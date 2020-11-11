@@ -1,24 +1,34 @@
 library(emmeans)
-library(ggplot2)
+library(ggplot2); theme_set(theme_bw())
 
 source("makestuff/makeRfuns.R") ## Will eventually be a package
 startGraphics()
 
 ## two models, with and without scaled/centered focal predictor
 ## (centering is the important part here ...)
-m1 <- lm(mpg~disp+wt,data=mtcars)
-m2 <- lm(mpg~scale(disp)+scale(wt),data=mtcars)
+basemod <- lm(mpg~disp+wt,data=mtcars)
+scaledmod <- lm(mpg~scale(disp)+scale(wt),data=mtcars)
 
-## by default we get a plot that predicts at discrete values of disp
-plot(e1 <- emmeans(m1, ~disp, cov.keep="disp", CIs=TRUE))
-## we can do it by hand; don't know if there is a shortcut for this or not ...
-d1 <- as.data.frame(e1)
-print(g1 <- ggplot(d1, aes(disp, emmean))
+## make an emmeans object and do the (weird) default plot
+## Why do we need both a formula and a "keep" argument – JD
+e_base <- emmeans(basemod, ~disp, cov.keep="disp", CIs=TRUE)
+
+## Plot the emmeans object by hand
+## JD: Do the tails in the middle look suspiciously flat?
+## Can we compare to the base "predict" function?
+## BC: can you try this?
+## JD: Is it easy to supply a different (denser) range of points for x?
+d_base <- as.data.frame(e_base)
+pp <- (ggplot(d_base, aes(disp, emmean))
     + geom_line()
     + geom_ribbon(aes(ymin=lower.CL, ymax=upper.CL),
-                  colour=NA, alpha=0.1)
-    )
+    	colour=NA, alpha=0.1
+	)
+)
 
+print(pp)
+
+## FIXME: Make this work based on variable names instead of parameters names
 ## zero out all but focal effects
 zero_vcov <- function(m, focal_params) {
     v <- vcov(m)
@@ -28,23 +38,28 @@ zero_vcov <- function(m, focal_params) {
     return(v)
 }
 
-zero_vcov(m1,"disp")
-zero_vcov(m1,c("disp","wt"))
+## zero_vcov(basemod,"disp")
+## zero_vcov(basemod,c("disp","wt"))
 
-plot(e2 <- emmeans(m1, ~disp, cov.keep="disp", CIs=TRUE,
-                   vcov. = zero_vcov(m1, "disp")))
-## works, but disappointing because disp isn't centered
-g1 %+% as.data.frame(e2)
+e_disp_base <- emmeans(basemod, ~disp, cov.keep="disp", CIs=TRUE,
+	vcov. = zero_vcov(basemod, "disp")
+)
 
-## do it with the scaled-disp model instead
-plot(e3 <- emmeans(m2, ~disp, cov.keep="disp", CIs=TRUE,
-                   vcov. = zero_vcov(m2, "scale(disp)")))
-g1 %+% as.data.frame(e3)
+## works, but "anchors" to an inappropriate point (x=0)
+pp %+% as.data.frame(e_disp_base)
+
+## If we use the scaled model it works as desired
+e_disp_scaled <- emmeans(scaledmod, ~disp, cov.keep="disp", CIs=TRUE,
+	vcov. = zero_vcov(scaledmod, "scale(disp)")
+)
+
+plot(e_disp_scaled)
+print(pp %+% as.data.frame(e_disp_scaled))
 
 ## identical results here because wt is zero at the model center/reference point
-plot(e4 <- emmeans(m2, ~disp, cov.keep="disp", CIs=TRUE,
-                   vcov. = zero_vcov(m2, c("scale(disp)","scale(wt)"))))
-g1 %+% as.data.frame(e4)
+e4 <- emmeans(scaledmod, ~disp, cov.keep="disp", CIs=TRUE,
+                   vcov. = zero_vcov(scaledmod, c("scale(disp)","scale(wt)")))
+pp %+% as.data.frame(e4)
 
 
 
