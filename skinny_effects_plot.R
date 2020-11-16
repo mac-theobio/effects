@@ -1,6 +1,7 @@
 library(emmeans)
 library(ggplot2); theme_set(theme_bw())
 
+##
 source("makestuff/makeRfuns.R") ## Will eventually be a package
 startGraphics()
 
