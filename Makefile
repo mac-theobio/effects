@@ -14,7 +14,22 @@ Sources += $(wildcard *.R)
 
 automatic_makeR = defined
 
+######################################################################
+
+## effect functions: clean zero_cov and add extract_assign for variable-name-wise zero out
+effectsfuns.Rout: effectsfuns.R
+
+## Simulate data
+sims_data.Rout: sims_data.R
+
+## fit simple lm
+mod_lm.Rout: mod_lm.R sims_data.rda
+
+## Base R prediction
+
+
 skinny_effects_plot.Rout: skinny_effects_plot.R
+
 
 ######################################################################
 
