@@ -25,11 +25,21 @@ sims_data.Rout: sims_data.R
 ## fit simple lm
 mod_lm.Rout: mod_lm.R sims_data.rda
 
-## Base R prediction
+## New data for prediction
+pred_data.Rout: pred_data.R sims_data.rda
 
+## Base R prediction
+predict_baseR.Rout: predict_baseR.R mod_lm.rda pred_data.rda
+
+## emmeans
+predict_emmeans.Rout: predict_emmeans.R effectsfuns.R mod_lm.rda pred_data.rda
+
+## Plot marginal predictions
+predict_plots.Rout: predict_plots.R predict_baseR.rda predict_emmeans.rda
+
+######################################################################
 
 skinny_effects_plot.Rout: skinny_effects_plot.R
-
 
 ######################################################################
 
