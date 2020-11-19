@@ -39,7 +39,6 @@ predict_x2s_em$model <- "em_s"
 predict_x2s_em$x <-  pred_df_x2s$x2s
 head(predict_x2s_em)
 
-
 # Zero out all vcov except focal effects
 ######################################################################
 
@@ -95,7 +94,6 @@ predict_x2_em <- (list(predict_x2u_em, predict_x2s_em, predict_x2u_em_zero, pred
 	%>% setnames(old = c("emmean", "lower.CL", "upper.CL"), new = c("fit", "lwr", "upr"))
 )
 head(predict_x2_em)
-
 
 saveVars(predict_x1_em
 	, predict_x2_em

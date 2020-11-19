@@ -14,7 +14,7 @@ extract_assign <- function(mod, intercept = TRUE){
 	return(assign)
 }
 
-## zero out all but focal effects of focal variable(s)
+## zero out non-focal covariances from matrix
 zero_vcov <- function(m, focal_vars, intercept = TRUE) {
 	assign <- extract_assign(m, intercept)
 	focal_vars <- names(assign)[assign %in% focal_vars]
