@@ -27,8 +27,9 @@ print(x1_plot)
 
 ## Zoom-in to emmeans only
 pred_x1_zoomed <- (pred_x1
-	%>% filter(grepl("em", model))
+	%>% filter(grepl("em_zero", model))
 )
+table(pred_x1_zoomed$model)
 
 x1_plot_zoomed <- (ggplot(pred_x1_zoomed, aes(x = x, group = model))
 	+ geom_line(aes(y = fit, colour = model), alpha=0.1)
