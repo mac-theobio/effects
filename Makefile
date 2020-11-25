@@ -19,6 +19,9 @@ automatic_makeR = defined
 ## effect functions: clean zero_cov and add extract_assign for variable-name-wise zero out
 effectsfuns.Rout: effectsfuns.R
 
+## Customize based R predict method to add CI and zero-out non-focal predictors
+cpred_baseR.Rout: cpred_baseR.R
+
 ## Simulate data
 sims_data.Rout: sims_data.R
 
