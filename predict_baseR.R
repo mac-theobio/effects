@@ -3,40 +3,52 @@ source("makestuff/makeRfuns.R")
 commandEnvironments()
 sourceFiles()
 
+## Predict function. Calls customized base R predict
+predfun <- function(mod, var, newdata, model, level = 0.95, vvfun=NULL){
+	pred <- cpredict(mod, newdata, level, vvfun)
+	pred$x <- newdata[[var]]
+	pred$model <- model
+	return(pred)
+}
+
 # Marginal effect of x1
+
 ## Unscaled predictions
-predict_x1u_base <- data.frame(predict(mod_unscaled, newdata = pred_df_x1, interval = "confidence", level = 0.95))
-predict_x1u_base$model <- "base_u"
-predict_x1u_base$x <-  pred_df_x1$x1
-head(predict_x1u_base)
+### Unzeroed vv
+x1u_base <- predfun(mod_unscaled
+	, var = "x1", newdata = pred_df_x1
+	, mode = "base_u"
+)
+head(x1u_base)
+
+### vv for non-focal predictors zeroed out
+x1u_base_zero <- predfun(mod_unscaled
+	, var = "x1", newdata = pred_df_x1
+	, mode = "base_u_zero"
+	, vvfun = zero_vcov(mod_unscaled, "x1")
+)
+head(x1u_base_zero)
 
 ## Scaled
-predict_x1s_base <- data.frame(predict(mod_scaled, newdata = pred_df_x1s, interval = "confidence", level = 0.95))
-predict_x1s_base$model <- "base_s"
-predict_x1s_base$x <-  pred_df_x1s$x1s
-head(predict_x1s_base)
+### Unzeroed vv
+x1s_base <- predfun(mod_scaled
+	, var = "x1s", newdata = pred_df_x1s
+	, mode = "base_s"
+)
+head(x1s_base)
 
-# Marginal effect of x2
-## Unscaled predictions
-predict_x2u_base <- data.frame(predict(mod_unscaled, newdata = pred_df_x2, interval = "confidence", level = 0.95))
-predict_x2u_base$model <- "base_u"
-predict_x2u_base$x <-  pred_df_x2$x2
-head(predict_x2u_base)
-
-## Scaled
-predict_x2s_base <- data.frame(predict(mod_scaled, newdata = pred_df_x2s, interval = "confidence", level = 0.95))
-predict_x2s_base$model <- "base_s"
-predict_x2s_base$x <-  pred_df_x2s$x2s
-head(predict_x2s_base)
+### Non-focal vv zeroed out
+x1s_base_zero <- predfun(mod_scaled
+	, var = "x1s", newdata = pred_df_x1s
+	, mode = "base_s_zero"
+	, vvfun = zero_vcov(mod_scaled, "x1s")
+)
+head(x1s_base_zero)
 
 ## Merge the predicitons for each predictor
-predict_x1_base <- bind_rows(predict_x1u_base, predict_x1s_base)
+predict_x1_base <- bind_rows(list(x1u_base, x1u_base_zero, x1s_base, x1s_base_zero))
 head(predict_x1_base)
-predict_x2_base <- bind_rows(predict_x2u_base, predict_x2s_base)
-head(predict_x2_base)
 
-saveVars(predict_x1_base
-	, predict_x2_base
-)
+saveVars(predict_x1_base)
 
 

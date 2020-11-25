@@ -32,7 +32,7 @@ mod_lm.Rout: mod_lm.R sims_data.rda
 pred_data.Rout: pred_data.R sims_data.rda
 
 ## Base R prediction
-predict_baseR.Rout: predict_baseR.R mod_lm.rda pred_data.rda
+predict_baseR.Rout: predict_baseR.R cpred_baseR.R effectsfuns.R mod_lm.rda pred_data.rda
 
 ## emmeans
 predict_emmeans.Rout: predict_emmeans.R effectsfuns.R mod_lm.rda pred_data.rda
