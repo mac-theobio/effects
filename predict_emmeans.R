@@ -54,7 +54,7 @@ head(x1s_em)
 x1s_em_zero <- empredfun(mod_scaled, spec = ~x1s
 	, at = list(x1s = pred_df_x1s$x1s), cov.keep = "x1s"
 	, model = "em_s_zero"
-	, vvfun = zero_vcov(mod_unscaled, "x1s")
+	, vvfun = zero_vcov(mod_scaled, "x1s")
 )
 head(x1s_em_zero)
 
