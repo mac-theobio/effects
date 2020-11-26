@@ -10,7 +10,7 @@ vim_session:
 
 ######################################################################
 
-Sources += $(wildcard *.R)
+Sources += $(wildcard *.R *.md)
 
 automatic_makeR = defined
 
