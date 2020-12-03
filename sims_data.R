@@ -4,7 +4,6 @@ library(dplyr)
 options(dplyr.width = Inf)
 
 source("makestuff/makeRfuns.R") ## Will eventually be a package
-commandEnvironments()
 
 set.seed(7902)
 
@@ -29,8 +28,12 @@ y1_eps <- e1*rnorm(people)
 ## Make data frame
 sim_df <- data.frame(x1 = x1
 	, x2 = x2
-	, x1s = drop(scale(x1)) # Scaled
-	, x2s = drop(scale(x2)) # Scaled
+	, x1s = x1/sd(x1)
+	, x2s = x2/sd(x2)
+	, x1c = x1 - mean(x1)
+	, x2c = x2 - mean(x2)
+	, x1std = drop(scale(x1)) # Scaled
+	, x2std = drop(scale(x2)) # Scaled
 	, y1 = y1_beta0 + y1_beta1 * x1 + y1_beta2 * x2 + y1_eps
 )
 
