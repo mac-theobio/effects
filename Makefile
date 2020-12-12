@@ -25,6 +25,11 @@ cpred_baseR.Rout: cpred_baseR.R
 ## Simulate data
 sims_data.Rout: sims_data.R
 
+## What happens to vcov when we scale?
+## vcov changes as Ben predicted!
+## (elements not involving intercept do not change when we translate)
+scales.Rout: scales.R sims_data.rda
+
 ## fit simple lm
 mod_lm.Rout: mod_lm.R sims_data.rda
 
