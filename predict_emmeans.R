@@ -44,22 +44,22 @@ head(x1u_em_zero)
 
 ## Scaled
 ### Unzeroed vcov
-x1s_em <- empredfun(mod_scaled, spec = ~x1s
-	, at = list(x1s = pred_df_x1s$x1s), cov.keep = "x1s"
+x1std_em <- empredfun(mod_scaled, spec = ~x1std
+	, at = list(x1std = pred_df_x1std$x1std), cov.keep = "x1std"
 	, model = "em_s"
 )
-head(x1s_em)
+head(x1std_em)
 
 ### Zeroed vcov for non-focal predictors
-x1s_em_zero <- empredfun(mod_scaled, spec = ~x1s
-	, at = list(x1s = pred_df_x1s$x1s), cov.keep = "x1s"
+x1std_em_zero <- empredfun(mod_scaled, spec = ~x1std
+	, at = list(x1std = pred_df_x1std$x1std), cov.keep = "x1std"
 	, model = "em_s_zero"
-	, vvfun = zero_vcov(mod_scaled, "x1s")
+	, vvfun = zero_vcov(mod_scaled, "x1std")
 )
-head(x1s_em_zero)
+head(x1std_em_zero)
 
 ## Combine the predictions
-predict_x1_em <- (list(x1u_em, x1s_em, x1u_em_zero, x1s_em_zero)
+predict_x1_em <- (list(x1u_em, x1std_em, x1u_em_zero, x1std_em_zero)
 	%>% bind_rows()
 	%>% setnames(old = c("emmean", "lower.CL", "upper.CL"), new = c("fit", "lwr", "upr"))
 	%>% select(!!c("fit", "lwr", "upr", "x", "model"))

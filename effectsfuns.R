@@ -156,7 +156,7 @@ extract_assign <- function(mod){
 
 ## zero out non-focal covariances from matrix
 zero_vcov <- function(m, focal_vars) {
-	assign <- extract_assign(m)
+	assign <- extract_assign(m)$assign
 	check_vars <- assign %in% focal_vars
 	if (!any(check_vars)) stop("Specified variable(s) not in the model")
 	focal_vars <- names(assign)[check_vars]

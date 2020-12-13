@@ -31,22 +31,22 @@ head(x1u_base_zero)
 
 ## Scaled
 ### Unzeroed vv
-x1s_base <- predfun(mod_scaled
-	, var = "x1s", newdata = pred_df_x1s
+x1std_base <- predfun(mod_scaled
+	, var = "x1std", newdata = pred_df_x1std
 	, mode = "base_s"
 )
-head(x1s_base)
+head(x1std_base)
 
 ### Non-focal vv zeroed out
-x1s_base_zero <- predfun(mod_scaled
-	, var = "x1s", newdata = pred_df_x1s
+x1std_base_zero <- predfun(mod_scaled
+	, var = "x1std", newdata = pred_df_x1std
 	, mode = "base_s_zero"
-	, vvfun = zero_vcov(mod_scaled, "x1s")
+	, vvfun = zero_vcov(mod_scaled, "x1std")
 )
-head(x1s_base_zero)
+head(x1std_base_zero)
 
 ## Merge the predicitons for each predictor
-predict_x1_base <- bind_rows(list(x1u_base, x1u_base_zero, x1s_base, x1s_base_zero))
+predict_x1_base <- bind_rows(list(x1u_base, x1u_base_zero, x1std_base, x1std_base_zero))
 head(predict_x1_base)
 
 saveVars(predict_x1_base)

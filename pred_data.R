@@ -14,12 +14,12 @@ pred_df_x1 <- expand.grid(
 head(pred_df_x1)
 
 ### Scaled
-x1s_range <- range(sim_df$x1s)
-pred_df_x1s <- expand.grid(
-	x1s = seq(x1s_range[1], x1s_range[2], length.out = rsteps)
-	, x2s = mean(sim_df$x2s)
+x1std_range <- range(sim_df$x1std)
+pred_df_x1std <- expand.grid(
+	x1std = seq(x1std_range[1], x1std_range[2], length.out = rsteps)
+	, x2std = mean(sim_df$x2std)
 )
-head(pred_df_x1s)
+head(pred_df_x1std)
 
 ## Marginal for x2
 ### Unscaled
@@ -31,11 +31,11 @@ pred_df_x2 <- expand.grid(
 head(pred_df_x2)
 
 ### Scaled
-x2s_range <- range(sim_df$x2s)
-pred_df_x2s <- expand.grid(
-	x1s = mean(sim_df$x1s)
-	, x2s = seq(x2s_range[1], x2s_range[2], length.out = rsteps)
+x2std_range <- range(sim_df$x2std)
+pred_df_x2std <- expand.grid(
+	x1std = mean(sim_df$x1std)
+	, x2std = seq(x2std_range[1], x2std_range[2], length.out = rsteps)
 )
-head(pred_df_x2s)
+head(pred_df_x2std)
 
-saveVars(pred_df_x1, pred_df_x1s, pred_df_x2, pred_df_x2s)
+saveVars(pred_df_x1, pred_df_x1std, pred_df_x2, pred_df_x2std)
