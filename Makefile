@@ -42,8 +42,15 @@ predict_baseR.Rout: predict_baseR.R cpred_baseR.R effectsfuns.R mod_lm.rda pred_
 ## emmeans
 predict_emmeans.Rout: predict_emmeans.R effectsfuns.R mod_lm.rda pred_data.rda
 
+## varpred: JD's effect
+predict_jdeffect.Rout: predict_jdeffect.R effectsfuns.R mod_lm.rda pred_data.rda
+
 ## Plot marginal predictions
-predict_plots.Rout: predict_plots.R predict_baseR.rda predict_emmeans.rda
+predict_plots.Rout: predict_plots.R predict_baseR.rda predict_emmeans.rda predict_jdeffect.rda
+
+## Model with interaction
+inter_mod_lm.Rout: inter_mod_lm.R
+inter_predict.Rout: inter_predict.R effectsfuns.R inter_mod_lm.rda
 
 ######################################################################
 

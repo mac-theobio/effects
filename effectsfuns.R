@@ -1,20 +1,22 @@
 #' Compute marginal means
 #'
 #' @param mod
-#' @param focal is of the form ~predictors
+#' @param focal predictor
 #' @param isolate logical
 #' @param isoValue default NULL
 #' @param level default 0.05
 #' @param steps default 101
 #' @param dfspec default 100
-#' @param vv default NULL
+#' @param at default NULL
+#' @param vcmat default NULL
 #'
 #' @importFrom stats model.frame model.matrix vcov
 #'
 #' @export
 #'
 varpred <- function(mod, focal, isolate = FALSE
-	, isoValue = NULL, level = 0.05, steps = 101, vv = NULL) {
+	, isoValue = NULL, level = 0.95, steps = 101
+	, at = NULL, vcmat = NULL) {
 	betahat <- extractcoef(mod)
 	mod_objs <- extract_assign(mod)
 	vnames <- mod_objs$assign
@@ -27,7 +29,11 @@ varpred <- function(mod, focal, isolate = FALSE
 	xlevels <- mod$xlevels
 	contrs <- mod$contrasts
 
-	if(is.null(vv)) {vv <- varfun(modFrame[[focalVar]], steps)}
+	if(is.null(at)) {
+		vv <- varfun(modFrame[[focalVar]], steps)
+	} else {
+		vv <- at
+	}
   	steps <- length(vv)
 	
 	rowMean <- apply(modMat, 2, mean)
@@ -49,10 +55,14 @@ varpred <- function(mod, focal, isolate = FALSE
 	focal_cols <- grep(focalVar, names(vnames), value = TRUE)
 	modVar[, focal_cols] <- newMat[, focal_cols]
   
-	vc <- vcov(mod)
-	if (inherits(mod, "clmm")){
-		f <- c(names(mod$alpha)[[1]], names(mod$beta))
-		vc <- vc[f, f]
+  	if (is.null(vcmat)){
+		vc <- vcov(mod)
+		if (inherits(mod, "clmm")){
+			f <- c(names(mod$alpha)[[1]], names(mod$beta))
+			vc <- vc[f, f]
+		}
+	} else {
+		vc <- vcmat
 	}
 
 	if(!identical(colnames(modMat), names(betahat))){
@@ -83,7 +93,7 @@ varpred <- function(mod, focal, isolate = FALSE
 		grepl("df.residual", paste(names(mod), collapse=""))
 		, mod$df.residual, dfspec
 	)
-	mult <- qt(1-level/2, df)
+	mult <- qt(1 - (1 - level)/2, df)
 
 	df <- data.frame(var = vv
 		, fit = pred

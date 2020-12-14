@@ -7,12 +7,14 @@ sourceFiles()
 makeGraphics()
 
 # x1 marginal effects
-pred_x1 <- (bind_rows(predict_x1_base, predict_x1_em)
+pred_x1 <- (bind_rows(predict_x1_base, predict_x1_em, predict_x1_jd)
 	%>% mutate(trans = ifelse(grepl("_u", model), "unscaled", "scaled")
 		, model = gsub("_u|_s", "", model)
 	)
 )
 head(pred_x1)
+table(pred_x1$trans)
+table(pred_x1$model)
 
 x1_plot <- (ggplot(pred_x1, aes(x = x, group = trans))
 	+ geom_line(aes(y = fit, colour = trans), alpha = 0.7)
