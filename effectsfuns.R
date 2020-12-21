@@ -16,7 +16,7 @@
 #'
 varpred <- function(mod, focal, isolate = FALSE
 	, isoValue = NULL, level = 0.95, steps = 101
-	, at = NULL, vcmat = NULL) {
+	, at = NULL,  dfspec = 100, vcmat = NULL) {
 	betahat <- extractcoef(mod)
 	mod_objs <- extract_assign(mod)
 	vnames <- mod_objs$assign
@@ -26,7 +26,7 @@ varpred <- function(mod, focal, isolate = FALSE
 	if (!any(check_vars)) stop("Specified variable not in the model")
 	focalVar <- unique(vnames[check_vars])
 	
-	xlevels <- mod$xlevels
+	xlevels <- .getXlevels(terms(mod), modFrame)
 	contrs <- mod$contrasts
 
 	if(is.null(at)) {
@@ -56,7 +56,11 @@ varpred <- function(mod, focal, isolate = FALSE
 	modVar[, focal_cols] <- newMat[, focal_cols]
   
   	if (is.null(vcmat)){
-		vc <- vcov(mod)
+		if (inherits(mod, "glmmTMB")) {
+			vc <- vcov(mod)$cond
+		} else {
+			vc <- vcov(mod)
+		}
 		if (inherits(mod, "clmm")){
 			f <- c(names(mod$alpha)[[1]], names(mod$beta))
 			vc <- vc[f, f]
@@ -116,7 +120,7 @@ extractcoef <- function(mod){
 	if (inherits(mod, "lm")) return (coef(mod))
 	if (inherits(mod, "mer")) return (fixef(mod))
 	if (inherits(mod, "glmerMod")) return (fixef(mod))
-	if (inherits(mod, "glmmTMB")) return (fixef(mod))
+	if (inherits(mod, "glmmTMB")) return (fixef(mod)$cond)
 	if (inherits(mod, "clmm")) {
 		ef <- c(0, mod$beta)
 		names(ef) <- c("(Intercept)", names(mod$beta))
