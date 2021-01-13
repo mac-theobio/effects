@@ -45,6 +45,7 @@ pp <- predict(inter_mod, data=dd)
 ## (unweighted arithmetic mean)
 marg_means <- tapply(pp, mf$x1, mean)
 
+
 ## special cases:
 ## if you're already using sum-to-zero contrasts,
 ## then setting the coefficient for the factor to zero

@@ -18,41 +18,49 @@ varpred <- function(mod, focal, isolate = FALSE
 	, isoValue = NULL, level = 0.95, steps = 101
 	, at = NULL,  dfspec = 100, vcmat = NULL) {
 	betahat <- extractcoef(mod)
-	mod_objs <- extract_assign(mod)
-	vnames <- mod_objs$assign
-	modMat <- mod_objs$modmat
-	modFrame <- mod_objs$modframe
-	check_vars <- vnames %in% focal
-	if (!any(check_vars)) stop("Specified variable not in the model")
+	mod_objs <- extractvnames(mod)
+	vnames <- mod_objs$vnames
+	termnames <- mod_objs$termnames
+	mm <- mod_objs$mm
+	mf <- recoverdata(mod)
+	Terms <- mod_objs$Terms
+	rTerms <- delete.response(Terms)
+	if (any(vnames %in% focal)) {
+		check_vars <- vnames %in% focal
+	} else {
+		check_vars <- termnames %in% focal
+	}
+	if (!any(check_vars)) stop(paste0(focal, " not in the model"))
 	focalVar <- unique(vnames[check_vars])
 	
-	xlevels <- .getXlevels(terms(mod), modFrame)
+	xlevels <- .getXlevels(Terms, model.frame(mod))
 	contrs <- mod$contrasts
 
 	if(is.null(at)) {
-		vv <- varfun(modFrame[[focalVar]], steps)
+		vv <- varfun(mf[[focalVar]], steps)
 	} else {
 		vv <- at
 	}
   	steps <- length(vv)
 	
-	rowMean <- apply(modMat, 2, mean)
+	rowMean <- apply(mm, 2, mean)
 	modMean <- t(replicate(steps, rowMean))
 
 	# Model matrix with progression of focal variable
-	varFrame <- modFrame[rep(1, steps), ]
+	varFrame <- mf[rep(1, steps), ]
 	varFrame[focalVar] <- vv
-	modTerms <- delete.response(terms(mod))
-	varFrame <- model.frame(modTerms, varFrame
+	varFrame <- model.frame(rTerms, varFrame
 		, xlev = xlevels, drop.unused.levels = TRUE
 	)
-	newMat <- model.matrix(modTerms, varFrame
+	newMat <- model.matrix(rTerms, varFrame
 		, contr = contrs, xlev = xlevels
 	)
 
 	## Better way to do this?
 	modVar <- modMean
 	focal_cols <- grep(focalVar, names(vnames), value = TRUE)
+#	focal_cols <- focal_cols[!grepl(":", focal_cols)]
+
 	modVar[, focal_cols] <- newMat[, focal_cols]
   
   	if (is.null(vcmat)){
@@ -69,9 +77,9 @@ varpred <- function(mod, focal, isolate = FALSE
 		vc <- vcmat
 	}
 
-	if(!identical(colnames(modMat), names(betahat))){
-		print(setdiff(colnames(modMat), names(betahat)))
-		print(setdiff(names(betahat), colnames(modMat)))
+	if(!identical(colnames(mm), names(betahat))){
+		print(setdiff(colnames(mm), names(betahat)))
+		print(setdiff(names(betahat), colnames(mm)))
 		stop("Effect names do not match: check for empty factor levels?")
 	}
   	pred <- modVar %*% betahat
@@ -79,11 +87,11 @@ varpred <- function(mod, focal, isolate = FALSE
 	# (Centered) predictions for SEs
 	if (isolate) {
 		if(!is.null(isoValue)){
-			modFrame[focalVar] <- 0*modFrame[focalVar]+isoValue
-			modMat <- model.matrix(modTerms, modFrame
+			mf[focalVar] <- 0*mf[focalVar]+isoValue
+			mm <- model.matrix(rTerms, mf
 				, contr = contrs, xlev = xlevels
 			)
-			rowMean <- apply(modMat, 2, mean)
+			rowMean <- apply(mm, 2, mean)
 			modMean <- t(replicate(steps, rowMean))
 
 		}
@@ -104,8 +112,8 @@ varpred <- function(mod, focal, isolate = FALSE
 		, lwr = pred - mult*pse_var
 		, upr = pred + mult*pse_var
 	)
-  	names(df)[[1]] <- focal
-	df <- df[order(df[[focal]]), ]
+  	names(df)[[1]] <- "xvar"
+	df <- df[order(df[["xvar"]]), ]
 	return(df)
 }
 
@@ -145,27 +153,31 @@ varfun <- function(vcol, steps){
 	return(unique(vcol))
 }
 
-#' Extract assign for model object esp. for glmmTMB
+#' Extract variable names from model object esp
 #'
 #' @param mod fitted model object
-#' @param intercept logical. Set to \code{TRUE} if fitted model had intercept term, else \code{FALSE}.
 #'
 #' @export 
 #'
 
-extract_assign <- function(mod){
+extractvnames <- function(mod){
 	mat <- model.matrix(mod)
-	modframe <- model.frame(mod, drop.unused.levels = TRUE)
-	xnames <- colnames(mat)
+	coefnames <- colnames(mat)
 	Terms <- terms(mod)
-	var_labs <- attr(Terms, "term.labels")
+	vnames <- all.vars(delete.response(Terms)) 
+	termnames <- attr(Terms, "term.labels") # Model based names
+	termnames <- gsub(" ", "", termnames)
 	assign <- attr(mat, "assign")
 	if(any(assign==0)) {
-		var_labs <- c("(Intercept)", var_labs)
+		vnames <- c("(Intercept)", vnames)
+		termnames <- c("(Intercept)", termnames)
 		assign <- assign + 1
 	}
-	assign <- setNames(var_labs[assign], xnames)
-	return(list(assign = assign, modmat = mat, modframe = modframe))
+	vnames <- setNames(vnames[assign], coefnames)
+	termnames <- setNames(termnames[assign], coefnames)
+	# In case there are interactions
+	vnames[is.na(vnames)] <- termnames[is.na(vnames)]
+	return(list(vnames = vnames, termnames = termnames, Terms = Terms, mm = mat))
 }
 
 #' Zero out non-focal covariances from matrix
@@ -174,12 +186,12 @@ extract_assign <- function(mod){
 #' @param focal_vars variables appearing on the right side of the formula in the fitted model
 #'
 #' @export
-zero_vcov <- function(m, focal_vars) {
-	assign <- extract_assign(m)$assign
+zero_vcov <- function(m, focal_vars, complete) {
+	assign <- extractvnames(m)$vnames
 	check_vars <- assign %in% focal_vars
 	if (!any(check_vars)) stop("Specified variable(s) not in the model")
 	focal_vars <- names(assign)[check_vars]
-	v <- vcov(m)
+	v <- stats::vcov(m)
 	if(inherits(m, "glmmTMB")){
 		v <- v$cond
 	}
@@ -188,6 +200,20 @@ zero_vcov <- function(m, focal_vars) {
 	v[focal_vars, focal_vars] <- focal_var
 	return(v)
 }
+
+#' Recover data from the data from the model 
+#'
+#' @param mod fitted model
+#' @param envir data environment 
+#'
+recoverdata <- function(mod, envir = environment(formula(mod)), ...) {
+	f <- formula(mod)
+	data <- eval(mod$call$data, envir)
+	df <- if(is.null(data)) eval(call("model.frame", f), envir) 
+	else eval(call("model.frame", data = data, drop.unused.levels = TRUE), envir)
+	return(df)
+}
+
 
 #' Scale model coefficients from unscaled coefficients
 #'
@@ -200,7 +226,7 @@ zero_vcov <- function(m, focal_vars) {
 scalecoef <- function(mod, scale_vars, tfun = function(x){scale(x, center = TRUE, scale = TRUE)}){
 	betahat <- extractcoef(mod)
 	btemp <- betahat
-	mod_objs <- extract_assign(mod)
+	mod_objs <- extractvnames(mod)
 	vnames <- mod_objs$assign
 	check_vars <- vnames %in% scale_vars
 	if (any(!check_vars)) {
@@ -215,9 +241,9 @@ scalecoef <- function(mod, scale_vars, tfun = function(x){scale(x, center = TRUE
 #	noscale_coefs <- setdiff(names(vnames), scale_coefs)
 	scale_coefs <- names(vnames)[check_vars]
 	noscale_coefs <- names(vnames)[!check_vars]
-	modMat <- tfun(mod_objs$modmat[, scale_coefs, drop = FALSE])
-	scale_sd <- c(attr(modMat, "scaled:scale"))
-	scale_mu <- c(attr(modMat, "scaled:center"))
+	mm <- tfun(mod_objs$modmat[, scale_coefs, drop = FALSE])
+	scale_sd <- c(attr(mm, "scaled:scale"))
+	scale_mu <- c(attr(mm, "scaled:center"))
 	if (length(noscale_coefs)){
 		noscale_sd <- rep(1, length(noscale_coefs))
 		noscale_mu <- rep(0, length(noscale_coefs))
@@ -240,3 +266,68 @@ scalecoef <- function(mod, scale_vars, tfun = function(x){scale(x, center = TRUE
 	}
 	return(list(betahat))
 }
+
+#' Plot marginal predictions 
+
+plotpreds <- function(df, xlabs = "Predictor value", pos = 0.5){
+	pos <- position_dodge(pos)
+	if (is.null(df$model)){
+		p1 <- (ggplot(df, aes(x = xvar, y = fit), colour="black", alpha = 0.2)
+			+ guides(fill = FALSE)
+			+ theme(legend.position = "none")
+		)
+	} else {
+		p1 <- (ggplot(df, aes(x = xvar, y = fit, colour = model), alpha = 0.2)
+			+ guides(fill = FALSE)
+			+ theme(legend.position = "right")
+		)
+	}
+	p1 <- p1+ labs(x = xlabs, y = "Prediction")
+	if (class(df[["xvar"]]) %in% c("numeric", "integer")) {
+		p2 <- (p1
+			+ geom_line()
+			+ geom_line(aes(y = lwr), lty = 2)
+			+ geom_line(aes(y = upr), lty = 2)
+			+ scale_colour_viridis_d(option = "plasma")
+		)
+	} else {
+		p2 <- (p1 
+			+ geom_point(position = pos, size = 0.6, colour="black")
+			+ geom_pointrange(aes(ymin = lwr, ymax = upr), position = pos, colour = "black")
+		)
+	}
+	return(p2)
+}
+
+#' Varpred theme
+
+varpredtheme <- function(){
+   theme_set(theme_bw() +
+      theme(panel.spacing = grid::unit(0,"lines")
+      	, plot.title = element_text(hjust = 0.5)
+			, legend.position = "bottom"
+			, axis.ticks.y = element_blank()
+			, axis.text.x = element_text(size = 12)
+			, axis.text.y = element_text(size = 12)
+			, axis.title.x = element_text(size = 12)
+			, axis.title.y = element_text(size = 12)
+			, legend.title = element_text(size = 13, hjust = 0.5)
+			, legend.text = element_text(size = 13)
+			, panel.grid.major = element_blank()
+			, legend.key.size = unit(0.8, "cm")
+			, legend.key = element_rect(fill = "white")
+			, panel.spacing.y = unit(0.3, "lines")
+			, panel.spacing.x = unit(1, "lines")
+			, strip.background = element_blank()
+			, panel.border = element_rect(colour = "grey"
+				, fill = NA
+				, size = 0.8
+			)
+			, strip.text.x = element_text(size = 11
+				, colour = "black"
+				, face = "bold"
+			)
+      )
+   )
+}
+

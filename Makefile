@@ -10,7 +10,7 @@ vim_session:
 
 ######################################################################
 
-Sources += $(wildcard *.R *.md)
+Sources += $(wildcard *.R *.md. *.Rnw)
 
 automatic_makeR = defined
 
@@ -57,6 +57,9 @@ inter_predict.Rout: inter_predict.R effectsfuns.R inter_mod_lm.rda
 skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
+effects_writeup.pdf: effects_writeup.Rnw
+
+######################################################################
 
 ### Makestuff
 
@@ -79,3 +82,5 @@ makestuff/Makefile:
 
 -include makestuff/git.mk
 -include makestuff/visual.mk
+
+-include rnw.mk

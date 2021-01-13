@@ -5,7 +5,7 @@ source("makestuff/makeRfuns.R")
 commandEnvironments()
 sourceFiles()
 
-## Varpre function function
+## Varpred function function
 varpredfun <- function(mod, focal, at, vcmat = NULL, model){
 	if (is.null(vcmat)){
 		pred <- varpred(mod, focal, at = at)
