@@ -20,7 +20,7 @@ automatic_makeR = defined
 
 ######################################################################
 
-## dfeffect package
+## jdeffect package
 jdeffects_pkg.Rout: R/jdeffects_pkg.R
 effectsfuns.Rout: R/effectsfuns.R
 utilities.Rout: R/utilities.R
