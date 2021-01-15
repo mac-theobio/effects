@@ -76,8 +76,8 @@ library(ggplot2)
 library(margins)
 library(effects)
 library(emmeans)
-source("effectsfuns.R")
-varpredtheme()
+library(jdeffects)
+jdtheme()
 @
 
 <<simple_sim>>=
@@ -183,7 +183,7 @@ print(vcov_est)
 The function will be used downstream to \emph{tidy} conditional predictions from each of the methods highlighted above. 
 
 <<condional_summary, cho=FALSE>>=
-condsummary <- function(mod_list, fun, simplify = TRUE
+condsummary <- function(mod_list, fun, resp = "y", simplify = TRUE
 	, combine = c("cbind", "rbind"), scale_param = list(), fmethod = NULL){
 	focal <- names(mod_list)
 	combine <- match.arg(combine)
@@ -209,6 +209,7 @@ condsummary <- function(mod_list, fun, simplify = TRUE
 			newn <- c("xvar", "fit", "lwr", "upr")
 			colnames(out)[colnames(out) %in% oldn] <-  newn
 		} else {
+			out <- data.frame(out)
 			colnames(out)[colnames(out)%in%f] <- "xvar"
 		}
 		if (combine=="rbind"){
@@ -240,6 +241,7 @@ condsummary <- function(mod_list, fun, simplify = TRUE
 		}
 		return(out)
 	}, simplify = FALSE)
+	f <- attr(out, "focal")
 	if (simplify){
 		out <- do.call(combine, out)
 		if (combine=="cbind") {
@@ -248,6 +250,7 @@ condsummary <- function(mod_list, fun, simplify = TRUE
 			rownames(out) <- NULL
 		}
 	}
+	attr(out, "response") <- resp
 	return(out)
 }
 @
@@ -293,7 +296,8 @@ simple_pred_all <- do.call("rbind"
 
 <<>>=
 head(simple_pred_all)
-simple_pred_all_plot <- (plotpreds(simple_pred_all) 
+class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
+simple_pred_all_plot <- (plot(simple_pred_all) 
 	+ facet_wrap(~method) 
 	+ theme(legend.position="bottom")
 )
@@ -309,6 +313,7 @@ simple_pred_all_plot
 \end{figure}
 
 Compute predictions and then back transform each predictor to the original scale.
+
 
 <<simple_conditional_backtrans, results=hide>>=
 ## Extract scaling parameters
@@ -354,8 +359,9 @@ simple_pred_spec <- do.call("rbind"
 
 <<>>=
 head(simple_pred_spec)
-simple_pred_spec_plot <- (plotpreds(simple_pred_spec) 
-	+ facet_wrap(~method) 
+class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
+simple_pred_spec_plot <- (plot(simple_pred_spec)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 @
@@ -405,8 +411,9 @@ simple_pred_cat <- do.call("rbind"
 
 <<>>=
 head(simple_pred_cat)
-simple_pred_cat_plot <- (plotpreds(simple_pred_cat) 
-	+ facet_wrap(~method) 
+class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
+simple_pred_cat_plot <- (plot(simple_pred_cat)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 @
@@ -438,16 +445,16 @@ lm_u_vcov_zero <- zero_vcov(lm_u, focal_vars = "x1u")
 print(lm_u_vcov_zero)
 @
 
-We'll repeat the same procedure in conditional predictions section but modify the functions to incorporate \emph{zeroed-out} covariance matrix. 
+We'll repeat the same procedure in conditional predictions section but modify the functions to incorporate \emph{zeroed-out} covariance matrix.
 
 \subsubsection{Continuous predictor}
 
-Notice that the modification in each of the method function call to pass either covariance matrix or function. In particular, in \pkg{varpred}, it is passed as \pkg{vcmat}, \pkg{emmeans} and \pkg{effects} as \pkg{vcov.} and \pkg{margins} as \pkg{vcov}. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
+Notice that the modification in each of the method function call to pass either covariance matrix or function. In particular, in \pkg{varpred}, it is passed as \pkg{vcov.}, \pkg{emmeans} and \pkg{effects} as \pkg{vcov.} and \pkg{margins} as \pkg{vcov}. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
 
 <<simple_marginal_specific, results=hide>>=
 ## varpred
 simple_vpred_all <- condsummary(mod_list=simple_models, fun=function(x, f){
-	dd <- varpred(x, f, vcmat = zero_vcov(x, f))
+	dd <- varpred(x, f, vcov. = zero_vcov(x, f))
 }, simplify = TRUE, combine = "rbind", fmethod = "varpred")
 
 ## emmeans
@@ -475,8 +482,9 @@ simple_pred_all <- do.call("rbind"
 
 
 <<echo=FALSE>>=
-simple_pred_all_plot <- (plotpreds(simple_pred_all) 
-	+ facet_wrap(~method) 
+class(simple_pred_all) <- c("jdeffects", "data.frame")
+simple_pred_all_plot <- (plot(simple_pred_all)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 @
@@ -490,6 +498,9 @@ simple_pred_all_plot
 \caption{Marginal predictions with the zeroed-out covariances on the variable-specific scale.}
 \end{figure}
 
+
+
+
 Also, we repeat above implementation but back-transform the predictions to original scale (unscale -- uncenter and/or unscale) by modifying the previous code to include scaling parameters. To clearly distinguish between what happens when apply various scaling schemes, we separately do the plots (see \autoref{fig:marginal_transformed}).
 
 \subsection{Centered model matrix}
@@ -499,7 +510,7 @@ Marginal predictions in \pkg{effects} and \pkg{emmeans} require models fitted wi
 <<simple_marginal_backtrans, echo=FALSE, results=hide>>=
 ## varpred
 simple_vpred_spec <- condsummary(mod_list=simple_models, fun=function(x, f){
-		dd <- varpred(x, f, vcmat = zero_vcov(x, f))
+		dd <- varpred(x, f, vcov. = zero_vcov(x, f))
 	}, simplify = TRUE, combine = "rbind"
 	, scale_param = scale_param, fmethod = "varpred"
 )
@@ -539,16 +550,18 @@ simple_pred_spec2 <- subset(simple_pred_spec, model=="x1c"|model=="x1sd")
 @
 
 <<label=simple_pred_spec_plot1, fig=TRUE, echo=FALSE, prefix=FALSE, include=FALSE>>=
-simple_pred_spec_plot1 <- (plotpreds(simple_pred_spec1) 
-	+ facet_wrap(~method) 
+class(simple_pred_spec1) <- c("jdeffects", "data.frame")
+simple_pred_spec_plot1 <- (plot(simple_pred_spec1)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 simple_pred_spec_plot1
 @
 
 <<label=simple_pred_spec_plot2, fig=TRUE, echo=FALSE, prefix=FALSE, include=FALSE>>=
-simple_pred_spec_plot2 <- (plotpreds(simple_pred_spec2) 
-	+ facet_wrap(~method) 
+class(simple_pred_spec2) <- c("jdeffects", "data.frame")
+simple_pred_spec_plot2 <- (plot(simple_pred_spec2)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 simple_pred_spec_plot2
@@ -575,16 +588,17 @@ simple_pred_spec_plot2
 <<vapred_isolate_numeric, fig=TRUE>>=
 ## Centered predictions from unscaled model
 vpred_c <- varpred(lm_u, focal = "x1u", isolate = TRUE)
-plotpreds(vpred_c)
+plot(vpred_c)
 @
 \caption{Using \pkg{varpred} to obtain marginal predictions from unscaled model.}
 \label{fig:varpred_isolate_num}
 \end{center}
 \end{figure}
 
+
 \subsubsection{Categorical predictors}
 
-Back to categorical predictor, \code{x2u}. The reference (base) category has not variance and has such we can not use the \emph{zeroed-out} covariance approach to estimate CI for the marginalized predictions. However, if we can figure out how to center model matrix in the computation of CIs, we can actually use model with unscaled categorical predictors and estimate marginal predictions for centered categorical predictors. Currently, only \pkg{varpred} provide this functionality. 
+Back to categorical predictor, \code{x2u}. The reference (base) category has not variance and has such we can not use the \emph{zeroed-out} covariance approach to estimate CI for the marginalized predictions. However, if we can figure out how to center model matrix in the computation of CIs, we can actually use model with unscaled categorical predictors and estimate marginal predictions for centered categorical predictors. Currently, only \pkg{varpred} provide this functionality.
 
 <<simple_marginal_specific_cat, results=hide>>=
 ## varpred
@@ -618,8 +632,9 @@ simple_pred_cat <- do.call("rbind"
 
 <<>>=
 head(simple_pred_cat)
-simple_pred_cat_plot <- (plotpreds(simple_pred_cat) 
-	+ facet_wrap(~method) 
+class(simple_pred_cat) <- c("jdeffects", "data.frame")
+simple_pred_cat_plot <- (plot(simple_pred_cat)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 @
@@ -632,7 +647,5 @@ simple_pred_cat_plot
 \end{center}
 \caption{Conditional predictions.}
 \end{figure}
-
-%\bibliography{effects_writeup}
 
 \end{document}

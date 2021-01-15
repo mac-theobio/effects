@@ -20,10 +20,11 @@ automatic_makeR = defined
 
 ######################################################################
 
-## jdeffect package
+## jdeffects package
 jdeffects_pkg.Rout: R/jdeffects_pkg.R
 effectsfuns.Rout: R/effectsfuns.R
 utilities.Rout: R/utilities.R
+plotsfuns.Rout: R/plotsfuns.R
 methodfuns.Rout: R/methodfuns.R
 pkgsExport.Rout: R/pkgsExport.R
 

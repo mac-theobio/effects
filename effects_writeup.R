@@ -7,8 +7,8 @@ library(ggplot2)
 library(margins)
 library(effects)
 library(emmeans)
-source("effectsfuns.R")
-varpredtheme()
+library(jdeffects)
+jdtheme()
 
 
 ###################################################
@@ -116,7 +116,7 @@ print(vcov_est)
 ###################################################
 ### code chunk number 11: condional_summary
 ###################################################
-condsummary <- function(mod_list, fun, simplify = TRUE
+condsummary <- function(mod_list, fun, resp = "y", simplify = TRUE
 	, combine = c("cbind", "rbind"), scale_param = list(), fmethod = NULL){
 	focal <- names(mod_list)
 	combine <- match.arg(combine)
@@ -142,6 +142,7 @@ condsummary <- function(mod_list, fun, simplify = TRUE
 			newn <- c("xvar", "fit", "lwr", "upr")
 			colnames(out)[colnames(out) %in% oldn] <-  newn
 		} else {
+			out <- data.frame(out)
 			colnames(out)[colnames(out)%in%f] <- "xvar"
 		}
 		if (combine=="rbind"){
@@ -173,6 +174,7 @@ condsummary <- function(mod_list, fun, simplify = TRUE
 		}
 		return(out)
 	}, simplify = FALSE)
+	f <- attr(out, "focal")
 	if (simplify){
 		out <- do.call(combine, out)
 		if (combine=="cbind") {
@@ -181,6 +183,7 @@ condsummary <- function(mod_list, fun, simplify = TRUE
 			rownames(out) <- NULL
 		}
 	}
+	attr(out, "response") <- resp
 	return(out)
 }
 
@@ -223,10 +226,11 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 14: effects_writeup.Rnw:294-299
+### code chunk number 14: effects_writeup.Rnw:297-303
 ###################################################
 head(simple_pred_all)
-simple_pred_all_plot <- (plotpreds(simple_pred_all) 
+class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
+simple_pred_all_plot <- (plot(simple_pred_all) 
 	+ facet_wrap(~method) 
 	+ theme(legend.position="bottom")
 )
@@ -283,11 +287,12 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 17: effects_writeup.Rnw:355-360
+### code chunk number 17: effects_writeup.Rnw:360-366
 ###################################################
 head(simple_pred_spec)
-simple_pred_spec_plot <- (plotpreds(simple_pred_spec) 
-	+ facet_wrap(~method) 
+class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
+simple_pred_spec_plot <- (plot(simple_pred_spec)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 
@@ -331,11 +336,12 @@ simple_pred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 20: effects_writeup.Rnw:406-411
+### code chunk number 20: effects_writeup.Rnw:412-418
 ###################################################
 head(simple_pred_cat)
-simple_pred_cat_plot <- (plotpreds(simple_pred_cat) 
-	+ facet_wrap(~method) 
+class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
+simple_pred_cat_plot <- (plot(simple_pred_cat)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 
@@ -362,7 +368,7 @@ print(lm_u_vcov_zero)
 ###################################################
 ## varpred
 simple_vpred_all <- condsummary(mod_list=simple_models, fun=function(x, f){
-	dd <- varpred(x, f, vcmat = zero_vcov(x, f))
+	dd <- varpred(x, f, vcov. = zero_vcov(x, f))
 }, simplify = TRUE, combine = "rbind", fmethod = "varpred")
 
 ## emmeans
@@ -389,10 +395,11 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 24: effects_writeup.Rnw:477-481
+### code chunk number 24: effects_writeup.Rnw:484-489
 ###################################################
-simple_pred_all_plot <- (plotpreds(simple_pred_all) 
-	+ facet_wrap(~method) 
+class(simple_pred_all) <- c("jdeffects", "data.frame")
+simple_pred_all_plot <- (plot(simple_pred_all)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 
@@ -408,7 +415,7 @@ simple_pred_all_plot
 ###################################################
 ## varpred
 simple_vpred_spec <- condsummary(mod_list=simple_models, fun=function(x, f){
-		dd <- varpred(x, f, vcmat = zero_vcov(x, f))
+		dd <- varpred(x, f, vcov. = zero_vcov(x, f))
 	}, simplify = TRUE, combine = "rbind"
 	, scale_param = scale_param, fmethod = "varpred"
 )
@@ -442,7 +449,7 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 27: effects_writeup.Rnw:535-538
+### code chunk number 27: effects_writeup.Rnw:546-549
 ###################################################
 ## Plot centered and non-centered separately
 simple_pred_spec1 <- subset(simple_pred_spec, model=="x1u"|model=="x1s")
@@ -452,8 +459,9 @@ simple_pred_spec2 <- subset(simple_pred_spec, model=="x1c"|model=="x1sd")
 ###################################################
 ### code chunk number 28: simple_pred_spec_plot1
 ###################################################
-simple_pred_spec_plot1 <- (plotpreds(simple_pred_spec1) 
-	+ facet_wrap(~method) 
+class(simple_pred_spec1) <- c("jdeffects", "data.frame")
+simple_pred_spec_plot1 <- (plot(simple_pred_spec1)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 simple_pred_spec_plot1
@@ -462,8 +470,9 @@ simple_pred_spec_plot1
 ###################################################
 ### code chunk number 29: simple_pred_spec_plot2
 ###################################################
-simple_pred_spec_plot2 <- (plotpreds(simple_pred_spec2) 
-	+ facet_wrap(~method) 
+class(simple_pred_spec2) <- c("jdeffects", "data.frame")
+simple_pred_spec_plot2 <- (plot(simple_pred_spec2)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 simple_pred_spec_plot2
@@ -474,7 +483,7 @@ simple_pred_spec_plot2
 ###################################################
 ## Centered predictions from unscaled model
 vpred_c <- varpred(lm_u, focal = "x1u", isolate = TRUE)
-plotpreds(vpred_c)
+plot(vpred_c)
 
 
 ###################################################
@@ -510,11 +519,12 @@ simple_pred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 32: effects_writeup.Rnw:619-624
+### code chunk number 32: effects_writeup.Rnw:633-639
 ###################################################
 head(simple_pred_cat)
-simple_pred_cat_plot <- (plotpreds(simple_pred_cat) 
-	+ facet_wrap(~method) 
+class(simple_pred_cat) <- c("jdeffects", "data.frame")
+simple_pred_cat_plot <- (plot(simple_pred_cat)
+	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 
