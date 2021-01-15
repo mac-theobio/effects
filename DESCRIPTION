@@ -1,0 +1,11 @@
+Package: jdeffects
+Type: Package
+Title: Compute Conditional and Marginal Predictions 
+Version: 1.0
+Author: Bicko Cygu
+Maintainer: Bicko Cygu <cygubicko@gmail.com>
+Description: Computes conditional and marginal predictions together with centered model equivalents from uncentered models.
+License: GPL (>= 2)
+Depends: R (>= 3.5.0)
+Imports: ggplot2, lme4
+RoxygenNote: 7.1.1

@@ -10,14 +10,24 @@ vim_session:
 
 ######################################################################
 
-Sources += $(wildcard *.R *.md. *.Rnw *.mk)
+Sources += $(wildcard *.R *.md. *.Rnw)
+Sources += $(wildcard R/*.R)
+Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
+
+Sources += rnw.mk
 
 automatic_makeR = defined
 
 ######################################################################
 
-## effect functions: clean zero_cov and add extract_assign for variable-name-wise zero out
-effectsfuns.Rout: effectsfuns.R
+## dfeffect package
+jdeffects_pkg.Rout: R/jdeffects_pkg.R
+effectsfuns.Rout: R/effectsfuns.R
+utilities.Rout: R/utilities.R
+methodfuns.Rout: R/methodfuns.R
+pkgsExport.Rout: R/pkgsExport.R
+
+######################################################################
 
 ## Customize based R predict method to add CI and zero-out non-focal predictors
 cpred_baseR.Rout: cpred_baseR.R
@@ -58,6 +68,23 @@ skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
 effects_writeup.pdf: effects_writeup.Rnw
+
+######################################################################
+
+## Package installation and checks
+Ignore += jdeffects_1*
+
+build-package:
+	R CMD build .
+
+install-package:
+	R CMD INSTALL jdeffects_1*
+
+check-package:
+	echo "devtools::check('.')" | R --slave
+
+update-doc:
+	echo "devtools::document('.')" | R --slave
 
 ######################################################################
 
