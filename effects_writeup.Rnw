@@ -51,10 +51,11 @@ Suppose the \emph{non-focal} entries in $X^*$ are computed by some kind of avera
 \section{Available packages}
 The following R packages \pkg{effects}, \pkg{emmeans} and \pkg{margins} implement various schemes for constructing \emph{conditional} predictions. However, currently, their ability to compute \emph{marginal} prediction is limited to the use of variance-covariance approach which requires the fitted model to be centered. We propose \pkg{varpred} to overcome this limitation.
 
-\section{Yet to figure out}
+\section{TODOs}
 \begin{enumerate}
-\item Handling complex interaction
-\item Zero SEs in the case of variance-covariance approach
+\item Models with interactions
+\item GLMs
+\item LMEs
 \end{enumerate}
 
 

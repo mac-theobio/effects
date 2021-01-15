@@ -226,7 +226,7 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 14: effects_writeup.Rnw:297-303
+### code chunk number 14: effects_writeup.Rnw:298-304
 ###################################################
 head(simple_pred_all)
 class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
@@ -287,7 +287,7 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 17: effects_writeup.Rnw:360-366
+### code chunk number 17: effects_writeup.Rnw:361-367
 ###################################################
 head(simple_pred_spec)
 class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
@@ -336,7 +336,7 @@ simple_pred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 20: effects_writeup.Rnw:412-418
+### code chunk number 20: effects_writeup.Rnw:413-419
 ###################################################
 head(simple_pred_cat)
 class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
@@ -395,7 +395,7 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 24: effects_writeup.Rnw:484-489
+### code chunk number 24: effects_writeup.Rnw:485-490
 ###################################################
 class(simple_pred_all) <- c("jdeffects", "data.frame")
 simple_pred_all_plot <- (plot(simple_pred_all)
@@ -449,7 +449,7 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 27: effects_writeup.Rnw:546-549
+### code chunk number 27: effects_writeup.Rnw:547-550
 ###################################################
 ## Plot centered and non-centered separately
 simple_pred_spec1 <- subset(simple_pred_spec, model=="x1u"|model=="x1s")
@@ -519,7 +519,7 @@ simple_pred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 32: effects_writeup.Rnw:633-639
+### code chunk number 32: effects_writeup.Rnw:634-640
 ###################################################
 head(simple_pred_cat)
 class(simple_pred_cat) <- c("jdeffects", "data.frame")
