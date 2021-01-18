@@ -1,4 +1,4 @@
-### R code from vignette source '/home/steve/grive/McMaster/PhD/projects/effects/effects_writeup.Rnw'
+### R code from vignette source '/home/dushoff/screens/research/effects/effects_writeup.Rnw'
 
 ###################################################
 ### code chunk number 1: set_up

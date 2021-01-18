@@ -16,17 +16,23 @@ Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 
 Sources += rnw.mk
 
-automatic_makeR = defined
+autopipeR = defined
 
 ######################################################################
 
 ## jdeffects package
 jdeffects_pkg.Rout: R/jdeffects_pkg.R
 effectsfuns.Rout: R/effectsfuns.R
+varpred.Rout: dev/varpred.R ## Steve to add
 utilities.Rout: R/utilities.R
 plotsfuns.Rout: R/plotsfuns.R
 methodfuns.Rout: R/methodfuns.R
 pkgsExport.Rout: R/pkgsExport.R
+
+Sources += $(wildcard dev/*.R)
+
+demonstrate.Rout: dev/demonstrate.R
+	$(pipeR)
 
 ######################################################################
 
@@ -106,7 +112,7 @@ makestuff/Makefile:
 
 -include makestuff/os.mk
 
--include makestuff/makeR.mk
+-include makestuff/pipeR.mk
 
 -include makestuff/git.mk
 -include makestuff/visual.mk
