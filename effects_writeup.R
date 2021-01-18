@@ -72,7 +72,7 @@ modsummary <- function(patterns="^lm_", fun, simplify = TRUE
 	combine <- match.arg(combine)
 	out <- sapply(mod, function(m){
 		out <- fun(get(m))
-		out <- round(out, 3)
+		out <- round(out, 4)
 		if (combine=="rbind"){
 			if (!is.null(match_colnames)){
 				colnames(out) <- match_colnames
