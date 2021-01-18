@@ -495,7 +495,7 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 
 \begin{figure}[H]
 \begin{center}
-<<simple_pred_all_plot, fig=TRUE, echo=FALSE>>=
+<<simple_margpred_all_plot, fig=TRUE, echo=FALSE>>=
 simple_pred_all_plot
 @
 \end{center}

@@ -1,4 +1,4 @@
-### R code from vignette source '/home/dushoff/screens/research/effects/effects_writeup.Rnw'
+### R code from vignette source '/home/steve/grive/McMaster/PhD/projects/effects/effects_writeup.Rnw'
 
 ###################################################
 ### code chunk number 1: set_up
@@ -72,7 +72,7 @@ modsummary <- function(patterns="^lm_", fun, simplify = TRUE
 	combine <- match.arg(combine)
 	out <- sapply(mod, function(m){
 		out <- fun(get(m))
-		out <- round(out, 4)
+		out <- round(out, 3)
 		if (combine=="rbind"){
 			if (!is.null(match_colnames)){
 				colnames(out) <- match_colnames
@@ -405,7 +405,7 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 
 
 ###################################################
-### code chunk number 26: simple_pred_all_plot
+### code chunk number 26: simple_margpred_all_plot
 ###################################################
 simple_pred_all_plot
 

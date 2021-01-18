@@ -300,6 +300,7 @@ zero_vcov <- function(m, focal_vars, complete) {
 #' Recover data from the data from the model 
 #'
 #' @param mod fitted model
+#' @param optional character vector or formula specifying the predictors. Important when the transformation are applied in the formula. 
 #' @param envir data environment 
 #' @param ... for future implementations
 #'
@@ -323,13 +324,19 @@ zero_vcov <- function(m, focal_vars, complete) {
 #'
 #' @export 
 #'
-recoverdata <- function(mod, envir = environment(formula(mod)), ...) {
+recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), ...) {
 	f <- formula(mod)
 	data <- eval(mod$call$data, envir)
 	if (is.null(data)) {
-		df <- eval(call("model.frame", f), envir) 
+		if (is.null(extras)) {
+			df <- eval(call("model.frame", f), envir) 
+		} else {
+			df <- eval(call("expand.model.frame", f, extras = extras), envir) 
+		}
 	} else {
 		df <- eval(call("model.frame", data = data, drop.unused.levels = TRUE), envir)
+	}
+	if (!is.null(extras) | !is.null(data)) {
 		resp <- get_response(mod)
 		xvars <- all.vars(delete.response(terms(mod)))
 		df <- df[, colnames(df) %in% c(resp, xvars)]

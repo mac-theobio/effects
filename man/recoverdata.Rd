@@ -4,7 +4,7 @@
 \alias{recoverdata}
 \title{Recover data from the data from the model}
 \usage{
-recoverdata(mod, envir = environment(formula(mod)), ...)
+recoverdata(mod, extras = NULL, envir = environment(formula(mod)), ...)
 }
 \arguments{
 \item{mod}{fitted model}
@@ -12,6 +12,8 @@ recoverdata(mod, envir = environment(formula(mod)), ...)
 \item{envir}{data environment}
 
 \item{...}{for future implementations}
+
+\item{optional}{character vector or formula specifying the predictors. Important when the transformation are applied in the formula.}
 }
 \value{
 a dataframe

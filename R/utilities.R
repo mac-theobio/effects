@@ -155,7 +155,7 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     }
   }
   factor.cols[grep(":", cnames)] <- FALSE   
-  X <- recoverdata(mod)
+  X <- recoverdata(mod, all.predictors)
   
   which.matrices <- sapply(X, function(x) is.matrix(x) && ncol(x) == 1)
   if (any(which.matrices)){
