@@ -226,9 +226,8 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 14: effects_writeup.Rnw:298-304
+### code chunk number 14: effects_writeup.Rnw:295-300
 ###################################################
-head(simple_pred_all)
 class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_all_plot <- (plot(simple_pred_all) 
 	+ facet_wrap(~method) 
@@ -287,9 +286,8 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 17: effects_writeup.Rnw:361-367
+### code chunk number 17: effects_writeup.Rnw:359-364
 ###################################################
-head(simple_pred_spec)
 class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_spec_plot <- (plot(simple_pred_spec)
 	+ facet_wrap(~method)
@@ -336,9 +334,8 @@ simple_pred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 20: effects_writeup.Rnw:413-419
+### code chunk number 20: effects_writeup.Rnw:411-416
 ###################################################
-head(simple_pred_cat)
 class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_cat_plot <- (plot(simple_pred_cat)
 	+ facet_wrap(~method)
@@ -353,18 +350,21 @@ simple_pred_cat_plot
 
 
 ###################################################
-### code chunk number 22: zero_out_ex
+### code chunk number 22: full_vcov
 ###################################################
 lm_u_vcov <- vcov(lm_u)
 print(lm_u_vcov)
 
-## x1u is the focal variable
+
+###################################################
+### code chunk number 23: zero_out_ex
+###################################################
 lm_u_vcov_zero <- zero_vcov(lm_u, focal_vars = "x1u")
 print(lm_u_vcov_zero)
 
 
 ###################################################
-### code chunk number 23: simple_marginal_specific
+### code chunk number 24: simple_marginal_specific
 ###################################################
 ## varpred
 simple_vpred_all <- condsummary(mod_list=simple_models, fun=function(x, f){
@@ -395,7 +395,7 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 24: effects_writeup.Rnw:485-490
+### code chunk number 25: effects_writeup.Rnw:488-493
 ###################################################
 class(simple_pred_all) <- c("jdeffects", "data.frame")
 simple_pred_all_plot <- (plot(simple_pred_all)
@@ -405,13 +405,13 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 
 
 ###################################################
-### code chunk number 25: simple_pred_all_plot
+### code chunk number 26: simple_pred_all_plot
 ###################################################
 simple_pred_all_plot
 
 
 ###################################################
-### code chunk number 26: simple_marginal_backtrans
+### code chunk number 27: simple_marginal_backtrans
 ###################################################
 ## varpred
 simple_vpred_spec <- condsummary(mod_list=simple_models, fun=function(x, f){
@@ -449,7 +449,7 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 27: effects_writeup.Rnw:547-550
+### code chunk number 28: effects_writeup.Rnw:550-553
 ###################################################
 ## Plot centered and non-centered separately
 simple_pred_spec1 <- subset(simple_pred_spec, model=="x1u"|model=="x1s")
@@ -457,7 +457,7 @@ simple_pred_spec2 <- subset(simple_pred_spec, model=="x1c"|model=="x1sd")
 
 
 ###################################################
-### code chunk number 28: simple_pred_spec_plot1
+### code chunk number 29: simple_pred_spec_plot1
 ###################################################
 class(simple_pred_spec1) <- c("jdeffects", "data.frame")
 simple_pred_spec_plot1 <- (plot(simple_pred_spec1)
@@ -468,7 +468,7 @@ simple_pred_spec_plot1
 
 
 ###################################################
-### code chunk number 29: simple_pred_spec_plot2
+### code chunk number 30: simple_pred_spec_plot2
 ###################################################
 class(simple_pred_spec2) <- c("jdeffects", "data.frame")
 simple_pred_spec_plot2 <- (plot(simple_pred_spec2)
@@ -479,7 +479,7 @@ simple_pred_spec_plot2
 
 
 ###################################################
-### code chunk number 30: vapred_isolate_numeric
+### code chunk number 31: vapred_isolate_numeric
 ###################################################
 ## Centered predictions from unscaled model
 vpred_c <- varpred(lm_u, focal = "x1u", isolate = TRUE)
@@ -487,22 +487,22 @@ plot(vpred_c)
 
 
 ###################################################
-### code chunk number 31: simple_marginal_specific_cat
+### code chunk number 32: simple_marginal_specific_cat
 ###################################################
 ## varpred
 simple_models_cat <- list(x2u = lm_u)
-simple_vpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
+simple_margvpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
 	dd <- varpred(x, f, isolate=TRUE)
 }, simplify = TRUE, combine = "rbind", fmethod = "varpred")
 
 ## emmeans
-simple_empred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
+simple_margempred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
 	spec <- as.formula(paste0("~", f))
 	dd <- emmeans(x, spec=spec, cov.keep=f, vcov. = zero_vcov(x, f))
 }, simplify = TRUE, combine = "rbind", fmethod = "emmeans")
 
 ## effects
-simple_efpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
+simple_margefpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
 	dd <- Effect(f, x, xlevels=100, vcov. = function(x, complete=FALSE)zero_vcov(x, f, complete))
 }, simplify = TRUE, combine = "rbind", fmethod = "effects")
 
@@ -513,25 +513,24 @@ simple_margpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f
 
 
 ## Combine all the estimates
-simple_pred_cat <- do.call("rbind"
-	, list(simple_vpred_cat, simple_empred_cat, simple_efpred_cat, simple_margpred_cat)
+simple_margpred_cat <- do.call("rbind"
+	, list(simple_margvpred_cat, simple_margempred_cat, simple_margefpred_cat, simple_margpred_cat)
 )
 
 
 ###################################################
-### code chunk number 32: effects_writeup.Rnw:634-640
+### code chunk number 33: effects_writeup.Rnw:637-642
 ###################################################
-head(simple_pred_cat)
-class(simple_pred_cat) <- c("jdeffects", "data.frame")
-simple_pred_cat_plot <- (plot(simple_pred_cat)
+class(simple_margpred_cat) <- c("jdeffects", "data.frame")
+simple_margpred_cat_plot <- (plot(simple_margpred_cat)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
 
 
 ###################################################
-### code chunk number 33: simple_pred_cat_plot
+### code chunk number 34: simple_margpred_cat_plot
 ###################################################
-simple_pred_cat_plot
+simple_margpred_cat_plot
 
 

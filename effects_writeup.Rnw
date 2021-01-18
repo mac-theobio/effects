@@ -59,13 +59,13 @@ The following R packages \pkg{effects}, \pkg{emmeans} and \pkg{margins} implemen
 \end{enumerate}
 
 
-\section{Illustrations}
+\section{No interactions}
 
 \subsection{Simulation}
 
 Consider a simple no-interaction terms simulation:
 \begin{itemize}
-\item $y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \epsilon$ s.t $\epsilon \sim N(0, 1)$ and $\{\beta_0 = -5, \beta_1 = 0.1, \beta_2 = -0.05\}$
+\item $y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \epsilon$ s.t $\epsilon \sim N(0, 1)$ and $\{\beta_0 = -5, \beta_1 = 0.1, \beta_2 = -0.6\}$
 \begin{itemize}
 \item $x_1 \sim unif(1, 9)$
 \item $x_2$ -- two level categorical variable
@@ -165,14 +165,14 @@ coef_est <- modsummary(fun=coef)
 print(coef_est)
 @
 
-Log likelihoods
+These four model are equivalent (they all have equal loglikehoods).
 
 <<simple_loglik>>=
 ll_est <- modsummary(fun=logLik)
 print(ll_est)
 @
 
-Variance covariance matrix
+Variance covariance matrix. It is important to note that the slope variance for unscaled and centered models are the same. This makes it easier to center predictions from uncentered models.
 <<simple_vcov>>=
 vcov_est <- modsummary(fun=function(x)vcov(x), simplify=TRUE
 	, combine="rbind", match_colnames = names(coef(lm_u)))
@@ -181,9 +181,7 @@ print(vcov_est)
 
 \subsection{Conditional predictions}
 
-The function will be used downstream to \emph{tidy} conditional predictions from each of the methods highlighted above. 
-
-<<condional_summary, cho=FALSE>>=
+<<condional_summary, echo=FALSE>>=
 condsummary <- function(mod_list, fun, resp = "y", simplify = TRUE
 	, combine = c("cbind", "rbind"), scale_param = list(), fmethod = NULL){
 	focal <- names(mod_list)
@@ -257,16 +255,15 @@ condsummary <- function(mod_list, fun, resp = "y", simplify = TRUE
 @
 
 
-We start by computing the conditional predictions using each of the methods (\pkg{varpred, emmeans, effects, margins}). In the first case, the predictions are displayed on the variable level scale-specific values (original (u), mean centered (c), divided by standard deviation (s), and both mean centered and scaled (sd)). In the second case, the predictions are transformed back to the original scale. 
-
-<<simple_model>>=
+<<simple_model, echo=FALSE>>=
 simple_models <- list(x1u = lm_u, x1c = lm_c, x1s = lm_s, x1sd = lm_sd)
 @
 
 
 \subsubsection{Continuous predictor}
 
-<<simple_conditional_specific, results=hide>>=
+
+<<simple_conditional_specific, echo=FALSE, results=hide>>=
 ## varpred
 simple_vpred_all <- condsummary(mod_list=simple_models, fun=function(x, f){
 	dd <- varpred(x, f)
@@ -295,8 +292,7 @@ simple_pred_all <- do.call("rbind"
 )
 @
 
-<<>>=
-head(simple_pred_all)
+<<echo=FALSE>>=
 class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_all_plot <- (plot(simple_pred_all) 
 	+ facet_wrap(~method) 
@@ -304,19 +300,21 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 )
 @
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \begin{center}
 <<simple_pred_all_plot, fig=TRUE, echo=FALSE>>=
 simple_pred_all_plot
 @
 \end{center}
 \caption{Conditional predictions on the variable-specific values.}
+\label{fig:simple_pred_all_plot}
 \end{figure}
 
-Compute predictions and then back transform each predictor to the original scale.
+
+\autoref{fig:simple_pred_all_plot}, displays the conditional predictions for of the models, i.e., variable-specific values (original (u), mean centered (c), divided by standard deviation (s), and both mean centered and scaled (sd)). The predictions looks different but we zoom-in in \autoref{fig:simple_pred_spec_plot} by transforming back all the scaled predictions to the original (unscaled) values -- and actually, conditional predictions are the same for each of the methods. This implies that, if we know the scaling or centering parameter, we can always transform back predictions to the untransformed (unscaled) equivalent.
 
 
-<<simple_conditional_backtrans, results=hide>>=
+<<simple_conditional_backtrans, echo=FALSE, results=hide>>=
 ## Extract scaling parameters
 scale_param <- list(x1s = unlist(attributes(df$x1s))
 	, x1c = unlist(attributes(df$x1c))
@@ -358,8 +356,7 @@ simple_pred_spec <- do.call("rbind"
 )
 @
 
-<<>>=
-head(simple_pred_spec)
+<<echo=FALSE>>=
 class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_spec_plot <- (plot(simple_pred_spec)
 	+ facet_wrap(~method)
@@ -367,20 +364,21 @@ simple_pred_spec_plot <- (plot(simple_pred_spec)
 )
 @
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \begin{center}
 <<simple_pred_spec_plot, fig=TRUE, echo=FALSE>>=
 simple_pred_spec_plot
 @
 \end{center}
 \caption{Back-transformed conditional predictions.}
+\label{fig:simple_pred_spec_plot}
 \end{figure}
 
 \subsubsection{Categorical predictors}
 
-Here, we are considering case where we are only interested estimating the conditional predictions. In this case, it doesn't matter which of the four models we choose since they will give the same predictions. Later, we'll show how we can estimate marginalized and/or centered (CI) for categorical predictors.
+In this case, it doesn't matter which of the four models we choose since they all give the similar conditional predictions. Later, we'll show how we can estimate marginalized and/or centered (CI) for categorical predictors.
 
-<<simple_conditional_specific_cat, results=hide>>=
+<<simple_conditional_specific_cat, echo=FALSE, results=hide>>=
 ## varpred
 simple_models_cat <- list(x2u = lm_u)
 simple_vpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
@@ -410,8 +408,7 @@ simple_pred_cat <- do.call("rbind"
 )
 @
 
-<<>>=
-head(simple_pred_cat)
+<<echo=FALSE>>=
 class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_cat_plot <- (plot(simple_pred_cat)
 	+ facet_wrap(~method)
@@ -419,7 +416,7 @@ simple_pred_cat_plot <- (plot(simple_pred_cat)
 )
 @
 
-\begin{figure}[ht]
+\begin{figure}[H]
 \begin{center}
 <<simple_pred_cat_plot, fig=TRUE, echo=FALSE>>=
 simple_pred_cat_plot
@@ -431,28 +428,34 @@ simple_pred_cat_plot
 
 \subsection{Marginal predictions}
 
-We can implement marginalization by \emph{zeroing-out} the variance of non-focal predictors (possible in all four methods) but this requires that the predictors are centered beforehand. On the other hand, in \pkg{varpred} marginal predictions can be obtained by centering the SE estimates.
+We can implement marginalization by \emph{zeroing-out} the variance of non-focal predictors (possible in all four methods) but this requires that continuous predictors are centered beforehand or appropriate contrast is applied in the case of categorical predictors. On the other hand, in \pkg{varpred} marginal predictions are computed by centering the model matrix (when computing SEs). This approach does not require centered predictors and also works with any contrast specification.
 
 \subsection{zeroed-out covariance matrix}
 
-We \pkg{zero\_vcov} function in \pkg{varpred} to transform the variances of non-focal predictors to zero. For example:
+The \pkg{zero\_vcov} function in \pkg{jdeffects} \emph{zeros-out} variance-covariances of non-focal terms of the predictor in question. For example:
 
-<<zero_out_ex>>=
+\begin{itemize}
+\item full variance-covariance matrix
+<<full_vcov, echo=FALSE>>=
 lm_u_vcov <- vcov(lm_u)
 print(lm_u_vcov)
+@
 
-## x1u is the focal variable
+\item \emph{zeroed-out} variance-covariance matrix with \code{x1u} as the focal variable
+
+<<zero_out_ex, echo=FALSE>>=
 lm_u_vcov_zero <- zero_vcov(lm_u, focal_vars = "x1u")
 print(lm_u_vcov_zero)
 @
+\end{itemize}
 
-We'll repeat the same procedure in conditional predictions section but modify the functions to incorporate \emph{zeroed-out} covariance matrix.
+We repeat all the procedures in conditional predictions section but modify the methods to incorporate \emph{zeroed-out} covariance matrix as one of the inputs.
 
 \subsubsection{Continuous predictor}
 
-Notice that the modification in each of the method function call to pass either covariance matrix or function. In particular, in \pkg{varpred}, it is passed as \pkg{vcov.}, \pkg{emmeans} and \pkg{effects} as \pkg{vcov.} and \pkg{margins} as \pkg{vcov}. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
+The most modification in each of the methods is to either specify \emph{zeroed-out} covariance matrix or a function to compute the variance-covariance matrix as one of the inputs. In particular, in \pkg{varpred}, \pkg{emmeans} and  \pkg{effects} it is specified through \pkg{vcov.} and in \pkg{margins} through \pkg{vcov} argument. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
 
-<<simple_marginal_specific, results=hide>>=
+<<simple_marginal_specific, echo=FALSE, results=hide>>=
 ## varpred
 simple_vpred_all <- condsummary(mod_list=simple_models, fun=function(x, f){
 	dd <- varpred(x, f, vcov. = zero_vcov(x, f))
@@ -599,23 +602,23 @@ plot(vpred_c)
 
 \subsubsection{Categorical predictors}
 
-Back to categorical predictor, \code{x2u}. The reference (base) category has not variance and has such we can not use the \emph{zeroed-out} covariance approach to estimate CI for the marginalized predictions. However, if we can figure out how to center model matrix in the computation of CIs, we can actually use model with unscaled categorical predictors and estimate marginal predictions for centered categorical predictors. Currently, only \pkg{varpred} provide this functionality.
+Back to categorical predictor, \code{x2u}. The default contrast compares the other categories with no-variance reference category (base) and as a result, we can not compute the SEs using \emph{zeroed-out} variance-covariance matrix unless appropriate contrast (\code{"contr.sum"}) was used during model specification. Model matrix centering provides a way to overcome this and computes centered independent of the contrasts. Currently, only \pkg{varpred} provide this functionality.
 
-<<simple_marginal_specific_cat, results=hide>>=
+<<simple_marginal_specific_cat, echo=FALSE, results=hide>>=
 ## varpred
 simple_models_cat <- list(x2u = lm_u)
-simple_vpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
+simple_margvpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
 	dd <- varpred(x, f, isolate=TRUE)
 }, simplify = TRUE, combine = "rbind", fmethod = "varpred")
 
 ## emmeans
-simple_empred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
+simple_margempred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
 	spec <- as.formula(paste0("~", f))
 	dd <- emmeans(x, spec=spec, cov.keep=f, vcov. = zero_vcov(x, f))
 }, simplify = TRUE, combine = "rbind", fmethod = "emmeans")
 
 ## effects
-simple_efpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
+simple_margefpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f){
 	dd <- Effect(f, x, xlevels=100, vcov. = function(x, complete=FALSE)zero_vcov(x, f, complete))
 }, simplify = TRUE, combine = "rbind", fmethod = "effects")
 
@@ -626,15 +629,14 @@ simple_margpred_cat <- condsummary(mod_list=simple_models_cat, fun=function(x, f
 
 
 ## Combine all the estimates
-simple_pred_cat <- do.call("rbind"
-	, list(simple_vpred_cat, simple_empred_cat, simple_efpred_cat, simple_margpred_cat)
+simple_margpred_cat <- do.call("rbind"
+	, list(simple_margvpred_cat, simple_margempred_cat, simple_margefpred_cat, simple_margpred_cat)
 )
 @
 
-<<>>=
-head(simple_pred_cat)
-class(simple_pred_cat) <- c("jdeffects", "data.frame")
-simple_pred_cat_plot <- (plot(simple_pred_cat)
+<<echo=FALSE>>=
+class(simple_margpred_cat) <- c("jdeffects", "data.frame")
+simple_margpred_cat_plot <- (plot(simple_margpred_cat)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
@@ -642,8 +644,8 @@ simple_pred_cat_plot <- (plot(simple_pred_cat)
 
 \begin{figure}[ht]
 \begin{center}
-<<simple_pred_cat_plot, fig=TRUE, echo=FALSE>>=
-simple_pred_cat_plot
+<<simple_margpred_cat_plot, fig=TRUE, echo=FALSE>>=
+simple_margpred_cat_plot
 @
 \end{center}
 \caption{Conditional predictions.}
