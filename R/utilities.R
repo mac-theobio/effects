@@ -83,6 +83,11 @@ check_intercept <- function(mod, ...) {
 }
 
 get_response <- function (mod, ...) deparse(attr(terms(mod), "variables")[[2]])
+## a <- attributes(terms(mod))
+## deparse(a$variables[[1+a$response]])  ## offset of 1 to skip the head of the expression ...
+## deparse(formula(mod)[[2]]) ???
+## or ... use pcoxtime getResponse()!
+
 
 get_termnames <- function (mod, ...) {
   termnames <- gsub(" ", "", labels(terms(mod)))

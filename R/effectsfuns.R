@@ -297,38 +297,40 @@ zero_vcov <- function(m, focal_vars, complete) {
 	return(v)
 }
 
-#' Recover data from the data from the model 
-#'
-#' @param mod fitted model
-#' @param optional character vector or formula specifying the predictors. Important when the transformation are applied in the formula. 
-#' @param envir data environment 
-#' @param ... for future implementations
-#'
-#' @details
-#' It uses the fitted model and the global environment to reconstruct the data used in the model. If \code{data} option is specified in the model formula, a dataframe with columns corresponding to the variable in the formula is returned. Any transformation, e.g. \code{log} specified in the formula terms is not evaluated on the returned data frame. However, if no is provided, the dataframe is constructed from the formula terms with all transformations evaluated.
-#'
-#' @return a dataframe
-#'
-#' @examples
-#'
-#' set.seed(4567)
-#' x <- rnorm(100, 3, 5)
-#' y <- 0.4 + 0.7*x + rnorm(100)
-#' df <- data.frame(y = y, x = x)
-#' m1 <- lm(y ~ x, df)
-#' d1 <- recoverdata(m1)
-#' head(d1)
-#' m2 <- lm(y ~ x)
-#' d2 <- recoverdata(m2)
-#' head(d2)
-#'
-#' @export 
-#'
+##' Recover data from the data from the model 
+##'
+##' @param mod fitted model
+##' @param optional character vector or formula specifying the predictors. Important when the transformation are applied in the formula. 
+##' @param envir data environment 
+##' @param ... for future implementations
+##'
+##' @details
+##' It uses the fitted model and the global environment to reconstruct the data used in the model. If \code{data} option is specified in the model formula, a dataframe with columns corresponding to the variable in the formula is returned. Any transformation, e.g. \code{log} specified in the formula terms is not evaluated on the returned data frame. However, if no is provided, the dataframe is constructed from the formula terms with all transformations evaluated.
+##'
+##' @return a dataframe
+##'
+##' @examples
+##' set.seed(4567)
+##' x <- rnorm(100, 3, 5)
+##' y <- 0.4 + 0.7*x + rnorm(100)
+##' df <- data.frame(y = y, x = x)
+##' m1 <- lm(y ~ x, df)
+##' d1 <- recoverdata(m1)
+##' head(d1)
+##' m2 <- lm(y ~ x)
+##' d2 <- recoverdata(m2)
+##' head(d2)
+##'
+##' @export 
+##'
+## add Stack Overflow URL
+## TEST CASES???
 recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), ...) {
 	f <- formula(mod)
-	data <- eval(mod$call$data, envir)
+	data <- eval(getCall(mod)$data, envir)
 	if (is.null(data)) {
-		if (is.null(extras)) {
+            if (is.null(extras)) {
+                ## df <- eval(bquote(model.frame(.(f))), envir)
 			df <- eval(call("model.frame", f), envir) 
 		} else {
 			df <- eval(call("expand.model.frame", f, extras = extras), envir) 
@@ -336,7 +338,7 @@ recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), .
 	} else {
 		df <- eval(call("model.frame", data = data, drop.unused.levels = TRUE), envir)
 	}
-	if (!is.null(extras) | !is.null(data)) {
+	if (!is.null(extras) || !is.null(data)) {
 		resp <- get_response(mod)
 		xvars <- all.vars(delete.response(terms(mod)))
 		df <- df[, colnames(df) %in% c(resp, xvars)]
