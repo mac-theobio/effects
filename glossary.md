@@ -8,7 +8,7 @@
 
 **Simple linear models case** - For a simple linear model, the choice between a marginal and conditional formulation is equivalent \cite{muff2016marginal}.
 
-** Focal predictor** - A predictor whose predictions are computed, otherwise _non-focal_.
+**Focal predictor** - A predictor whose predictions are computed, otherwise _non-focal_.
 
 **Zeroing-out variance-covariance matrix** - Eliminating uncertainties due to non-focal predictors.
 
