@@ -15,6 +15,7 @@ Sources += $(wildcard R/*.R)
 Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 
 Sources += rnw.mk
+Sources += glossary.md
 
 autopipeR = defined
 
