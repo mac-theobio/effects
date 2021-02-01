@@ -13,7 +13,7 @@
 
 \setlength{\parindent}{0pt}
 
-\title{Marginal predictions}
+\title{Visualizing marginal means}
 
 \begin{document}
 
