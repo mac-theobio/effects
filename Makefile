@@ -14,7 +14,15 @@ Sources += $(wildcard *.R *.md. *.Rnw)
 Sources += $(wildcard R/*.R)
 Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 
-Sources += rnw.mk
+%.tangle.r: %.Rnw
+	R CMD Stangle $<
+
+%.tex: %.Rnw
+	R CMD Sweave $<
+
+## Try to trick Sweave
+%: %.pdf ;
+
 Sources += glossary.md
 
 autopipeR = defined
@@ -75,7 +83,8 @@ inter_predict.Rout: inter_predict.R effectsfuns.R inter_mod_lm.rda
 skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
-effects_writeup.pdf: effects_writeup.Rnw
+
+## effects_writeup.pdf: effects_writeup.Rnw
 
 ######################################################################
 
@@ -113,6 +122,7 @@ makestuff/Makefile:
 
 -include makestuff/os.mk
 
+-include makestuff/texi.mk
 -include makestuff/pipeR.mk
 
 -include makestuff/git.mk
