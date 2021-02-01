@@ -226,7 +226,7 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 14: effects_writeup.Rnw:295-300
+### code chunk number 14: effects_writeup.Rnw:305-310
 ###################################################
 class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_all_plot <- (plot(simple_pred_all) 
@@ -286,7 +286,7 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 17: effects_writeup.Rnw:359-364
+### code chunk number 17: effects_writeup.Rnw:369-374
 ###################################################
 class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_spec_plot <- (plot(simple_pred_spec)
@@ -334,7 +334,7 @@ simple_pred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 20: effects_writeup.Rnw:411-416
+### code chunk number 20: effects_writeup.Rnw:421-426
 ###################################################
 class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
 simple_pred_cat_plot <- (plot(simple_pred_cat)
@@ -395,10 +395,10 @@ simple_pred_all <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 25: effects_writeup.Rnw:488-493
+### code chunk number 25: effects_writeup.Rnw:497-502
 ###################################################
 class(simple_pred_all) <- c("jdeffects", "data.frame")
-simple_pred_all_plot <- (plot(simple_pred_all)
+simple_pred_all_plot_out <- (plot(simple_pred_all)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
@@ -407,7 +407,7 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 ###################################################
 ### code chunk number 26: simple_margpred_all_plot
 ###################################################
-simple_pred_all_plot
+simple_pred_all_plot_out
 
 
 ###################################################
@@ -449,7 +449,7 @@ simple_pred_spec <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 28: effects_writeup.Rnw:550-553
+### code chunk number 28: effects_writeup.Rnw:558-561
 ###################################################
 ## Plot centered and non-centered separately
 simple_pred_spec1 <- subset(simple_pred_spec, model=="x1u"|model=="x1s")
@@ -519,7 +519,7 @@ simple_margpred_cat <- do.call("rbind"
 
 
 ###################################################
-### code chunk number 33: effects_writeup.Rnw:637-642
+### code chunk number 33: effects_writeup.Rnw:645-650
 ###################################################
 class(simple_margpred_cat) <- c("jdeffects", "data.frame")
 simple_margpred_cat_plot <- (plot(simple_margpred_cat)

@@ -11,7 +11,6 @@
 \newcommand{\pkg}[1]{\textbf{#1}}
 \def\code#1{\texttt{#1}}
 
-\bibliographystyle{chicago}
 \setlength{\parindent}{0pt}
 
 \title{Marginal predictions}
@@ -22,34 +21,45 @@
 
 \section{Introduction}
 
-In this task, we describe various R machineries for displaying predictions in both simple and complex (involving interaction terms) generalized linear models. We first consider existing approaches for \emph{conditioning} predictions and then describe our proposed approach for \emph{marginalized} predictions. These provide a unified and intuitive way of describing relationships from a fitted model, especially complex models involving interaction terms or some kind transformations on the dependent variables whose estimates are usually, but not always, a subject to less clarity of interpretation.
+In this task, we describe various R machineries for displaying predictions in both simple and complex (involving interaction terms) generalized linear models. We first consider existing approaches for constructing model predictions and then describe how our proposed approach is different from the existing ones. When visually presented, predictions provide a unified and intuitive way of describing relationships from a fitted model, especially complex models involving interaction terms or some kind transformations on the dependent variables whose estimates are usually, but not always, a subject to less clarity of interpretation.
 
-We can derive various quantities from a fitted regression model. The first and most obvious, is the model coefficient estimates. Others include predicted values of the outcome variable---1) predictions at a particular; and 2) mean or median value of the predictors. The first case simply involves evaluation of the fitted model function, say $\hat{f}(X = x)$, at some particular value of $x$. The second case, chooses the values of the predictor based on its distributional properties. 
+A related term to \emph{marginal} predictions is the \emph{conditional} predictions --- it is not clear whether conditional or marginal predictions is more appropriate for a particular research problem \citep{muff2016marginal}. However, we attempt to make the distinction between the two (see \href{https://github.com/mac-theobio/effects/blob/main/glossary.md}{glossary}).
 
-Most importantly, from these predicted values, we can also generate second class quantities of interest -- \emph{conditional} or \emph{marginal} predictions. These quantities describes the change in the predicted value of the dependent variable after changing one independent variable -- either a discrete change in the categorical variable(s) or an instantaneous change in continuous variables, while all other variable are held at specified values. 
+By default, commonly used R packages for constructing predictions do not remove (\emph{zero-out}) the uncertainties resulting from the \emph{non-focal} predictors when computing predictions. A non-trivial way to achieve this in some of these packages is to provide a user defined variance-covariance matrix with the covariances of \emph{non-focal} terms set to $0$ -- \emph{zeroing-out} variance-covariance matrix. This only works when the predictors are centered prior to model fitting, in case of numerical predictors, and even much complicated when the predictors are categorical. We propose a method independent of model scaling to provide more robust \emph{marginal} predictions. 
 
-Suppose we are interested in the \emph{conditional} predictions of a particular predictor (hence forth referred as \emph{focal} predictor otherwise \emph{non-focal}), $x_f$, in the set of predictors. To keep it simple, assume that the model has no interaction terms. Then the idea is to fix the values of \emph{non-focal} predictor(s) at some typical values -- typically determined by averaging in some meaningful way, for example, arithmetic mean and average over the levels of the factors of \emph{non-focal} continuous and categorical predictors, respectively. This is achieved by averaging the columns of \emph{model matrix}, $\mathbf{X}$, except for the column of focal predictor. 
+We can derive various quantities from a fitted regression model. The first and most obvious, is the model coefficient estimates. Others include predicted values of the outcome variable --- 1) predictions at a particular; and 2) mean or median value of the predictors. The first case simply involves evaluation of the fitted model function, say $\hat{f}(X = x)$, at some particular value of $x$. The second case, chooses the values of the predictor based on its distributional properties. 
 
-Consider a simple linear model with linear predictor $\eta = \mathbf{X\beta}$ and let $g(\mu) = \eta$ be an identity link function (in the case of simple linear model), where $\mu$ is the predicted (expected) value of outcome variable  $y$. Let $\hat{\beta}$ be the estimate of $\beta$, together with the estimated covariance matrix $V(\hat{\beta})$ of $\hat{\beta}$. Let the entries of $\mathbf{X^*}$ include all conditioned (\emph{non-focal}) and \emph{focal} predictors. The model matrix, $\mathbf{X^*}$, inherits most of its key properties, for example transformation (e.g., scaling) on the predictors and interactions from the model matrix, $\mathbf{X}$. Then the predicted values $\hat{\eta}^* = \mathbf{X^*}\hat{\beta}$ represents the \emph{conditional} predictions of the focal predictor. Alternatively, we can transform these predictions to response scale using $g^{-1}(\hat{\eta}^*)$.
+Most importantly, from these predicted values, we can also generate second class quantities of interest --- \emph{marginal} predictions, which describes the change in the predicted value of the dependent variable after changing one independent variable -- either a discrete change in the categorical variable(s) or an instantaneous change in continuous variables, while all other variable are held at specified values. 
 
-Further, we can compute the standard errors (SEs) of the \emph{conditional} predictions, $\hat{\eta}^*$, for constructing confidence intervals, as the $\operatorname{sqrt}(\operatorname{diag}(\mathbf{X}^*V(\hat{\beta})\mathbf{X}^{*T}))$. When computing \emph{marginal} predictions, the \emph{uncertainty} as a result of \emph{non-focal} predictors are removed. This can be achieved in two ways:
+Suppose we are interested in the \emph{marginal} predictions of a particular predictor (hence forth referred as \emph{focal} predictor otherwise \emph{non-focal}), $x_f$, in the set of predictors. To keep it simple, assume that the model has no interaction terms. Then the idea is to fix the values of \emph{non-focal} predictor(s) at some typical values -- typically determined by averaging in some meaningful way, for example, arithmetic mean and average over the levels of the factors of \emph{non-focal} continuous and categorical predictors, respectively. An alternative to \emph{averaging} is \emph{anchoring} which involves picking a fixed value of the predictor. One way to achieve this is using \emph{model matrix},  $\mathbf{X}$, i.e., \emph{anchoring} or \emph{averaging} the columns of \emph{non-focal} terms in $\mathbf{X}$. 
+
+
+\subsection{Simple linear models}
+
+Consider a simple linear model with linear predictor $\eta = \mathbf{X\beta}$ and let $g(\mu) = \eta$ be an identity link function (in the case of simple linear model), where $\mu$ is the predicted (expected) value of outcome variable  $y$. Let $\hat{\beta}$ be the estimate of $\beta$, together with the estimated covariance matrix $V(\hat{\beta})$ of $\hat{\beta}$. Let the entries of $\mathbf{X^*}$ include all \emph{non-focal} and \emph{focal} predictors. The model matrix, $\mathbf{X^*}$, inherits most of its key properties, for example transformation (e.g., scaling) on the predictors and interactions from the model matrix, $\mathbf{X}$. Then the predicted values $\hat{\eta}^* = \mathbf{X^*}\hat{\beta}$ represents the \emph{marginal} predictions of the focal predictor. Alternatively, we can transform these predictions to response scale using $g^{-1}(\hat{\eta}^*)$.
+
+Further, we can compute the standard errors (SEs) associated with these predictions, $\hat{\eta}^*$, for constructing confidence intervals, as the $\operatorname{sqrt}(\operatorname{diag}(\mathbf{X}^*V(\hat{\beta})\mathbf{X}^{*T}))$. Our proposed method goes one step further of removing the \emph{uncertainty} as a result of \emph{non-focal} predictors are removed. This can be achieved in two ways:
 \begin{itemize}
 \item using variance-covariance matrix, $V(\hat{\beta})$
 \item using centered model matrix, $\mathbf{X}^*$
 \end{itemize}
 
-\subsection{Variance-covariance}
+\subsubsection{Variance-covariance}
 
 The computation of $\hat{\eta}^*$ remains the same as described above. However, to compute SEs $V(\hat{\beta})$ is modified by \emph{zeroing-out} (the variance-covariance of all non-focal predictors are assigned zero) entries of \emph{non-focal} terms in $V(\hat{\beta})$. This approach requires \emph{centering} of the predictors in the model matrix, $X$. In other words, the fitted model should have \emph{centered} predictors.
 
 
-\subsection{Centered model matrix}
+\subsubsection{Centered model matrix}
 
-Suppose the \emph{non-focal} entries in $X^*$ are computed by some kind of averaging. Consider centered $X^*$, $X^*_{c} = (X^* - \bar{X^*})$. It follows that the \emph{non-focal} entries in $X^*_{c}$ are all zero. As a result, the SEs are computed as  $\operatorname{sqrt}(\operatorname{diag}(\mathbf{X}^*_{c}V(\hat{\beta})\mathbf{X}^{*T}_{c}))$, which actually \emph{zeros-out}. More generally, \emph{centering}, $\mathbf{X}^*_{c} = \mathbf{X}^* - k$ (for example $k = E(\mathbf{X}^*)$) impacts on the estimated value of the intercept and its associated variance. However, the slopes are not affect by this. The implication of this that since \emph{non-focal} terms in $\mathbf{X}^*_c$ are zero, it doesn't matter what their corresponding values are in the variance-covariance matrix. Hence, we can compute \emph{marginal} predictions from non-centered predictors (in other words, fitted models with predictors in their natural scales).
+Suppose the \emph{non-focal} entries in $X^*$ are computed by some kind of averaging or anchoring. Consider centered $X^*$, $X^*_{c} = (X^* - \bar{X^*})$. It follows that the \emph{non-focal} entries in $X^*_{c}$ are all zero. As a result, the SEs are computed as  $\operatorname{sqrt}(\operatorname{diag}(\mathbf{X}^*_{c}V(\hat{\beta})\mathbf{X}^{*T}_{c}))$, which actually \emph{zeros-out}. More generally, \emph{centering}, $\mathbf{X}^*_{c} = \mathbf{X}^* - k$ (for example $k = E(\mathbf{X}^*)$) impacts on the estimated value of the intercept and its associated variance. However, the slopes are not affect by this. The implication of this that since \emph{non-focal} terms in $\mathbf{X}^*_c$ are zero, it doesn't matter what their corresponding values are in the variance-covariance matrix. Hence, we can compute \emph{marginal} predictions from non-centered predictors (in other words, fitted models with predictors in their natural scales).
 
+\subsection{GLMs}
+
+
+\subsection{LMEs}
 
 \section{Available packages}
-The following R packages \pkg{effects}, \pkg{emmeans} and \pkg{margins} implement various schemes for constructing \emph{conditional} predictions. However, currently, their ability to compute \emph{marginal} prediction is limited to the use of variance-covariance approach which requires the fitted model to be centered. We propose \pkg{varpred} to overcome this limitation.
+The following R packages \pkg{effects}, \pkg{emmeans} and \pkg{margins} implement various schemes for constructing \emph{marginal} predictions. However, currently, their ability to compute \emph{marginal} predictions with zeroed-out non-focal uncertanities is limited to the use of variance-covariance approach which requires the fitted model to be centered. We propose \pkg{varpred} to overcome this limitation.
 
 \section{TODOs}
 \begin{enumerate}
@@ -81,7 +91,7 @@ library(jdeffects)
 jdtheme()
 @
 
-<<simple_sim>>=
+<<simple_sim, echo=FALSE>>=
 set.seed(101)
 N <- 100
 x1_min <- 1
@@ -179,7 +189,7 @@ vcov_est <- modsummary(fun=function(x)vcov(x), simplify=TRUE
 print(vcov_est)
 @
 
-\subsection{Conditional predictions}
+\subsection{All uncertainties included}
 
 <<condional_summary, echo=FALSE>>=
 condsummary <- function(mod_list, fun, resp = "y", simplify = TRUE
@@ -306,12 +316,12 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 simple_pred_all_plot
 @
 \end{center}
-\caption{Conditional predictions on the variable-specific values.}
+\caption{Predictions on the variable-specific values.}
 \label{fig:simple_pred_all_plot}
 \end{figure}
 
 
-\autoref{fig:simple_pred_all_plot}, displays the conditional predictions for of the models, i.e., variable-specific values (original (u), mean centered (c), divided by standard deviation (s), and both mean centered and scaled (sd)). The predictions looks different but we zoom-in in \autoref{fig:simple_pred_spec_plot} by transforming back all the scaled predictions to the original (unscaled) values -- and actually, conditional predictions are the same for each of the methods. This implies that, if we know the scaling or centering parameter, we can always transform back predictions to the untransformed (unscaled) equivalent.
+\autoref{fig:simple_pred_all_plot}, displays the simple marginal predictions for each of the four models described above, i.e., variable-specific values (original (u), mean centered (c), divided by standard deviation (s), and both mean centered and scaled (sd)). The uncertainties associated with these predictions includes those for non-focal predictors too. The predictions looks different but they are actually similar when plotted on the same scale, see \autoref{fig:simple_pred_spec_plot}.
 
 
 <<simple_conditional_backtrans, echo=FALSE, results=hide>>=
@@ -370,13 +380,13 @@ simple_pred_spec_plot <- (plot(simple_pred_spec)
 simple_pred_spec_plot
 @
 \end{center}
-\caption{Back-transformed conditional predictions.}
+\caption{Back-transformed conditional predictions. Remember the model predictors were in different scales -- this implies that if we know the scaling or centering parameter, we can always back-transform model predictions to the original (unscaled) form.}
 \label{fig:simple_pred_spec_plot}
 \end{figure}
 
 \subsubsection{Categorical predictors}
 
-In this case, it doesn't matter which of the four models we choose since they all give the similar conditional predictions. Later, we'll show how we can estimate marginalized and/or centered (CI) for categorical predictors.
+In this case, it doesn't matter which of the four models we choose since they all give the similar predictions.
 
 <<simple_conditional_specific_cat, echo=FALSE, results=hide>>=
 ## varpred
@@ -426,11 +436,13 @@ simple_pred_cat_plot
 \end{figure}
 
 
-\subsection{Marginal predictions}
+\subsection{Zeroed-out uncertainties}
 
-We can implement marginalization by \emph{zeroing-out} the variance of non-focal predictors (possible in all four methods) but this requires that continuous predictors are centered beforehand or appropriate contrast is applied in the case of categorical predictors. On the other hand, in \pkg{varpred} marginal predictions are computed by centering the model matrix (when computing SEs). This approach does not require centered predictors and also works with any contrast specification.
+We can remove uncertainties associated with non-focal predictors by \emph{zeroing-out} the variance of non-focal terms of the variance-covariance matrix (possible in all four methods) but this requires that continuous predictors are centered or appropriate contrast is applied in the case of categorical predictors before model fitting. In \pkg{varpred} marginal predictions are computed by centering the model matrix (when computing SEs), whic does not require centered predictors and is independent of contrast specification.
 
-\subsection{zeroed-out covariance matrix}
+\subsubsection{zeroed-out covariance matrix}
+
+The modification in each of the methods is to either specify \emph{zeroed-out} covariance matrix or a function to compute the variance-covariance matrix as one of the inputs. In particular, in \pkg{varpred}, \pkg{emmeans} and  \pkg{effects} it is specified through \pkg{vcov.} and in \pkg{margins} through \pkg{vcov} argument. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
 
 The \pkg{zero\_vcov} function in \pkg{jdeffects} \emph{zeros-out} variance-covariances of non-focal terms of the predictor in question. For example:
 
@@ -449,11 +461,8 @@ print(lm_u_vcov_zero)
 @
 \end{itemize}
 
-We repeat all the procedures in conditional predictions section but modify the methods to incorporate \emph{zeroed-out} covariance matrix as one of the inputs.
 
-\subsubsection{Continuous predictor}
-
-The most modification in each of the methods is to either specify \emph{zeroed-out} covariance matrix or a function to compute the variance-covariance matrix as one of the inputs. In particular, in \pkg{varpred}, \pkg{emmeans} and  \pkg{effects} it is specified through \pkg{vcov.} and in \pkg{margins} through \pkg{vcov} argument. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
+For the continuous predictors, we first compute predictions on predictor-specific scales (\autoref{fig:simple_pred_all_plot_out}) and then back-transform the predictions to original scale (unscale -- uncenter and/or unscale). To clearly distinguish between what happens when apply various scaling schemes, we separately do the plots (see \autoref{fig:marginal_transformed}).
 
 <<simple_marginal_specific, echo=FALSE, results=hide>>=
 ## varpred
@@ -487,7 +496,7 @@ simple_pred_all <- do.call("rbind"
 
 <<echo=FALSE>>=
 class(simple_pred_all) <- c("jdeffects", "data.frame")
-simple_pred_all_plot <- (plot(simple_pred_all)
+simple_pred_all_plot_out <- (plot(simple_pred_all)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
 )
@@ -496,20 +505,19 @@ simple_pred_all_plot <- (plot(simple_pred_all)
 \begin{figure}[H]
 \begin{center}
 <<simple_margpred_all_plot, fig=TRUE, echo=FALSE>>=
-simple_pred_all_plot
+simple_pred_all_plot_out
 @
 \end{center}
 \caption{Marginal predictions with the zeroed-out covariances on the variable-specific scale.}
+\label{fig:simple_pred_all_plot_out}
 \end{figure}
 
 
 
 
-Also, we repeat above implementation but back-transform the predictions to original scale (unscale -- uncenter and/or unscale) by modifying the previous code to include scaling parameters. To clearly distinguish between what happens when apply various scaling schemes, we separately do the plots (see \autoref{fig:marginal_transformed}).
+\subsubsection{Centered model matrix}
 
-\subsection{Centered model matrix}
-
-Marginal predictions in \pkg{effects} and \pkg{emmeans} require models fitted with transformed predictors. However, in \pkg{varpred} we can use model fitted using predictors on their original scale and estimate marginal predictions. In our example, we use the unscaled model \code{lm\_u} and simply set \code{isolate=TRUE}. The predictions (see \autoref{fig:varpred_isolate_num}) are similar to \autoref{fig:marginal_transformed}~b (except for the \pkg{margins}).
+Marginal predictions in \pkg{effects} and \pkg{emmeans} require models fitted with transformed predictors. However, in \pkg{varpred} we can use model fitted using predictors on their original scale and estimate marginal predictions. In our example, we use the unscaled model \code{lm\_u} and simply set \code{isolate=TRUE}. The predictions (see \autoref{fig:varpred_isolate_num}) are similar to \autoref{fig:marginal_transformed}~b (except \pkg{margins}).
 
 <<simple_marginal_backtrans, echo=FALSE, results=hide>>=
 ## varpred
@@ -587,7 +595,7 @@ simple_pred_spec_plot2
 \end{figure}
 
 
-\begin{figure}[H]
+\begin{figure}
 \begin{center}
 <<vapred_isolate_numeric, fig=TRUE>>=
 ## Centered predictions from unscaled model
@@ -642,7 +650,7 @@ simple_margpred_cat_plot <- (plot(simple_margpred_cat)
 )
 @
 
-\begin{figure}[ht]
+\begin{figure}
 \begin{center}
 <<simple_margpred_cat_plot, fig=TRUE, echo=FALSE>>=
 simple_margpred_cat_plot
@@ -650,5 +658,10 @@ simple_margpred_cat_plot
 \end{center}
 \caption{Conditional predictions.}
 \end{figure}
+
+\clearpage
+% References
+\bibliographystyle{plainnat}
+\bibliography{effects_writeup}
 
 \end{document}
