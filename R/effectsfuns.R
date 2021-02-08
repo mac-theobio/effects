@@ -211,17 +211,17 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	  out$temp <- temp
 	  result <- switch(type
 	  	, response= { if (is.null(out$se)) 
-		  	data.frame(out$x, fit=transform(out$fit))
+		  	data.frame(out$x, fit=as.vector(transform(out$fit)))
 			else 
-				data.frame(out$x, fit=linkinv(out$fit)
-					, se = linkmu.eta(out$fit) * out$se
-					, lwr=linkinv(out$lwr)
-					, upr=linkinv(out$upr))
+				data.frame(out$x, fit=as.vector(linkinv(out$fit))
+					, se = as.vector(linkmu.eta(out$fit) * out$se)
+					, lwr=as.vector(linkinv(out$lwr))
+					, upr=as.vector(linkinv(out$upr)))
 		} , link = { if (is.null(out$se)) 
-		  	data.frame(out$x, fit=out$fit)
+		  	data.frame(out$x, fit=as.vector(out$fit))
 		 	else 
-				data.frame(out$x, fit=out$fit, se=out$se
-					, lwr=out$lwr, upr= out$upr)}
+				data.frame(out$x, fit=as.vector(out$fit), se=as.vector(out$se)
+					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 	attr(result, "type") <- type
 	attr(result, "focal") <- focal.predictors

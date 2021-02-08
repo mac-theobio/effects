@@ -4,6 +4,3 @@
 \name{jdeffects}
 \alias{jdeffects}
 \title{Compute conditional and marginal predictions.}
-\description{
-Compute conditional and marginal predictions.
-}

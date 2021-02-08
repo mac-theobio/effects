@@ -1,6 +1,6 @@
-source("makestuff/makeRfuns.R")
+library(shellpipes)
+
 commandEnvironments()
-sourceFiles()
 
 rsteps <- 50
 

@@ -2,8 +2,7 @@
 
 library(dplyr)
 options(dplyr.width = Inf)
-
-source("makestuff/makeRfuns.R") ## Will eventually be a package
+library(shellpipes)
 
 set.seed(7902)
 

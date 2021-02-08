@@ -25,7 +25,6 @@ Recover data from the data from the model
 It uses the fitted model and the global environment to reconstruct the data used in the model. If \code{data} option is specified in the model formula, a dataframe with columns corresponding to the variable in the formula is returned. Any transformation, e.g. \code{log} specified in the formula terms is not evaluated on the returned data frame. However, if no is provided, the dataframe is constructed from the formula terms with all transformations evaluated.
 }
 \examples{
-
 set.seed(4567)
 x <- rnorm(100, 3, 5)
 y <- 0.4 + 0.7*x + rnorm(100)

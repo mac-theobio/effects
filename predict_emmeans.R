@@ -1,10 +1,10 @@
 library(dplyr)
 library(data.table)
+library(jdeffects)
 library(emmeans)
+library(shellpipes)
 
-source("makestuff/makeRfuns.R")
 commandEnvironments()
-sourceFiles()
 
 ## emmeans function
 empredfun <- function(mod, spec, at, cov.keep, model, vvfun=NULL){

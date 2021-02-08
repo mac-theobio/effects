@@ -1,19 +1,20 @@
 library(dplyr)
 library(data.table)
+library(jdeffects)
+library(shellpipes)
 
-source("makestuff/makeRfuns.R")
 commandEnvironments()
-sourceFiles()
 
 ## Varpred function function
 varpredfun <- function(mod, focal, at, vcmat = NULL, model){
 	if (is.null(vcmat)){
 		pred <- varpred(mod, focal, at = at)
 	} else {
-		pred <- varpred(mod, focal, at = at, vcmat = vcmat)
+		pred <- varpred(mod, focal, at = at, vcov. = vcmat)
 	}
+	pred <- pred$preds
 	pred$model <- model
-	pred$x <- at
+	pred$x <- unlist(at)
 	return(pred)
 }
 
@@ -22,14 +23,14 @@ varpredfun <- function(mod, focal, at, vcmat = NULL, model){
 ## Unscaled predictions
 ### Unzeroed vcov
 x1u_jd <- varpredfun(mod_unscaled, focal = "x1"
-	, at = pred_df_x1$x1
+	, at = list(x1 = pred_df_x1$x1)
 	, model = "jd_u"
 )
 head(x1u_jd)
 
 ### Zeroed non-focal vv
 x1u_jd_zero <- varpredfun(mod_unscaled, focal = "x1"
-	, at = pred_df_x1$x1
+	, at = list(x1 = pred_df_x1$x1)
 	, model = "jd_u_zero"
 	, vcmat = zero_vcov(mod_unscaled, "x1")
 )
@@ -38,14 +39,14 @@ head(x1u_jd_zero)
 ## Scaled
 ### Unzeroed vcov
 x1std_jd <- varpredfun(mod_scaled, focal = "x1std"
-	, at = pred_df_x1std$x1std,
+	, at = list(x1std = pred_df_x1std$x1std),
 	, model = "jd_s"
 )
 head(x1std_jd)
 
 ### Zeroed vcov for non-focal predictors
 x1std_jd_zero <- varpredfun(mod_scaled, focal = "x1std"
-	, at = pred_df_x1std$x1std
+	, at = list(x1std = pred_df_x1std$x1std)
 	, model = "jd_s_zero"
 	, vcmat = zero_vcov(mod_scaled, "x1std")
 )

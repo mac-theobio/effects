@@ -1,10 +1,23 @@
 library(dplyr)
 library(ggplot2); theme_set(theme_bw())
+library(shellpipes)
 
-source("makestuff/makeRfuns.R")
 commandEnvironments()
-sourceFiles()
 makeGraphics()
+
+## Some checks
+base <- (predict_x1_base
+	%>% filter(model=="base_u")
+	%>% select(-model)
+)
+emm <- (predict_x1_em
+	%>% filter(model=="em_u")
+	%>% select(-model)
+)
+jd <- (predict_x1_jd
+	%>% filter(model=="jd_u")
+	%>% select(-model)
+)
 
 # x1 marginal effects
 pred_x1 <- (bind_rows(predict_x1_base, predict_x1_em, predict_x1_jd)
@@ -13,8 +26,6 @@ pred_x1 <- (bind_rows(predict_x1_base, predict_x1_em, predict_x1_jd)
 	)
 )
 head(pred_x1)
-table(pred_x1$trans)
-table(pred_x1$model)
 
 x1_plot <- (ggplot(pred_x1, aes(x = x, group = trans))
 	+ geom_line(aes(y = fit, colour = trans), alpha = 0.7)
@@ -26,5 +37,5 @@ x1_plot <- (ggplot(pred_x1, aes(x = x, group = trans))
 	+ labs(x = "x1", y = "Predictions", fill = "Data", colour = "Data")
 	+ facet_wrap(~model, scales = "free_x")
 )
-print(x1_plot)
 
+saveEnvironment()

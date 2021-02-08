@@ -63,13 +63,13 @@ mod_lm.Rout: mod_lm.R sims_data.rda
 pred_data.Rout: pred_data.R sims_data.rda
 
 ## Base R prediction
-predict_baseR.Rout: predict_baseR.R cpred_baseR.R effectsfuns.R mod_lm.rda pred_data.rda
+predict_baseR.Rout: predict_baseR.R cpred_baseR.rda mod_lm.rda pred_data.rda
 
 ## emmeans
-predict_emmeans.Rout: predict_emmeans.R effectsfuns.R mod_lm.rda pred_data.rda
+predict_emmeans.Rout: predict_emmeans.R mod_lm.rda pred_data.rda
 
 ## varpred: JD's effect
-predict_jdeffect.Rout: predict_jdeffect.R effectsfuns.R mod_lm.rda pred_data.rda
+predict_jdeffect.Rout: predict_jdeffect.R mod_lm.rda pred_data.rda
 
 ## Plot marginal predictions
 predict_plots.Rout: predict_plots.R predict_baseR.rda predict_emmeans.rda predict_jdeffect.rda
@@ -84,7 +84,7 @@ skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
 
-effects_writeup.pdf: effects_writeup.Rnw
+effects_writeup.pdf: effects_writeup.Rnw predict_plots.rda
 
 ######################################################################
 

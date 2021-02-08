@@ -1,7 +1,8 @@
 library(dplyr)
-source("makestuff/makeRfuns.R")
+library(jdeffects)
+library(shellpipes)
+
 commandEnvironments()
-sourceFiles()
 
 ## Predict function. Calls customized base R predict
 predfun <- function(mod, var, newdata, model, level = 0.95, vvfun=NULL){
@@ -48,7 +49,7 @@ head(x1std_base_zero)
 ## Merge the predicitons for each predictor
 predict_x1_base <- bind_rows(list(x1u_base, x1u_base_zero, x1std_base, x1std_base_zero))
 head(predict_x1_base)
-
+rownames(predict_x1_base) <- NULL
 saveVars(predict_x1_base)
 
 

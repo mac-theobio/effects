@@ -1,3 +1,5 @@
+library(shellpipes)
+
 ## Customize based R predict method to add CI and zero-out non-focal predictors
 ### Manually compute the uncertainty around the estimates
 
@@ -30,3 +32,5 @@ cpredict <- function(mod, newdata, level = 0.95, vvfun = NULL) {
 	)
 	return(pred_df)
 }
+
+saveEnvironment()

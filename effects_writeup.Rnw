@@ -13,7 +13,7 @@
 
 \setlength{\parindent}{0pt}
 
-\title{Visualizing marginal means}
+\title{Visualizing predictions}
 
 \begin{document}
 
@@ -87,8 +87,11 @@ library(ggplot2)
 library(margins)
 library(effects)
 library(emmeans)
-library(jdeffects)
-jdtheme()
+library(jdeffects); jdtheme()
+
+#library(shellpipes)
+#sourceFiles()
+
 @
 
 <<simple_sim, echo=FALSE>>=
@@ -333,7 +336,7 @@ scale_param <- list(x1s = unlist(attributes(df$x1s))
 
 ## varpred
 simple_vpred_spec <- condsummary(mod_list=simple_models, fun=function(x, f){
-		dd <- varpred(x, f)
+		dd <- varpred(x, f, steps=101)
 	}, simplify = TRUE, combine = "rbind"
 	, scale_param = scale_param, fmethod = "varpred"
 )
@@ -595,7 +598,7 @@ simple_pred_spec_plot2
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[H]
 \begin{center}
 <<vapred_isolate_numeric, fig=TRUE>>=
 ## Centered predictions from unscaled model
@@ -650,7 +653,7 @@ simple_margpred_cat_plot <- (plot(simple_margpred_cat)
 )
 @
 
-\begin{figure}
+\begin{figure}[H]
 \begin{center}
 <<simple_margpred_cat_plot, fig=TRUE, echo=FALSE>>=
 simple_margpred_cat_plot
@@ -658,6 +661,33 @@ simple_margpred_cat_plot
 \end{center}
 \caption{Conditional predictions.}
 \end{figure}
+
+
+\subsubsection{Comparison with base R predict}
+
+<<compare_baseR, echo=FALSE>>=
+load("predict_plots.rda")
+@
+
+Compare prediction estimates from \pkg{base R}, \pkg{emmeans} and \pkg{varpred}
+
+<<>>=
+## Base R vs emmeans
+all.equal(base, emm)
+## Base R vs varpred
+all.equal(base, jd)
+## Implied: emmeans vs varpred
+@
+
+\begin{figure}[H]
+\begin{center}
+<<compare_baseR_plot, fig=TRUE, echo=FALSE>>=
+print(x1_plot)
+@
+\end{center}
+\caption{Conditional predictions.}
+\end{figure}
+
 
 \clearpage
 % References
