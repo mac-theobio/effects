@@ -84,7 +84,7 @@ skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
 
-## effects_writeup.pdf: effects_writeup.Rnw
+effects_writeup.pdf: effects_writeup.Rnw
 
 ######################################################################
 
