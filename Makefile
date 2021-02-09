@@ -20,7 +20,7 @@ Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 %.tex: %.Rnw
 	R CMD Sweave $<
 
-## Try to trick Sweave
+## Make Sweave weird depencies chain
 %: %.pdf ;
 
 Sources += glossary.md
@@ -84,7 +84,7 @@ skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
 
-effects_writeup.pdf: effects_writeup.Rnw predict_plots.rda
+effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 ######################################################################
 

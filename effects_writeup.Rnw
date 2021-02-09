@@ -89,6 +89,9 @@ library(effects)
 library(emmeans)
 library(jdeffects); jdtheme()
 
+load("predict_plots.rda")
+
+## How to pass arguments??
 #library(shellpipes)
 #sourceFiles()
 
@@ -666,7 +669,6 @@ simple_margpred_cat_plot
 \subsubsection{Comparison with base R predict}
 
 <<compare_baseR, echo=FALSE>>=
-load("predict_plots.rda")
 @
 
 Compare prediction estimates from \pkg{base R}, \pkg{emmeans} and \pkg{varpred}
@@ -682,7 +684,8 @@ all.equal(base, jd)
 \begin{figure}[H]
 \begin{center}
 <<compare_baseR_plot, fig=TRUE, echo=FALSE>>=
-print(x1_plot)
+print(plot(1:10))
+## print(x1_plot)
 @
 \end{center}
 \caption{Conditional predictions.}
