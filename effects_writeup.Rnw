@@ -96,7 +96,11 @@ load("predict_plots.rda")
 #sourceFiles()
 
 @
+<<>>=
 
+ls()
+
+@
 <<simple_sim, echo=FALSE>>=
 set.seed(101)
 N <- 100
