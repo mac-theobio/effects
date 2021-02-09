@@ -84,6 +84,8 @@ skinny_effects_plot.Rout: skinny_effects_plot.R
 
 ######################################################################
 
+Ignore += effects_writeup.tex
+Ignore += effects_writeup*.pdf
 effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 ######################################################################
