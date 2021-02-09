@@ -10,7 +10,7 @@ vim_session:
 
 ######################################################################
 
-Sources += $(wildcard *.R *.md. *.Rnw)
+Sources += $(wildcard *.R *.md *.Rnw)
 Sources += $(wildcard R/*.R)
 Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 
