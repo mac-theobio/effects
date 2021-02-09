@@ -688,8 +688,7 @@ all.equal(base, jd)
 \begin{figure}[H]
 \begin{center}
 <<compare_baseR_plot, fig=TRUE, echo=FALSE>>=
-print(plot(1:10))
-## print(x1_plot)
+print(x1_plot)
 @
 \end{center}
 \caption{Conditional predictions.}
