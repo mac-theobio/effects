@@ -1,6 +1,11 @@
+
+We'll discuss git_push/effects_writeup.pdf in effects repo and also jdeffects in the same repo.
+
+To jdeffects
+make build-package && install-package
+
 2020 Nov 25 (Wed)
 =================
-
 
 - Unscaling parameters fitted on scaled predictors: considering a simple case where there are no interactions
 	- If only the predictors are scaled
