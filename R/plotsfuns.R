@@ -53,7 +53,7 @@ plot.jdeffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
 			+ theme(legend.position = "none")
 		)
 	} else {
-		p1 <- (ggplot(df, aes_string(x = x.var, y = "fit", colour =" model"), alpha = 0.2)
+		p1 <- (ggplot(df, aes_string(x = x.var, y = "fit", colour ="model"), alpha = 0.2)
 			+ guides(fill = FALSE)
 			+ theme(legend.position = "right")
 		)
@@ -67,10 +67,18 @@ plot.jdeffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
 			+ scale_colour_viridis_d(option = "plasma")
 		)
 	} else {
-		p2 <- (p1 
-			+ geom_point(position = pos, size = 0.6, colour="black")
-			+ geom_pointrange(aes(ymin = lwr, ymax = upr), position = pos, colour = "black")
-		)
+		nn <- unique(df$model)
+		if (length(nn) > 1) {
+			p2 <- (p1 
+				+ geom_point(aes(colour=model), position = pos, size = 0.6)
+				+ geom_pointrange(aes(ymin = lwr, ymax = upr, colour=model), position = pos)
+			)
+		} else {
+			p2 <- (p1 
+				+ geom_point(position = pos, size = 0.6, colour="black")
+				+ geom_pointrange(aes(ymin = lwr, ymax = upr), colour = "black", position = pos)
+			)
+		}
 	}
 
 	if (n.focal>1L) {

@@ -96,11 +96,7 @@ load("predict_plots.rda")
 #sourceFiles()
 
 @
-<<>>=
 
-ls()
-
-@
 <<simple_sim, echo=FALSE>>=
 set.seed(101)
 N <- 100
@@ -693,6 +689,198 @@ print(x1_plot)
 \end{center}
 \caption{Conditional predictions.}
 \end{figure}
+
+
+\section{Unbalanced data}
+
+Consider a simple no-interaction terms simulation:
+\begin{itemize}
+\item $y = \beta_0 + \beta_1x_1 + \beta_2x_2 + \epsilon$ s.t $\epsilon \sim N(0, 1)$ and $\{\beta_0 = -5, \beta_1 = 0.1, \beta_2 = \{-0.6, 0.5\}\}$
+\begin{itemize}
+\item $x_1 \sim unif(1, 9)$
+\item $x_2$ -- three level categorical variable s.t $A$, $B$ and $C$ are $10\%$, $30\%$ and $60\%$, respectively.
+\end{itemize}
+\end{itemize}
+
+<<simple_sim, echo=FALSE>>=
+set.seed(101)
+N <- 500
+x1_min <- 1
+x1_max <- 9
+b0 <- -0.5
+b_x1 <- 0.1
+b_x2b <- -0.6
+b_x2c <- 0.5
+
+cat_props <- c(0.1, 0.3, 0.6)
+df <- data.frame(x1u = runif(n=N, min=x1_min, max=x1_max)
+                  , x2u = sample(c("A", "B", "C"), N, prob = cat_props, replace = TRUE)
+)
+X <- model.matrix(~x1u + x2u, df)
+betas <- c(b0, b_x1, b_x2b, b_x2c)
+df$y <- rnorm(nrow(df), mean= X %*% betas, sd=1)
+df <- transform(df
+	, x2c = x2u
+	, x1s = drop(scale(x1u, center=FALSE))
+	, x1sd = drop(scale(x1u))
+)
+prop.table(table(df$x2u))
+head(df)
+@
+
+We fit two models -- the model without contrast and the one with sum-to-contrast (\code{`contr.sum'}):
+
+<<contrast_modes>>=
+## No contrast model
+lm_no_contr <- lm(y ~ x1u + x2u, data = df)
+print(lm_no_contr)
+
+## With contrast
+contrasts(df$x2c) <- "contr.sum"
+lm_contr <- lm(y ~ x1u + x2c, data = df)
+print(lm_contr)
+@
+
+First, we include the intercept variance in the variable effects:
+
+<<simple_model, echo=FALSE>>=
+contr_models <- list(x2u = lm_no_contr, x2c = lm_contr)
+@
+
+
+<<contr_model_predictions, echo=FALSE, results=hide>>=
+## varpred
+contr_vpred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	dd <- varpred(x, f)
+}, simplify = TRUE, combine = "rbind", fmethod = "varpred")
+
+## emmeans
+contr_empred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	spec <- as.formula(paste0("~", f))
+	dd <- emmeans(x, spec=spec, cov.keep=f)
+}, simplify = TRUE, combine = "rbind", fmethod = "emmeans")
+
+## effects
+contr_efpred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	dd <- Effect(f, x)
+}, simplify = TRUE, combine = "rbind", fmethod = "effects")
+
+## Combine all the estimates
+contr_pred_all <- do.call("rbind"
+	, list(contr_vpred_all, contr_empred_all, contr_efpred_all)
+)
+@
+
+<<echo=FALSE>>=
+class(contr_pred_all) <- c("jdeffects", "data.frame")
+contr_pred_all_plot_out <- (plot(contr_pred_all)
+	+ facet_wrap(~method)
+	+ theme(legend.position="bottom")
+)
+@
+
+\begin{figure}[H]
+\begin{center}
+<<contr_model_predictions_plot, fig=TRUE, echo=FALSE>>=
+contr_pred_all_plot_out
+@
+\end{center}
+\caption{Variable effects with intercept and other non-focal predictor uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
+\label{fig:contr_pred_plot}
+\end{figure}
+
+
+\subsection{Zeroed-out uncertainties}
+
+As explained in the previous section, we again eliminate the uncertainties due to the intercept term and the non-focal variables. 
+
+\subsubsection{zeroed-out covariance matrix}
+
+<<contr_model_zeroed_vcov, echo=FALSE, results=hide>>=
+## varpred
+contr_vcov_vpred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	dd <- varpred(x, f, vcov. = zero_vcov(x, f))
+}, simplify = TRUE, combine = "rbind", fmethod = "varpred")
+
+## emmeans
+contr_vcov_empred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	spec <- as.formula(paste0("~", f))
+	dd <- emmeans(x, spec=spec, cov.keep=f, vcov. = zero_vcov(x, f))
+}, simplify = TRUE, combine = "rbind", fmethod = "emmeans")
+
+## effects
+contr_vcov_efpred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	dd <- Effect(f, x, vcov. = function(x, complete=FALSE)zero_vcov(x, f, complete))
+}, simplify = TRUE, combine = "rbind", fmethod = "effects")
+
+## Combine all the estimates
+contr_vcov_pred_all <- do.call("rbind"
+	, list(contr_vcov_vpred_all, contr_vcov_empred_all, contr_vcov_efpred_all)
+)
+@
+
+<<echo=FALSE>>=
+class(contr_vcov_pred_all) <- c("jdeffects", "data.frame")
+contr_pred_zeroed_vcov_plot <- (plot(contr_vcov_pred_all)
+	+ facet_wrap(~method)
+	+ theme(legend.position="bottom")
+)
+@
+
+\begin{figure}[H]
+\begin{center}
+<<contr_zeroed_vcov_plot, fig=TRUE, echo=FALSE>>=
+contr_pred_zeroed_vcov_plot
+@
+\end{center}
+\caption{Variable effects with intercept and other non-focal predictor uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
+\label{fig:contr_zeroed_vcov}
+\end{figure}
+
+
+\subsubsection{Centered model matrix}
+
+<<contr_model_zeroed_mmat, echo=FALSE, results=hide>>=
+## varpred
+contr_mmat_vpred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	dd <- varpred(x, f, isolate = TRUE, vcov. = zero_vcov(x, f))
+}, simplify = TRUE, combine = "rbind", fmethod = "varpred")
+
+## emmeans
+contr_mmat_empred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	spec <- as.formula(paste0("~", f))
+	dd <- emmeans(x, spec=spec, cov.keep=f, vcov. = zero_vcov(x, f))
+}, simplify = TRUE, combine = "rbind", fmethod = "emmeans")
+
+## effects
+contr_mmat_efpred_all <- condsummary(mod_list=contr_models, fun=function(x, f){
+	dd <- Effect(f, x, vcov. = function(x, complete=FALSE)zero_vcov(x, f, complete))
+}, simplify = TRUE, combine = "rbind", fmethod = "effects")
+
+## Combine all the estimates
+contr_mmat_pred_all <- do.call("rbind"
+	, list(contr_mmat_vpred_all, contr_mmat_empred_all, contr_mmat_efpred_all)
+)
+@
+
+<<echo=FALSE>>=
+class(contr_mmat_pred_all) <- c("jdeffects", "data.frame")
+contr_pred_zeroed_mmat_plot <- (plot(contr_mmat_pred_all)
+	+ facet_wrap(~method)
+	+ theme(legend.position="bottom")
+)
+@
+
+\begin{figure}[H]
+\begin{center}
+<<contr_zeroed_mmat_plot, fig=TRUE, echo=FALSE>>=
+contr_pred_zeroed_mmat_plot
+@
+\end{center}
+\caption{Variable effects with intercept and other non-focal predictor uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
+\label{fig:contr_zeroed_mmat}
+\end{figure}
+
 
 
 \clearpage
