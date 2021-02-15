@@ -115,10 +115,12 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	}
 	contrs <- get_contrasts(mod)
 
+#	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
 	model_frame_objs <- clean_model(focal.predictors = focal.predictors, mod = mod
 		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
 		, x.var = x.var, typical = avefun
 	)
+	formula.rhs <- formula(mod)[c(1, 3)]
 	excluded.predictors <- model_frame_objs$excluded.predictors
 	predict.data <- model_frame_objs$predict.data
 	factor.levels <- model_frame_objs$factor.levels
@@ -129,7 +131,6 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	cnames <- model_frame_objs$cnames
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
-	formula.rhs <- formula(mod)[c(1, 3)]
 	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = get_contrasts(mod))
 	mod.matrix.all <- model.matrix(mod)

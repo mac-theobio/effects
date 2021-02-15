@@ -35,6 +35,15 @@ check_numeric <- function(xvar, mod) {
 	is.null(xlevels[[xvar]])
 }
 
+check_factor <- function(xvar, mod) {
+  xvar %in% names(attr(model.matrix(mod), "contrasts"))
+}
+
+is.numeric.predictor <- function(predictor, model) {
+  is.null(model$xlevels[[predictor]])
+}
+
+
 get_vcov <- function(mod){
 	if (inherits(mod, "glmmTMB")) {
 		vc <- vcov(mod)$cond
@@ -155,7 +164,7 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
   factor.cols <- rep(FALSE, length(cnames))
   names(factor.cols) <- cnames
   for (name in all.predictors){
-    if (!check_numeric(name, mod)) {
+    if (check_factor(name, mod)) {
       factor.cols[grep(paste("^", name, sep=""), cnames)] <- TRUE
     }
   }
@@ -177,7 +186,7 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
   }
   
   for (name in all.predictors){
-    if (!check_numeric(name, mod) && is.null(xlevels[[name]])) {
+    if (check_factor(name, mod) && is.null(xlevels[[name]])) {
       xlevels[[name]] <- levels(X[, name]) 
     }
   }
