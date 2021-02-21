@@ -741,7 +741,9 @@ lm_contr <- lm(y ~ x1u + x2c, data = df)
 print(lm_contr)
 @
 
-First, we include the intercept variance in the variable effects:
+
+\autoref{fig:contr_pred_plot} compares variable effects for the three packages when the variance of the non-focal predictors are included.
+
 
 <<simple_model, echo=FALSE>>=
 contr_models <- list(x2u = lm_no_contr, x2c = lm_contr)
@@ -785,14 +787,14 @@ contr_pred_all_plot_out <- (plot(contr_pred_all)
 contr_pred_all_plot_out
 @
 \end{center}
-\caption{Variable effects with intercept and other non-focal predictor uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
+\caption{Variable effects with non-focal predictors' uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
 \label{fig:contr_pred_plot}
 \end{figure}
 
 
 \subsection{Zeroed-out uncertainties}
 
-As explained in the previous section, we again eliminate the uncertainties due to the intercept term and the non-focal variables. 
+As explained in the previous section, we again eliminate the uncertainties due to non-focal predictors. 
 
 \subsubsection{zeroed-out covariance matrix}
 
@@ -833,12 +835,14 @@ contr_pred_zeroed_vcov_plot <- (plot(contr_vcov_pred_all)
 contr_pred_zeroed_vcov_plot
 @
 \end{center}
-\caption{Variable effects with intercept and other non-focal predictor uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
+\caption{Here, we eliminate uncertainties using zeroed-variance covariance approach. All the three methods give similar estimates for the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}), respectively. In comparing, \code{x2u} with \code{x2c}, the uncertainties around the baseline category is completely eliminated.}
 \label{fig:contr_zeroed_vcov}
 \end{figure}
 
 
 \subsubsection{Centered model matrix}
+
+Currently, only \pkg{varpred} provides a way to center the model matrix.
 
 <<contr_model_zeroed_mmat, echo=FALSE, results=hide>>=
 ## varpred
@@ -877,7 +881,7 @@ contr_pred_zeroed_mmat_plot <- (plot(contr_mmat_pred_all)
 contr_pred_zeroed_mmat_plot
 @
 \end{center}
-\caption{Variable effects with intercept and other non-focal predictor uncertainties included. The legend compares the model with non contrast (\code{x2u}) to the one with sum to zero contrast (\code{x2c}).}
+\caption{We set \code{isolate = TRUE} in \pkg{varpred} to use centered model matrix in computing the CIs. In this case, predictions for both non contrasted (\code{x2u}) and contrasted (\code{x2c}) models are the same in \pkg{varpred}. Also, the CIs are slightly different with those in \autoref{fig:contr_zeroed_vcov}. \JD{Steve -> JD: Weighted contrast?}.}
 \label{fig:contr_zeroed_mmat}
 \end{figure}
 

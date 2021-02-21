@@ -85,7 +85,7 @@
 
 varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL
-	, level = 0.95, steps = 101, at = NULL,  dfspec = 100, vcov. = NULL
+	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
 	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
 	, returnall = FALSE) {
 	betahat <- get_coef(mod)
@@ -120,7 +120,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
 		, x.var = x.var, typical = avefun
 	)
-	formula.rhs <- formula(mod)[c(1, 3)]
+	formula.rhs <- formula(mod, fixed.only = TRUE)[c(1, 3)] #FIXME: supported models
 	excluded.predictors <- model_frame_objs$excluded.predictors
 	predict.data <- model_frame_objs$predict.data
 	factor.levels <- model_frame_objs$factor.levels
@@ -156,7 +156,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	}
 
 	if (internal) {
-		vc <- zero_vcov(vc, focal_vars=x.var)	
+		vc <- zero_vcov(mod, focal_vars=x.var)	
 	}
   	
 	pred <- mm %*% betahat

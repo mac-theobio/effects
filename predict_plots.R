@@ -37,5 +37,6 @@ x1_plot <- (ggplot(pred_x1, aes(x = x, group = trans))
 	+ labs(x = "x1", y = "Predictions", fill = "Data", colour = "Data")
 	+ facet_wrap(~model, scales = "free_x")
 )
+print(x1_plot)
 
 saveEnvironment()

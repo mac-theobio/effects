@@ -43,6 +43,18 @@ is.numeric.predictor <- function(predictor, model) {
   is.null(model$xlevels[[predictor]])
 }
 
+# for character and logical predictors
+
+is.factor <- function(x) inherits(x, "factor") || ((is.character(x) || is.logical(x)) && is.vector(x))
+
+levels.character <- function(x) {
+  levs <- unique(x)
+  sort(levs[!is.na(levs)])
+}
+
+levels.logical <- function(x) {
+  c("FALSE", "TRUE")
+}
 
 get_vcov <- function(mod){
 	if (inherits(mod, "glmmTMB")) {
@@ -148,7 +160,19 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
-  all.predictors <- all.vars(formula.rhs)
+
+  terms <- attr(formula.rhs, "term.labels")
+  all.predictors <- all.vars(parse(text=terms))
+  if (is.numeric(xlevels)){
+    if (length(xlevels) > 1 || round(xlevels != xlevels)) stop("xlevels must be a single whole number or a list")
+    xlevs <- list()
+    for (pred in all.predictors){
+      xlevs[[pred]] <- xlevels
+    }
+    xlevels <- xlevs
+  }
+
+#  all.predictors <- all.vars(formula.rhs) #predictors
   check.vars <- !(focal.predictors %in% all.predictors)
   excluded.predictors <- setdiff(all.predictors, focal.predictors)
   number.bad <- sum(check.vars)
@@ -205,9 +229,11 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     levs <- xlevels
     for(name in focal.predictors) xlevels[[name]] <- levs
   }
+  oldlevels <- get_xlevels(mod)
   for (name in focal.predictors){
-    levels <- mod$xlevels[[name]]
-    if(is.null(levels)) levels <- mod$xlevels[[paste("factor(",name,")",sep="")]]
+    # levels <- mod$xlevels[[name]] # FIXME: supported models
+    levels <- oldlevels[[name]]
+    if(is.null(levels)) levels <- oldlevels[[paste("factor(",name,")",sep="")]] #FIXME: supported models
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
@@ -222,9 +248,11 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 	 else factor.levels[[name]] <- levels
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
   }
+
   x.excluded <- list()
   for (name in excluded.predictors){
-    levels <- mod$xlevels[[name]] 
+    # levels <- mod$xlevels[[name]] # FIXME: supported models
+    levels <- oldlevels[[name]] 
     if (is.logical(X[, name])) levels <- c("FALSE", "TRUE")
     fac <- !is.null(levels)
     level <- if (fac) levels[1] else typical(X[, name])
