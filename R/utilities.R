@@ -4,7 +4,7 @@ get_vnames <- function(mod){
 	mat <- model.matrix(mod)
 	coefnames <- colnames(mat)
 	Terms <- terms(mod)
-	vnames <- all.vars(delete.response(Terms)) 
+	vnames <- all.vars(parse(text=delete.response(Terms)))
 	termnames <- attr(Terms, "term.labels") # Model based names
 	termnames <- gsub(" ", "", termnames)
 	assign <- attr(mat, "assign")
@@ -54,33 +54,6 @@ levels.character <- function(x) {
 
 levels.logical <- function(x) {
   c("FALSE", "TRUE")
-}
-
-get_vcov <- function(mod){
-	if (inherits(mod, "glmmTMB")) {
-		vc <- vcov(mod)$cond
-	} else if (inherits(mod, "clmm")){
-		f <- c(names(mod$alpha)[[1]], names(mod$beta))
-		vc <- vc[f, f]
-	} else {
-		vc <- vcov(mod)
-	}
-	return(vc)
-}
-
-get_degof <- function(mod, dfspec) {
-	df <- ifelse(
-		grepl("df.residual", paste(names(mod), collapse=""))
-		, mod$df.residual, dfspec
-	)
-	return(df)
-}
-
-get_stats <- function(level, df, modfamily=NULL) {
-	if (is.null(modfamily)){
-		mult <- qt(1 - (1 - level)/2, df)
-	}
-	return(mult)
 }
 
 subscripts <- function(index, dims){
@@ -231,9 +204,8 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
   }
   oldlevels <- get_xlevels(mod)
   for (name in focal.predictors){
-    # levels <- mod$xlevels[[name]] # FIXME: supported models
     levels <- oldlevels[[name]]
-    if(is.null(levels)) levels <- oldlevels[[paste("factor(",name,")",sep="")]] #FIXME: supported models
+    if(is.null(levels)) levels <- oldlevels[[paste("factor(",name,")",sep="")]]
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
@@ -251,7 +223,6 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 
   x.excluded <- list()
   for (name in excluded.predictors){
-    # levels <- mod$xlevels[[name]] # FIXME: supported models
     levels <- oldlevels[[name]] 
     if (is.logical(X[, name])) levels <- c("FALSE", "TRUE")
     fac <- !is.null(levels)

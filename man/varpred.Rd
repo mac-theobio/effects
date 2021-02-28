@@ -45,7 +45,7 @@ varpred(
 
 \item{vcov.}{a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} Is important when "zeroed-out" predictions are required. However, with this approach, the predictors should be centered. {isolate=TRUE} marginalizes without requiring zeroing-out. See examples.}
 
-\item{internal}{logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[jdeffects]{zero_vcov}}. Default is \code{FALSE}.}
+\item{internal}{logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.}
 
 \item{avefun}{the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.}
 
@@ -62,7 +62,7 @@ The main distinction between the two predictions lies on how the standard errors
 \examples{
 
 # Set theme for ggplot. Comment out if not needed
-jdtheme()
+varefftheme()
 set.seed(101)
 N <- 100
 x1_min <- 1
@@ -114,5 +114,5 @@ plot(pred4c)
 
 }
 \seealso{
-\code{\link[jdeffects]{plot.jdeffects}}
+\code{\link[vareffects]{plot.vareffects}}
 }

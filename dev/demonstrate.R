@@ -1,5 +1,5 @@
 library(dplyr)
-library(jdeffects)
+library(vareffects)
 library(shellpipes)
 
 jdtheme()
@@ -42,6 +42,6 @@ pvp_df <- (bind_rows(
 )
 head(pvp_df)
 
-### Make pvp jdeffects object and use plot method
-class(pvp_df) <- c("jdeffects", "data.frame")
+### Make pvp vareffects object and use plot method
+class(pvp_df) <- c("vareffects", "data.frame")
 plot(pvp_df)

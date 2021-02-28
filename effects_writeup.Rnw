@@ -87,7 +87,7 @@ library(ggplot2)
 library(margins)
 library(effects)
 library(emmeans)
-library(jdeffects); jdtheme()
+library(vareffects); varefftheme()
 
 load("predict_plots.rda")
 
@@ -309,7 +309,7 @@ simple_pred_all <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(simple_pred_all) <- c("jdeffects", "data.frame") # plot.effects
+class(simple_pred_all) <- c("vareffects", "data.frame") # plot.effects
 simple_pred_all_plot <- (plot(simple_pred_all) 
 	+ facet_wrap(~method) 
 	+ theme(legend.position="bottom")
@@ -373,7 +373,7 @@ simple_pred_spec <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(simple_pred_spec) <- c("jdeffects", "data.frame") # plot.effects
+class(simple_pred_spec) <- c("vareffects", "data.frame") # plot.effects
 simple_pred_spec_plot <- (plot(simple_pred_spec)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -425,7 +425,7 @@ simple_pred_cat <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(simple_pred_cat) <- c("jdeffects", "data.frame") # plot.effects
+class(simple_pred_cat) <- c("vareffects", "data.frame") # plot.effects
 simple_pred_cat_plot <- (plot(simple_pred_cat)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -450,7 +450,7 @@ We can remove uncertainties associated with non-focal predictors by \emph{zeroin
 
 The modification in each of the methods is to either specify \emph{zeroed-out} covariance matrix or a function to compute the variance-covariance matrix as one of the inputs. In particular, in \pkg{varpred}, \pkg{emmeans} and  \pkg{effects} it is specified through \pkg{vcov.} and in \pkg{margins} through \pkg{vcov} argument. However, this seems not to work currently in \pkg{cplot} which computes the predictions in \pkg{margins}.
 
-The \pkg{zero\_vcov} function in \pkg{jdeffects} \emph{zeros-out} variance-covariances of non-focal terms of the predictor in question. For example:
+The \pkg{zero\_vcov} function in \pkg{vareffects} \emph{zeros-out} variance-covariances of non-focal terms of the predictor in question. For example:
 
 \begin{itemize}
 \item full variance-covariance matrix
@@ -501,7 +501,7 @@ simple_pred_all <- do.call("rbind"
 
 
 <<echo=FALSE>>=
-class(simple_pred_all) <- c("jdeffects", "data.frame")
+class(simple_pred_all) <- c("vareffects", "data.frame")
 simple_pred_all_plot_out <- (plot(simple_pred_all)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -568,7 +568,7 @@ simple_pred_spec2 <- subset(simple_pred_spec, model=="x1c"|model=="x1sd")
 @
 
 <<label=simple_pred_spec_plot1, fig=TRUE, echo=FALSE, prefix=FALSE, include=FALSE>>=
-class(simple_pred_spec1) <- c("jdeffects", "data.frame")
+class(simple_pred_spec1) <- c("vareffects", "data.frame")
 simple_pred_spec_plot1 <- (plot(simple_pred_spec1)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -577,7 +577,7 @@ simple_pred_spec_plot1
 @
 
 <<label=simple_pred_spec_plot2, fig=TRUE, echo=FALSE, prefix=FALSE, include=FALSE>>=
-class(simple_pred_spec2) <- c("jdeffects", "data.frame")
+class(simple_pred_spec2) <- c("vareffects", "data.frame")
 simple_pred_spec_plot2 <- (plot(simple_pred_spec2)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -649,7 +649,7 @@ simple_margpred_cat <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(simple_margpred_cat) <- c("jdeffects", "data.frame")
+class(simple_margpred_cat) <- c("vareffects", "data.frame")
 simple_margpred_cat_plot <- (plot(simple_margpred_cat)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -774,7 +774,7 @@ contr_pred_all <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(contr_pred_all) <- c("jdeffects", "data.frame")
+class(contr_pred_all) <- c("vareffects", "data.frame")
 contr_pred_all_plot_out <- (plot(contr_pred_all)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -822,7 +822,7 @@ contr_vcov_pred_all <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(contr_vcov_pred_all) <- c("jdeffects", "data.frame")
+class(contr_vcov_pred_all) <- c("vareffects", "data.frame")
 contr_pred_zeroed_vcov_plot <- (plot(contr_vcov_pred_all)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")
@@ -868,7 +868,7 @@ contr_mmat_pred_all <- do.call("rbind"
 @
 
 <<echo=FALSE>>=
-class(contr_mmat_pred_all) <- c("jdeffects", "data.frame")
+class(contr_mmat_pred_all) <- c("vareffects", "data.frame")
 contr_pred_zeroed_mmat_plot <- (plot(contr_mmat_pred_all)
 	+ facet_wrap(~method)
 	+ theme(legend.position="bottom")

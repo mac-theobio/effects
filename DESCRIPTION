@@ -1,4 +1,4 @@
-Package: jdeffects
+Package: vareffects
 Type: Package
 Title: Compute Conditional and Marginal Predictions 
 Version: 1.0

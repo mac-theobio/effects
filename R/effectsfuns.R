@@ -16,18 +16,18 @@
 #' @param at default \code{NULL}. Otherwise, is a named \code{list} specifying points to evaluate \code{focal_predictors}. The names in the list should match the names used in \code{focal_predictors}.
 #' @param dfspec default \code{100}. Specified degrees of freedom for model which do not return \code{df}. This is used in computation of confidence intervals.
 #' @param vcov. a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} Is important when "zeroed-out" predictions are required. However, with this approach, the predictors should be centered. {isolate=TRUE} marginalizes without requiring zeroing-out. See examples.
-#' @param internal logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[jdeffects]{zero_vcov}}. Default is \code{FALSE}.
+#' @param internal logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.
 #' @param avefun the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.
 #' @param zero_out_interaction logical. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect predictions are computed.
 #' @param returnall logical. If \code{TRUE}, all other named computed quantities are also returned. Otherwise, only predictions are returned. 
 #'
 #' @seealso
-#'\code{\link[jdeffects]{plot.jdeffects}}
+#'\code{\link[vareffects]{plot.vareffects}}
 #'
 #' @examples
 #'
 #' # Set theme for ggplot. Comment out if not needed
-#' jdtheme()
+#' varefftheme()
 #' set.seed(101)
 #' N <- 100
 #' x1_min <- 1
@@ -88,7 +88,8 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
 	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
 	, returnall = FALSE) {
-	betahat <- get_coef(mod)
+	vareff_objects <- vareffobj(mod)
+	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
 	vnames <- mod_names$vnames
 	termnames <- mod_names$termnames
@@ -120,7 +121,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
 		, x.var = x.var, typical = avefun
 	)
-	formula.rhs <- formula(mod, fixed.only = TRUE)[c(1, 3)] #FIXME: supported models
+	formula.rhs <- formula(vareff_objects)[c(1,3)]
 	excluded.predictors <- model_frame_objs$excluded.predictors
 	predict.data <- model_frame_objs$predict.data
 	factor.levels <- model_frame_objs$factor.levels
@@ -148,7 +149,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	if (is.null(x.var)) x.var <- focal.predictors[[1]]
 	
 	if (is.null(vcov.)){
-		vc <- get_vcov(mod)
+		vc <- vcov(vareff_objects)
 	} else if (is.function(vcov.)) {
 		vc <- vcov.(mod)
 	} else {
@@ -183,8 +184,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	pse_var <- sqrt(diag(mm %*% tcrossprod(data.matrix(vc), mm)))
 	
 	# Stats
-	dof <- get_degof(mod, dfspec) 
-	mult <- get_stats(level, dof, modfamily=NULL)
+	mult <- get_stats(mod, level, dfspec)
 
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
@@ -194,8 +194,8 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		, se = pse_var
 		, lwr = pred - mult*pse_var
 		, upr = pred + mult*pse_var
-		, family <- family(mod)$family
-		, link <- family(mod)
+		, family = vareff_objects$link$family
+		, link = vareff_objects$link
 	)
 
 	## Organize
@@ -234,29 +234,8 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		res <- list(preds = result)
 	}
 	res$call <- match.call()
-	class(res) <- c("jdeffects", "varpred")
+	class(res) <- c("vareffects", "varpred")
 	return(res)
-}
-
-#' Extract model coefficients
-#'
-#' @param mod model object
-#' @noRd
-#' @keywords internal
-#'
-
-get_coef <- function(mod){
-	if (inherits(mod, "lm")) return (coef(mod))
-	if (inherits(mod, "mer")) return (fixef(mod))
-	if (inherits(mod, "glmerMod")) return (fixef(mod))
-	if (inherits(mod, "glmmTMB")) return (fixef(mod)$cond)
-	if (inherits(mod, "clmm")) {
-		ef <- c(0, mod$beta)
-		names(ef) <- c("(Intercept)", names(mod$beta))
-		return (ef)
-	} else {
-		stop("Don't recognize model type")
-	}
 }
 
 
@@ -342,7 +321,7 @@ recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), .
 	if (!is.null(extras) || !is.null(data)) {
 		resp <- get_response(mod)
 		xvars <- all.vars(delete.response(terms(mod)))
-		df <- df[, colnames(df) %in% c(resp, xvars)]
+		df <- df[, colnames(df) %in% c(resp, xvars), drop=FALSE]
 	}
 	return(df)
 }

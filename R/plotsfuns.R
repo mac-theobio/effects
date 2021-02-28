@@ -1,7 +1,7 @@
 #' Plot  predictions 
 #' 
 #' Plots estimated conditional or marginal predictions. 
-#' @param x \code{\link[jdeffects]{varpred}} object
+#' @param x \code{\link[vareffects]{varpred}} object
 #' @param ... for future implementations
 #' @param xlabs x-axis label. If \code{NULL}, default, \code{x.var} is used.
 #' @param ylabs y-axis label. If \code{NULL}, default, the response label is used.
@@ -10,7 +10,7 @@
 #' @return a \code{\link[ggplot2]{ggplot}} object.
 #'
 #' @seealso
-#'\code{\link[jdeffects]{varpred}}
+#'\code{\link[vareffects]{varpred}}
 #'
 #' @examples
 #' set.seed(4567)
@@ -25,7 +25,7 @@
 #' @import ggplot2
 #' @export
 
-plot.jdeffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
+plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
 
 	lwr <- upr <- NULL
 	df <- x$preds
@@ -87,13 +87,13 @@ plot.jdeffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
 	return(p2)
 }
 
-#' Customized theme for jdeffects plots
+#' Customized theme for vareffects plots
 #'
-#' Sets a theme for jdeffects and other ggplot objects
+#' Sets a theme for vareffects and other ggplot objects
 #'
 #' @examples
 #' library(ggplot2)
-#' jdtheme()
+#' varefftheme()
 #' set.seed(4567)
 #' x <- rnorm(100, 3, 5)
 #' y <- 0.4 + 0.7*x + rnorm(100)
@@ -106,7 +106,7 @@ plot.jdeffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
 #' @import ggplot2
 #' @export
 
-jdtheme <- function(){
+varefftheme <- function(){
    theme_set(theme_bw() +
       theme(panel.spacing = grid::unit(0,"lines")
       	, plot.title = element_text(hjust = 0.5)

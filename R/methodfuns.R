@@ -21,8 +21,8 @@ print.varpred <- function(x, ...){
 #' @param x varpred object.
 #' @param ... additional aurguments passed to as.data.frame.
 #'
-#' @method as.data.frame varpred
 #' @export
+#' @method as.data.frame varpred
 #' @export as.data.frame.varpred
 
 as.data.frame.varpred <- function(x, ...) {
@@ -36,8 +36,8 @@ as.data.frame.varpred <- function(x, ...) {
 #' @param x varpred object.
 #' @param ... additional aurguments passed to data.frame.
 #'
-#' @method data.frame varpred
 #' @export
+#' @method data.frame varpred
 #' @export data.frame.varpred
 
 data.frame.varpred <- function(x, ...) {
@@ -45,3 +45,15 @@ data.frame.varpred <- function(x, ...) {
 	if(is.null(df)) df <- x
 	return(data.frame(df, ...))
 }
+
+#'
+#' @keywords internal
+vareffobj <- function(mod, ...)UseMethod("vareffobj")
+
+#'
+#' @keywords internal
+get_xlevels <- function(mod)UseMethod("get_xlevels")
+
+#'
+#' @keywords internal
+get_stats <- function(mod, level, dfspec, ...)UseMethod("get_stats")

@@ -1,6 +1,6 @@
 library(dplyr)
 library(data.table)
-library(jdeffects)
+library(vareffects)
 library(shellpipes)
 
 commandEnvironments()
