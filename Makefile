@@ -29,16 +29,14 @@ autopipeR = defined
 
 ######################################################################
 
-## vareffects package
-vareffects_pkg.Rout: R/vareffects_pkg.R
+## jdeffects package
+jdeffects_pkg.Rout: R/jdeffects_pkg.R
 effectsfuns.Rout: R/effectsfuns.R
+varpred.Rout: dev/varpred.R ## Steve to add
 utilities.Rout: R/utilities.R
 plotsfuns.Rout: R/plotsfuns.R
 methodfuns.Rout: R/methodfuns.R
 pkgsExport.Rout: R/pkgsExport.R
-implemented.Rout: R/implemented.R
-
-# varpred.Rout: dev/varpred.R ## Steve to add
 
 Sources += $(wildcard dev/*.R)
 
@@ -94,13 +92,13 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 ######################################################################
 
 ## Package installation and checks
-Ignore += vareffects_1*
+Ignore += jdeffects_1*
 
 build-package:
 	R CMD build .
 
 install-package:
-	R CMD INSTALL vareffects_1*
+	R CMD INSTALL jdeffects_1*
 
 check-package:
 	echo "devtools::check('.')" | R --slave
