@@ -92,13 +92,13 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 ######################################################################
 
 ## Package installation and checks
-Ignore += jdeffects_1*
+Ignore += vareffects_1*
 
 build-package:
 	R CMD build .
 
 install-package:
-	R CMD INSTALL jdeffects_1*
+	R CMD INSTALL vareffects_1*
 
 check-package:
 	echo "devtools::check('.')" | R --slave
