@@ -25,7 +25,7 @@
 #' @import ggplot2
 #' @export
 
-plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
+plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet_scales = "fixed", facet_ncol = NULL){
 
 	lwr <- upr <- NULL
 	df <- x$preds
@@ -82,7 +82,7 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5){
 	}
 
 	if (n.focal>1L) {
-		p2 <- p2 + facet_wrap(gform, labeller = label_parsed)
+		p2 <- p2 + facet_wrap(gform, scales=facet_scales, ncol=facet_ncol, labeller = label_parsed)
 	}
 	return(p2)
 }

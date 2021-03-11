@@ -143,10 +143,11 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	)
 
 	if (is.null(x.var) & n.focal>1L) {
-		x.var <- focal.predictors[[1]]
+		x.var <- focal.predictors[[2]]
 		message(paste0("x.var was not specified, ", x.var, " is used instead."))
+	} else if (is.null(x.var)) {
+		x.var <- focal.predictors[[1]]
 	}
-	if (is.null(x.var)) x.var <- focal.predictors[[1]]
 	
 	if (is.null(vcov.)){
 		vc <- vcov(vareff_objects)

@@ -4,7 +4,15 @@
 \alias{plot.vareffects}
 \title{Plot  predictions}
 \usage{
-\method{plot}{vareffects}(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5)
+\method{plot}{vareffects}(
+  x,
+  ...,
+  xlabs = NULL,
+  ylabs = NULL,
+  pos = 0.5,
+  facet_scales = "fixed",
+  facet_ncol = NULL
+)
 }
 \arguments{
 \item{x}{\code{\link[vareffects]{varpred}} object}
