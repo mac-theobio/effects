@@ -39,7 +39,7 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 		df[, non.focal] <- sapply(non.focal, function(x){
 			xx <- df[[x]]
 			xx <- if (class(xx) %in% c("numeric", "integer")) round(xx,1) else xx
-			ll <- paste0(x, "==", xx)
+			ll <- paste0(x, ": ", xx)
 			return(ll)
 		})	
 		gform <- as.formula(paste0(".~", paste0(non.focal, collapse="+")))
@@ -82,7 +82,7 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 	}
 
 	if (n.focal>1L) {
-		p2 <- p2 + facet_wrap(gform, scales=facet_scales, ncol=facet_ncol, labeller = label_parsed)
+		p2 <- p2 + facet_wrap(gform, scales=facet_scales, ncol=facet_ncol)#, labeller = label_parsed)
 	}
 	return(p2)
 }

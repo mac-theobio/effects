@@ -29,10 +29,10 @@ autopipeR = defined
 
 ######################################################################
 
-## jdeffects package
-jdeffects_pkg.Rout: R/jdeffects_pkg.R
+## vareffects package
+vareffects_pkg.Rout: R/vareffects_pkg.R
 effectsfuns.Rout: R/effectsfuns.R
-varpred.Rout: dev/varpred.R ## Steve to add
+implemented.Rout: R/implemented.R
 utilities.Rout: R/utilities.R
 plotsfuns.Rout: R/plotsfuns.R
 methodfuns.Rout: R/methodfuns.R

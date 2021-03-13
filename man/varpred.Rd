@@ -19,6 +19,7 @@ varpred(
   internal = FALSE,
   avefun = mean,
   zero_out_interaction = FALSE,
+  which.interaction = c("emmeans", "effects"),
   returnall = FALSE
 )
 }
@@ -50,6 +51,8 @@ varpred(
 \item{avefun}{the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.}
 
 \item{zero_out_interaction}{logical. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect predictions are computed.}
+
+\item{which.interaction}{if \code{TRUE}, condition interactions the same Effect package}
 
 \item{returnall}{logical. If \code{TRUE}, all other named computed quantities are also returned. Otherwise, only predictions are returned.}
 }

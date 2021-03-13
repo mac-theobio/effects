@@ -19,6 +19,7 @@
 #' @param internal logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.
 #' @param avefun the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.
 #' @param zero_out_interaction logical. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect predictions are computed.
+#' @param which.interaction if \code{TRUE}, condition interactions the same Effect package 
 #' @param returnall logical. If \code{TRUE}, all other named computed quantities are also returned. Otherwise, only predictions are returned. 
 #'
 #' @seealso
@@ -87,7 +88,8 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL
 	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
 	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
-	, returnall = FALSE) {
+	, which.interaction = c("emmeans", "effects"), returnall = FALSE) {
+	which.interaction <- match.arg(which.interaction)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
@@ -109,17 +111,11 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	if (!is.null(x.var) & !any(focal.predictors %in% x.var) & length(focal.predictors)>1L) 
 		stop(paste0(x.var, " not in ", focal.predictors))
 
-	## Contrasts
-	get_contrasts <- function(m){
-		contrs <- mod$contrasts	
-		return(contrs)
-	}
-	contrs <- get_contrasts(mod)
-
 #	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
 	model_frame_objs <- clean_model(focal.predictors = focal.predictors, mod = mod
 		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
-		, x.var = x.var, typical = avefun
+		, x.var = x.var, typical = avefun, vnames = vnames
+		, which.interaction = which.interaction
 	)
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
 	excluded.predictors <- model_frame_objs$excluded.predictors
@@ -133,7 +129,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
 	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
-	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = get_contrasts(mod))
+	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
 	mod.matrix.all <- model.matrix(mod)
 	typical <- avefun
 
@@ -141,6 +137,29 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		, factor.cols, cnames, focal.predictors, excluded.predictors
 		, typical, apply.typical.to.factors = TRUE
 	)
+	
+	if (which.interaction=="emmeans") {
+		ff_cols <- factor.cols[factor.cols==TRUE]
+		if (length(focal.predictors)>1L) {
+			ncats <- 0
+			for (f in focal.predictors) {
+				name <- names(grep(f, vnames, value=TRUE))
+				if (!any(grepl("\\:", name)) & length(name)>1L) {
+					ncats <- ncats + length(name)
+				}	
+			}
+			ncats <- ifelse(ncats==0, 1, ncats)
+			ff_cols <- factor.cols[factor.cols==TRUE]
+			for (name in names(ff_cols)) {
+				components <- unlist(strsplit(name, ':'))
+				component <- components[1]
+				if (length(components) > 1) {
+					if (any(vnames[names(vnames) %in% name] %in% focal.predictors)) ncats <- 1
+	  				mm[,name] <- apply(mm[,c(component, name)], 1, prod) * ncats
+				}
+			}
+		}
+	}
 
 	if (is.null(x.var) & n.focal>1L) {
 		x.var <- focal.predictors[[2]]
@@ -176,7 +195,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		}
 		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
 			mf[x.var] <- 0*mf[x.var]+isolate.value
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = get_contrasts(mod))
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
 			col_mean <- apply(mod.matrix, 2, typical)
 			mm_mean <- t(replicate(NROW(mm), col_mean))
 		}
@@ -191,7 +210,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		, formula = formula(mod), response = get_response(mod)
 		, variables = x, fit = pred
 		, x = predict.data[, 1:n.focal, drop=FALSE]
-		, model.matrix = mod.matrix, data = X, x.var=x.var
+		, model.matrix = mm, data = X, x.var=x.var
 		, se = pse_var
 		, lwr = pred - mult*pse_var
 		, upr = pred + mult*pse_var
@@ -200,18 +219,18 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	)
 
 	## Organize
-	  type <- match.arg(type)
-	  linkinv <- if (is.null(out$link$linkinv)) I else out$link$linkinv
-	  linkmu.eta <- if(is.null(out$link$mu.eta)) I else out$link$mu.eta
-	  temp <- out$x
-	  for (var in names(temp)){
-		 if (is.factor(temp[[var]])){
-			# handle factors with "valid" NA level
-			temp[[var]] <- addNA(temp[[var]]) 
-		 }
+   type <- match.arg(type)
+   linkinv <- if (is.null(out$link$linkinv)) I else out$link$linkinv
+   linkmu.eta <- if(is.null(out$link$mu.eta)) I else out$link$mu.eta
+   temp <- out$x
+   for (var in names(temp)){
+	  if (is.factor(temp[[var]])){
+		 # handle factors with "valid" NA level
+		 temp[[var]] <- addNA(temp[[var]]) 
 	  }
-	  out$temp <- temp
-	  result <- switch(type
+   }
+	out$temp <- temp
+	result <- switch(type
 	  	, response= { if (is.null(out$se)) 
 		  	data.frame(out$x, fit=as.vector(transform(out$fit)))
 			else 

@@ -130,7 +130,8 @@ matrix.to.df <- function(matrix, colclasses){
 }
 
 clean_model <- function(focal.predictors, mod, xlevels = list()
-	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean){
+	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean
+	, vnames, which.interaction){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
 
@@ -160,12 +161,24 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
   cnames <- colnames(X.mod)
   factor.cols <- rep(FALSE, length(cnames))
   names(factor.cols) <- cnames
+
+#  for (name in all.predictors){
+#    if (check_factor(name, mod)) {
+#      factor.cols[grep(paste("^", name, sep=""), cnames)] <- TRUE
+#    }
+#  }
+# factor.cols[grep(":", cnames)] <- FALSE   
+
+## FIXME: For compatibility with emmeans. Otherwise uncomment above block and comment the block below
   for (name in all.predictors){
     if (check_factor(name, mod)) {
-      factor.cols[grep(paste("^", name, sep=""), cnames)] <- TRUE
+      factor.cols[names(grep(name, vnames, value=TRUE))] <- TRUE
     }
   }
-  factor.cols[grep(":", cnames)] <- FALSE   
+  if (which.interaction=="effects") {
+     factor.cols[grep(":", cnames)] <- FALSE   
+  }
+
   X <- recoverdata(mod, all.predictors)
   
   which.matrices <- sapply(X, function(x) is.matrix(x) && ncol(x) == 1)
@@ -262,14 +275,12 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 
 get_model_matrix <- function(mod, mod.matrix, mod.matrix.all, X.mod,
                                factor.cols, cnames, focal.predictors, excluded.predictors,
-                               typical, apply.typical.to.factors=FALSE){
+                               typical, apply.typical.to.factors){
   attr(mod.matrix, "assign") <- attr(mod.matrix.all, "assign")
   if (length(excluded.predictors) > 0){
     strangers <- get_strangers(mod, focal.predictors, excluded.predictors)
-    stranger.cols <-
-      apply(outer(strangers, attr(mod.matrix,'assign'), '=='), 2, any)
-  }
-  else stranger.cols <- rep(FALSE, ncol(mod.matrix))
+    stranger.cols <- apply(outer(strangers, attr(mod.matrix,'assign'), '=='), 2, any)
+  }  else stranger.cols <- rep(FALSE, ncol(mod.matrix))
   if (check_intercept(mod)) stranger.cols[1] <- TRUE
   if (any(stranger.cols)) {
     facs <- factor.cols & stranger.cols

@@ -7,6 +7,7 @@ vareffobj.lm <- function(mod, ...){
 	out$variance_covariance <- vcov(mod)
 	out$formula <- formula(mod)
 	out$link <- family(mod)
+	out$contrasts <- mod$contrasts
 	class(out) <- "vareffobj"
 	return(out)
 }
@@ -23,6 +24,7 @@ vareffobj.glmmTMB <- function(mod, ...) {
 	out$variance_covariance <- vcov(mod)$cond
 	out$formula <- formula(mod, fixed.only=TRUE)
 	out$link <- family(mod)
+	out$contrasts <- mod$modelInfo$contrasts
 	class(out) <- "vareffobj"
 	return(out)
 }
