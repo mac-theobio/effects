@@ -47,7 +47,8 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 	if (is.null(xlabs)) xlabs <- x.var
 	if (is.null(ylabs)) ylabs <- attr(df, "response")
 	pos <- position_dodge(pos)
-	if (is.null(df$model)){
+	nn <- unique(df$model)
+	if (!(length(nn)>1)){
 		p1 <- (ggplot(df, aes_string(x = x.var, y = "fit"), colour="black", alpha = 0.2)
 			+ guides(fill = FALSE)
 			+ theme(legend.position = "none")
@@ -58,7 +59,7 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 			+ theme(legend.position = "right")
 		)
 	}
-	p1 <- p1+ labs(x = xlabs, y = ylabs)
+	p1 <- p1 + labs(x = xlabs, y = ylabs)
 	if (class(df[[x.var]]) %in% c("numeric", "integer")) {
 		p2 <- (p1
 			+ geom_line()
@@ -67,7 +68,6 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 			+ scale_colour_viridis_d(option = "plasma")
 		)
 	} else {
-		nn <- unique(df$model)
 		if (length(nn) > 1) {
 			p2 <- (p1 
 				+ geom_point(aes(colour=model), position = pos, size = 0.6)

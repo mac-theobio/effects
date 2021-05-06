@@ -88,7 +88,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL
 	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
 	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
-	, which.interaction = c("emmeans", "effects"), returnall = FALSE) {
+	, which.interaction = c("emmeans", "effects"), modelname = NULL, returnall = FALSE) {
 	which.interaction <- match.arg(which.interaction)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
@@ -244,8 +244,11 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 				data.frame(out$x, fit=as.vector(out$fit), se=as.vector(out$se)
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
+	if (!is.null(modelname)) {
+		result$model <- modelname
+	}
 	attr(result, "type") <- type
-	attr(result, "focal") <- focal.predictors
+	attr(result, "focal") <- unlist(focal.predictors)
 	attr(result, "response") <- out$response
 	attr(result, "x.var") <- out$x.var 
 	if (returnall) {
