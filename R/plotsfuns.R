@@ -70,13 +70,13 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 	} else {
 		if (length(nn) > 1) {
 			p2 <- (p1 
-				+ geom_point(aes(colour=model), position = pos, size = 0.6)
-				+ geom_pointrange(aes(ymin = lwr, ymax = upr, colour=model), position = pos)
+#				+ geom_point(aes(colour=model), position = pos, size = 0.6)
+				+ geom_pointrange(aes(ymin = lwr, ymax = upr, colour=model), size=0.2, position = pos)
 			)
 		} else {
 			p2 <- (p1 
-				+ geom_point(position = pos, size = 0.6, colour="black")
-				+ geom_pointrange(aes(ymin = lwr, ymax = upr), colour = "black", position = pos)
+#				+ geom_point(position = pos, size = 0.6, colour="black")
+				+ geom_pointrange(aes(ymin = lwr, ymax = upr), colour = "black", size=0.2, position = pos)
 			)
 		}
 	}
