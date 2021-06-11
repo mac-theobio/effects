@@ -20,8 +20,11 @@ varpred(
   avefun = mean,
   zero_out_interaction = FALSE,
   which.interaction = c("emmeans", "effects"),
+  bias.adjust = FALSE,
+  sigma = NULL,
   modelname = NULL,
-  returnall = FALSE
+  returnall = FALSE,
+  ...
 )
 }
 \arguments{

@@ -88,7 +88,8 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL
 	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
 	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
-	, which.interaction = c("emmeans", "effects"), modelname = NULL, returnall = FALSE) {
+	, which.interaction = c("emmeans", "effects"), bias.adjust = FALSE
+	, sigma = NULL, modelname = NULL, returnall = FALSE, ...) {
 	which.interaction <- match.arg(which.interaction)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
@@ -205,6 +206,32 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
+	
+	# For bias-adjustment: coppied directry from emmeans
+	## Currently, we just use a 2nd-order approx for everybody:
+	## E(h(nu + E))  ~=  h(nu) + 0.5*h"(nu)*var(E)
+	.make.bias.adj.link <- function(link, sigma) {
+		 if (is.null(sigma))
+			  stop("Must specify 'sigma' to obtain bias-adjusted back transformations", call. = FALSE)
+		 link$inv = link$linkinv
+		 link$der = link$mu.eta
+		 link$sigma22 = sigma^2 / 2
+		 link$der2 = function(eta) with(link, 1000 * (der(eta + .0005) - der(eta - .0005)))
+		 link$linkinv = function(eta) with(link, inv(eta) + sigma22 * der2(eta))
+		 link$mu.eta = function(eta) with(link, der(eta) +
+														  1000 * sigma22 * (der2(eta + .0005) - der2(eta - .0005)))
+		 link
+	}
+
+	link <- vareff_objects$link
+
+	if (bias.adjust) {
+		if (is.null(sigma)) {
+			sigma <- get_sigma(mod, ...)
+		}
+		link <- .make.bias.adj.link(link, sigma)
+	}
+
 
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
@@ -215,7 +242,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		, lwr = pred - mult*pse_var
 		, upr = pred + mult*pse_var
 		, family = vareff_objects$link$family
-		, link = vareff_objects$link
+		, link = link 
 	)
 
 	## Organize

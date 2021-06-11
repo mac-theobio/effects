@@ -53,3 +53,21 @@ get_stats.default <- function(mod, level, dfspec, ...) {
 	return(mult)
 }
 
+## sigma
+get_sigma.default <- function(mod, ...) {
+	stats::sigma(mod, ...)
+}
+
+get_sigma.glmmTMB <- function(mod, ...) {
+	rand_comp <- glmmTMB::VarCorr(mod)$cond
+	sigma <- unlist(lapply(names(rand_comp), function(x)attr(rand_comp[[x]], "stddev")))
+	total_sd <- sqrt(sum(sigma^2))
+	total_sd
+}
+
+get_sigma.lme4 <- function(mod, ...) {
+	rand_comp <- lme4::VarCorr(mod)$cond
+	sigma <- unlist(lapply(names(rand_comp), function(x)attr(rand_comp[[x]], "stddev")))
+	total_sd <- sqrt(sum(sigma^2))
+	total_sd
+}

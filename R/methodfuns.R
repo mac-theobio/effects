@@ -57,3 +57,7 @@ get_xlevels <- function(mod)UseMethod("get_xlevels")
 #'
 #' @keywords internal
 get_stats <- function(mod, level, dfspec, ...)UseMethod("get_stats")
+
+#'
+#' @keywords internal
+get_sigma <- function(mod, ...)UseMethod("get_sigma")
