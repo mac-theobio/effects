@@ -91,6 +91,11 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 ######################################################################
 
+bias_correction.pdf: bias_correction.rmd
+	$(knitpdf)
+
+######################################################################
+
 ## Package installation and checks
 Ignore += vareffects_1*
 
