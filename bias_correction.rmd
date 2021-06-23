@@ -43,7 +43,7 @@ We perform a simple simulation for a fixed effect model
 \end{align*}
 
 ```{R sim_simple}
-N <- 10000
+N <- 1e5
 beta0 <- 0.7
 betaA <- 0.2
 betaW <- 0.5
