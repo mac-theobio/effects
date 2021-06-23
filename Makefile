@@ -91,6 +91,8 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 ######################################################################
 
+Sources += *.rmd
+
 bias_correction.pdf: bias_correction.rmd
 	$(knitpdf)
 
