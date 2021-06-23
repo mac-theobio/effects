@@ -1,0 +1,171 @@
+---
+title: "Bias correction in GLMs"
+author: Bicko, Jonathan & Ben
+date: "2021 Jun 21 (Mon)"
+compact-title: false
+output: "pdf_document"
+---
+
+```{R setup, include=FALSE, echo=FALSE}
+library(dplyr)
+library(ggplot2)
+library(vareffects); varefftheme()
+library(ggpubr)
+set.seed(1011)
+
+## Functions
+plotEsize <- function(df, pos = 0.5, col_lab = ""){
+	pos <- position_dodge(pos)
+	p1 <- (ggplot(df, aes(x = reorder(term, -estimate), y = estimate, colour="Estimate"))
+		+ geom_pointrange(aes(ymin = conf.low, ymax = conf.high), size=0.2, position = pos)
+		+ geom_hline(yintercept=0,lty=2, size=0.2)
+		+ coord_flip()
+		+ labs(x="", y = "Estimate")
+	)
+}
+```
+
+\section{Introduction}
+
+We intend to investigate our prediction based  on known truth and any bias potentially introduced by non-linear averaging, conditioning or random effect. We'll start with a simple case of a only fixed effect model and then consider a mixed effect model.
+
+\section{Simulation}
+
+We perform a simple simulation for a fixed effect model
+\begin{align*}
+\mathrm{logit(status} = 1) &= \eta \\ 
+\eta &= \beta_0 + \beta_{\mathrm{A}} \mathrm{Age} + \beta_{\mathrm{W}} \mathrm{Wealthindex} \\
+\mathrm{Age} &\sim \mathrm{Uniform}(0.2, 1) \\
+\mathrm{Wealthindex} &\sim \mathrm{Normal}(0, 1) \\
+\beta_0 &= 0.7 \\
+\beta_{\mathrm{A}} &= 0.3 \\
+\beta_{\mathrm{W}} &= 0.6
+\end{align*}
+
+```{R sim_simple}
+N <- 10000
+beta0 <- 0.7
+betaA <- 0.2
+betaW <- 0.5
+
+age_max <- 1
+age_min <- 0.2
+age <- runif(N, age_min, age_max)
+
+wealthindex <- rnorm(N, 0, 1)
+
+eta <- beta0 + betaA * age + betaW * wealthindex
+sim_df <- (data.frame(age=age, wealthindex=wealthindex, eta=eta)
+	%>% mutate(status = rbinom(N, 1, plogis(eta)))
+	%>% select(-eta)
+)
+true_prop <- mean(sim_df$status)
+print(true_prop)
+head(sim_df)
+```
+
+\subsection{Simple logistic model}
+
+```{R simple_logistic}
+simple_mod <- glm(status ~ age + wealthindex, data = sim_df, family="binomial")
+```
+
+Coefficient plots
+
+```{R simple_coef}
+## True beta
+true_beta_df <- data.frame(term=c("Intercept", "age", "wealthindex")
+	, estimate=c(beta0, betaA, betaW)
+)
+
+## Tidy coef estimates
+coef_df <- (broom::tidy(simple_mod, conf.int=TRUE)
+#	%>% dotwhisker::by_2sd(sim_df)
+	%>% mutate(term = gsub("\\(|\\)", "", term))
+)
+print(coef_df)
+
+simple_coef_plot <- (plotEsize(coef_df) 
+	+ geom_point(data=true_beta_df, aes(x=term, y=estimate, colour="Truth"))
+	+ labs(colour="Type")
+	+ scale_colour_brewer(palette="Dark2")
+)
+print(simple_coef_plot)
+```
+
+Variable effect plots -- with and without bias adjustment
+
+```{R simple_vareffects, fig.cap = "Variable prediction plots comparing bias unadjusted and adjusted predictions. The bias adjusted predictions are slighly lower but close to what we expect from effect size estimates (and their confidence intervals)?"}
+# Age
+## Not bias adjusted
+simple_vareff_age <- varpred(simple_mod, "age", isolate=TRUE, modelname="Not adjusted")
+print(sigma(simple_mod))
+
+## Bias adjusted
+simple_vareff_age_adjust <- varpred(simple_mod, "age", isolate=TRUE, bias.adjust=TRUE, modelname="Bias adjusted")
+
+vareff_age <- simple_vareff_age
+vareff_age$preds <- do.call("rbind", list(vareff_age$preds, simple_vareff_age_adjust$preds))
+age_plot <- (plot(vareff_age)
+ 	+ labs(y="Prob. of improved \n service", colour="Model")
+	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+	+ theme(legend.position="bottom")
+)
+
+# Wealth index
+## Not bias adjusted
+simple_vareff_wealthindex <- varpred(simple_mod, "wealthindex", isolate=TRUE, modelname="Not adjusted")
+
+## Bias adjusted
+simple_vareff_wealthindex_adjust <- varpred(simple_mod, "wealthindex", isolate=TRUE, bias.adjust=TRUE, modelname="Bias adjusted")
+
+vareff_wealthindex <- simple_vareff_wealthindex
+vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, simple_vareff_wealthindex_adjust$preds))
+wealthindex_plot <- (plot(vareff_wealthindex)
+ 	+ labs(y="", colour="Model")
+	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+	+ theme(legend.position="bottom")
+)
+ggarrange(age_plot, wealthindex_plot, common.legend=TRUE)
+```
+
+Effect sizes on logit scale:
+
+```{R simple_logit}
+coef_df_logit <- (coef_df
+	%>% select(term, estimate, conf.low, conf.high)
+	%>% group_by(term)
+	%>% summarise_all(plogis)
+)
+print(coef_df_logit)
+```
+
+\subsection{MRP approach}
+
+```{R simple_mrp}
+pred <- predict(simple_mod, type="link", se.fit=TRUE)
+z.val <- qnorm(1 - (1 - 0.95)/2)
+pred_df <- (data.frame(age=sim_df$age, wealthindex=sim_df$wealthindex, estimate=pred$fit, se=pred$se.fit)
+	%>% mutate(lwr = plogis(estimate-z.val*se)
+		, upr = plogis(estimate+z.val*se)
+		, estimate = plogis(estimate)
+	)
+)
+head(pred_df)
+
+## Age plot
+age_mrp <- (pred_df
+	%>% select(age, estimate, lwr, upr)
+	%>% group_by(age)
+	%>% summarise_all(mean)
+)
+age_mrp_plot <- (ggplot(age_mrp, aes(x=age, y=estimate))
+	+ geom_line()
+	+ geom_line(aes(y=lwr), lty=2)
+	+ geom_line(aes(y=upr), lty=2)
+#	+ geom_smooth(aes(ymin=lwr, ymax=upr), stat="identity")
+)
+print(age_mrp_plot)
+```
+
+
