@@ -88,7 +88,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL
 	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
 	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
-	, which.interaction = c("emmeans", "effects"), bias.adjust = FALSE
+	, which.interaction = c("emmeans", "effects"), pop.ave = FALSE, bias.adjust = FALSE
 	, sigma = NULL, modelname = NULL, returnall = FALSE, ...) {
 	which.interaction <- match.arg(which.interaction)
 	vareff_objects <- vareffobj(mod)
@@ -116,7 +116,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	model_frame_objs <- clean_model(focal.predictors = focal.predictors, mod = mod
 		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
 		, x.var = x.var, typical = avefun, vnames = vnames
-		, which.interaction = which.interaction
+		, which.interaction = which.interaction, pop.ave = pop.ave
 	)
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
 	excluded.predictors <- model_frame_objs$excluded.predictors
@@ -202,8 +202,8 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		}
 		mm <- mm - mm_mean
 	}
-	pse_var <- sqrt(diag(mm %*% tcrossprod(data.matrix(vc), mm)))
-	
+#	pse_var <- sqrt(diag(mm %*% tcrossprod(data.matrix(vc), mm)))
+	pse_var <- sqrt(rowSums(mm * t(tcrossprod(data.matrix(vc), mm))))	
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
 	

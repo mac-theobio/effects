@@ -20,6 +20,7 @@ varpred(
   avefun = mean,
   zero_out_interaction = FALSE,
   which.interaction = c("emmeans", "effects"),
+  pop.ave = FALSE,
   bias.adjust = FALSE,
   sigma = NULL,
   modelname = NULL,

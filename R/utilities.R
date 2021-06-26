@@ -130,8 +130,7 @@ matrix.to.df <- function(matrix, colclasses){
 }
 
 clean_model <- function(focal.predictors, mod, xlevels = list()
-	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean
-	, vnames, which.interaction){
+	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean, vnames, which.interaction, pop.ave=FALSE){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
 
@@ -231,6 +230,9 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 		}
 	 }
 	 else factor.levels[[name]] <- levels
+	 if (pop.ave) {
+	 	levels <- as.vector(X[[name]])
+	 }
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
   }
 
