@@ -7,6 +7,7 @@ output: "pdf_document"
 ---
 
 ```{R setup, include=FALSE, echo=FALSE}
+library(glmmTMB)
 library(dplyr)
 library(ggplot2)
 library(vareffects); varefftheme()
@@ -88,12 +89,12 @@ print(coef_df)
 simple_coef_plot <- (plotEsize(coef_df) 
 	+ geom_point(data=true_beta_df, aes(x=term, y=estimate, colour="Truth"))
 	+ labs(colour="Type")
-	+ scale_colour_brewer(palette="Dark2")
+	+ scale_colour_manual(values=c("black", "blue"))
 )
 print(simple_coef_plot)
 ```
 
-Variable effect plots -- with and without bias adjustment
+Variable effect plots -- varpred and population averaging approach
 
 ```{R simple_vareffects} 
 # Age
@@ -112,6 +113,7 @@ vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, simp
 wealthindex_plot <- (plot(vareff_wealthindex)
  	+ labs(y="", colour="Model")
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+	+ scale_colour_manual(values=c("black", "blue"))
 	+ theme(legend.position="bottom")
 )
 ```
@@ -166,6 +168,7 @@ vareff_age$preds <- do.call("rbind", list(vareff_age$preds, simple_vareff_age_po
 age_plot <- (plot(vareff_age)
  	+ labs(y="Prob. of improved \n service", colour="Model")
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+	+ scale_colour_manual(values=c("black", "blue"))
 	+ theme(legend.position="bottom")
 )
 
@@ -177,4 +180,115 @@ The observed population average is `r true_prop` while the estimated population 
 - age: `r mean(simple_vareff_age_pop$fit)`
 - wealthindex: `r mean(simple_vareff_wealthindex_adjust$preds$fit)`
 
+
+\section{Random effect model}
+
+```{r sim_randeff}
+# Simulation parameters
+nHH <- 1000		# Number of HH (primary units) per year
+
+nyrs <- 10	# Number of years to simulate
+yrs <- 2000 + c(1:nyrs) # Years to simulate
+N <- nyrs * nHH
+
+## HH random effect sd
+hhSD <- 0.5
+
+# Generate dataset template
+temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
+		, years = rep(yrs, nHH)
+		, age = runif(n=N, age_min, age_max)
+		, wealthindex = rnorm(n = N, 0, 1)
+	)
+)
+
+# Simulate HH-level random effects (residual error)
+hhRE <- rnorm(nHH, hhSD)
+temp_df$hhRE <- hhRE[temp_df$hhid]
+
+sim_df <- (temp_df
+	%>% mutate(eta = beta0 + betaA * age + betaW * wealthindex + hhRE
+		, status = rbinom(N, 1, plogis(eta))
+	)
+	%>% select(-eta)
+)
+true_prop_reff <- mean(sim_df$status)
+print(true_prop)
+print(head(sim_df, 50))
+```
+
+\subsection{Fit model}
+
+```{R model_reff}
+reff_mod <- glmmTMB(status ~ age + wealthindex + (1|hhid)
+	, data = sim_df
+	, family = binomial(link = "logit")
+)
+```
+
+```{R reff_coef}
+## Tidy coef estimates
+reff_coef_df <- (broom.mixed::tidy(reff_mod, conf.int=TRUE)
+	%>% mutate(term = gsub("\\(|\\)", "", term))
+	%>% filter(effect=="fixed")
+)
+print(reff_coef_df)
+
+reff_coef_plot <- (plotEsize(reff_coef_df) 
+	+ geom_point(data=true_beta_df, aes(x=term, y=estimate, colour="Truth"))
+	+ labs(colour="Type")
+	+ scale_colour_manual(values=c("black", "blue"))
+)
+print(reff_coef_plot)
+```
+
+Variable effect plots
+
+- Age
+
+```{R reff_vareffects_age} 
+## varpred way
+reff_vareff_age <- varpred(reff_mod, "age", isolate=FALSE, modelname="varpred")
+
+## Pop. average
+reff_vareff_age_pop <- varpred(reff_mod, "age", isolate=TRUE, pop.ave=TRUE, modelname = "Pop. ave") 
+
+## Bias adjust
+reff_vareff_age_adjust <- varpred(reff_mod, "age", isolate=TRUE, bias.adjust=TRUE, modelname = "Bias adjust") 
+
+vareff_age <- reff_vareff_age
+vareff_age$preds <- do.call("rbind", list(vareff_age$preds, reff_vareff_age_pop$preds, reff_vareff_age_adjust$preds))
+age_plot <- (plot(vareff_age)
+ 	+ labs(y="Prob. of improved \n service", colour="Model")
+	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
+	+ scale_colour_manual(values=c("black", "blue", "red"))
+	+ theme(legend.position="bottom")
+)
+
+```
+
+- Wealth index
+
+```{R reff_vareff_wealthindex, fig.cap = "A comparison of population averaged, varpred-based and bias-adjusted predictions. For each of the predictors, the population averaging and varpred gives similar estimates, and slightly off the truth. However, when we apply bias-adjustment, the estimates are very precise (i.e., close to the truth)."}
+# Wealth index
+## varpred 
+reff_vareff_wealthindex <- varpred(reff_mod, "wealthindex", isolate=TRUE, modelname="varpred")
+
+## Pop. average
+reff_vareff_wealthindex_pop <- varpred(reff_mod, "wealthindex", isolate=TRUE, pop.ave=TRUE, modelname="Pop. ave")
+
+## Bias adjust
+reff_vareff_wealthindex_adjust <- varpred(reff_mod, "wealthindex", isolate=TRUE, bias.adjust=TRUE, modelname="Bias adjust")
+
+vareff_wealthindex <- reff_vareff_wealthindex
+vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_pop$preds, reff_vareff_wealthindex_adjust$preds))
+wealthindex_plot <- (plot(vareff_wealthindex)
+ 	+ labs(y="", colour="Model")
+	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
+	+ scale_colour_manual(values=c("black", "blue", "red"))
+	+ theme(legend.position="bottom")
+)
+
+ggarrange(age_plot, wealthindex_plot, common.legend=TRUE)
+```
 
