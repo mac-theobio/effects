@@ -40,7 +40,7 @@ We perform a simple simulation for a fixed effect model
 \begin{align*}
 \mathrm{logit(status} = 1) &= \eta \\ 
 \eta &= \beta_0 + \beta_{\mathrm{A}} \mathrm{Age} + \beta_{\mathrm{W}} \mathrm{Wealthindex} \\
-\mathrm{Age} &\sim \mathrm{Uniform}(0.2, 1) \\
+\mathrm{Age} &\sim \mathrm{Normal}(0.2, 1) \\
 \mathrm{Wealthindex} &\sim \mathrm{Normal}(0, 1) \\
 \beta_0 &= 0.7 \\
 \beta_{\mathrm{A}} &= 0.3 \\
@@ -55,7 +55,8 @@ betaW <- 0.5
 
 age_max <- 1
 age_min <- 0.2
-age <- runif(N, age_min, age_max)
+# age <- runif(N, age_min, age_max)
+age <- rnorm(N, age_max, age_max)
 
 wealthindex <- rnorm(N, 0, 1)
 
