@@ -96,6 +96,9 @@ Sources += *.rmd
 bias_correction.pdf: bias_correction.rmd
 	$(knitpdf)
 
+## JD: How are these made?
+Ignore += simple_pred_spec_plot1.pdf simple_pred_spec_plot2.pdf
+
 ######################################################################
 
 ## Package installation and checks
