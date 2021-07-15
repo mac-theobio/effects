@@ -221,7 +221,12 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
-			 seq(min(X[, name]), max(X[, name]), length.out=steps)
+			 if (pop.ave) {
+			 	quant <- seq(0, 1, length.out=steps)
+			 	as.vector(quantile(X[,name], quant))
+			 } else {
+			 	seq(min(X[, name]), max(X[, name]), length.out=steps)
+			 }
 		}
 		else {
 		  if(length(xlevels[[name]]) == 1L) { 
@@ -230,9 +235,6 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 		}
 	 }
 	 else factor.levels[[name]] <- levels
-	 if (pop.ave) {
-	 	levels <- as.vector(X[[name]])
-	 }
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
   }
 
