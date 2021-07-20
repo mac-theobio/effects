@@ -130,38 +130,9 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
 	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
-	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-	mod.matrix.all <- model.matrix(mod)
 	typical <- avefun
-
-	mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-		, factor.cols, cnames, focal.predictors, excluded.predictors
-		, typical, apply.typical.to.factors = TRUE
-	)
+	mod.matrix.all <- model.matrix(mod)
 	
-	if (which.interaction=="emmeans") {
-		ff_cols <- factor.cols[factor.cols==TRUE]
-		if (length(focal.predictors)>1L) {
-			ncats <- 0
-			for (f in focal.predictors) {
-				name <- names(grep(f, vnames, value=TRUE))
-				if (!any(grepl("\\:", name)) & length(name)>1L) {
-					ncats <- ncats + length(name)
-				}	
-			}
-			ncats <- ifelse(ncats==0, 1, ncats)
-			ff_cols <- factor.cols[factor.cols==TRUE]
-			for (name in names(ff_cols)) {
-				components <- unlist(strsplit(name, ':'))
-				component <- components[1]
-				if (length(components) > 1) {
-					if (any(vnames[names(vnames) %in% name] %in% focal.predictors)) ncats <- 1
-	  				mm[,name] <- apply(mm[,c(component, name)], 1, prod) * ncats
-				}
-			}
-		}
-	}
-
 	if (is.null(x.var) & n.focal>1L) {
 		x.var <- focal.predictors[[2]]
 		message(paste0("x.var was not specified, ", x.var, " is used instead."))
@@ -169,6 +140,46 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		x.var <- focal.predictors[[1]]
 	}
 	
+	if (pop.ave) {
+		mf <- mf[, c(x.var, colnames(mf)[!colnames(mf) %in% x.var])]
+		mf <- do.call("expand.grid", mf)
+		mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+		mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+			, factor.cols, cnames, focal.predictors, excluded.predictors
+			, typical, apply.typical.to.factors = FALSE
+		)
+#		mm <- mod.matrix
+	} else {
+		mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+		mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+			, factor.cols, cnames, focal.predictors, excluded.predictors
+			, typical, apply.typical.to.factors = TRUE
+		)
+		
+		if (which.interaction=="emmeans") {
+			ff_cols <- factor.cols[factor.cols==TRUE]
+			if (length(focal.predictors)>1L) {
+				ncats <- 0
+				for (f in focal.predictors) {
+					name <- names(grep(f, vnames, value=TRUE))
+					if (!any(grepl("\\:", name)) & length(name)>1L) {
+						ncats <- ncats + length(name)
+					}	
+				}
+				ncats <- ifelse(ncats==0, 1, ncats)
+				ff_cols <- factor.cols[factor.cols==TRUE]
+				for (name in names(ff_cols)) {
+					components <- unlist(strsplit(name, ':'))
+					component <- components[1]
+					if (length(components) > 1) {
+						if (any(vnames[names(vnames) %in% name] %in% focal.predictors)) ncats <- 1
+						mm[,name] <- apply(mm[,c(component, name)], 1, prod) * ncats
+					}
+				}
+			}
+		}
+	}
+
 	if (is.null(vcov.)){
 		vc <- vcov(vareff_objects)
 	} else if (is.function(vcov.)) {
@@ -183,11 +194,11 @@ varpred <- function(mod, focal_predictors, x.var = NULL
   	
 	pred <- mm %*% betahat
 	
-	# (Centered) predictions for SEs
-	## Center model matrix
-	col_mean <- apply(mod.matrix.all, 2, typical)
-	mm_mean <- t(replicate(NROW(mm), col_mean))
 	if (isolate) {
+		# (Centered) predictions for SEs
+		## Center model matrix
+		col_mean <- apply(mod.matrix.all, 2, typical)
+		mm_mean <- t(replicate(NROW(mm), col_mean))
 	#	if (any(grepl(":", get_termnames(mod))) & zero_out_interaction){
 	#		vc <- zero_vcov(mod, focal_vars=x.var)
 	#	}
@@ -232,7 +243,6 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		link <- .make.bias.adj.link(link, sigma)
 	}
 
-
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
 		, variables = x, fit = pred
@@ -271,6 +281,12 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 				data.frame(out$x, fit=as.vector(out$fit), se=as.vector(out$se)
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
+
+	if (pop.ave){
+		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
+		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
+	}
+
 	if (!is.null(modelname)) {
 		result$model <- modelname
 	}

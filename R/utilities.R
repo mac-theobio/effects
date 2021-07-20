@@ -243,7 +243,16 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     levels <- oldlevels[[name]] 
     if (is.logical(X[, name])) levels <- c("FALSE", "TRUE")
     fac <- !is.null(levels)
-    level <- if (fac) levels[1] else typical(X[, name])
+    level <- if (fac) {
+	 	levels[1]
+	 } else {
+	 	if (pop.ave) {
+			quant <- seq(0, 1, length.out=steps)
+			as.vector(quantile(X[,name], quant))	
+		} else {
+			typical(X[, name])	
+		}
+	 }
     if (fac) factor.levels[[name]] <- levels
     x.excluded[[name]] <- list(name=name, is.factor=fac,
                                level=level)
@@ -260,8 +269,13 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     for (j in 1:n.focal){
       predict.data[i,j] <- x[[j]]$levels[subs[j]]
     }
-    if (n.excluded > 0)
-      predict.data[i, (n.focal + 1):n.vars] <- excluded
+    if (n.excluded > 0) {
+		if (pop.ave) {
+      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i, ]
+		} else {
+      	predict.data[i, (n.focal + 1):n.vars] <- excluded
+		}
+	}
   }
   colnames(predict.data) <- c(sapply(x, function(x) x$name),
                               sapply(x.excluded, function(x) x$name))
