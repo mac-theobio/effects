@@ -203,4 +203,108 @@ The observed population average is `r true_prop` while the estimated population 
 - age: pop. average `r mean(simple_vareff_age_pop$preds$fit)`; varpred `r mean(simple_vareff_age$preds$fit)`
 - wealthindex: pop. average `r mean(simple_vareff_wealthindex_pop$preds$fit)`; varpred `r mean(simple_vareff_wealthindex$preds$fit)`
 
+\section{Random effect model}
+
+```{r sim_randeff}
+# Simulation parameters
+nHH <- 1000	# Number of HH (primary units) per year
+
+nyrs <- 50	# Number of years to simulate
+yrs <- 2000 + c(1:nyrs) # Years to simulate
+N <- nyrs * nHH
+
+## HH random effect sd
+hhSD <- 0.5
+
+# Generate dataset template
+temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
+		, years = rep(yrs, nHH)
+		, age = runif(n=N, age_min, age_max)
+		, wealthindex = rnorm(n = N, 0, 1)
+	)
+)
+
+# Simulate HH-level random effects (residual error)
+hhRE <- rnorm(nHH, hhSD)
+temp_df$hhRE <- hhRE[temp_df$hhid]
+
+sim_df <- (temp_df
+	%>% mutate(eta = beta0 + betaA * age + betaW * wealthindex + hhRE
+		, status = rbinom(N, 1, plogis(eta))
+	)
+	%>% select(-eta)
+)
+true_prop_reff <- mean(sim_df$status)
+print(true_prop)
+print(head(sim_df, 10))
+```
+
+\subsection{Fit model}
+
+```{r model_reff}
+reff_mod <- glmmTMB(status ~ age + wealthindex + (1|hhid)
+	, data = sim_df
+	, family = binomial(link = "logit")
+)
+```
+
+```{r reff_coef}
+## Tidy coef estimates
+reff_coef_df <- (broom.mixed::tidy(reff_mod, conf.int=TRUE)
+	%>% mutate(term = gsub("\\(|\\)", "", term))
+	%>% filter(effect=="fixed")
+)
+print(reff_coef_df)
+
+reff_coef_plot <- (plotEsize(reff_coef_df) 
+	+ geom_point(data=true_beta_df, aes(x=term, y=estimate, colour="Truth"))
+	+ labs(colour="Type")
+	+ scale_colour_manual(values=c("black", "blue"))
+)
+print(reff_coef_plot)
+```
+
+Variable effect plots
+
+- Age
+
+```{r reff_vareffects_age}
+## varpred way
+reff_vareff_age <- varpred(reff_mod, "age", isolate=FALSE, modelname="varpred")
+
+## Pop. average
+reff_vareff_age_pop <- varpred(reff_mod, "age", isolate=FALSE, pop.ave=TRUE, modelname = "Pop. ave")
+
+vareff_age <- reff_vareff_age
+vareff_age$preds <- do.call("rbind", list(vareff_age$preds, reff_vareff_age_pop$preds))
+age_plot <- (plot(vareff_age)
+ 	+ labs(y="Prob. of improved \n service", colour="Model")
+	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
+	+ scale_colour_manual(values=c("black", "blue", "red"))
+	+ theme(legend.position="bottom")
+)
+```
+
+- Wealth index
+
+```{r reff_vareff_wealthindex, fig.cap = "A comparison of population average and varpred based predictions. In the case of age, both methods seems to over-approximate the predictions."} 
+# Wealth index
+## varpred
+reff_vareff_wealthindex <- varpred(reff_mod, "wealthindex", isolate=FALSE, modelname="varpred")
+
+## Pop. average
+reff_vareff_wealthindex_pop <- varpred(reff_mod, "wealthindex", isolate=FALSE, pop.ave=TRUE, modelname="Pop. ave")
+
+vareff_wealthindex <- reff_vareff_wealthindex
+vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_pop$preds))
+wealthindex_plot <- (plot(vareff_wealthindex)
+ 	+ labs(y="", colour="Model")
+	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
+	+ scale_colour_manual(values=c("black", "blue", "red"))
+	+ theme(legend.position="bottom")
+)
+
+ggarrange(age_plot, wealthindex_plot, common.legend=TRUE)
+```
+
 
