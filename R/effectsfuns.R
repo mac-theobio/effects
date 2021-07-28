@@ -85,12 +85,13 @@
 #'
 
 varpred <- function(mod, focal_predictors, x.var = NULL
-	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL
-	, level = 0.95, steps = 101, at = list(),  dfspec = 100, vcov. = NULL
-	, internal = FALSE, avefun = mean, zero_out_interaction = FALSE
-	, which.interaction = c("emmeans", "effects"), pop.ave = FALSE, bias.adjust = FALSE
-	, sigma = NULL, modelname = NULL, returnall = FALSE, ...) {
+	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL, level = 0.95
+	, steps = 101, at = list(),  dfspec = 100, vcov. = NULL, internal = FALSE, avefun = mean
+	, zero_out_interaction = FALSE, which.interaction = c("emmeans", "effects")
+	, pop.ave = c("none", "quantile", "population"), include.re = FALSE
+	, bias.adjust = FALSE, sigma = NULL, modelname = NULL, returnall = FALSE, ...) {
 	which.interaction <- match.arg(which.interaction)
+	pop.ave <- match.arg(pop.ave)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
@@ -140,16 +141,37 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		x.var <- focal.predictors[[1]]
 	}
 	
-	if (pop.ave) {
+	if (pop.ave=="quantile") {
 		mf <- mf[, c(x.var, colnames(mf)[!colnames(mf) %in% x.var])]
-		mf <- do.call("expand.grid", mf)
-		mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-		mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-			, factor.cols, cnames, focal.predictors, excluded.predictors
-			, typical, apply.typical.to.factors = FALSE
-		)
+		quant <- seq(0, 1, length.out=steps)
+		if (inherits(mod, c("glmmTMB", "lme4", "glmerMod"))) {
+			ran_eff <- ranef(mod)$cond
+			rand_eff <- do.call("cbind", ran_eff)
+			re <- as.vector(getME(mod, "Z") %*% as.matrix(rand_eff))
+			re <- as.vector(quantile(re, quant))
+			mf$rezzz <- re
+			mf <- do.call("expand.grid", mf)
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+				, factor.cols, cnames, focal.predictors, excluded.predictors
+				, typical, apply.typical.to.factors = FALSE
+			)
+			if (include.re) {
+				pred <- mm %*% betahat + mf$rezzz
+			} else {
+				pred <- mm %*% betahat
+			}
+		} else {
+			mf <- do.call("expand.grid", mf)
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+				, factor.cols, cnames, focal.predictors, excluded.predictors
+				, typical, apply.typical.to.factors = FALSE
+			)
+			pred <- mm %*% betahat
+		}
 #		mm <- mod.matrix
-	} else {
+	} else if (pop.ave=="none") {
 		mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
 		mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
 			, factor.cols, cnames, focal.predictors, excluded.predictors
@@ -192,7 +214,21 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		vc <- zero_vcov(mod, focal_vars=x.var)	
 	}
   	
-	pred <- mm %*% betahat
+	if (pop.ave=="population") {
+		pred <- mod.matrix.all %*% betahat
+		mm <- mod.matrix.all
+		if (inherits(mod, c("glmmTMB", "lme4", "glmerMod"))) {
+			if (include.re) {
+				ran_eff <- ranef(mod)$cond
+				rand_eff <- do.call("cbind", ran_eff)
+				re <- as.matrix(as.vector(getME(mod, "Z") %*% as.matrix(rand_eff)), ncol=1)
+				pred <- pred + re
+			}
+			
+		}
+	} else if (pop.ave=="none") {
+		pred <- mm %*% betahat
+	}
 	
 	if (isolate) {
 		# (Centered) predictions for SEs
@@ -282,9 +318,23 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if (pop.ave){
+	if (pop.ave=="quantile"){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
+	} else if (pop.ave=="population") {
+		probs <- seq(0, 1, length.out=steps)
+		x_temp <- out$x[[out$x.var]]
+		quant <- quantile(x_temp, probs)
+		cats <- cut(x_temp, breaks = quant)
+		result1 <- list()
+		result1[[out$x.var]] <- seq(min(x_temp), max(x_temp), length.out=steps-1)
+		result2 <- sapply(c("fit", "se", "lwr", "upr"), function(xx){
+			val <- result[[xx]]
+			out <- as.vector(tapply(val, list(cats), mean))
+			return(out)
+		}, simplify = FALSE)
+		result1[names(result2)] <- result2
+		result <- as.data.frame(do.call("cbind", result1))
 	}
 
 	if (!is.null(modelname)) {

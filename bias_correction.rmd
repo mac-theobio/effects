@@ -117,17 +117,10 @@ print(coef_df_logit)
 We consider both \textbf{varpred} and population averaging approach; and then introduce bias correction to \textbf{varpred} predictions.
 
 ```{r pop_ave_fun}
-popavefun <- function(mod, focal, non.focal, level=0.95, steps=100, bins=50, modelname="Pop. ave", ...) {
+popavefun <- function(mod, focal, non.focal, level=0.95, steps=100, modelname="quantiles", ...) {
 	mf <- model.frame(mod)
 	mm <- (mf
 		%>% select_at(c(focal, non.focal))
-	)
-	check_df <- (mf
-		%>% arrange_at(focal)
-		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
-		%>% group_by(bin)
-		%>% summarise_all(mean)
-		%>% mutate(model="binned")
 	)
 	quant <- seq(0, 1, length.out=steps)
 	mm <- sapply(c(focal, non.focal), function(x)quantile(mm[,x], quant), simplify = FALSE)
@@ -148,7 +141,22 @@ popavefun <- function(mod, focal, non.focal, level=0.95, steps=100, bins=50, mod
 		%>% summarise_at(c("fit", "lwr", "upr"), mean)
 		%>% mutate(model = modelname, se=NA)
 	)
-	return(list(preds=pred_df, check=check_df))
+	return(pred_df)
+}
+
+binfun <- function(mod, focal, non.focal, bins=50, ...) {
+	mf <- model.frame(mod)
+	mm <- (mf
+		%>% select_at(c(focal, non.focal))
+	)
+	check_df <- (mf
+		%>% arrange_at(focal)
+		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
+		%>% group_by(bin)
+		%>% summarise_all(mean)
+		%>% mutate(model="binned")
+	)
+	return(check_df)
 }
 
 ```
@@ -160,15 +168,15 @@ popavefun <- function(mod, focal, non.focal, level=0.95, steps=100, bins=50, mod
 simple_vareff_age <- varpred(simple_mod, "age", isolate=FALSE, modelname="varpred")
 
 ## Pop. average
-simple_vareff_age_pop <- varpred(simple_mod, "age", isolate=FALSE, pop.ave=TRUE, modelname="Pop. ave")
-# simple_vareff_age_pop <- popavefun(simple_mod, "age", "wealthindex", modelname = "Pop. ave") 
-# binned_df <- simple_vareff_age_pop$check
+simple_vareff_age_pop <- varpred(simple_mod, "age", isolate=FALSE, pop.ave="quantile", modelname="quantiles")
+binned_df <- binfun(simple_mod, "age", "wealthindex")
 
 vareff_age <- simple_vareff_age
 vareff_age$preds <- do.call("rbind", list(vareff_age$preds, simple_vareff_age_pop$preds))
 age_plot <- (plot(vareff_age)
  	+ labs(y="Prob. of improved \n service", colour="Model")
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
 	+ scale_colour_manual(values=c("black", "blue", "red", "green"))
 	+ theme(legend.position="bottom")
 )
@@ -182,15 +190,15 @@ age_plot <- (plot(vareff_age)
 simple_vareff_wealthindex <- varpred(simple_mod, "wealthindex", isolate=FALSE, modelname="varpred")
 
 ## Pop. average
-simple_vareff_wealthindex_pop <- varpred(simple_mod, "wealthindex", isolate=FALSE, pop.ave=TRUE, modelname="Pop. ave")
-# binned_df <- simple_vareff_wealthindex_pop$check
+simple_vareff_wealthindex_pop <- varpred(simple_mod, "wealthindex", isolate=FALSE, pop.ave="quantile", modelname="quantiles")
+binned_df <- binfun(simple_mod, "wealthindex", "age")
 
 vareff_wealthindex <- simple_vareff_wealthindex
 vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, simple_vareff_wealthindex_pop$preds))
 wealthindex_plot <- (plot(vareff_wealthindex)
  	+ labs(y="", colour="Model")
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-#	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
+	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
 	+ scale_colour_manual(values=c("black", "blue", "red"))
 	+ theme(legend.position="bottom")
 )
@@ -273,13 +281,15 @@ Variable effect plots
 reff_vareff_age <- varpred(reff_mod, "age", isolate=FALSE, modelname="varpred")
 
 ## Pop. average
-reff_vareff_age_pop <- varpred(reff_mod, "age", isolate=FALSE, pop.ave=TRUE, modelname = "Pop. ave")
+reff_vareff_age_pop <- varpred(reff_mod, "age", isolate=FALSE, pop.ave="quantile", include.re=TRUE, modelname = "quantiles")
+binned_df <- binfun(reff_mod, "age", "wealthindex")
 
 vareff_age <- reff_vareff_age
 vareff_age$preds <- do.call("rbind", list(vareff_age$preds, reff_vareff_age_pop$preds))
 age_plot <- (plot(vareff_age)
  	+ labs(y="Prob. of improved \n service", colour="Model")
 	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
+	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
 	+ scale_colour_manual(values=c("black", "blue", "red"))
 	+ theme(legend.position="bottom")
 )
@@ -287,19 +297,21 @@ age_plot <- (plot(vareff_age)
 
 - Wealth index
 
-```{r reff_vareff_wealthindex, fig.cap = "A comparison of population average and varpred based predictions. In the case of age, both methods seems to over-approximate the predictions."} 
+```{r reff_vareff_wealthindex, fig.cap = "A comparison of quantile and varpred based predictions. In both cases, varpred seems to over-approximate the predictions."} 
 # Wealth index
 ## varpred
 reff_vareff_wealthindex <- varpred(reff_mod, "wealthindex", isolate=FALSE, modelname="varpred")
+binned_df <- binfun(reff_mod, "wealthindex", "age")
 
 ## Pop. average
-reff_vareff_wealthindex_pop <- varpred(reff_mod, "wealthindex", isolate=FALSE, pop.ave=TRUE, modelname="Pop. ave")
+reff_vareff_wealthindex_pop <- varpred(reff_mod, "wealthindex", isolate=FALSE, pop.ave="quantile", include.re=TRUE, modelname="quantiles")
 
 vareff_wealthindex <- reff_vareff_wealthindex
 vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_pop$preds))
 wealthindex_plot <- (plot(vareff_wealthindex)
  	+ labs(y="", colour="Model")
 	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
+	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
 	+ scale_colour_manual(values=c("black", "blue", "red"))
 	+ theme(legend.position="bottom")
 )

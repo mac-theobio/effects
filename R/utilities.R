@@ -130,7 +130,7 @@ matrix.to.df <- function(matrix, colclasses){
 }
 
 clean_model <- function(focal.predictors, mod, xlevels = list()
-	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean, vnames, which.interaction, pop.ave=FALSE){
+	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean, vnames, which.interaction, pop.ave){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
 
@@ -221,9 +221,11 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
-			 if (pop.ave) {
+			 if (pop.ave=="quantile") {
 			 	quant <- seq(0, 1, length.out=steps)
 			 	as.vector(quantile(X[,name], quant))
+			 } else if (pop.ave=="population") {
+			 	as.vector(X[, name])
 			 } else {
 			 	seq(min(X[, name]), max(X[, name]), length.out=steps)
 			 }
@@ -246,7 +248,7 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     level <- if (fac) {
 	 	levels[1]
 	 } else {
-	 	if (pop.ave) {
+	 	if (pop.ave=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
 			as.vector(quantile(X[,name], quant))	
 		} else {
@@ -270,7 +272,7 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
       predict.data[i,j] <- x[[j]]$levels[subs[j]]
     }
     if (n.excluded > 0) {
-		if (pop.ave) {
+		if (pop.ave=="quantile") {
       	predict.data[i, (n.focal + 1):n.vars] <- excluded[i, ]
 		} else {
       	predict.data[i, (n.focal + 1):n.vars] <- excluded
