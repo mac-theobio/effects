@@ -251,6 +251,8 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
 	 	if (pop.ave=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
 			as.vector(quantile(X[,name], quant))	
+		} else if (pop.ave=="population") {
+			as.vector(X[, name])
 		} else {
 			typical(X[, name])	
 		}
@@ -266,14 +268,15 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
   n.vars <- n.focal + n.excluded
   predict.data <-matrix('', len, n.vars)
   excluded <- sapply(x.excluded, function(x) x$level)
+  if (is.list(excluded)) excluded <- do.call("cbind", excluded)
   for (i in 1:len){
     subs <- subscripts(i, dims)
     for (j in 1:n.focal){
       predict.data[i,j] <- x[[j]]$levels[subs[j]]
     }
     if (n.excluded > 0) {
-		if (pop.ave=="quantile") {
-      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i, ]
+		if (pop.ave=="quantile" || pop.ave=="population") {
+      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i,]
 		} else {
       	predict.data[i, (n.focal + 1):n.vars] <- excluded
 		}

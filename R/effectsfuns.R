@@ -142,14 +142,14 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	}
 	
 	if (pop.ave=="quantile") {
-		mf <- mf[, c(x.var, colnames(mf)[!colnames(mf) %in% x.var])]
+		mf <- mf[, c(x.var, colnames(mf)[!colnames(mf) %in% x.var]), drop=FALSE]
 		quant <- seq(0, 1, length.out=steps)
 		if (inherits(mod, c("glmmTMB", "lme4", "glmerMod"))) {
-			ran_eff <- ranef(mod)$cond
-			rand_eff <- do.call("cbind", ran_eff)
-			re <- as.vector(getME(mod, "Z") %*% as.matrix(rand_eff))
+			ran_eff <- as.data.frame(ranef(mod))
+			ran_eff <- ran_eff[, "condval", drop=FALSE]
+			re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
 			re <- as.vector(quantile(re, quant))
-			mf$rezzz <- re
+			mf$..rezzz <- re
 			mf <- do.call("expand.grid", mf)
 			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
 			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
@@ -157,7 +157,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 				, typical, apply.typical.to.factors = FALSE
 			)
 			if (include.re) {
-				pred <- mm %*% betahat + mf$rezzz
+				pred <- mm %*% betahat + mf$..rezzz
 			} else {
 				pred <- mm %*% betahat
 			}
@@ -215,17 +215,46 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	}
   	
 	if (pop.ave=="population") {
-		pred <- mod.matrix.all %*% betahat
-		mm <- mod.matrix.all
+		quant <- seq(0, 1, length.out=steps)
+		..x_quant <- mf[[x.var]]
+		..x_quant <- as.vector(quantile(..x_quant, quant))
+		mf <- mf[, colnames(mf)[!colnames(mf) %in% x.var], drop=FALSE]
+		mf_list <- list()
+		mf_list[[x.var]] <- ..x_quant
+		mf_list <- c(mf_list, as.list(mf))
+		mf <- mf_list
 		if (inherits(mod, c("glmmTMB", "lme4", "glmerMod"))) {
+			ran_eff <- ranef(mod)
+			ran_eff <- as.data.frame(ranef(mod))
+			ran_eff <- ran_eff[, "condval", drop=FALSE]
+			re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
+			re <- as.vector(quantile(re, quant))
+			mf$..rezzz <- re
+			mf <- do.call("expand.grid", mf)
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+			mm <- mod.matrix
+			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+				, factor.cols, cnames, focal.predictors, excluded.predictors
+				, typical, apply.typical.to.factors = FALSE
+			)
 			if (include.re) {
-				ran_eff <- ranef(mod)$cond
-				rand_eff <- do.call("cbind", ran_eff)
-				re <- as.matrix(as.vector(getME(mod, "Z") %*% as.matrix(rand_eff)), ncol=1)
-				pred <- pred + re
+				pred <- mm %*% betahat + mf$..rezzz
+			} else {
+				pred <- mm %*% betahat
 			}
-			
+		} else {
+			mf <- do.call("expand.grid", mf)
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+				, factor.cols, cnames, focal.predictors, excluded.predictors
+				, typical, apply.typical.to.factors = FALSE
+			)
+			mm <- mod.matrix
+			pred <- mm %*% betahat
 		}
+		x[[x.var]]$levels <- unique(mf[[x.var]])
+		x[[x.var]] <- mf[[x.var]]
+		predict.data <- mf
 	} else if (pop.ave=="none") {
 		pred <- mm %*% betahat
 	}
@@ -318,24 +347,10 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if (pop.ave=="quantile"){
+	if (pop.ave=="quantile" || pop.ave=="population"){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
-	} else if (pop.ave=="population") {
-		probs <- seq(0, 1, length.out=steps)
-		x_temp <- out$x[[out$x.var]]
-		quant <- quantile(x_temp, probs)
-		cats <- cut(x_temp, breaks = quant)
-		result1 <- list()
-		result1[[out$x.var]] <- seq(min(x_temp), max(x_temp), length.out=steps-1)
-		result2 <- sapply(c("fit", "se", "lwr", "upr"), function(xx){
-			val <- result[[xx]]
-			out <- as.vector(tapply(val, list(cats), mean))
-			return(out)
-		}, simplify = FALSE)
-		result1[names(result2)] <- result2
-		result <- as.data.frame(do.call("cbind", result1))
-	}
+	} 
 
 	if (!is.null(modelname)) {
 		result$model <- modelname
