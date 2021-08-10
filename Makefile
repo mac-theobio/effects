@@ -96,6 +96,8 @@ Sources += *.rmd
 bias_correction.pdf: bias_correction.rmd
 	$(knitpdf)
 
+taylor.Rout: taylor.R
+
 ## JD: How are these made?
 Ignore += simple_pred_spec_plot1.pdf simple_pred_spec_plot2.pdf
 
