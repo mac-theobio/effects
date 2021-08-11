@@ -1,0 +1,67 @@
+---
+title: "Nonlinear transformations and bias correction"
+---
+
+Generating predictions and confidence intervals of predictions for regression models is surprisingly hard. A short list of the challenges:
+
+- dealing with multiple predictor variables: choosing representative values for one or more 'focal variables' and choosing an appropriate 'model center' for non-focal variables
+- Jensen's inequality and bias in the mean induced by nonlinear transformations of the response variable (e.g., link functions in GLM(M)s)
+- propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? should we exclude variation in non-focal parameters (JD-style effect plots)? Can we avoid assuming a Gaussian sampling distribution of the uncertainty, e.g. by importance sampling?) (Many but not necessarily all of these issues are resolved by moving to Bayesian sampling-based approaches, at the cost of additional (explicit) assumptions and computational effort.)
+
+More broadly:
+
+- what questions do we want to ask (this implicitly determines answers to questions about where the model center should be)?
+- what assumptions are we willing to make (multivariate normality, weak nonlinearity [for delta-method approximations], independence of non-focal variables?)
+
+Note that we will be interested in/concerned about the distribution of the predictors (we have the distribution represented by our sample; we may want to treat this as a sample from an underlying distribution, e.g. multivariate Normal or something else, both for computational convenience and in order to get a smoother prediction) as well as the sampling distribution of the coefficients (which we will often assume is multivariate Normal for convenience). Random-effects coefficients are an interesting case; they are coefficients, but we could also treat them as part of a population sample. (We usually assume that random-effects coefficients are independent of everything else.)
+
+In what follows let's say we have a focal predictor $x_f$ and a set of non-focal predictors $x_\{n\}$ (and without loss of generality, the focal predictor is first in the vector of predictors).
+
+## Population-based approach
+
+\newcommand{\bX}{{\mathbf X}}
+\newcommand{\bbeta}{{\boldsymbol \beta}}
+\newcommand{\boldeta}{{\boldsymbol \eta}}
+
+The most precise (although not necessarily accurate!) way to predict is to condition on a value $F$ of the focal predictor and make predictions for all observations (members of the population) for which $x_f = F$ (or in a small range around $F$ ...). The linear predictor values are $\boldeta = (F,\bX_\{-f\}) \bbeta$. 
+
+Closed form integral of Gaussian over logistic curve?
+
+We are interested in the mean of logistic(gaussian)
+
+Tried it in Python (and Wolfram Alpha). This is just to reiterate what we knew already, which is that the logistic-normal doesn't have a closed form solution (WA can actually do the non-generic case (standard Normal), which sympy can't, but even WA breaks down for non-standard Normal case.
+
+```{python}
+from sympy import *
+x = Symbol('x')
+integrate(exp(-(x**2))/(1+exp(-x)), (x, -oo, oo))
+```
+
+A [CrossValidated question](https://stats.stackexchange.com/questions/45267/expected-value-of-a-gaussian-random-variable-transformed-with-a-logistic-functio) about calculating this transformation (and various interesting series approximations etc., although these are very likely not worth the trouble).  Turns out that if we don't want to use the delta method there is an existing package that codes up the mean & variance of the logistic-normal:
+
+```{r mln_ex, eval=FALSE}
+logitnorm::momentsLogitnorm(mu= 2, sigma = 2)
+##       mean        var 
+## 0.77520025 0.06186495
+x <- rnorm(1e5, 2, 2)
+x <- scale(x)*2 + 2 ## exact moments
+mean(x)
+mean(plogis(x))
+plogis(mean(x))
+deltamethod(1/(1+exp(-x)), x, max.order=2)
+```
+
+although the entire function definition is not very complicated, we don't really need a package for this ...
+
+```{r mln}
+function (mu, sigma, abs.tol = 0, ...) {
+    fExp <- function(x) plogis(x) * dnorm(x, mean = mu, sd = sigma)
+    .exp <- integrate(fExp, -Inf, Inf, abs.tol = abs.tol, ...)$value
+    fVar <- function(x) (plogis(x) - .exp)^2 * dnorm(x, mean = mu, 
+        sd = sigma)
+    .var <- integrate(fVar, -Inf, Inf, abs.tol = abs.tol, ...)$value
+    c(mean = .exp, var = .var)
+}
+```
+
+Further thoughts about my scribbles: the covariances of the design matrix do almost certainly differ if we condition on values/ranges of a focal predictor, e.g. if vars A and B are strongly correlated and we select a narrow range for A (the focal var), then the variance of B in that slice will inevitably be reduced.  Don't know if there are closed-form solutions for this (even assuming multivariate normality).
