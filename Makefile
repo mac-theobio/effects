@@ -98,6 +98,14 @@ bias_correction.pdf: bias_correction.rmd
 
 taylor.Rout: taylor.R
 
+## Second-order approximation
+second_order_correction.pdf: second_order_correction.rmd
+	$(knitpdf)
+
+## BB notes
+logist_normal_bias.html: logist_normal_bias.Rmd
+	$(knithtml)
+
 ## JD: How are these made?
 Ignore += simple_pred_spec_plot1.pdf simple_pred_spec_plot2.pdf
 

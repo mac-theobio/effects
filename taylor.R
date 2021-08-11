@@ -1,8 +1,8 @@
 
-set.seed(477)
+set.seed(1011)
 
 b_0 <- 6
-b_1 <- 0.1
+b_1 <- 5
 
 x <- scale(rnorm(100))
 ell <- b_0 + b_1*x
@@ -14,6 +14,9 @@ ellpp <- unc^2*exp(-m_l)*(2*exp(-m_l)*unc - 1)
 
 mean = mean(plogis(ell))
 cor = unc + ellpp*s_l^2/2
+mean
+unc
+cor
 
 print(c(NULL
 	, delta = mean - unc
