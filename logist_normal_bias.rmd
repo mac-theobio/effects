@@ -23,7 +23,31 @@ In what follows let's say we have a focal predictor $x_f$ and a set of non-focal
 \newcommand{\bbeta}{{\boldsymbol \beta}}
 \newcommand{\boldeta}{{\boldsymbol \eta}}
 
-The most precise (although not necessarily accurate!) way to predict is to condition on a value $F$ of the focal predictor and make predictions for all observations (members of the population) for which $x_f = F$ (or in a small range around $F$ ...). The linear predictor values are $\boldeta = (F,\bX_\{-f\}) \bbeta$. 
+The most precise (although not necessarily accurate!) way to predict is to condition on a value $F$ of the focal predictor and make predictions for all observations (members of the population) for which $x_f = F$ (or in a small range around $F$ ...). The linear predictor values are $\boldeta = (F,\bX_{\{-f\}}) \bbeta$. 
+A key point is that the nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population (e.g. all individuals with $x_f = F$) to a one-dimensional distribution of $\eta$.
+
+Once we've got our vector of $\boldeta$ (which is essentially a set of samples from the distribution over $\eta$ for the conditional set), we want a mean and confidence intervals on the mean on the response (data) scale, i.e. after back-transforming. Most precisely the mean is $\int P(\eta') g^{-1}(\eta') d\,\eta$.
+
+- if we use the observations themselves then we just compute the individual values of $g^{-1}(\eta)$ and compute their mean
+- we could compute the quantiles of the distribution of $\eta$ and use this to construct an approximate Riemann sum over the distribution ($\sum g^{-1}(Q_i(\eta))/n_Q$ ?)
+- compute the mean and variance of the $\eta$ values, assume Normality (or some other distribution we like), and integrate numerically 
+- for some inverse-link functions like the exponential (but not logistic), there's a closed-form solution
+- assume Normality, use Gaussian quadrature instead of brute-force numerical integration
+- assume Normality, use the delta-method (second-order Taylor) approximation
+
+What about the confidence intervals? The limits of the confidence intervals are points, not mean values. In principle, every observation/set of non-focal predictors has a different CI.  The predictions are $\bX \bbeta$; the variances of the predictions are $\textrm{Diag}(\bX \Sigma \bX^\top)$ (I think [this can be computed more efficiently since we only want the diagonal: see [here](https://stackoverflow.com/questions/56962209/compact-efficient-replacement-for-diagx-v-xt)]). I'm not sure how to combine these: do we take the distributions of the upper/lower CIs (e.g. Wald intervals using $\pm q \sigma$ where $q$ is an appropriate quantile of the Normal or t distribution) and find their transformed mean values in the same way? ??? If we consider only the uncertainty of the focal predictor, so that the confidence intervals are $\eta \pm q \sigma_f$, we still have the same question of how to condense the set of endpoints.
+
+If we compute the individual back-transformed predictions for a poorly sampled/finely spaced set of focal values, we will get a noisy prediction line as the values of the non-focal predictors shift across the focal values. (Simple example: suppose everyone below the median age has wealth index $w_1$, everyone above the median has $w_2$.  Then the predicted value will have a discontinuity at the median age.) We can deal with this by taking bigger bins (a form of smoothing), or by post-smoothing the results (by loess or something). The principled form of this would be to assume/recognize that our uneven distribution of observed non-focal predictors actually represents a sample of a distribution that will vary \emph{smoothly} as a function of the focal predictor.
+
+## Full-normal approximation
+
+Suppose we assume that the full distribution of all of the predictors is multivariate Normal. Then for a fixed value of $x_f = F$ the conditional distribution of the non-focal predictors is also MVN with mean and covariance matrix we can get from [Wikipedia](https://en.wikipedia.org/wiki/Multivariate_normal_distribution#Conditional_distributions) [!!] (see also lots of answers from [this twitter thread](https://twitter.com/bolkerb/status/1425546539833995266), including [this blog post](https://fabiandablander.com/statistics/Two-Properties.html)). Once we know the mean and variance of the predictors we can directly compute the mean and variance of the linear predictor (mean is $\bX' \bbeta$ as before, variance is $\bbeta \Sigma' \bbeta\top$), and proceed as above.
+
+## Links to MRP
+
+What does MRP do about this?  Does the Bayesian averaging over uncertainty somehow smooth over the population distribution? Or do they directly construct an estimate of the population-level distributions of predictors?
+
+## junk
 
 Closed form integral of Gaussian over logistic curve?
 
@@ -31,27 +55,27 @@ We are interested in the mean of logistic(gaussian)
 
 Tried it in Python (and Wolfram Alpha). This is just to reiterate what we knew already, which is that the logistic-normal doesn't have a closed form solution (WA can actually do the non-generic case (standard Normal), which sympy can't, but even WA breaks down for non-standard Normal case.
 
-```{python}
+```{python integrate}
 from sympy import *
 x = Symbol('x')
 integrate(exp(-(x**2))/(1+exp(-x)), (x, -oo, oo))
 ```
 
-A [CrossValidated question](https://stats.stackexchange.com/questions/45267/expected-value-of-a-gaussian-random-variable-transformed-with-a-logistic-functio) about calculating this transformation (and various interesting series approximations etc., although these are very likely not worth the trouble).  Turns out that if we don't want to use the delta method there is an existing package that codes up the mean & variance of the logistic-normal:
+A [CrossValidated question](https://stats.stackexchange.com/questions/45267/expected-value-of-a-gaussian-random-variable-transformed-with-a-logistic-functio) about calculating this transformation (and various interesting series approximations etc., although these are very likely not worth the trouble).  Turns out that if we don't want to use the delta method there is an existing package that codes up the mean & variance of the logistic-normal (exact, up to integration accuracy):
 
-```{r mln_ex, eval=FALSE}
+```{r mln_ex}
 logitnorm::momentsLogitnorm(mu= 2, sigma = 2)
-##       mean        var 
-## 0.77520025 0.06186495
 x <- rnorm(1e5, 2, 2)
 x <- scale(x)*2 + 2 ## exact moments
-mean(x)
-mean(plogis(x))
-plogis(mean(x))
-deltamethod(1/(1+exp(-x)), x, max.order=2)
+mean(x)  
+mean(plogis(x))  ## correct value
+plogis(mean(x))  ## naive value
+emdbook::deltamethod(1/(1+exp(-x)), x)
+## The `delta2` value is supposedly a higher-order Taylor expansion/correction, but a little bit of poking around suggests these are bogus/possibly wrong ...
 ```
 
-although the entire function definition is not very complicated, we don't really need a package for this ...
+
+The entire `mln()` function definition is not very complicated, we don't really need a package for this ...
 
 ```{r mln}
 function (mu, sigma, abs.tol = 0, ...) {
@@ -63,5 +87,3 @@ function (mu, sigma, abs.tol = 0, ...) {
     c(mean = .exp, var = .var)
 }
 ```
-
-Further thoughts about my scribbles: the covariances of the design matrix do almost certainly differ if we condition on values/ranges of a focal predictor, e.g. if vars A and B are strongly correlated and we select a narrow range for A (the focal var), then the variance of B in that slice will inevitably be reduced.  Don't know if there are closed-form solutions for this (even assuming multivariate normality).
