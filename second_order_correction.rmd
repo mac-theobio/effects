@@ -71,6 +71,7 @@ out <- c(NULL
 )
 print(out)
 logitnorm::momentsLogitnorm(mu= mean(eta), sigma = sd(eta))
+emdbook::deltamethod(1/(1+exp(-x)), eta)
 ```
 
 **??**
