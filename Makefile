@@ -97,13 +97,14 @@ bias_correction.pdf: bias_correction.rmd
 	$(knitpdf)
 
 taylor.Rout: taylor.R
+delta.Rout: delta.R
 
 ## Second-order approximation
 second_order_correction.pdf: second_order_correction.rmd
 	$(knitpdf)
 
 ## BB notes
-logist_normal_bias.html: logist_normal_bias.Rmd
+logist_normal_bias.html: logist_normal_bias.rmd
 	$(knithtml)
 
 ## JD: How are these made?

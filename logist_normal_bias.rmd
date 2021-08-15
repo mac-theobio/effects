@@ -55,7 +55,7 @@ We are interested in the mean of logistic(gaussian)
 
 Tried it in Python (and Wolfram Alpha). This is just to reiterate what we knew already, which is that the logistic-normal doesn't have a closed form solution (WA can actually do the non-generic case (standard Normal), which sympy can't, but even WA breaks down for non-standard Normal case.
 
-```{python integrate}
+```{python3 integrate}
 from sympy import *
 x = Symbol('x')
 integrate(exp(-(x**2))/(1+exp(-x)), (x, -oo, oo))
