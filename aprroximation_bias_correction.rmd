@@ -1,0 +1,248 @@
+---
+title: "Taylor approximation - based methods for bias correction"
+author: Bicko, Jonathan & Ben
+date: "2021 Aug 11 (Mon)"
+compact-title: false
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(fig.pos = "H", out.extra = "")
+
+library(glmmTMB)
+library(dplyr)
+library(ggplot2)
+library(vareffects); varefftheme()
+library(ggpubr)
+set.seed(1011)
+
+prob2logit <- function(x)log(x / (1 - x))
+```
+
+\section{Introduction}
+
+We consider two approaches:
+
+\begin{itemize}
+\item Second order Taylor approximation
+\item Delta method
+\end{itemize}
+
+and then compare our approximations to _closed form integral of Gaussian over logistic curve_.
+
+
+\subsection{Second order Taylor approximation}
+
+We consider Taylor series approximation approach for bias correction. Suppose $f(.)$ represents a back-transformation function, $\mu$ the mean and $\sigma^2_\mu$ on the linear predictor scale (**univariate case** // **what happens in multivariate case?**) predictor. Then using Taylor expansion around $\mu$, the approximation on the original scale is given by
+
+\[
+f(\mu) + \frac{1}{2}\sigma^2_{\mu}f''(\mu)
+\]
+
+To start with, we consider logistic function 
+
+\[
+g(\mu) = \frac{1}{1 + \exp(-\mu)},
+\]
+with the first and second derivatives give by
+
+\[
+g'(\mu) = g(\mu)(1 - g(\mu))
+\]
+and 
+
+\[
+g''(\mu) = g(\mu)g(-\mu)(1 - 2g(\mu))
+\]
+respectively. 
+
+```{r taylor_fun}
+taylorapprox <- function(fun, var="x", mu, sigma, ...) {
+	ff <- as.expression(substitute(fun))
+	x <- mu
+	untrans <- eval(ff, list(x))
+	der <- D(ff, var)		# 1s derivative
+	der2 <- D(der, var)	# 2nd derivative
+	der2 <- eval(der2, list(x))
+	corrected <- untrans + der2*sigma^2/2
+	return(corrected)
+}
+```
+
+\subsection{Delta method}
+
+Consider a first order Taylor approximation of $f(.)$ about the mean $\mu$, evaluated at the random variable $x_i$ defined as:
+
+\[
+f(x_i) \approx f(\mu) + f'(x_i)(x_i - \mu)
+\]
+with a variance of 
+
+\[
+\mbox{Var}\left(f(x_i)\right) = f'(\mu)\mbox{Var}(x_i)f'(\mu)
+\]
+
+
+```{r deltaapprox}
+deltaapprox <- function(fun, var="x", z, ...) {
+	ff <- as.expression(substitute(fun))
+	der <- D(ff, var)
+	x <- z
+	ymu <- eval(ff, list(x))
+	x <- mean(z)
+	der <- eval(der, list(x))
+	y <- ymu + der * (z - x)
+	yvar <- der * var(z) * der		# Check with BB
+	out <- list(fx = y, var = yvar)
+	return(out)
+}
+```
+
+Let us consider a simple univariate case
+
+```{r simple_univariate}
+b0 <- 6
+b1 <- 5
+N <- 100
+x <- scale(rnorm(N))
+eta <- b0 + b1*x
+
+taylor <- taylorapprox(fun=1/(1+exp(-x)), mu=mean(eta), sigma=sd(eta))
+delta <- deltaapprox(fun=1/(1+exp(-x)), z=eta)
+normal_approx <- logitnorm::momentsLogitnorm(mu= mean(eta), sigma = sd(eta))
+out <- c(NULL
+	, truth = mean(plogis(eta))
+	, naive = plogis(mean(eta))
+	, taylor = taylor
+	, delta = mean(delta$fx)
+	, normal = normal_approx[[1]]
+)
+print(out)
+delta$var
+normal_approx[[2]]
+```
+
+Simple logistic model example
+
+```{r simple_sim}
+N <- 1e4
+beta0 <- 0.7
+betaA <- 0.2
+betaW <- 0.5
+
+age_max <- 1
+age_min <- 0.2
+age <- runif(N, age_min, age_max)
+# age <- rnorm(N, age_max, age_max)
+
+wealthindex <- rnorm(N, 0, 1)
+
+eta <- beta0 + betaA * age + betaW * wealthindex
+sim_df <- (data.frame(age=age, wealthindex=wealthindex, eta=eta)
+	%>% mutate(status = rbinom(N, 1, plogis(eta)))
+	%>% select(-eta)
+)
+true_prop <- mean(sim_df$status)
+print(true_prop)
+```
+
+```{r simple_logistic}
+simple_mod <- glm(status ~ age + wealthindex, data = sim_df, family="binomial")
+```
+
+
+Applying `taylor`, `delta` and `normal approximation` method 
+
+```{r generate_pred}
+genpred <- function(mod, focal, non.focal, level=0.95, steps=100, pop=FALSE, bias.adjust=c("none", "delta", "normal", "taylor"), modelname="none", ...) {
+	
+	bias.adjust <- match.arg(bias.adjust)
+	mf <- model.frame(mod)
+	mm <- (mf
+		%>% select_at(c(focal, non.focal))
+	)
+	quant <- seq(0, 1, length.out=steps)
+	mm1 <- sapply(focal, function(x)as.vector(quantile(mm[,x], quant)), simplify = FALSE)
+	if (pop) {
+		mm1[[non.focal]] <- mm[[non.focal]]
+		mm <- do.call("expand.grid", mm1)
+		mm <- model.matrix(formula(mod)[c(1,3)], mm)
+	} else {
+		mm2 <- sapply(non.focal, function(x)mean(mm[,x]), simplify = FALSE)
+		mm <- do.call("data.frame", c(mm1, mm2))
+		mm <- model.matrix(formula(mod)[c(1,3)], mm)
+	}
+	linpred <- as.vector(mm %*% coef(mod))
+	out <- (mm
+		%>% data.frame()
+		%>% select_at(focal)
+		%>% mutate(lp = linpred, model=modelname)
+	)
+
+	if (bias.adjust=="delta") {
+		out <- (out
+			%>% mutate(fit=deltaapprox(fun=1/(1+exp(-x)), z=lp)$fx)
+		)
+	} else if (bias.adjust=="taylor") {
+		vc <- vcov(mod)
+		pse_var <- sqrt(rowSums(mm * t(tcrossprod(data.matrix(vc), mm))))
+		lp <- out$lp
+		fit <- unlist(lapply(1:length(lp), function(i){
+			taylorapprox(fun=1/(1+exp(-x)), mu=lp[[i]], sigma=pse_var[[i]])
+		}))
+		out <- (out
+			%>% select(-lp)
+			%>% mutate(fit = fit) 
+		)
+	}	else if (bias.adjust=="normal") {
+		vc <- vcov(mod)
+		pse_var <- sqrt(rowSums(mm * t(tcrossprod(data.matrix(vc), mm))))
+		lp <- out$lp
+		fit <- unlist(lapply(1:length(lp), function(i){
+			logitnorm::momentsLogitnorm(mu = lp[[i]], sigma = pse_var[[i]])[[1]]
+		}))
+		out <- (out
+			%>% select(-lp)
+			%>% mutate(fit = fit) 
+		)
+	} else if (bias.adjust=="none") {
+		out <- (out
+			%>% mutate(fit = plogis(lp)) 
+		)
+	}
+	if (pop) {
+		out <- (out
+			%>% group_by_at(focal)
+			%>% summarise_at("fit", mean)
+			%>% mutate(model=modelname)
+		)
+	}
+	return(out)
+}
+
+## Population averaging
+pop_none <- genpred(simple_mod, "age", "wealthindex", pop=TRUE, bias.adjust="none", modelname="pop-none")
+pop_delta <- genpred(simple_mod, "age", "wealthindex", pop=TRUE, bias.adjust="delta", modelname="pop-delta")
+
+## Averaged // centered??
+centered_none <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="none", modelname="centered-none")
+centered_delta <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="delta", modelname="centered-delta")
+centered_taylor <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="taylor", modelname="centered-taylor")
+
+```
+
+```{r simple_preds}
+p1 <- (ggplot(pop_none, aes(x=age, y=fit, colour=model))
+	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+	+ geom_line()
+	+ geom_line(data=pop_delta, aes(x=age, y=fit, colour=model))
+	+ geom_line(data=centered_none, aes(x=age, y=fit, colour=model))
+	+ geom_line(data=centered_delta, aes(x=age, y=fit, colour=model))
+	+ geom_line(data=centered_taylor, aes(x=age, y=fit, colour=model))
+	+ scale_colour_manual(values=c("blue", "red", "black", "orange", "purple"))
+	+ theme(legend.position="right")
+)
+print(p1)
+```

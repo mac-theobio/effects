@@ -100,7 +100,7 @@ taylor.Rout: taylor.R
 delta.Rout: delta.R
 
 ## Second-order approximation
-second_order_correction.pdf: second_order_correction.rmd
+aprroximation_bias_correction.pdf: aprroximation_bias_correction.rmd
 	$(knitpdf)
 
 ## BB notes
