@@ -87,3 +87,30 @@ function (mu, sigma, abs.tol = 0, ...) {
     c(mean = .exp, var = .var)
 }
 ```
+
+## Prediction vs effects plots
+
+The purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors ("what is the expected probability of having clean water for a 25-year-old male"?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.)
+
+In contrast, an *effects plot* is supposed to show the *marginal effect* (in the economics/differential sense) of varying the focal parameter(s). This means, technically that we want the *derivative* (and its uncertainty) with respect to the focal parameters to match that predicted by the model. 
+
+* Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, *on the linear predictor scale*, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative ($\beta_f = d\eta/dx_f$) and the derivative of the inverse link function at the point ($dg^{-1}(\eta)/d\eta$, which is the `mu.eta` component of a `family` object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose $\hat \beta_f(x_n)$ is the derivative for a particular set of non-focal parameters (i.e. $\beta_f + \sum \beta_{fi} x_i$ where the second term is the sum of the relevant interaction coefficients)
+
+$$
+\overline{\frac{d \mu}{dx}} = \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, d x_n
+$$
+
+This seems to be linear in $x_n$, so I think we get to *not* worry about averaging effects here?
+
+It seems that the appropriate computed value (y-axis height) of the effects plot at a given value of $x$ is 
+$$
+\begin{split}
+ & y_{\textrm{ref}} + \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, dx_f \\
+ = & y_{\textrm{ref}} + \frac{dg^{-1}(\eta)}{d\eta} \overline{\hat \beta_f} \\
+ \approx & y_{\textrm{ref}} + \sum \frac{dg^{-1}(\eta(x_f,\bar x_n))}{d\eta} \hat \beta_f(\bar x_n) \, \Delta x_f
+\end{split}
+$$
+
+in other words, start from the appropriately bias-corrected value on the response scale at the central value of $x_f$ ($y_{\textrm{ref}}$).  For every step $\Delta x_f$, calculate the value of the slope (including interactions) at the *mean value of the non-focal parameters conditional on the current value of $x_f$*. (If there are no interactions, this reduces to $\beta_f$.) Calculate the linear predictor, again based on the conditional mean value of the non-focal predictors; use it to compute the expansion factor (derivative of the inverse-link function). Take the product of the slope, the expansion factor, and $\Delta x_f$; add to the integrand and repeat.
+
+The good news is that we don't have to fart around with logistic-normal integrals etc. except when we are computing $y_{\textrm{\ref}}$. The bad news is that the effect plot computed this way will only agree with the prediction plot in special cases ...
