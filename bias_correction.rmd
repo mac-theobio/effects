@@ -499,9 +499,9 @@ reff_vareff_age_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, modelname=
 
 ## Pop. average
 ### Quantiles
-reff_vareff_age_quant_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, pop.ave="quantile", modelname="quantiles")
+reff_vareff_age_quant_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, include.re=TRUE, pop.ave="quantile", modelname="quantiles")
 ### Population
-reff_vareff_age_pop_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, pop.ave="population", modelname="Population")
+reff_vareff_age_pop_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, include.re=TRUE, pop.ave="population", modelname="Population")
 binned_df <- binfun(reff_mod_multi, focal = "age", non.focal = c("expenditure", "wealthindex"), bins=50)
 
 vareff_age <- reff_vareff_age_multi
@@ -521,9 +521,9 @@ reff_vareff_expenditure_multi <- varpred(reff_mod_multi, "expenditure", isolate=
 
 ## Pop. average
 ### Quantiles
-reff_vareff_expenditure_quant_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, pop.ave="quantile", modelname="quantiles")
+reff_vareff_expenditure_quant_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, pop.ave="quantile", include.re=TRUE, modelname="quantiles")
 ### Population
-reff_vareff_expenditure_pop_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, pop.ave="population", modelname="Population")
+reff_vareff_expenditure_pop_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, pop.ave="population", include.re=TRUE, modelname="Population")
 binned_df <- binfun(reff_mod_multi, focal = "expenditure", non.focal = c("age", "wealthindex"), bins=50)
 
 vareff_expenditure <- reff_vareff_expenditure_multi
