@@ -1,4 +1,39 @@
 # Internal functions used to condition the model. Some of the condition code is based on R package effects (clean_model). Transfered and modified here because they are not exported in effects.
+	
+get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, ...) {
+	
+	if (is.null(vcov.)){
+		vc <- vcov(vareff_objects)
+	} else if (is.function(vcov.)) {
+		vc <- vcov.(mod)
+	} else if (internal) {
+		vc <- zero_vcov(mod, focal_vars=x.var)	
+	} else {
+		vc <- vcov.
+	}
+  	
+	# (Centered) predictions for SEs
+	## Center model matrix
+	if (isolate) {
+		mm_mean <- t(replicate(NROW(mm), col_mean))
+	#	if (any(grepl(":", get_termnames(mod))) & zero_out_interaction){
+	#		vc <- zero_vcov(mod, focal_vars=x.var)
+	#	}
+		if (zero_out_interaction){
+			vc <- zero_vcov(mod, focal_vars=x.var)
+		}
+		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
+			mf[x.var] <- 0*mf[x.var]+isolate.value
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+			col_mean <- apply(mod.matrix, 2, typical)
+			mm_mean <- t(replicate(NROW(mm), col_mean))
+		}
+		mm <- mm - mm_mean
+	}
+#	pse_var <- sqrt(diag(mm %*% tcrossprod(data.matrix(vc), mm)))
+	pse_var <- sqrt(rowSums(mm * t(tcrossprod(data.matrix(vc), mm))))
+	return(pse_var)
+}
 
 get_vnames <- function(mod){
 	mat <- model.matrix(mod)
@@ -261,27 +296,34 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     x.excluded[[name]] <- list(name=name, is.factor=fac,
                                level=level)
   }
-  dims <- sapply(x, function(x) length(x$levels))
-  len <- prod(dims)
   n.focal <- length(focal.predictors)
   n.excluded <- length(excluded.predictors)
   n.vars <- n.focal + n.excluded
-  predict.data <-matrix('', len, n.vars)
-  excluded <- sapply(x.excluded, function(x) x$level)
-  if (is.list(excluded)) excluded <- do.call("cbind", excluded)
-  for (i in 1:len){
-    subs <- subscripts(i, dims)
-    for (j in 1:n.focal){
-      predict.data[i,j] <- x[[j]]$levels[subs[j]]
-    }
-    if (n.excluded > 0) {
-		if (pop.ave=="quantile" || pop.ave=="population") {
-      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i,]
-		} else {
-      	predict.data[i, (n.focal + 1):n.vars] <- excluded
+  if (pop.ave=="none") {
+	  dims <- sapply(x, function(x) length(x$levels))
+	  len <- prod(dims)
+	  predict.data <-matrix('', len, n.vars)
+	  excluded <- sapply(x.excluded, function(x) x$level)
+	  if (is.list(excluded)) excluded <- do.call("cbind", excluded)
+	  for (i in 1:len){
+		 subs <- subscripts(i, dims)
+		 for (j in 1:n.focal){
+			predict.data[i,j] <- x[[j]]$levels[subs[j]]
+		 }
+		 if (n.excluded > 0) {
+	#		if (pop.ave=="quantile" || pop.ave=="population") {
+	#      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i,]
+	#		} else {
+				predict.data[i, (n.focal + 1):n.vars] <- excluded
+	#		}
 		}
-	}
+	  }
+  } else if (pop.ave=="population" || pop.ave=="quantile") {
+	  excluded <- sapply(x.excluded, function(x) x$level, simplify=FALSE)
+	  ..focal <- sapply(focal.predictors, function(j) x[[j]]$levels, simplify=FALSE)
+	  predict.data <- do.call("cbind", c(..focal, excluded))
   }
+
   colnames(predict.data) <- c(sapply(x, function(x) x$name),
                               sapply(x.excluded, function(x) x$name))
   colclasses <- lapply(X, class)

@@ -133,6 +133,11 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 	typical <- avefun
 	mod.matrix.all <- model.matrix(mod)
+	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+	mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
+		, factor.cols, cnames, focal.predictors, excluded.predictors
+		, typical, apply.typical.to.factors = TRUE
+	)
 	
 	if (is.null(x.var) & n.focal>1L) {
 		x.var <- focal.predictors[[2]]
@@ -140,44 +145,93 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	} else if (is.null(x.var)) {
 		x.var <- focal.predictors[[1]]
 	}
+
+	check <- !termnames %in% x.var
+	terms_non.focal <- termnames[check]
+	terms_focal <- termnames[!check]
+	betahat_non.focal <- betahat[check]
+	betahat_focal <- betahat[!check]
+	# Stats
+	mult <- get_stats(mod, level, dfspec)
 	
-	if (pop.ave=="quantile") {
-		mf <- mf[, c(x.var, colnames(mf)[!colnames(mf) %in% x.var]), drop=FALSE]
+	if (pop.ave=="quantile" || pop.ave=="population") {
 		quant <- seq(0, 1, length.out=steps)
-		if (inherits(mod, c("glmmTMB", "lme4", "glmerMod"))) {
-			ran_eff <- as.data.frame(ranef(mod))
-			ran_eff <- ran_eff[, "condval", drop=FALSE]
-			re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
-			re <- as.vector(quantile(re, quant))
-			mf$..rezzz <- re
-			mf <- do.call("expand.grid", mf)
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-				, factor.cols, cnames, focal.predictors, excluded.predictors
-				, typical, apply.typical.to.factors = FALSE
-			)
-			if (include.re) {
-				pred <- mm %*% betahat + mf$..rezzz
-			} else {
-				pred <- mm %*% betahat
-			}
-		} else {
-			mf <- do.call("expand.grid", mf)
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-				, factor.cols, cnames, focal.predictors, excluded.predictors
-				, typical, apply.typical.to.factors = FALSE
-			)
-			pred <- mm %*% betahat
+		mf_x.var <- mf[[x.var]]
+		col_mean <- apply(mm, 2, typical)
+		mm2 <- mm
+		if (isolate) {
+			col_mean[check] <- 0
+			mm2[] <- 0
+			mm2[, terms_focal] <- mm[, terms_focal]
 		}
-#		mm <- mod.matrix
+		if (pop.ave=="population" && !is.factor(mf_x.var)) {
+			mm_x.var <- as.vector(mm[, terms_focal])
+			mm_x.var <- as.vector(quantile(mm_x.var, quant))
+			if (isolate) {
+				mm2 <- mm2[1:steps, , drop=FALSE]
+				mm2[, terms_focal] <- mm_x.var
+			}
+		}
+		if (isolate || is.factor(mf_x.var)) {
+			pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2, col_mean=col_mean, isolate=isolate
+				, isolate.value=isolate.value, vareff_objects=vareff_objects, x.var=x.var
+				, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
+			)
+		}
+		if (include.re) {
+			re <- includeRE(mod)
+		} else {
+			re <- 0
+		}
+		if (is.factor(mf_x.var)) {
+			pred <- mm %*% betahat + re
+		} else {
+			if (length(re)>1) {
+				if (pop.ave=="quantile") {
+					re <- as.vector(quantile(re, quant))
+				} 
+			}
+			mm_non.focal <- mm[, terms_non.focal, drop=FALSE]
+			pred_non.focal <- mm_non.focal %*% betahat_non.focal
+			if (pop.ave=="quantile") {
+				mm_x.var <- as.vector(mm[, terms_focal])
+			}
+			est <- lapply(1:length(mm_x.var), function(i){
+				if (!isolate) {
+					mm2[, terms_focal] <- mm_x.var[[i]]
+					pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2
+						, col_mean=col_mean, isolate=isolate, isolate.value=isolate.value
+						, vareff_objects=vareff_objects, x.var=x.var, typical=typical
+						, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
+					)
+				} else {
+					pse_var <- pse_var[[i]]
+				}
+				if (length(re)>1 && pop.ave=="quantile") {
+					out <- lapply(re, function(j){
+						out <- as.vector(c(mm_x.var[[i]] %*% betahat_focal) + pred_non.focal + j)
+						return(data.frame(pred=out, pse_var=pse_var))
+					})
+					out <- do.call("rbind", out)
+					pred <- out[["pred"]]
+					pse_var <- out[["pse_var"]]
+				} else {
+					pred <- as.vector(c(mm_x.var[[i]] %*% betahat_focal) + pred_non.focal + re)
+				}
+				lwr <- pred - pse_var
+				upr <- pred + pse_var
+				out <- data.frame(x=mm_x.var[[i]], pred = pred, lwr=lwr, upr=upr, pse_var=pse_var)
+				return(out)
+			})
+			est <- do.call("rbind", est)
+			pred <- est[["pred"]]
+			lwr <- est[["lwr"]]
+			upr <- est[["upr"]]
+			pse_var <- est[["pse_var"]]
+			predict.data <- data.frame(...xxx=est[["x"]])
+			colnames(predict.data) <- x.var
+		}
 	} else if (pop.ave=="none") {
-		mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-		mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-			, factor.cols, cnames, focal.predictors, excluded.predictors
-			, typical, apply.typical.to.factors = TRUE
-		)
-		
 		if (which.interaction=="emmeans") {
 			ff_cols <- factor.cols[factor.cols==TRUE]
 			if (length(focal.predictors)>1L) {
@@ -200,88 +254,15 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 				}
 			}
 		}
-	}
-
-	if (is.null(vcov.)){
-		vc <- vcov(vareff_objects)
-	} else if (is.function(vcov.)) {
-		vc <- vcov.(mod)
-	} else {
-		vc <- vcov.
-	}
-
-	if (internal) {
-		vc <- zero_vcov(mod, focal_vars=x.var)	
-	}
-  	
-	if (pop.ave=="population") {
-		quant <- seq(0, 1, length.out=steps)
-		..x_quant <- mf[[x.var]]
-		..x_quant <- as.vector(quantile(..x_quant, quant))
-		mf <- mf[, colnames(mf)[!colnames(mf) %in% x.var], drop=FALSE]
-		mf_list <- list()
-		mf_list[[x.var]] <- ..x_quant
-		mf_list <- c(mf_list, as.list(mf))
-		mf <- mf_list
-		if (inherits(mod, c("glmmTMB", "lme4", "glmerMod"))) {
-			ran_eff <- ranef(mod)
-			ran_eff <- as.data.frame(ranef(mod))
-			ran_eff <- ran_eff[, "condval", drop=FALSE]
-			re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
-			re <- as.vector(quantile(re, quant))
-			mf$..rezzz <- re
-			mf <- do.call("expand.grid", mf)
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-			mm <- mod.matrix
-			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-				, factor.cols, cnames, focal.predictors, excluded.predictors
-				, typical, apply.typical.to.factors = FALSE
-			)
-			if (include.re) {
-				pred <- mm %*% betahat + mf$..rezzz
-			} else {
-				pred <- mm %*% betahat
-			}
-		} else {
-			mf <- do.call("expand.grid", mf)
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-			mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-				, factor.cols, cnames, focal.predictors, excluded.predictors
-				, typical, apply.typical.to.factors = FALSE
-			)
-			mm <- mod.matrix
-			pred <- mm %*% betahat
-		}
-		x[[x.var]]$levels <- unique(mf[[x.var]])
-		x[[x.var]] <- mf[[x.var]]
-		predict.data <- mf
-	} else if (pop.ave=="none") {
-		pred <- mm %*% betahat
-	}
-	
-	if (isolate) {
-		# (Centered) predictions for SEs
-		## Center model matrix
 		col_mean <- apply(mod.matrix.all, 2, typical)
-		mm_mean <- t(replicate(NROW(mm), col_mean))
-	#	if (any(grepl(":", get_termnames(mod))) & zero_out_interaction){
-	#		vc <- zero_vcov(mod, focal_vars=x.var)
-	#	}
-		if (zero_out_interaction){
-			vc <- zero_vcov(mod, focal_vars=x.var)
-		}
-		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
-			mf[x.var] <- 0*mf[x.var]+isolate.value
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-			col_mean <- apply(mod.matrix, 2, typical)
-			mm_mean <- t(replicate(NROW(mm), col_mean))
-		}
-		mm <- mm - mm_mean
+		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
+			, isolate.value=isolate.value, vareff_objects=vareff_objects, x.var=x.var
+			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
+		)
+		pred <- as.vector(mm %*% betahat)
+		lwr <- pred - pse_var
+		upr <- pred + pse_var
 	}
-#	pse_var <- sqrt(diag(mm %*% tcrossprod(data.matrix(vc), mm)))
-	pse_var <- sqrt(rowSums(mm * t(tcrossprod(data.matrix(vc), mm))))	
-	# Stats
-	mult <- get_stats(mod, level, dfspec)
 	
 	# For bias-adjustment: coppied directry from emmeans
 	## Currently, we just use a 2nd-order approx for everybody:
@@ -311,11 +292,11 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
 		, variables = x, fit = pred
-		, x = predict.data[, 1:n.focal, drop=FALSE]
+		, x = if (pop.ave=="none") {predict.data[, 1:n.focal, drop=FALSE]} else predict.data[, x.var, drop=FALSE]
 		, model.matrix = mm, data = X, x.var=x.var
-		, se = pse_var
-		, lwr = pred - mult*pse_var
-		, upr = pred + mult*pse_var
+		, se = pse_var/mult
+		, lwr = lwr#pred - mult*pse_var
+		, upr = upr#pred + mult*pse_var
 		, family = vareff_objects$link$family
 		, link = link 
 	)

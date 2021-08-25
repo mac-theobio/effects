@@ -233,6 +233,33 @@ centered_taylor <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adj
 
 ```
 
+```{r generate_pred2}
+genpred2 <- function(mod, focal, level=0.95, steps=100, modelname="none", ...) {
+	
+	mm <- model.matrix(mod)
+	quant <- seq(0, 1, length.out=steps)
+	xvals <- as.vector(quantile(mm[, focal], quant))
+	vnames <- vareffects:::get_vnames(mod)$termnames
+	check <- !vnames %in% focal
+	non.focal.terms <- vnames[check]
+	betas <- coef(mod)
+	non.focal.coefs <- betas[check]
+	focal.coefs <- betas[!check]
+	lp.non.focal <- as.vector(as.matrix(mm[, non.focal.terms, drop=FALSE]) %*% non.focal.coefs)
+	lp.all <- unlist(lapply(xvals, function(x){
+		mu <- mean(plogis(as.vector(c(x %*% focal.coefs) + lp.non.focal)))
+		return(mu)
+	}))
+
+	out <- list(xx = xvals, xx2 = lp.all)
+	return(out)
+}
+
+x1 <- genpred2(simple_mod, "wealthindex")
+mean(x1$xx2)
+
+```
+
 ```{r simple_preds}
 p1 <- (ggplot(pop_none, aes(x=age, y=fit, colour=model))
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")

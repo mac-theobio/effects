@@ -61,3 +61,7 @@ get_stats <- function(mod, level, dfspec, ...)UseMethod("get_stats")
 #'
 #' @keywords internal
 get_sigma <- function(mod, ...)UseMethod("get_sigma")
+
+#'
+#' @keywords internal
+includeRE <- function(mod, ...)UseMethod("includeRE")

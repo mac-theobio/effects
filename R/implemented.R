@@ -71,3 +71,24 @@ get_sigma.lme4 <- function(mod, ...) {
 	total_sd <- sqrt(sum(sigma^2))
 	total_sd
 }
+
+## Include random effects
+includeRE.default <- function(mod, ...) {
+	re <- 0
+	return(re)
+}
+
+includeRE.glmmTMB <- function(mod, ...) {
+	ran_eff <- as.data.frame(ranef(mod))
+	ran_eff <- ran_eff[, "condval", drop=FALSE]
+	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
+	return(re)	
+}
+
+includeRE.merMod <- function(mod, ...){
+	ran_eff <- as.data.frame(ranef(mod))
+	ran_eff <- ran_eff[, "condval", drop=FALSE]
+	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
+	return(re)	
+}
+		
