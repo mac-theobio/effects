@@ -2,6 +2,9 @@
 title: "Nonlinear transformations and bias correction"
 ---
 
+```{r setup,include=FALSE}
+```
+
 Generating predictions and confidence intervals of predictions for regression models is surprisingly hard. A short list of the challenges:
 
 - dealing with multiple predictor variables: choosing representative values for one or more 'focal variables' and choosing an appropriate 'model center' for non-focal variables
@@ -55,7 +58,7 @@ We are interested in the mean of logistic(gaussian)
 
 Tried it in Python (and Wolfram Alpha). This is just to reiterate what we knew already, which is that the logistic-normal doesn't have a closed form solution (WA can actually do the non-generic case (standard Normal), which sympy can't, but even WA breaks down for non-standard Normal case.
 
-```{python3 integrate}
+```{python integrate, eval=FALSE}
 from sympy import *
 x = Symbol('x')
 integrate(exp(-(x**2))/(1+exp(-x)), (x, -oo, oo))
@@ -90,14 +93,31 @@ function (mu, sigma, abs.tol = 0, ...) {
 
 ## Prediction vs effects plots
 
-The purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors ("what is the expected probability of having clean water for a 25-year-old male"?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.)
+In which I try to figure out what the hell we're actually trying to do.
+
+
+Notation: 
+
+\newcommand{\nset}[1]{#1_{\{n\}}}
+
+- $x_f$: a value of the focal predictor
+- $\nset{x}$: a vector of values of the non-focal predictors for a particular observation
+- $\eta(x_f, \nset{x}) = \beta_f x_f + \sum \nset{\beta} \nset{x}$ = linear predictor (e.g. prediction on the log-odds scale)
+- $g^{-1}()$: inverse-link function (e.g. logistic)
+- $D(\nset{x}|x_f)$: distribution of the non-focal predictors conditional on a particular value of the focal predictor
+- $\beta_{fi}$: the coefficient describing the interaction(s) of the focal and non-focal parameters
+
+The purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors ("what is the expected probability of having clean water for a 25-year-old male"?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.) In other words, 
+$$
+\textrm{mean} \left( g^{-1} \eta(D(\nset{x}),x_f) \right)
+$$
 
 In contrast, an *effects plot* is supposed to show the *marginal effect* (in the economics/differential sense) of varying the focal parameter(s). This means, technically that we want the *derivative* (and its uncertainty) with respect to the focal parameters to match that predicted by the model. 
 
-* Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, *on the linear predictor scale*, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative ($\beta_f = d\eta/dx_f$) and the derivative of the inverse link function at the point ($dg^{-1}(\eta)/d\eta$, which is the `mu.eta` component of a `family` object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose $\hat \beta_f(x_n)$ is the derivative for a particular set of non-focal parameters (i.e. $\beta_f + \sum \beta_{fi} x_i$ where the second term is the sum of the relevant interaction coefficients)
+* Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, *on the linear predictor scale*, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative ($\beta_f = d\eta/dx_f$) and the derivative of the inverse link function at the point ($dg^{-1}(\eta)/d\eta$, which is the `mu.eta` component of a `family` object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose $\hat \beta_f(x_n)$ is the derivative for a particular set of non-focal parameters (i.e. $\beta_f + \sum \beta_{f\nset{i}} \nset{x}$ where the second term is the sum of the relevant interaction coefficients)
 
 $$
-\overline{\frac{d \mu}{dx}} = \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, d x_n
+\overline{\frac{d \mu}{dx}} = \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, D(\nset{x}|x_f) d \nset{x}
 $$
 
 This seems to be linear in $x_n$, so I think we get to *not* worry about averaging effects here?

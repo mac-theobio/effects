@@ -409,7 +409,6 @@ pre code {
 <pre class="python"><code>from sympy import *
 x = Symbol(&#39;x&#39;)
 integrate(exp(-(x**2))/(1+exp(-x)), (x, -oo, oo))</code></pre>
-<pre><code>## Integral(exp(x)*exp(-x**2)/(exp(x) + 1), (x, -oo, oo))</code></pre>
 <p>A <a href="https://stats.stackexchange.com/questions/45267/expected-value-of-a-gaussian-random-variable-transformed-with-a-logistic-functio">CrossValidated question</a> about calculating this transformation (and various interesting series approximations etc., although these are very likely not worth the trouble). Turns out that if we don’t want to use the delta method there is an existing package that codes up the mean &amp; variance of the logistic-normal (exact, up to integration accuracy):</p>
 <pre class="r"><code>logitnorm::momentsLogitnorm(mu= 2, sigma = 2)</code></pre>
 <pre><code>##       mean        var 
@@ -419,12 +418,12 @@ x &lt;- scale(x)*2 + 2 ## exact moments
 mean(x)  </code></pre>
 <pre><code>## [1] 2</code></pre>
 <pre class="r"><code>mean(plogis(x))  ## correct value</code></pre>
-<pre><code>## [1] 0.7747854</code></pre>
+<pre><code>## [1] 0.7755275</code></pre>
 <pre class="r"><code>plogis(mean(x))  ## naive value</code></pre>
 <pre><code>## [1] 0.8807971</code></pre>
 <pre class="r"><code>emdbook::deltamethod(1/(1+exp(-x)), x)</code></pre>
 <pre><code>##     delta   E(f(x))    delta2 
-## 0.7747854 0.8807971 0.7208721</code></pre>
+## 0.7755275 0.8807971 0.7208721</code></pre>
 <pre class="r"><code>## The `delta2` value is supposedly a higher-order Taylor expansion/correction, but a little bit of poking around suggests these are bogus/possibly wrong ...</code></pre>
 <p>The entire <code>mln()</code> function definition is not very complicated, we don’t really need a package for this …</p>
 <pre class="r"><code>function (mu, sigma, abs.tol = 0, ...) {
@@ -446,10 +445,22 @@ mean(x)  </code></pre>
 </div>
 <div id="prediction-vs-effects-plots" class="section level2">
 <h2>Prediction vs effects plots</h2>
-<p>The purpose and goal of a <em>prediction plot</em> seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a “typical” (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors (“what is the expected probability of having clean water for a 25-year-old male”?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the <em>conditional distribution</em>. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.)</p>
+<p>In which I try to figure out what the hell we’re actually trying to do.</p>
+<p>Notation:</p>
+<ul>
+<li><span class="math inline">\(x_f\)</span>: a value of the focal predictor</li>
+<li><span class="math inline">\(x_{\{n\}}\)</span>: a vector of values of the non-focal predictors for a particular observation</li>
+<li><span class="math inline">\(\eta(x_f, x_{\{n\}}) = \beta_f x_f + \sum \beta_{\{n\}} x_{\{n\}}\)</span> = linear predictor (e.g. prediction on the log-odds scale)</li>
+<li><span class="math inline">\(g^{-1}()\)</span>: inverse-link function (e.g. logistic)</li>
+<li><span class="math inline">\(D(x_{\{n\}}|x_f)\)</span>: distribution of the non-focal predictors conditional on a particular value of the focal predictor</li>
+<li><span class="math inline">\(\beta_{fi}\)</span>: the coefficient describing the interaction(s) of the focal and non-focal parameters</li>
+</ul>
+<p>The purpose and goal of a <em>prediction plot</em> seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a “typical” (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors (“what is the expected probability of having clean water for a 25-year-old male”?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the <em>conditional distribution</em>. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.) In other words, <span class="math display">\[
+\textrm{mean} \left( g^{-1} \eta(D(x_{\{n\}}),x_f) \right)
+\]</span></p>
 <p>In contrast, an <em>effects plot</em> is supposed to show the <em>marginal effect</em> (in the economics/differential sense) of varying the focal parameter(s). This means, technically that we want the <em>derivative</em> (and its uncertainty) with respect to the focal parameters to match that predicted by the model.</p>
 <ul>
-<li>Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, <em>on the linear predictor scale</em>, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative (<span class="math inline">\(\beta_f = d\eta/dx_f\)</span>) and the derivative of the inverse link function at the point (<span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span>, which is the <code>mu.eta</code> component of a <code>family</code> object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose <span class="math inline">\(\hat \beta_f(x_n)\)</span> is the derivative for a particular set of non-focal parameters (i.e. <span class="math inline">\(\beta_f + \sum \beta_{fi} x_i\)</span> where the second term is the sum of the relevant interaction coefficients)</li>
+<li>Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, <em>on the linear predictor scale</em>, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative (<span class="math inline">\(\beta_f = d\eta/dx_f\)</span>) and the derivative of the inverse link function at the point (<span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span>, which is the <code>mu.eta</code> component of a <code>family</code> object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose <span class="math inline">\(\hat \beta_f(x_n)\)</span> is the derivative for a particular set of non-focal parameters (i.e. <span class="math inline">\(\beta_f + \sum \beta_{fi_{\{n\}}} x_{\{n\}}\)</span> where the second term is the sum of the relevant interaction coefficients)</li>
 </ul>
 <p><span class="math display">\[
 \overline{\frac{d \mu}{dx}} = \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, d x_n
