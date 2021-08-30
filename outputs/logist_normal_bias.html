@@ -418,12 +418,12 @@ x &lt;- scale(x)*2 + 2 ## exact moments
 mean(x)  </code></pre>
 <pre><code>## [1] 2</code></pre>
 <pre class="r"><code>mean(plogis(x))  ## correct value</code></pre>
-<pre><code>## [1] 0.7752174</code></pre>
+<pre><code>## [1] 0.7752344</code></pre>
 <pre class="r"><code>plogis(mean(x))  ## naive value</code></pre>
 <pre><code>## [1] 0.8807971</code></pre>
 <pre class="r"><code>emdbook::deltamethod(1/(1+exp(-x)), x)</code></pre>
 <pre><code>##     delta   E(f(x))    delta2 
-## 0.7752174 0.8807971 0.7208721</code></pre>
+## 0.7752344 0.8807971 0.7208721</code></pre>
 <pre class="r"><code>## The `delta2` value is supposedly a higher-order Taylor expansion/correction, but a little bit of poking around suggests these are bogus/possibly wrong ...</code></pre>
 <p>The entire <code>mln()</code> function definition is not very complicated, we don’t really need a package for this …</p>
 <pre class="r"><code>function (mu, sigma, abs.tol = 0, ...) {
@@ -483,6 +483,24 @@ y_{\textrm{ref}}+ \iint_{D(x_{\{n\}}|x_f&#39;)} \frac{dg^{-1}(\eta(x_{f&#39;}, x
 <li>add <span class="math inline">\(\phi \Delta x_f\)</span> to the effects-plot value</li>
 </ul></li>
 </ul>
+</div>
+<div id="alternatives" class="section level2">
+<h2>Alternatives</h2>
+<ul>
+<li>Do everything by computing means of <span class="math inline">\(g^{-1}\)</span> applied to different values of the focal predictor and the <em>unconditional</em> distribution of non-focal parameters (I think this is what Steve is currently doing, at least in some cases, and what JD would prefer?)
+<ul>
+<li>if the unconditional distribution is different from (e.g. much wider than) the conditional distribution at the central value of <span class="math inline">\(x_f\)</span>, then the computed value of <span class="math inline">\(y_{\textrm{ref}}\)</span> won’t match the observed marginal probability computed from the data</li>
+</ul></li>
+<li>Compute <span class="math inline">\(y_{\textrm{ref}}\)</span> using the conditional distribution for the central value of <span class="math inline">\(x_f\)</span>, then compute the increments of <span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span> using the unconditional (population-wide) distribution of <span class="math inline">\(x_{\{n\}}\)</span>
+<ul>
+<li>you can certainly do this, but it seems incoherent to me based on the discussion above</li>
+</ul></li>
+<li>Compute <span class="math inline">\(y_{\textrm{ref}}\)</span> using the conditional distribution for the central value of <span class="math inline">\(x_f\)</span>, then compute the increments of <span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span> using the conditional distribution of <span class="math inline">\(x_{\{n\}}\)</span> for the central value of <span class="math inline">\(x_f\)</span>
+<ul>
+<li>this is coherent but answers an odd question (“what would the predicted response be if we took a typical (central) individual and modified only their focal characteristic, leaving all of their non-focal values the same?”). We would end up (for example) with a prediction of what we would get if we took a 30-year-old and let them age to 90 without ever changing their wealth or education status …</li>
+</ul></li>
+</ul>
+<p>I think the key is to start by asking “what is the effects plot supposed to represent?”; I claim it’s supposed to represent (in some way) the marginal (economic-sense) effect of the focal parameter on typical individuals at a given value of the focal parameter. It might be less confusing to plot the effect itself (e.g. put d(probability)/d(age) on the y-axis, rather than probability) — it would eliminate one of the integrals — but that’s not the convention.</p>
 </div>
 
 

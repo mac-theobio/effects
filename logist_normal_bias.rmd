@@ -144,3 +144,14 @@ In practice to implement this I would suggest:
    - compute the mean value of $\phi = dg^{-1}/d\eta \hat \beta f$
    - add $\phi \Delta x_f$ to the effects-plot value
    
+## Alternatives
+
+- Do everything by computing means of $g^{-1}$ applied to different values of the focal predictor and the *unconditional* distribution of non-focal parameters (I think this is what Steve is currently doing, at least in some cases, and what JD would prefer?)
+   - if the unconditional distribution is different from (e.g. much wider than) the conditional distribution at the central value of $x_f$, then the computed value of $\yref$ won't match the observed marginal probability computed from the data
+- Compute $\yref$ using the conditional distribution for the central value of $x_f$, then compute the increments of $dg^{-1}(\eta)/d\eta$ using the unconditional (population-wide) distribution of $\nset{x}$
+   - you can certainly do this, but it seems incoherent to me based on the discussion above
+- Compute $\yref$ using the conditional distribution for the central value of $x_f$, then compute the increments of $dg^{-1}(\eta)/d\eta$ using the conditional distribution of $\nset{x}$ for the central value of $x_f$
+   - this is coherent but answers an odd question ("what would the predicted response be if we took a typical (central) individual and modified only their focal characteristic, leaving all of their non-focal values the same?"). We would end up (for example) with a prediction of what we would get if we took a 30-year-old and let them age to 90 without ever changing their wealth or education status ...
+   
+I think the key is to start by asking "what is the effects plot supposed to represent?"; I claim it's supposed to represent (in some way) the marginal (economic-sense) effect of the focal parameter on typical individuals at a given value of the focal parameter. It might be less confusing to plot the effect itself (e.g. put d(probability)/d(age) on the y-axis, rather than probability) &mdash; it would eliminate one of the integrals &mdash; but that's not the convention.
+   
