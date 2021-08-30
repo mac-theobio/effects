@@ -99,38 +99,48 @@ In which I try to figure out what the hell we're actually trying to do.
 Notation: 
 
 \newcommand{\nset}[1]{#1_{\{n\}}}
+\newcommand{\yref}{y_{\textrm{ref}}}
+\newcommand{\cdist}{{D(\nset{x}|x_f)}}
+\newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
+\newcommand{\xfprime}{x_{f'}}
 
 - $x_f$: a value of the focal predictor
 - $\nset{x}$: a vector of values of the non-focal predictors for a particular observation
 - $\eta(x_f, \nset{x}) = \beta_f x_f + \sum \nset{\beta} \nset{x}$ = linear predictor (e.g. prediction on the log-odds scale)
 - $g^{-1}()$: inverse-link function (e.g. logistic)
-- $D(\nset{x}|x_f)$: distribution of the non-focal predictors conditional on a particular value of the focal predictor
+- $\cdist$: distribution of the non-focal predictors conditional on a particular value of the focal predictor
 - $\beta_{fi}$: the coefficient describing the interaction(s) of the focal and non-focal parameters
 
 The purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors ("what is the expected probability of having clean water for a 25-year-old male"?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.) In other words, 
 $$
-\textrm{mean} \left( g^{-1} \eta(D(\nset{x}),x_f) \right)
+\underset{\cdist}{\textrm{mean}}  g^{-1} \left(\eta(\nset{x},x_f) \right)
 $$
 
 In contrast, an *effects plot* is supposed to show the *marginal effect* (in the economics/differential sense) of varying the focal parameter(s). This means, technically that we want the *derivative* (and its uncertainty) with respect to the focal parameters to match that predicted by the model. 
 
-* Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, *on the linear predictor scale*, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative ($\beta_f = d\eta/dx_f$) and the derivative of the inverse link function at the point ($dg^{-1}(\eta)/d\eta$, which is the `mu.eta` component of a `family` object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose $\hat \beta_f(x_n)$ is the derivative for a particular set of non-focal parameters (i.e. $\beta_f + \sum \beta_{f\nset{i}} \nset{x}$ where the second term is the sum of the relevant interaction coefficients)
+* Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, *on the linear predictor scale*, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative ($\beta_f = d\eta/dx_f$) and the derivative of the inverse link function at the point ($dg^{-1}(\eta)/d\eta$, which is the `mu.eta` component of a `family` object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose $\hat \beta_f(x_n)$ is the derivative for a particular set of non-focal parameters (i.e. $\hat \beta f(x_n) \equiv \beta_f + \sum \beta_{f\nset{i}} \nset{x}$ where the second term is the sum of the relevant interaction coefficients). Then I claim that the marginal effect at a particular value of the focal parameter $\xfprime$ is
 
 $$
-\overline{\frac{d \mu}{dx}} = \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, D(\nset{x}|x_f) d \nset{x}
+\overline{\frac{d \mu}{dx_f}}(\xfprime) = \int_\cdistprime \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \,  d \nset{x}
 $$
 
-This seems to be linear in $x_n$, so I think we get to *not* worry about averaging effects here?
+$\hat \beta_f$ is linear in $\nset{x}$, so nonlinear averaging doesn't affect it, but we do have to worry about weighting the different values of $\hat \beta f$ by the corresponding values of $dg^{-1}(\eta)/d\eta$ (since $\eta$ *also depends on $\nset{x}$*).
 
 It seems that the appropriate computed value (y-axis height) of the effects plot at a given value of $x$ is 
+
 $$
-\begin{split}
- & y_{\textrm{ref}} + \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, dx_f \\
- = & y_{\textrm{ref}} + \frac{dg^{-1}(\eta)}{d\eta} \overline{\hat \beta_f} \\
- \approx & y_{\textrm{ref}} + \sum \frac{dg^{-1}(\eta(x_f,\bar x_n))}{d\eta} \hat \beta_f(\bar x_n) \, \Delta x_f
-\end{split}
+\yref + \iint_{D(\nset{x}|x_f')} \frac{dg^{-1}(\eta(\xfprime, \nset{x})}{d\eta} \hat \beta_f \, d \nset{x} \, d x_f
 $$
 
-in other words, start from the appropriately bias-corrected value on the response scale at the central value of $x_f$ ($y_{\textrm{ref}}$).  For every step $\Delta x_f$, calculate the value of the slope (including interactions) at the *mean value of the non-focal parameters conditional on the current value of $x_f$*. (If there are no interactions, this reduces to $\beta_f$.) Calculate the linear predictor, again based on the conditional mean value of the non-focal predictors; use it to compute the expansion factor (derivative of the inverse-link function). Take the product of the slope, the expansion factor, and $\Delta x_f$; add to the integrand and repeat.
+In the case without interactions $\hat \beta f = \beta_f$ is a constant and we can pull it out of the integrals, but unless the distribution of the non-focal parameters is independent of the focal parameter(s) it looks like we might have to do some relatively complicated stuff.
 
-The good news is that we don't have to fart around with logistic-normal integrals etc. except when we are computing $y_{\textrm{\ref}}$. The bad news is that the effect plot computed this way will only agree with the prediction plot in special cases ...
+In practice to implement this I would suggest:
+
+- compute $\yref$ by taking $\cdist$ at the center value of the focal parameter and finding the mean (either directly or by computing the mean and variance of $\eta$ and using the logistic-normal calculation
+- for each step away from the center
+   - find $\cdist$ for the new value of $x_f$;
+   - if necessary (i.e. if the model has interactions with the focal parameter) compute $\hat \beta f$ across $\cdist$;
+   - compute the derivative across $\cdist$
+   - compute the mean value of $\phi = dg^{-1}/d\eta \hat \beta f$
+   - add $\phi \Delta x_f$ to the effects-plot value
+   
