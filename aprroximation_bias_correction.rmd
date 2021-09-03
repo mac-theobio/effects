@@ -222,15 +222,15 @@ genpred <- function(mod, focal, non.focal, level=0.95, steps=100, pop=FALSE, bia
 	return(out)
 }
 
-## Population averaging
-pop_none <- genpred(simple_mod, "age", "wealthindex", pop=TRUE, bias.adjust="none", modelname="pop-none")
-pop_delta <- genpred(simple_mod, "age", "wealthindex", pop=TRUE, bias.adjust="delta", modelname="pop-delta")
-
-## Averaged // centered??
-centered_none <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="none", modelname="centered-none")
-centered_delta <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="delta", modelname="centered-delta")
-centered_taylor <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="taylor", modelname="centered-taylor")
-
+### Population averaging
+#pop_none <- genpred(simple_mod, "age", "wealthindex", pop=TRUE, bias.adjust="none", modelname="pop-none")
+#pop_delta <- genpred(simple_mod, "age", "wealthindex", pop=TRUE, bias.adjust="delta", modelname="pop-delta")
+#
+### Averaged // centered??
+#centered_none <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="none", modelname="centered-none")
+#centered_delta <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="delta", modelname="centered-delta")
+#centered_taylor <- genpred(simple_mod, "age", "wealthindex", pop=FALSE, bias.adjust="taylor", modelname="centered-taylor")
+#
 ```
 
 ```{r generate_pred2}
@@ -260,16 +260,16 @@ mean(x1$xx2)
 
 ```
 
-```{r simple_preds}
-p1 <- (ggplot(pop_none, aes(x=age, y=fit, colour=model))
-	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_line()
-	+ geom_line(data=pop_delta, aes(x=age, y=fit, colour=model))
-	+ geom_line(data=centered_none, aes(x=age, y=fit, colour=model))
-	+ geom_line(data=centered_delta, aes(x=age, y=fit, colour=model))
-	+ geom_line(data=centered_taylor, aes(x=age, y=fit, colour=model))
-	+ scale_colour_manual(values=c("blue", "red", "black", "orange", "purple"))
-	+ theme(legend.position="right")
-)
-print(p1)
+```{r simple_preds, echo=FALSE}
+#p1 <- (ggplot(pop_none, aes(x=age, y=fit, colour=model))
+#	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
+#	+ geom_line()
+#	+ geom_line(data=pop_delta, aes(x=age, y=fit, colour=model))
+#	+ geom_line(data=centered_none, aes(x=age, y=fit, colour=model))
+#	+ geom_line(data=centered_delta, aes(x=age, y=fit, colour=model))
+#	+ geom_line(data=centered_taylor, aes(x=age, y=fit, colour=model))
+#	+ scale_colour_manual(values=c("blue", "red", "black", "orange", "purple"))
+#	+ theme(legend.position="right")
+#)
+# print(p1)
 ```
