@@ -409,7 +409,6 @@ pre code {
 <pre class="python"><code>from sympy import *
 x = Symbol(&#39;x&#39;)
 integrate(exp(-(x**2))/(1+exp(-x)), (x, -oo, oo))</code></pre>
-<pre><code>## Integral(exp(x)*exp(-x**2)/(exp(x) + 1), (x, -oo, oo))</code></pre>
 <p>A <a href="https://stats.stackexchange.com/questions/45267/expected-value-of-a-gaussian-random-variable-transformed-with-a-logistic-functio">CrossValidated question</a> about calculating this transformation (and various interesting series approximations etc., although these are very likely not worth the trouble). Turns out that if we don’t want to use the delta method there is an existing package that codes up the mean &amp; variance of the logistic-normal (exact, up to integration accuracy):</p>
 <pre class="r"><code>logitnorm::momentsLogitnorm(mu= 2, sigma = 2)</code></pre>
 <pre><code>##       mean        var 
@@ -419,12 +418,12 @@ x &lt;- scale(x)*2 + 2 ## exact moments
 mean(x)  </code></pre>
 <pre><code>## [1] 2</code></pre>
 <pre class="r"><code>mean(plogis(x))  ## correct value</code></pre>
-<pre><code>## [1] 0.7747854</code></pre>
+<pre><code>## [1] 0.7752344</code></pre>
 <pre class="r"><code>plogis(mean(x))  ## naive value</code></pre>
 <pre><code>## [1] 0.8807971</code></pre>
 <pre class="r"><code>emdbook::deltamethod(1/(1+exp(-x)), x)</code></pre>
 <pre><code>##     delta   E(f(x))    delta2 
-## 0.7747854 0.8807971 0.7208721</code></pre>
+## 0.7752344 0.8807971 0.7208721</code></pre>
 <pre class="r"><code>## The `delta2` value is supposedly a higher-order Taylor expansion/correction, but a little bit of poking around suggests these are bogus/possibly wrong ...</code></pre>
 <p>The entire <code>mln()</code> function definition is not very complicated, we don’t really need a package for this …</p>
 <pre class="r"><code>function (mu, sigma, abs.tol = 0, ...) {
@@ -446,24 +445,62 @@ mean(x)  </code></pre>
 </div>
 <div id="prediction-vs-effects-plots" class="section level2">
 <h2>Prediction vs effects plots</h2>
-<p>The purpose and goal of a <em>prediction plot</em> seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a “typical” (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors (“what is the expected probability of having clean water for a 25-year-old male”?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the <em>conditional distribution</em>. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.)</p>
+<p>In which I try to figure out what the hell we’re actually trying to do.</p>
+<p>Notation:</p>
+<ul>
+<li><span class="math inline">\(x_f\)</span>: a value of the focal predictor</li>
+<li><span class="math inline">\(x_{\{n\}}\)</span>: a vector of values of the non-focal predictors for a particular observation</li>
+<li><span class="math inline">\(\eta(x_f, x_{\{n\}}) = \beta_f x_f + \sum \beta_{\{n\}} x_{\{n\}}\)</span> = linear predictor (e.g. prediction on the log-odds scale)</li>
+<li><span class="math inline">\(g^{-1}()\)</span>: inverse-link function (e.g. logistic)</li>
+<li><span class="math inline">\({D(x_{\{n\}}|x_f)}\)</span>: distribution of the non-focal predictors conditional on a particular value of the focal predictor</li>
+<li><span class="math inline">\(\beta_{fi}\)</span>: the coefficient describing the interaction(s) of the focal and non-focal parameters</li>
+</ul>
+<p>The purpose and goal of a <em>prediction plot</em> seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a “typical” (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors (“what is the expected probability of having clean water for a 25-year-old male”?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the <em>conditional distribution</em>. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.) In other words, <span class="math display">\[
+\underset{{D(x_{\{n\}}|x_f)}}{\textrm{mean}}  g^{-1} \left(\eta(x_{\{n\}},x_f) \right)
+\]</span></p>
 <p>In contrast, an <em>effects plot</em> is supposed to show the <em>marginal effect</em> (in the economics/differential sense) of varying the focal parameter(s). This means, technically that we want the <em>derivative</em> (and its uncertainty) with respect to the focal parameters to match that predicted by the model.</p>
 <ul>
-<li>Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, <em>on the linear predictor scale</em>, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative (<span class="math inline">\(\beta_f = d\eta/dx_f\)</span>) and the derivative of the inverse link function at the point (<span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span>, which is the <code>mu.eta</code> component of a <code>family</code> object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose <span class="math inline">\(\hat \beta_f(x_n)\)</span> is the derivative for a particular set of non-focal parameters (i.e. <span class="math inline">\(\beta_f + \sum \beta_{fi} x_i\)</span> where the second term is the sum of the relevant interaction coefficients)</li>
+<li>Although it might not matter, we do need pick a reference point to start from (e.g. the prediction for the model center). Then, <em>on the linear predictor scale</em>, we can compute the derivative (which is just the coefficient for the focal parameter unless there are interactions, in which case we need to incorporate the conditional values/distribution of the non-focal parameters in the calculation). If there are no interactions, then the derivative on the response scale is the same for the entire distribution and by the chain rule is the product of the derivative (<span class="math inline">\(\beta_f = d\eta/dx_f\)</span>) and the derivative of the inverse link function at the point (<span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span>, which is the <code>mu.eta</code> component of a <code>family</code> object in R). How does variability (due to variation in the non-focal parameters + interactions) affect this result?? Suppose <span class="math inline">\(\hat \beta_f(x_n)\)</span> is the derivative for a particular set of non-focal parameters (i.e. <span class="math inline">\(\hat \beta f(x_n) \equiv \beta_f + \sum \beta_{fi_{\{n\}}} x_{\{n\}}\)</span> where the second term is the sum of the relevant interaction coefficients). Then I claim that the marginal effect at a particular value of the focal parameter <span class="math inline">\(x_{f&#39;}\)</span> is</li>
 </ul>
 <p><span class="math display">\[
-\overline{\frac{d \mu}{dx}} = \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, d x_n
+\overline{\frac{d \mu}{dx_f}}(x_{f&#39;}) = \int_{D(x_{\{n\}}|x_{f&#39;})}\frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \,  d x_{\{n\}}
 \]</span></p>
-<p>This seems to be linear in <span class="math inline">\(x_n\)</span>, so I think we get to <em>not</em> worry about averaging effects here?</p>
-<p>It seems that the appropriate computed value (y-axis height) of the effects plot at a given value of <span class="math inline">\(x\)</span> is <span class="math display">\[
-\begin{split}
- &amp; y_{\textrm{ref}} + \int \frac{dg^{-1}(\eta)}{d\eta} \hat \beta_f \, dx_f \\
- = &amp; y_{\textrm{ref}} + \frac{dg^{-1}(\eta)}{d\eta} \overline{\hat \beta_f} \\
- \approx &amp; y_{\textrm{ref}} + \sum \frac{dg^{-1}(\eta(x_f,\bar x_n))}{d\eta} \hat \beta_f(\bar x_n) \, \Delta x_f
-\end{split}
+<p><span class="math inline">\(\hat \beta_f\)</span> is linear in <span class="math inline">\(x_{\{n\}}\)</span>, so nonlinear averaging doesn’t affect it, but we do have to worry about weighting the different values of <span class="math inline">\(\hat \beta f\)</span> by the corresponding values of <span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span> (since <span class="math inline">\(\eta\)</span> <em>also depends on <span class="math inline">\(x_{\{n\}}\)</span></em>).</p>
+<p>It seems that the appropriate computed value (y-axis height) of the effects plot at a given value of <span class="math inline">\(x\)</span> is</p>
+<p><span class="math display">\[
+y_{\textrm{ref}}+ \iint_{D(x_{\{n\}}|x_f&#39;)} \frac{dg^{-1}(\eta(x_{f&#39;}, x_{\{n\}})}{d\eta} \hat \beta_f \, d x_{\{n\}} \, d x_f
 \]</span></p>
-<p>in other words, start from the appropriately bias-corrected value on the response scale at the central value of <span class="math inline">\(x_f\)</span> (<span class="math inline">\(y_{\textrm{ref}}\)</span>). For every step <span class="math inline">\(\Delta x_f\)</span>, calculate the value of the slope (including interactions) at the <em>mean value of the non-focal parameters conditional on the current value of <span class="math inline">\(x_f\)</span></em>. (If there are no interactions, this reduces to <span class="math inline">\(\beta_f\)</span>.) Calculate the linear predictor, again based on the conditional mean value of the non-focal predictors; use it to compute the expansion factor (derivative of the inverse-link function). Take the product of the slope, the expansion factor, and <span class="math inline">\(\Delta x_f\)</span>; add to the integrand and repeat.</p>
-<p>The good news is that we don’t have to fart around with logistic-normal integrals etc. except when we are computing <span class="math inline">\(y_{\textrm{\ref}}\)</span>. The bad news is that the effect plot computed this way will only agree with the prediction plot in special cases …</p>
+<p>In the case without interactions <span class="math inline">\(\hat \beta f = \beta_f\)</span> is a constant and we can pull it out of the integrals, but unless the distribution of the non-focal parameters is independent of the focal parameter(s) it looks like we might have to do some relatively complicated stuff.</p>
+<p>In practice to implement this I would suggest:</p>
+<ul>
+<li>compute <span class="math inline">\(y_{\textrm{ref}}\)</span> by taking <span class="math inline">\({D(x_{\{n\}}|x_f)}\)</span> at the center value of the focal parameter and finding the mean (either directly or by computing the mean and variance of <span class="math inline">\(\eta\)</span> and using the logistic-normal calculation</li>
+<li>for each step away from the center
+<ul>
+<li>find <span class="math inline">\({D(x_{\{n\}}|x_f)}\)</span> for the new value of <span class="math inline">\(x_f\)</span>;</li>
+<li>if necessary (i.e. if the model has interactions with the focal parameter) compute <span class="math inline">\(\hat \beta f\)</span> across <span class="math inline">\({D(x_{\{n\}}|x_f)}\)</span>;</li>
+<li>compute the derivative across <span class="math inline">\({D(x_{\{n\}}|x_f)}\)</span></li>
+<li>compute the mean value of <span class="math inline">\(\phi = dg^{-1}/d\eta \hat \beta f\)</span></li>
+<li>add <span class="math inline">\(\phi \Delta x_f\)</span> to the effects-plot value</li>
+</ul></li>
+</ul>
+</div>
+<div id="alternatives" class="section level2">
+<h2>Alternatives</h2>
+<ul>
+<li>Do everything by computing means of <span class="math inline">\(g^{-1}\)</span> applied to different values of the focal predictor and the <em>unconditional</em> distribution of non-focal parameters (I think this is what Steve is currently doing, at least in some cases, and what JD would prefer?)
+<ul>
+<li>if the unconditional distribution is different from (e.g. much wider than) the conditional distribution at the central value of <span class="math inline">\(x_f\)</span>, then the computed value of <span class="math inline">\(y_{\textrm{ref}}\)</span> won’t match the observed marginal probability computed from the data</li>
+</ul></li>
+<li>Compute <span class="math inline">\(y_{\textrm{ref}}\)</span> using the conditional distribution for the central value of <span class="math inline">\(x_f\)</span>, then compute the increments of <span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span> using the unconditional (population-wide) distribution of <span class="math inline">\(x_{\{n\}}\)</span>
+<ul>
+<li>you can certainly do this, but it seems incoherent to me based on the discussion above</li>
+</ul></li>
+<li>Compute <span class="math inline">\(y_{\textrm{ref}}\)</span> using the conditional distribution for the central value of <span class="math inline">\(x_f\)</span>, then compute the increments of <span class="math inline">\(dg^{-1}(\eta)/d\eta\)</span> using the conditional distribution of <span class="math inline">\(x_{\{n\}}\)</span> for the central value of <span class="math inline">\(x_f\)</span>
+<ul>
+<li>this is coherent but answers an odd question (“what would the predicted response be if we took a typical (central) individual and modified only their focal characteristic, leaving all of their non-focal values the same?”). We would end up (for example) with a prediction of what we would get if we took a 30-year-old and let them age to 90 without ever changing their wealth or education status …</li>
+</ul></li>
+</ul>
+<p>I think the key is to start by asking “what is the effects plot supposed to represent?”; I claim it’s supposed to represent (in some way) the marginal (economic-sense) effect of the focal parameter on typical individuals at a given value of the focal parameter. It might be less confusing to plot the effect itself (e.g. put d(probability)/d(age) on the y-axis, rather than probability) — it would eliminate one of the integrals — but that’s not the convention.</p>
 </div>
 
 
