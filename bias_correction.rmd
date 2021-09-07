@@ -11,13 +11,17 @@ output:
 ```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(fig.pos = "H", out.extra = "", message=FALSE, warning=FALSE)
 
+library(shellpipes)
 library(glmmTMB)
 library(dplyr)
 library(ggplot2)
 library(vareffects); varefftheme()
 library(ggpubr)
-set.seed(1011)
 
+commandEnvironments()
+makeGraphics()
+ 
+set.seed(2121)
 ## Functions
 plotEsize <- function(df, pos = 0.5, col_lab = ""){
 	pos <- position_dodge(pos)
@@ -32,15 +36,57 @@ plotEsize <- function(df, pos = 0.5, col_lab = ""){
 
 \section{Introduction}
 
-Prediction of the variation in the response variable depends on whether the relationship between the response variable and the predictors is linear or nonlinear. For example, when response, $Y$, changes nonlinearly with the predictor variable, $X$, averaged response variable with respect to the predictor, $E(Y(X))$, does not necessarily equal the response at the mean of the predictor, $Y(E(X)$. This can be understood in relation to Jensen's inequality which states that, for a nonlinear function, $Y(X)$, then $E(Y(X)) > Y(E(X))$, if $Y(X)$ is positive second derivative; and $E(Y(X)) < Y(E(X))$ if $Y(X)$ is negative second derivative. Most packages for predicting responses make distribution assumptions about the non-focal predictors, (for example, conditioning at the mean value of the predictor), leading to potential biasness if the particular predictor is not well represented, or as a result of nonlinear averaging. We consider the following approaches for bias correction:
+Generating predictions from regression models can be challenging and depends on whether the relationship between the response variable and the predictors is linear or nonlinear. For example, if response, $Y$, changes nonlinearly with the predictor variable, $X$, averaged response variable with respect to the predictor, $E(Y(X))$, does not necessarily equal the response at the mean of the predictor, $Y(E(X)$. This can be understood in relation to Jensen's inequality which states that, for a nonlinear function, $Y(X)$, then $E(Y(X)) > Y(E(X))$, if $Y(X)$ is positive second derivative; and $E(Y(X)) < Y(E(X))$ if $Y(X)$ is negative second derivative. Currently, existing R packages for predicting responses make distribution assumptions about the non-focal predictors, (for example, averaging the non-focal predictors at various levels of focal predictors), leading to potential biasness if the particular predictor is not well represented, or as a result of nonlinear averaging. To understand what we are trying to achieve, we first define the following:
 
-- Population averaging
+\subsection{Prediction plots}
 
-	- Whole population
-	- Quantiles
-- Second-order correction
+Notation :
 
-and provide a comparison with the uncorrected _Distributional conditioning_ (varpred or emmeans approach).
+\newcommand{\nset}[1]{#1_{\{n\}}}
+\newcommand{\yref}{y_{\textrm{ref}}}
+\newcommand{\cdist}{{D(\nset{x}|x_f)}}
+\newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
+\newcommand{\xfprime}{x_{f'}}
+
+- $x_f$: a value of the focal predictor
+- $\nset{x}$: a vector of values of the non-focal predictors for a particular observation
+- $\eta(x_f, \nset{x}) = \beta_f x_f + \sum \nset{\beta} \nset{x}$ = linear predictor (e.g. prediction on the log-odds scale)
+- $g^{-1}()$: inverse-link function (e.g. logistic)
+- $\cdist$: distribution of the non-focal predictors conditional on a particular value of the focal predictor
+- $\beta_{fi}$: the coefficient describing the interaction(s) of the focal and non-focal parameters
+
+The purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors.
+
+**BB**'s
+
+("what is the expected probability of having clean water for a 25-year-old male"?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.) In other words,
+$$
+\underset{\cdist}{\textrm{mean}}  g^{-1} \left(\eta(\nset{x},x_f) \right)
+$$
+
+Suppose we consider the values of non-focal predictors, to implement this:
+
+- compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+- find a list of vectors of observations of $\nset{\eta}$ associated with each value (bin) of the focal predictor, $\nset{{\eta_j}}$, $j = 1, 2, \cdots$
+- for each $\nset{{\eta_j}}$:
+	- compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{{\eta_j}}\right)$
+
+_What's the expected probability of having clean water for all $x$-year-old with the **corresponding** wealth index??_
+
+**JD**'s and **SC**'s
+
+- compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+- for every value of the focal predictor, $x_{j_f}$:
+	- compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{\eta}\right)$
+
+The major difference between **BB**'s and **JD**'s approach is that in the former case, we consider non-focal linear predictor corresponding to specific value (bin) of the focal predictor, while in the later case, for each value of the focal predictor, we consider linear predictor associated with entire population.
+
+**Questions**
+
+- What does the second case (JD's) represent?
+- Which is the correct approach?
+
+\subsection{Simulation}
 
 We implement and apply these methods in the context of both simple generalized linear and mixed effect models, using simulated data sets -- for univariate and multivariate models.
 
@@ -53,29 +99,29 @@ We start with a univariate case where we have only one predictor.
 \eta &= \beta_0 + \beta_{\mathrm{A}} \mathrm{Age} + \beta_{\mathrm{W}} \mathrm{Wealthindex} \\
 \mathrm{Age} &\sim \mathrm{Normal}(0.2, 1) \\
 \mathrm{Wealthindex} &\sim \mathrm{Normal}(0, 1) \\
-\beta_0 &= 0.7 \\
-\beta_{\mathrm{A}} &= 0.2 \\
-\beta_{\mathrm{W}} &= 0.5
+\beta_0 &= 1.5 \\
+\beta_{\mathrm{A}} &= 1.0 \\
+\beta_{\mathrm{W}} &= 2
 \end{align*}
 
+Considering $N=1e4$
+
 ```{r sim_simple}
-N <- 1e4
-beta0 <- 0.7
-betaA <- 0.2
-betaW <- 0.5
 
-age_max <- 1
-age_min <- 0.2
-age <- runif(N, age_min, age_max)
-# age <- rnorm(N, age_max, age_max)
-
-wealthindex <- rnorm(N, 0, 1)
-
-eta <- beta0 + betaA * age + betaW * wealthindex
-sim_df <- (data.frame(age=age, wealthindex=wealthindex, eta=eta)
-	%>% mutate(status = rbinom(N, 1, plogis(eta)))
-	%>% select(-eta)
-)
+simplesim <- function(N=1e4, beta0=1.5, betaA=1.0, betaW=2
+		, age_sd=1, age_mean=0.2
+		, wealth_sd=1, wealth_mean=0
+	) {
+	age <- rnorm(N, age_mean, age_sd)
+	wealthindex <- rnorm(N, wealth_mean, wealth_sd)
+	eta <- beta0 + betaA * age + betaW * wealthindex
+	sim_df <- (data.frame(age=age, wealthindex=wealthindex, eta=eta)
+		%>% mutate(status = rbinom(N, 1, plogis(eta)))
+		%>% select(-eta)
+	)
+	return(sim_df)
+}
+sim_df <- simplesim()
 true_prop <- mean(sim_df$status)
 print(true_prop)
 head(sim_df)
@@ -92,33 +138,6 @@ simple_mod <- glm(status ~ age + wealthindex, data = sim_df, family="binomial")
 
 
 ```{r pop_ave_fun, echo=FALSE}
-popavefun <- function(mod, focal, non.focal, level=0.95, steps=100, modelname="quantiles", ...) {
-	mf <- model.frame(mod)
-	mm <- (mf
-		%>% select_at(c(focal, non.focal))
-	)
-	quant <- seq(0, 1, length.out=steps)
-	mm <- sapply(c(focal, non.focal), function(x)quantile(mm[,x], quant), simplify = FALSE)
-	mm <- do.call("expand.grid", mm)
-	vc <- vcov(mod)
-	mm2 <- model.matrix(formula(mod)[c(1,3)], mm)
-	linpred <- as.vector(mm2 %*% coef(mod))
-	pse_var <- sqrt(rowSums(mm2 * t(tcrossprod(data.matrix(vc), mm2))))
-	z.val <- qnorm(1 - (1 - level)/2)
-	pred_df <- (mm
-		%>% select_at(focal)
-		%>% mutate(fit = linpred
-			, lwr = plogis(fit - z.val*pse_var)
-			, upr = plogis(fit + z.val*pse_var)
-			, fit = plogis(fit)
-		)
-		%>% group_by_at(focal)
-		%>% summarise_at(c("fit", "lwr", "upr"), mean)
-		%>% mutate(model = modelname, se=NA)
-	)
-	return(pred_df)
-}
-
 binfun <- function(mod, focal, non.focal, bins=50, ...) {
 	mf <- model.frame(mod)
 	mm <- (mf
@@ -137,429 +156,74 @@ binfun <- function(mod, focal, non.focal, bins=50, ...) {
 ```
 
 
-```{r simple_vareffects_age, echo=FALSE} 
-## varpred way
-simple_vareff_age <- varpred(simple_mod, "age", isolate=FALSE, modelname="Distribution")
+```{r simple_pred_age, echo=FALSE, fig.cap="Prediction plots with N=1e4: JD's approach on the left; BB's on the right."} 
+binned_df <- binfun(simple_mod, "age", "wealthindex")
 
-## Pop. average
-### Quantiles
-simple_vareff_age_quant <- varpred(simple_mod, "age", isolate=FALSE, pop.ave="quantile", modelname="quantiles")
-### Population
-simple_vareff_age_pop <- varpred(simple_mod, "age", isolate=FALSE, pop.ave="population", modelname="Population")
-binned_df <- binfun(simple_mod, "age", "wealthindex", bins=15)
-
-vareff_age <- simple_vareff_age
-vareff_age$preds <- do.call("rbind", list(vareff_age$preds, simple_vareff_age_quant$preds, simple_vareff_age_pop$preds))
-age_plot <- (plot(vareff_age)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
+## JD's approach
+pred_age_jd <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="jd", modelname="JD")
+age_plot_jd <- (ggplot(pred_age_jd, aes(x=age, y=fit))
+	+ geom_line()
+	+ geom_line(aes(y=lwr), lty=2)
+	+ geom_line(aes(y=upr), lty=2)
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
 	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
+	+ labs(y="Probability")
+	+ theme(legend.position="none")
 )
-```
 
-
-```{r simple_vareff_wealthindex, echo=FALSE, fig.cap = "A comparison of variable predictions with uncorrected and corrected estimates. The uncorrected Distribution approach is based on averaging of non-focal predictors; Population approach involves using the observed values of non-focal predictors together with the quantiles of the focal predictors; while quantiles approach involves sampling (or picking quantiles of) the observed values of both focal and non-focal predictors. The uncorrected Distribution approach seems to over-predict and is slightly higher then the marginal estimates."}
-# Wealth index
-## varpred 
-simple_vareff_wealthindex <- varpred(simple_mod, "wealthindex", isolate=FALSE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-simple_vareff_wealthindex_quant <- varpred(simple_mod, "wealthindex", isolate=FALSE, pop.ave="quantile", modelname="quantiles")
-### Population
-simple_vareff_wealthindex_pop <- varpred(simple_mod, "wealthindex", isolate=FALSE, pop.ave="population", modelname="Population")
-binned_df <- binfun(simple_mod, "wealthindex", "age")
-
-vareff_wealthindex <- simple_vareff_wealthindex
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, simple_vareff_wealthindex_quant$preds, simple_vareff_wealthindex_pop$preds))
-wealthindex_plot <- (plot(vareff_wealthindex)
- 	+ labs(y="", colour="Model")
+## BB's approach
+pred_age_bb <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="bb", modelname="BB")
+age_plot_bb <- (ggplot(pred_age_bb, aes(x=age, y=fit))
+	+ geom_line()
+	+ geom_line(aes(y=lwr), lty=2)
+	+ geom_line(aes(y=upr), lty=2)
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-
-ggarrange(age_plot, wealthindex_plot, common.legend=TRUE)
-```
-
-The marginal mean is `r true_prop` while the estimated are:
-
-- age: quantiles `r mean(simple_vareff_age_quant$preds$fit)`; population `r mean(simple_vareff_age_pop$preds$fit)`; distribution `r mean(simple_vareff_age$preds$fit)`
-- wealthindex: quantiles `r mean(simple_vareff_wealthindex_quant$preds$fit)`; population `r mean(simple_vareff_wealthindex_pop$preds$fit)`; distribution `r mean(simple_vareff_wealthindex$preds$fit)`
-
-\section{Random effect model}
-
-```{r sim_randeff}
-# Simulation parameters
-nHH <- 100	# Number of HH (primary units) per year
-
-nyrs <- 50	# Number of years to simulate
-yrs <- 2000 + c(1:nyrs) # Years to simulate
-N <- nyrs * nHH
-
-## HH random effect sd
-hhSD <- 0.5
-
-# Generate dataset template
-temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
-		, years = rep(yrs, nHH)
-		, age = runif(n=N, age_min, age_max)
-		, wealthindex = rnorm(n = N, 0, 1)
-	)
-)
-
-# Simulate HH-level random effects (residual error)
-hhRE <- rnorm(nHH, hhSD)
-temp_df$hhRE <- hhRE[temp_df$hhid]
-
-sim_df <- (temp_df
-	%>% mutate(eta = beta0 + betaA * age + betaW * wealthindex + hhRE
-		, status = rbinom(N, 1, plogis(eta))
-	)
-	%>% select(-eta)
-)
-true_prop_reff <- mean(sim_df$status)
-print(true_prop)
-print(head(sim_df, 10))
-```
-
-\subsection{Fit model}
-
-```{r model_reff}
-reff_mod <- glmmTMB(status ~ age + wealthindex + (1|hhid)
-	, data = sim_df
-	, family = binomial(link = "logit")
-)
-```
-
-
-\subsection{Variable predictions}
-
-
-```{r reff_vareffects_age, echo=FALSE}
-## varpred way
-reff_vareff_age <- varpred(reff_mod, "age", isolate=FALSE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-reff_vareff_age_quant <- varpred(reff_mod, "age", isolate=FALSE, pop.ave="quantile", include.re=TRUE, modelname = "quantiles")
-### Population
-reff_vareff_age_pop <- varpred(reff_mod, "age", isolate=FALSE, pop.ave="population", include.re=TRUE, modelname = "Population")
-binned_df <- binfun(reff_mod, "age", "wealthindex", bins=15)
-
-vareff_age <- reff_vareff_age
-vareff_age$preds <- do.call("rbind", list(vareff_age$preds, reff_vareff_age_quant$preds, reff_vareff_age_pop$preds))
-age_plot <- (plot(vareff_age)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
 	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
+	+ geom_smooth(colour="black", size=0.5)
+	+ labs(y="Probability")
+	+ theme(legend.position="none")
 )
+
+ggarrange(age_plot_jd, age_plot_bb + rremove("ylab"), common.legend=FALSE)
+
 ```
 
+Considering $N=1e5$ and then refit the model
 
-```{r reff_vareff_wealthindex, echo=FALSE, fig.cap = "Similar to the previous simple model, the quantile and population-based averaging gives very close estimates as opposed to the uncorrected distribution-based which appears to over-predict."} 
-# Wealth index
-## varpred
-reff_vareff_wealthindex <- varpred(reff_mod, "wealthindex", isolate=FALSE, modelname="Distribution")
-binned_df <- binfun(reff_mod, "wealthindex", "age")
-
-## Pop. average
-### Quantiles
-reff_vareff_wealthindex_quant <- varpred(reff_mod, "wealthindex", isolate=FALSE, pop.ave="quantile", include.re=TRUE, modelname="quantiles")
-### Population
-reff_vareff_wealthindex_pop <- varpred(reff_mod, "wealthindex", isolate=FALSE, pop.ave="population", include.re=TRUE, modelname="Population")
-
-vareff_wealthindex <- reff_vareff_wealthindex
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_quant$preds, reff_vareff_wealthindex_pop$preds))
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_quant$preds, reff_vareff_wealthindex_pop$preds))
-wealthindex_plot <- (plot(vareff_wealthindex)
- 	+ labs(y="", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-
-ggarrange(age_plot, wealthindex_plot, common.legend=TRUE)
-```
-
-We can also add centered predictions as in the case of _varpred_:
-
-
-```{r reff_vareffects_age_centered, echo=FALSE}
-## varpred way
-reff_vareff_age_cen <- varpred(reff_mod, "age", isolate=TRUE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-reff_vareff_age_quant_cen <- varpred(reff_mod, "age", isolate=TRUE, pop.ave="quantile", include.re=TRUE, modelname = "quantiles")
-### Population
-reff_vareff_age_pop_cen <- varpred(reff_mod, "age", isolate=TRUE, pop.ave="population", include.re=TRUE, modelname = "Population")
-binned_df <- binfun(reff_mod, "age", "wealthindex", bins=15)
-
-vareff_age <- reff_vareff_age_cen
-vareff_age$preds <- do.call("rbind", list(vareff_age$preds, reff_vareff_age_quant_cen$preds, reff_vareff_age_pop_cen$preds))
-age_plot_cen <- (plot(vareff_age)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-```
-
-
-```{r reff_vareff_wealthindex_cen, echo=FALSE, fig.cap = "Same plots above but with centered confidence bands..."} 
-# Wealth index
-## varpred
-reff_vareff_wealthindex_cen <- varpred(reff_mod, "wealthindex", isolate=TRUE, modelname="Distribution")
-binned_df <- binfun(reff_mod, "wealthindex", "age")
-
-## Pop. average
-### Quantiles
-reff_vareff_wealthindex_quant_cen <- varpred(reff_mod, "wealthindex", isolate=TRUE, pop.ave="quantile", include.re=TRUE, modelname="quantiles")
-### Population
-reff_vareff_wealthindex_pop_cen <- varpred(reff_mod, "wealthindex", isolate=TRUE, pop.ave="population", include.re=TRUE, modelname="Population")
-
-vareff_wealthindex <- reff_vareff_wealthindex_cen
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_quant_cen$preds, reff_vareff_wealthindex_pop_cen$preds))
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_quant_cen$preds, reff_vareff_wealthindex_pop_cen$preds))
-wealthindex_plot_cen <- (plot(vareff_wealthindex)
- 	+ labs(y="", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-
-ggarrange(age_plot_cen, wealthindex_plot_cen, common.legend=TRUE)
-```
-
-
-\section{Multivariate model}
-
-We now consider a model with multiple predictors.
-
-\subsection{Simple logistic model}
-
-
-```{r simple_sim_multi}
-N <- 1e4
-beta0 <- 0.7
-betaA <- 0.2
-betaE <- -0.7
-betaW <- 0.5
-age_max <- 1
-age_min <- 0.2
-expend_mean <- 0.2
-expend_sd <- 1
-age <- runif(N, age_min, age_max)
-expenditure <- rnorm(N, expend_mean, expend_sd)
-wealthindex <- rnorm(N, 0, 1)
-eta <- beta0 + betaA * age + betaW * wealthindex + betaE*expenditure
-sim_df <- (data.frame(age=age, expenditure=expenditure, wealthindex=wealthindex, eta=eta)
-	%>% mutate(status = rbinom(N, 1, plogis(eta)))
-	%>% select(-eta)
-)
+```{r sim_simple_ne5}
+sim_df <- simplesim(N=1e5)
 true_prop <- mean(sim_df$status)
-print(true_prop)
+simple_mod <- glm(status ~ age + wealthindex, data = sim_df, family="binomial")
 ```
 
-```{r simple_mod_multi}
-simple_mod_multi <- glm(status ~ age + expenditure + wealthindex, data = sim_df, family="binomial")
-```
+```{r simple_pred_age_ne5, echo=FALSE, fig.cap="Prediction plots with N=1e5: JD's approach on the left; BB's on the right."} 
+binned_df <- binfun(simple_mod, "age", "wealthindex")
 
-```{r simple_vareffects_age_multi, echo=FALSE}
-## varpred way
-simple_vareff_age_multi <- varpred(simple_mod_multi, "age", isolate=TRUE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-simple_vareff_age_quant_multi <- varpred(simple_mod_multi, "age", isolate=TRUE, pop.ave="quantile", modelname="quantiles")
-### Population
-simple_vareff_age_pop_multi <- varpred(simple_mod_multi, "age", isolate=TRUE, pop.ave="population", modelname="Population")
-binned_df <- binfun(simple_mod_multi, focal = "age", non.focal = c("expenditure", "wealthindex"), bins=50)
-
-vareff_age <- simple_vareff_age_multi
-vareff_age$preds <- do.call("rbind", list(vareff_age$preds, simple_vareff_age_quant_multi$preds, simple_vareff_age_pop_multi$preds))
-age_plot_multi <- (plot(vareff_age)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
+## JD's approach
+pred_age_jd <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="jd", modelname="JD")
+age_plot_jd <- (ggplot(pred_age_jd, aes(x=age, y=fit))
+	+ geom_line()
+	+ geom_line(aes(y=lwr), lty=2)
+	+ geom_line(aes(y=upr), lty=2)
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
 	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
+	+ labs(y="Probability")
+	+ theme(legend.position="none")
 )
-```
 
-```{r simple_vareffects_expenditure_multi, echo=FALSE}
-## varpred way
-simple_vareff_expenditure_multi <- varpred(simple_mod_multi, "expenditure", isolate=TRUE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-simple_vareff_expenditure_quant_multi <- varpred(simple_mod_multi, "expenditure", isolate=TRUE, pop.ave="quantile", modelname="quantiles")
-### Population
-simple_vareff_expenditure_pop_multi <- varpred(simple_mod_multi, "expenditure", isolate=TRUE, pop.ave="population", modelname="Population")
-binned_df <- binfun(simple_mod_multi, focal = "expenditure", non.focal = c("age", "wealthindex"), bins=50)
-
-vareff_expenditure <- simple_vareff_expenditure_multi
-vareff_expenditure$preds <- do.call("rbind", list(vareff_expenditure$preds, simple_vareff_expenditure_quant_multi$preds, simple_vareff_expenditure_pop_multi$preds))
-expenditure_plot_multi <- (plot(vareff_expenditure)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
+## BB's approach
+pred_age_bb <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="bb", modelname="BB")
+age_plot_bb <- (ggplot(pred_age_bb, aes(x=age, y=fit))
+	+ geom_line()
+	+ geom_line(aes(y=lwr), lty=2)
+	+ geom_line(aes(y=upr), lty=2)
 	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=expenditure, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-```
-
-```{r simple_vareffects_wealthindex_multi, echo=FALSE, fig.cap="A comparison of bias correction approaches for a simple multivariate logistic model."}
-## varpred way
-simple_vareff_wealthindex_multi <- varpred(simple_mod_multi, "wealthindex", isolate=TRUE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-simple_vareff_wealthindex_quant_multi <- varpred(simple_mod_multi, "wealthindex", isolate=TRUE, pop.ave="quantile", modelname="quantiles")
-### Population
-simple_vareff_wealthindex_pop_multi <- varpred(simple_mod_multi, "wealthindex", isolate=TRUE, pop.ave="population", modelname="Population")
-binned_df <- binfun(simple_mod_multi, focal = "wealthindex", non.focal = c("age", "expenditure"), bins=50)
-
-vareff_wealthindex <- simple_vareff_wealthindex_multi
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, simple_vareff_wealthindex_quant_multi$preds, simple_vareff_wealthindex_pop_multi$preds))
-wealthindex_plot_multi <- (plot(vareff_wealthindex)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
-	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-ggarrange(age_plot_multi + rremove("ylab")
-	, expenditure_plot_multi + rremove("ylab")
-	, wealthindex_plot_multi + rremove("ylab")
-	, nrow=1, common.legend=TRUE
-)
-```
-
-\subsection{Mixed model}
-
-```{r sim_mixed_multi}
-beta0 <- 0.7
-betaA <- 0.2
-betaW <- 0.5
-betaE <- -0.7
-age_max <- 1
-age_min <- 0.2
-expend_mean <- 0.2
-expend_sd <- 1
-
-# Simulation parameters
-nHH <- 100 # Number of HH (primary units) per year
-nyrs <- 50 # Number of years to simulate
-yrs <- 2000 + c(1:nyrs) # Years to simulate
-N <- nyrs * nHH
-## HH random effect sd
-hhSD <- 0.5
-# Generate dataset template
-temp_df <- (data.frame(hhid = rep(c(1:nHH), each = nyrs)
-		, years = rep(yrs, nHH)
-		, age = runif(n=N, age_min, age_max)
-		, expenditure = rnorm(N, expend_mean, expend_sd)
-		, wealthindex = rnorm(n = N, 0, 1)
-	)
-)
-# Simulate HH-level random effects (residual error)
-hhRE <- rnorm(nHH, hhSD)
-temp_df$hhRE <- hhRE[temp_df$hhid]
-sim_df <- (temp_df
-	%>% mutate(eta = beta0 + betaA * age + betaE * expenditure + betaW * wealthindex + hhRE
-	, status = rbinom(N, 1, plogis(eta))
-	)
-	%>% select(-eta)
-)
-true_prop_reff <- mean(sim_df$status)
-print(true_prop_reff)
-```
-
-```{r mixed_model_multi}
-reff_mod_multi <- glmmTMB(status ~ age + expenditure + wealthindex + (1|hhid)
-	, data = sim_df
-	, family = binomial(link = "logit")
-)
-```
-
-
-```{r reff_vareffects_age_multi, echo=FALSE}
-## varpred way
-reff_vareff_age_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-reff_vareff_age_quant_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, include.re=TRUE, pop.ave="quantile", modelname="quantiles")
-### Population
-reff_vareff_age_pop_multi <- varpred(reff_mod_multi, "age", isolate=TRUE, include.re=TRUE, pop.ave="population", modelname="Population")
-binned_df <- binfun(reff_mod_multi, focal = "age", non.focal = c("expenditure", "wealthindex"), bins=50)
-
-vareff_age <- reff_vareff_age_multi
-vareff_age$preds <- do.call("rbind", list(vareff_age$preds, reff_vareff_age_quant_multi$preds, reff_vareff_age_pop_multi$preds))
-age_plot_multi <- (plot(vareff_age)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
 	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
+	+ geom_smooth(colour="black", size=0.5)
+	+ labs(y="Probability")
+	+ theme(legend.position="none")
 )
-```
 
-```{r reff_vareffects_expenditure_multi, echo=FALSE}
-## varpred way
-reff_vareff_expenditure_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, modelname="Distribution")
+ggarrange(age_plot_jd, age_plot_bb + rremove("ylab"), common.legend=FALSE)
 
-## Pop. average
-### Quantiles
-reff_vareff_expenditure_quant_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, pop.ave="quantile", include.re=TRUE, modelname="quantiles")
-### Population
-reff_vareff_expenditure_pop_multi <- varpred(reff_mod_multi, "expenditure", isolate=TRUE, pop.ave="population", include.re=TRUE, modelname="Population")
-binned_df <- binfun(reff_mod_multi, focal = "expenditure", non.focal = c("age", "wealthindex"), bins=50)
-
-vareff_expenditure <- reff_vareff_expenditure_multi
-vareff_expenditure$preds <- do.call("rbind", list(vareff_expenditure$preds, reff_vareff_expenditure_quant_multi$preds, reff_vareff_expenditure_pop_multi$preds))
-expenditure_plot_multi <- (plot(vareff_expenditure)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=expenditure, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-```
-
-```{r reff_vareffects_wealthindex_multi, echo=FALSE, fig.cap="A comparison of bias correction approaches for a reff multivariate logistic model."}
-## varpred way
-reff_vareff_wealthindex_multi <- varpred(reff_mod_multi, "wealthindex", isolate=TRUE, modelname="Distribution")
-
-## Pop. average
-### Quantiles
-reff_vareff_wealthindex_quant_multi <- varpred(reff_mod_multi, "wealthindex", isolate=TRUE, pop.ave="quantile", modelname="quantiles")
-### Population
-reff_vareff_wealthindex_pop_multi <- varpred(reff_mod_multi, "wealthindex", isolate=TRUE, pop.ave="population", modelname="Population")
-binned_df <- binfun(reff_mod_multi, focal = "wealthindex", non.focal = c("age", "expenditure"), bins=50)
-
-vareff_wealthindex <- reff_vareff_wealthindex_multi
-vareff_wealthindex$preds <- do.call("rbind", list(vareff_wealthindex$preds, reff_vareff_wealthindex_quant_multi$preds, reff_vareff_wealthindex_pop_multi$preds))
-wealthindex_plot_multi <- (plot(vareff_wealthindex)
- 	+ labs(y="Prob. of improved \n service", colour="Model")
-	+ geom_hline(yintercept=true_prop_reff, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=wealthindex, y=status, color="binned"))
-	+ scale_colour_manual(values=c("grey", "blue", "red", "black"))
-	+ theme(legend.position="bottom")
-)
-ggarrange(age_plot_multi + rremove("ylab")
-	, expenditure_plot_multi + rremove("ylab")
-	, wealthindex_plot_multi + rremove("ylab")
-	, nrow=1, common.legend=TRUE
-)
 ```

@@ -93,7 +93,10 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 Sources += *.rmd
 
-bias_correction.pdf: bias_correction.rmd
+prediction.Rout: prediction.R
+	$(wrapR)
+
+bias_correction.pdf: bias_correction.rmd prediction.rda
 	$(knitpdf)
 
 taylor.Rout: taylor.R
@@ -126,6 +129,9 @@ check-package:
 
 update-doc:
 	echo "devtools::document('.')" | R --slave
+
+install-all:
+	make update-doc && make build-package && make install-package
 
 ######################################################################
 
