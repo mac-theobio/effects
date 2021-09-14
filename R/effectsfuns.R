@@ -88,10 +88,12 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL, level = 0.95
 	, steps = 101, at = list(),  dfspec = 100, vcov. = NULL, internal = FALSE, avefun = mean
 	, zero_out_interaction = FALSE, which.interaction = c("emmeans", "effects")
-	, pop.ave = c("none", "quantile", "population"), include.re = FALSE
-	, bias.adjust = FALSE, sigma = NULL, modelname = NULL, returnall = FALSE, ...) {
+	, pop.ave = c("none", "quantile", "population"), nlp.type=c("whole", "binned")
+	, include.re = FALSE, bias.adjust = FALSE, sigma = NULL
+	, modelname = NULL, returnall = FALSE, ...) {
 	which.interaction <- match.arg(which.interaction)
 	pop.ave <- match.arg(pop.ave)
+	nlp.type <- match.arg(nlp.type)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
@@ -196,7 +198,12 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 			if (pop.ave=="quantile") {
 				mm_x.var <- as.vector(mm[, terms_focal])
 			}
-			est <- lapply(1:length(mm_x.var), function(i){
+			
+			pred_focal <- as.vector(as.matrix(mm_x.var) %*% betahat_focal)
+			cutpts <- c(-Inf, (mm_x.var[-1] + mm_x.var[-steps])/2, Inf)
+			lp.split <- split(pred_non.focal, cut(mm_x.var, cutpts))
+
+			est <- lapply(1:length(lp.split), function(i){
 				if (!isolate) {
 					mm2[, terms_focal] <- mm_x.var[[i]]
 					pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2
@@ -209,14 +216,22 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 				}
 				if (length(re)>1 && pop.ave=="quantile") {
 					out <- lapply(re, function(j){
-						out <- as.vector(c(mm_x.var[[i]] %*% betahat_focal) + pred_non.focal + j)
+						if (nlp.type == "binned") {
+							out <- as.vector(pred_focal[[i]] + lp.split[[i]] + j)
+						} else {
+							out <- as.vector(pred_focal[[i]] + pred_non.focal + j)
+						}
 						return(data.frame(pred=out, pse_var=pse_var))
 					})
 					out <- do.call("rbind", out)
 					pred <- out[["pred"]]
 					pse_var <- out[["pse_var"]]
 				} else {
-					pred <- as.vector(c(mm_x.var[[i]] %*% betahat_focal) + pred_non.focal + re)
+					if (nlp.type == "binned") {
+						pred <- as.vector(pred_focal[[i]] + lp.split[[i]] + re)
+					} else {
+						pred <- as.vector(pred_focal[[i]] + pred_non.focal + re)
+					}
 				}
 				lwr <- pred - pse_var
 				upr <- pred + pse_var

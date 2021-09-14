@@ -21,6 +21,7 @@ varpred(
   zero_out_interaction = FALSE,
   which.interaction = c("emmeans", "effects"),
   pop.ave = c("none", "quantile", "population"),
+  nlp.type = c("whole", "binned"),
   include.re = FALSE,
   bias.adjust = FALSE,
   sigma = NULL,

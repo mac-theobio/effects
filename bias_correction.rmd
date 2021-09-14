@@ -6,6 +6,8 @@ compact-title: false
 output:
   pdf_document:
     extra_dependencies: ["float"]
+bibliography: bias_correction.bib
+link-citations: yes
 ---
 
 ```{r setup, include=FALSE, echo=FALSE}
@@ -32,21 +34,40 @@ plotEsize <- function(df, pos = 0.5, col_lab = ""){
 		+ labs(x="", y = "Estimate")
 	)
 }
+
+simplesim <- function(N=1e4, beta0=1.5, betaA=1.0, betaW=2
+		, age_sd=1, age_mean=0.2
+		, wealth_sd=1, wealth_mean=0
+		, link_scale = FALSE
+	) {
+	age <- rnorm(N, age_mean, age_sd)
+	wealthindex <- rnorm(N, wealth_mean, wealth_sd)
+	eta <- beta0 + betaA * age + betaW * wealthindex
+	if (link_scale) {
+		eta <- eta + rnorm(N) 
+	}
+	sim_df <- data.frame(age=age, wealthindex=wealthindex, eta=eta)
+	if (!link_scale) {
+		sim_df <- (sim_df
+			%>% mutate(status = rbinom(N, 1, plogis(eta)))
+			%>% select(-eta)
+		)
+	}
+	return(sim_df)
+}
 ```
-
-\section{Introduction}
-
-Generating predictions from regression models can be challenging and depends on whether the relationship between the response variable and the predictors is linear or nonlinear. For example, if response, $Y$, changes nonlinearly with the predictor variable, $X$, averaged response variable with respect to the predictor, $E(Y(X))$, does not necessarily equal the response at the mean of the predictor, $Y(E(X)$. This can be understood in relation to Jensen's inequality which states that, for a nonlinear function, $Y(X)$, then $E(Y(X)) > Y(E(X))$, if $Y(X)$ is positive second derivative; and $E(Y(X)) < Y(E(X))$ if $Y(X)$ is negative second derivative. Currently, existing R packages for predicting responses make distribution assumptions about the non-focal predictors, (for example, averaging the non-focal predictors at various levels of focal predictors), leading to potential biasness if the particular predictor is not well represented, or as a result of nonlinear averaging. To understand what we are trying to achieve, we first define the following:
-
-\subsection{Prediction plots}
-
-Notation :
 
 \newcommand{\nset}[1]{#1_{\{n\}}}
 \newcommand{\yref}{y_{\textrm{ref}}}
 \newcommand{\cdist}{{D(\nset{x}|x_f)}}
 \newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
 \newcommand{\xfprime}{x_{f'}}
+
+\newcommand{\bX}{{\mathbf X}}
+\newcommand{\bbeta}{{\boldsymbol \beta}}
+\newcommand{\boldeta}{{\boldsymbol \eta}}
+
+Notation :
 
 - $x_f$: a value of the focal predictor
 - $\nset{x}$: a vector of values of the non-focal predictors for a particular observation
@@ -55,175 +76,155 @@ Notation :
 - $\cdist$: distribution of the non-focal predictors conditional on a particular value of the focal predictor
 - $\beta_{fi}$: the coefficient describing the interaction(s) of the focal and non-focal parameters
 
-The purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors.
+_\
 
-**BB**'s
+\section{Introduction}
 
-("what is the expected probability of having clean water for a 25-year-old male"?). These are most of the problems we have actually been addressing with our bias correction stuff above. To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. (If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins.) In other words,
+Generating variable predictions from regression models can be challenging and depends on whether the relationship between the response variable and the predictors is linear or nonlinear. For example, predictions from generalized linear (mixed) models (GLM(M)s) may be inaccurate due to a number of reasons:
+\begin{enumerate}
+\item choice of representative values of \emph{focal} variable(s) and appropriate 'model center' for \emph{non-focal} variables in the case of multiple predictors
+\item Jensen’s inequality and bias in the mean induced by nonlinear transformations of the response variable (e.g., link functions in GLM(M)s)
+\item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? Should we exclude variation in non-focal parameters?)
+\end{enumerate}
+
+Most common way of dealing with the first challenge is taking the taking unique levels of the _focal_ variable(s) if they are discrete or taking appropriately sized quantiles (or bins) if they are continuous, and then conditioning these values on the mean of the non-focal predictors. We propose an alternative approach, the population-based approach. The two approaches result in predictions corresponding to each level of the focal predictor i.e., \emph{variable prediction}. Second and third challenges are the focus of this article.
+
+To get an intuition of how conditioning on the mean values of the non-focal predictors work, suppose we are interested in the variable predictions of a particular predictor (hence forth referred as \emph{focal} predictor otherwise \emph{non-focal}), $x_f$, from the set of predictors. To keep it simple, assume that the model has no interaction terms. Then the idea is to fix the values of \emph{non-focal} predictor(s) at some typical values -- typically determined by averaging (for now) in some meaningful way, for example, arithmetic mean and average over the levels of the factors of \emph{non-focal} continuous and categorical predictors, respectively. An alternative to \emph{averaging} is \emph{anchoring} which involves picking a fixed value of the non-focal predictor. One way to achieve this is by averaging the columns of non-focal terms in model matrix, $\bX$. For a simple linear model with identity link function, the estimated variable predictions corresponding to focal predictor, $x_f$, is $\eta(x_f, \nset{{\bar{x}}}) = \beta_f x_f + \sum \nset{\beta} \nset{{\bar{x}}}$, where $\nset{{\bar{x}}}$ are the appropriately averaged entries of non-focal predictors. Almost all existing \textbf{R} packages for constructing predictions employ this kind of averaging of the non-focal predictors across the levels of the focal predictors [@lenth2018package; @leeper2017package; @fox2009effect]. More complicated models and link functions are described in the subsequent sections.
+
+\subsection{Variable prediction and prediction plot}
+
+Variable predictions are individual predictions corresponding to the levels (or unique values) of focal predictor(s) conditioned on the "typical" values of the non-focal predictors. Prediction plot provides a way to describe variable predictions. In particular, the purpose and goal of a *prediction plot* seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a "typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors.
+
+
+\subsection{Jensen’s inequality and bias in the expected mean}
+
+Nonlinear relationship between the response and independent variables can either increase or decrease the predicted outcome, depending on the shape of the link function. A key challenge is understanding how the variability in the focal predictor(s) affect the (mean) predictions of the outcome. Classically, Jensen's inequality provides a way to examine the nature of the link function and deducing its effect on the prediction. Specifically, for a random variable $x$ with mean of $\bar{x}$; a nonlinear function, $f(x)$, the mean of $f(x)$, $\bar{f(x)}$, does not equal the the nonlinear function applied to mean of $x$, $f(\bar{x})$. When $f(x)$ is accelerating ($f''(x) > 0$), $\bar{f(x)} > f(\bar{x})$; and when $f(x)$ is decreasing ($f''(x) < 0$), $\bar{f(x)} < f(\bar{x})$. In other words, the sign of the difference between $\bar{f(x)}$ and $f(\bar{x})$ depends on the nature of the link function.
+
+For accelerating functions, the Jensen's inequality describes how the changes in the predictors elevate the predicted outcome and describes how these changes depress the predictions. **SC -> JD: graphical illustration?** 
+
+In many applications, it usually important to report the estimates that reflect the expected values of the untransformed respense. In such cases, bias-adjustment is needed when back-transforming the predictions to the original scales, due to the biases induced by the nonlinear transformation on the expected mean. More specifically, suppose the transformed response is $\eta$, the back-transformed response is $y = g^{-1}(\eta)$. Most common approach for bias-adjustment is second-order Taylor approximation [@lenth2018package; @duursma2003bias]. Here, we describe and implement a different approach, \emph{population-based} approach for bias correction.
+
+
+\subsubsection{Population-based approach for bias correction}
+
+
+The most precise (although not necessarily accurate!) way to predict is to condition on a value $F$ of the focal predictor and make predictions for all observations (members of the population) for which $x_f = F$ (or in a small range around $F$ ...). A key point is that the nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population (e.g. all individuals with $x_f = F$) to a one-dimensional distribution of $\eta(x_f, \nset{x})$.
+
+Once we have got our vector of $\boldeta$ (which is essentially a set of samples from the distribution over $\eta$ for the conditional set), we want a mean and confidence intervals on the mean on the response (data) scale, i.e. after back-transforming. Most precisely the mean is $\int P(\eta') g^{-1}(\eta') d\,\eta$:
+\begin{enumerate}
+\item if we use the observations themselves then we just compute the individual values of $g^{-1}(\eta)$ and compute their mean
+\item we could compute the quantiles of the distribution of $\eta$ and use this to construct an approximate Riemann sum over the distribution
+\end{enumerate}
+
+In principle, the first approach is more applicable, hence our focus, in our case since  we are interested in individual (at each level of the focal predictor) predictions i.e., the \emph{variable prediction}, not necessarily the mean. In addition, we can conveniently compute the mean of $g^{-1}(\eta)$.
+
+There are two ways to compute $\eta$ when we use the individuals observations, i.e., the first case. In particular for each level of the focal predictor, we can take
+\begin{enumerate}
+\item corresponding values of the non-focal linear (hence forth referred to as binned non-focal linear predictor // \textbf{BB})
+\item entire population of the non-focal linear predictor (hence forth referred to as population-based non-focal linear predictor // \textbf{JD})
+\end{enumerate}
+
+
+\subsubsection{Binned non-focal linear predictor}
+
+To do these computations, we need to take the values of the non-focal predictors (or their means and covariances) from the *conditional distribution*. If the focal predictors are discrete, we condition on exact values; if they are continuous/have mostly unique values, we condition on appropriately sized bins. In other words,
 $$
 \underset{\cdist}{\textrm{mean}}  g^{-1} \left(\eta(\nset{x},x_f) \right)
 $$
 
-Suppose we consider the values of non-focal predictors, to implement this:
+To implement this:
+\begin{itemize}
+\item compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+\item find a list of vectors of observations of $\nset{\eta}$ associated with each value (bin) of the focal predictor, $\nset{{\eta_j}}$, $j = 1, 2, \cdots$
+\item for each $\nset{{\eta_j}}$:
+\begin{itemize}
+\item compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{{\eta_j}}\right)$
+\end{itemize}
+\end{itemize}
 
-- compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
-- find a list of vectors of observations of $\nset{\eta}$ associated with each value (bin) of the focal predictor, $\nset{{\eta_j}}$, $j = 1, 2, \cdots$
-- for each $\nset{{\eta_j}}$:
-	- compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{{\eta_j}}\right)$
+Consider an example where we want to predict the probability of having clean water based on age and gender of household head, the prediction $\hat{y}_j$ would represent the expected probability of clean water for a 25-year-old, for example.
 
-_What's the expected probability of having clean water for all $x$-year-old with the **corresponding** wealth index??_
+If we compute the individual back-transformed predictions for a poorly sampled/finely spaced set of focal values, we will get a noisy prediction line as the values of the non-focal predictors shift across the focal values. Simple example: suppose everyone below the median age has wealth index $w_1$, everyone above the median has $w_2$.  Then the predicted value will have a discontinuity at the median age. We can deal with this by taking bigger bins (a form of smoothing), or by post-smoothing the results (by loess, for example). The principled form of this would be to assume/recognize that our uneven distribution of observed non-focal predictors actually represents a sample of a distribution that will vary \emph{smoothly} as a function of the focal predictor.
 
-**JD**'s and **SC**'s
 
-- compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
-- for every value of the focal predictor, $x_{j_f}$:
-	- compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{\eta}\right)$
+\subsubsection{Whole population non-focal linear predictor}
 
-The major difference between **BB**'s and **JD**'s approach is that in the former case, we consider non-focal linear predictor corresponding to specific value (bin) of the focal predictor, while in the later case, for each value of the focal predictor, we consider linear predictor associated with entire population.
+Suppose we are now interested in \emph{expected probability of having clean water for all $x$-year-old across the levels of gender??}, then at each level of the focal predictor, we want to add overall contribution of non-focal predictors. In particular:
+\begin{itemize}
+\item compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+\item for every value of the focal predictor, $x_{j_f}$:
+\begin{itemize}
+\item compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{\eta}\right)$
+\end{itemize}
+\end{itemize}
 
 **Questions**
+\begin{itemize}
+\item How to conceptualize \textbf{JD} approach. What does it represent in reality?
+\item Which approach is the most appropriate?
+\end{itemize}
 
-- What does the second case (JD's) represent?
-- Which is the correct approach?
 
-\subsection{Simulation}
+\subsection{Propagation of uncertainty}
 
-We implement and apply these methods in the context of both simple generalized linear and mixed effect models, using simulated data sets -- for univariate and multivariate models.
+What about the confidence intervals (CI)? The limits of the confidence intervals are points, not mean values. In principle, every observation/set of non-focal predictors has a different CI.  The predictions are $\eta(x_f, \nset{x})$ or $\eta(x_f, \nset{{\bar{x}}})$, depending on how we treat non-focal predictors; the variances of the predictions are $\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})$, where the entries in $\bX^\star$ constitutes appropriately constructed (as per $\eta$) non-focal predictors (or corresponding terms) together with appropriate values of the non-focal predictors; and $\Sigma = V(\bbeta)$ is variance-covariance matrix of $\bbeta$. If the non-focal predictors are averaged, the variances are directly computed from $\bX^\star$. However, for the population-based approaches, we follow the same steps described above to compute the distributions of lower/upper CI, $\eta \pm q\sigma$, and compute the transformed mean values, i.e.,
+$$
+\underset{\cdist}{\textrm{mean}}  g^{-1} \left(\eta(\nset{x},x_f) \pm q\sigma \right),
+$$
+where $q$ is an appropriate quantile of the Normal or t distribution.
 
-We start with a univariate case where we have only one predictor.
+If we consider only the uncertainty of the focal predictor, so that the confidence intervals are $\eta \pm q \sigma_f$, we can construct \emph{centered} CI by removing the uncertainty associated with the non-focal predictor(s) using either variance-covariance matrix, $\Sigma$ or centered model matrix, $\bX^{\star}$.
 
-\section{Simple fixed effect model}
+\subsubsection{Variance-covariance}
 
+The computation of $\hat{\eta}$ remains the same as described above. However, to compute $\sigma$, $\Sigma$ is modified by \emph{zeroing-out} (the variance-covariance of all non-focal predictors are assigned zero) entries of non-focal terms$. This approach requires \emph{centering} of the predictors in the model matrix, $X$. In other words, the fitted model should have centered predictors i.e., $\bX_{c} = \bX - \bar{\bX}$.
+
+_\
+
+\subsubsection{Centered model matrix}
+
+Consider centered $\bX^{\star}_{c}$. It follows that the \emph{non-focal} terms in $\bX^{\star}_{c}$ are all zero. Consequently the uncertainty due to non-focal predictors are all zeroed-out in the computation of $\sigma$. More generally, centered design matrix, $\bX^{\star}_{c}$, impacts on the estimated value of the intercept and its associated variance but not the slopes. Thus since non-focal terms in $\bX^{\star}_{c}$ are all zero, it does not matter what their corresponding values are in the variance-covariance matrix. Hence, we can compute variable predictions from non-centered predictors (in other words, fitted models with predictors in their natural scales).
+
+
+\subsection{Simulation examples}
+
+In this section, we illustrate bias in the context of linear and generalized (mixed) linear models. We compare predictions when non-focal predictors averaging and when population-based approaches are used. Later on, we illustrate and compare our approaches for describing uncertainty in the predictions to existing major \textbf{R} packages for prediction.
+
+\subsection{Simple linear model}
+
+Consider a simple simulation
 \begin{align*}
-\mathrm{logit(status} = 1) &= \eta \\ 
-\eta &= \beta_0 + \beta_{\mathrm{A}} \mathrm{Age} + \beta_{\mathrm{W}} \mathrm{Wealthindex} \\
-\mathrm{Age} &\sim \mathrm{Normal}(0.2, 1) \\
-\mathrm{Wealthindex} &\sim \mathrm{Normal}(0, 1) \\
+y &= \beta_0 + \beta_1\mathrm{x_1} + \beta_2\mathrm{x_2} + \epsilon \\
+\mathrm{x_1} &\sim \mathrm{Normal}(0.2, 1) \\
+\mathrm{x_2} &\sim \mathrm{Normal}(0, 1) \\
+\epsilon &\sim \mathrm{Normal}(0, 1) \\
 \beta_0 &= 1.5 \\
-\beta_{\mathrm{A}} &= 1.0 \\
-\beta_{\mathrm{W}} &= 2
+\beta_{\mathrm{x_1}} &= 1.0 \\
+\beta_{\mathrm{x_2}} &= 2
 \end{align*}
+for $10000$ observations.
 
-Considering $N=1e4$
-
-```{r sim_simple}
-
-simplesim <- function(N=1e4, beta0=1.5, betaA=1.0, betaW=2
-		, age_sd=1, age_mean=0.2
-		, wealth_sd=1, wealth_mean=0
-	) {
-	age <- rnorm(N, age_mean, age_sd)
-	wealthindex <- rnorm(N, wealth_mean, wealth_sd)
-	eta <- beta0 + betaA * age + betaW * wealthindex
-	sim_df <- (data.frame(age=age, wealthindex=wealthindex, eta=eta)
-		%>% mutate(status = rbinom(N, 1, plogis(eta)))
-		%>% select(-eta)
-	)
-	return(sim_df)
-}
-sim_df <- simplesim()
-true_prop <- mean(sim_df$status)
-print(true_prop)
-head(sim_df)
+```{r simple_linear_sim, echo=FALSE}
+sim_linear_df <- simplesim(N=10000, link_scale=TRUE)
+colnames(sim_linear_df) <- c("x1", "x2", "y")
+true_prop_linear <- mean(sim_linear_df$y)
+str(sim_linear_df)
 ```
 
-\subsection{Simple logistic model}
+We want to compare the model predicted mean with "true" (marginal) mean, i.e., `r round(true_prop_linear, 2)`. We first check the coefficient estimates which are relatively close to our truth.
 
-```{r simple_logistic}
-simple_mod <- glm(status ~ age + wealthindex, data = sim_df, family="binomial")
+```{r simple_linear_model}
+simple_lm_mod <- lm(y ~ x1 + x2, sim_linear_df)
+summary(simple_lm_mod)
 ```
 
+The next step is to construct variable predictions -- non-focal predictor averaging (hence forth referred to as "average") and population-based, i.e., binned non-focal linear predictor (hence referred to as "binned-nlp") and whole population non-focal linear predictor (hence referred to as "whole-nlp").
 
-\subsection{Variable predictions}
-
-
-```{r pop_ave_fun, echo=FALSE}
-binfun <- function(mod, focal, non.focal, bins=50, ...) {
-	mf <- model.frame(mod)
-	mm <- (mf
-		%>% select_at(c(focal, non.focal))
-	)
-	check_df <- (mf
-		%>% arrange_at(focal)
-		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
-		%>% group_by(bin)
-		%>% summarise_all(mean)
-		%>% mutate(model="binned")
-	)
-	return(check_df)
-}
-
+```{r simple_linear_pred, exho=FALSE}
+pred_average <- varpred(simple_lm_mod, "x1", pop.ave="population", nlp.type="binned")
+plot(pred_average)
 ```
 
+\newpage
+\section{References}
 
-```{r simple_pred_age, echo=FALSE, fig.cap="Prediction plots with N=1e4: JD's approach on the left; BB's on the right."} 
-binned_df <- binfun(simple_mod, "age", "wealthindex")
-
-## JD's approach
-pred_age_jd <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="jd", modelname="JD")
-age_plot_jd <- (ggplot(pred_age_jd, aes(x=age, y=fit))
-	+ geom_line()
-	+ geom_line(aes(y=lwr), lty=2)
-	+ geom_line(aes(y=upr), lty=2)
-	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ labs(y="Probability")
-	+ theme(legend.position="none")
-)
-
-## BB's approach
-pred_age_bb <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="bb", modelname="BB")
-age_plot_bb <- (ggplot(pred_age_bb, aes(x=age, y=fit))
-	+ geom_line()
-	+ geom_line(aes(y=lwr), lty=2)
-	+ geom_line(aes(y=upr), lty=2)
-	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ geom_smooth(colour="black", size=0.5)
-	+ labs(y="Probability")
-	+ theme(legend.position="none")
-)
-
-ggarrange(age_plot_jd, age_plot_bb + rremove("ylab"), common.legend=FALSE)
-
-```
-
-Considering $N=1e5$ and then refit the model
-
-```{r sim_simple_ne5}
-sim_df <- simplesim(N=1e5)
-true_prop <- mean(sim_df$status)
-simple_mod <- glm(status ~ age + wealthindex, data = sim_df, family="binomial")
-```
-
-```{r simple_pred_age_ne5, echo=FALSE, fig.cap="Prediction plots with N=1e5: JD's approach on the left; BB's on the right."} 
-binned_df <- binfun(simple_mod, "age", "wealthindex")
-
-## JD's approach
-pred_age_jd <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="jd", modelname="JD")
-age_plot_jd <- (ggplot(pred_age_jd, aes(x=age, y=fit))
-	+ geom_line()
-	+ geom_line(aes(y=lwr), lty=2)
-	+ geom_line(aes(y=upr), lty=2)
-	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ labs(y="Probability")
-	+ theme(legend.position="none")
-)
-
-## BB's approach
-pred_age_bb <- predictionfun(simple_mod, "age", isolate=TRUE, include.nonfocal="bb", modelname="BB")
-age_plot_bb <- (ggplot(pred_age_bb, aes(x=age, y=fit))
-	+ geom_line()
-	+ geom_line(aes(y=lwr), lty=2)
-	+ geom_line(aes(y=upr), lty=2)
-	+ geom_hline(yintercept=true_prop, lty=2, colour="grey")
-	+ geom_point(data=binned_df, aes(x=age, y=status, color="binned"))
-	+ geom_smooth(colour="black", size=0.5)
-	+ labs(y="Probability")
-	+ theme(legend.position="none")
-)
-
-ggarrange(age_plot_jd, age_plot_bb + rremove("ylab"), common.legend=FALSE)
-
-```

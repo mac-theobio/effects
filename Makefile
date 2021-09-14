@@ -10,7 +10,7 @@ vim_session:
 
 ######################################################################
 
-Sources += $(wildcard *.R *.md *.Rnw *.rmd)
+Sources += $(wildcard *.R *.md *.Rnw *.rmd *.bib)
 Sources += $(wildcard R/*.R)
 Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 
@@ -96,6 +96,7 @@ Sources += *.rmd
 prediction.Rout: prediction.R
 	$(wrapR)
 
+# bias_correction.bib: bias_correction.bib
 bias_correction.pdf: bias_correction.rmd prediction.rda
 	$(knitpdf)
 
