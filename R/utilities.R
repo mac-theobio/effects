@@ -256,13 +256,14 @@ clean_model <- function(focal.predictors, mod, xlevels = list()
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
+			 quant <- seq(0, 1, length.out=steps)
 			 if (pop.ave=="quantile") {
-			 	quant <- seq(0, 1, length.out=steps)
 			 	as.vector(quantile(X[,name], quant))
 			 } else if (pop.ave=="population") {
 			 	as.vector(X[, name])
 			 } else {
-			 	seq(min(X[, name]), max(X[, name]), length.out=steps)
+			 #	seq(min(X[, name]), max(X[, name]), length.out=steps)
+			 	as.vector(quantile(X[,name], quant))
 			 }
 		}
 		else {

@@ -86,7 +86,7 @@
 
 varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL, level = 0.95
-	, steps = 101, at = list(),  dfspec = 100, vcov. = NULL, internal = FALSE, avefun = mean
+	, steps = 100, at = list(),  dfspec = 100, vcov. = NULL, internal = FALSE, avefun = mean
 	, zero_out_interaction = FALSE, which.interaction = c("emmeans", "effects")
 	, pop.ave = c("none", "quantile", "population"), nlp.type=c("whole", "binned")
 	, include.re = FALSE, bias.adjust = FALSE, sigma = NULL
@@ -194,7 +194,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 				} 
 			}
 			mm_non.focal <- mm[, terms_non.focal, drop=FALSE]
-			pred_non.focal <- mm_non.focal %*% betahat_non.focal
+			pred_non.focal <- as.vector(mm_non.focal %*% betahat_non.focal)
 			if (pop.ave=="quantile") {
 				mm_x.var <- as.vector(mm[, terms_focal])
 			}

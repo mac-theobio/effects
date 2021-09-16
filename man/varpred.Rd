@@ -12,7 +12,7 @@ varpred(
   isolate = FALSE,
   isolate.value = NULL,
   level = 0.95,
-  steps = 101,
+  steps = 100,
   at = list(),
   dfspec = 100,
   vcov. = NULL,

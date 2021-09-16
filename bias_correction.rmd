@@ -14,6 +14,7 @@ link-citations: yes
 knitr::opts_chunk$set(fig.pos = "H", out.extra = "", message=FALSE, warning=FALSE)
 
 library(shellpipes)
+library(lme4)
 library(glmmTMB)
 library(dplyr)
 library(ggplot2)
@@ -35,6 +36,7 @@ plotEsize <- function(df, pos = 0.5, col_lab = ""){
 	)
 }
 
+## Simple linear models simulation
 simplesim <- function(N=1e4, beta0=1.5, betaA=1.0, betaW=2
 		, age_sd=1, age_mean=0.2
 		, wealth_sd=1, wealth_mean=0
@@ -55,6 +57,56 @@ simplesim <- function(N=1e4, beta0=1.5, betaA=1.0, betaW=2
 	}
 	return(sim_df)
 }
+
+## Random effect simulation
+randsim <- function(nHH = 10, perHH = 5, hh_sd = 2
+	, age_mean = 0.2, age_sd = 1, beta0 = 1.5, betaA = 1
+	, link_scale = FALSE){
+	N <- nHH * perHH
+	hhID <- rep(1:perHH, each=nHH)
+	age <- rnorm(N, age_mean, age_sd)
+	if (link_scale) {
+		eps <- rnorm(N, 0, 1)
+	} else {
+		eps <- 0
+	}
+	sim_df <- (data.frame(hhid=hhID, age=age)
+		%>% group_by(hhid)
+		%>% mutate(hhRE = rnorm(1, 0, hh_sd))
+		%>% ungroup()
+		%>% mutate(eta = beta0 + hhRE + betaA*age + eps)
+		%>% select(-hhRE)
+	)
+	if (link_scale) {
+		sim_df <- (sim_df
+			%>% mutate(y = eta)
+			%>% select(-eta)
+		)
+	} else {
+		sim_df <- (sim_df
+			%>% mutate(y = rbinom(N, 1, plogis(eta)))
+			%>% select(-eta)
+		)
+	}
+	return(sim_df)
+}
+
+
+binfun <- function(mod, focal, non.focal, bins=50, ...) {
+	mf <- model.frame(mod)
+	mm <- (mf
+		%>% select_at(c(focal, non.focal))
+	)
+	check_df <- (mf
+		%>% arrange_at(focal)
+		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
+		%>% group_by(bin)
+		%>% summarise_all(mean)
+		%>% mutate(model="binned")
+	)
+	return(check_df)
+}
+
 ```
 
 \newcommand{\nset}[1]{#1_{\{n\}}}
@@ -205,24 +257,234 @@ y &= \beta_0 + \beta_1\mathrm{x_1} + \beta_2\mathrm{x_2} + \epsilon \\
 for $10000$ observations.
 
 ```{r simple_linear_sim, echo=FALSE}
-sim_linear_df <- simplesim(N=10000, link_scale=TRUE)
+sim_linear_df <- simplesim(N=1e4, link_scale=TRUE)
 colnames(sim_linear_df) <- c("x1", "x2", "y")
 true_prop_linear <- mean(sim_linear_df$y)
-str(sim_linear_df)
 ```
 
-We want to compare the model predicted mean with "true" (marginal) mean, i.e., `r round(true_prop_linear, 2)`. We first check the coefficient estimates which are relatively close to our truth.
+We want to compare the model predicted mean with "true" (marginal) mean, i.e., `r round(true_prop_linear, 2)`. The first step is to fit the model and then construct variable predictions -- non-focal predictor averaging (hence forth referred to as "average") and population-based, i.e., binned non-focal linear predictor (hence referred to as "binned-nlp") and whole population non-focal linear predictor (hence referred to as "whole-nlp").
 
-```{r simple_linear_model}
-simple_lm_mod <- lm(y ~ x1 + x2, sim_linear_df)
-summary(simple_lm_mod)
+```{r simple_linear_model, echo=FALSE}
+simple_linear_mod <- lm(y ~ x1 + x2, sim_linear_df)
 ```
 
-The next step is to construct variable predictions -- non-focal predictor averaging (hence forth referred to as "average") and population-based, i.e., binned non-focal linear predictor (hence referred to as "binned-nlp") and whole population non-focal linear predictor (hence referred to as "whole-nlp").
+```{r simple_linear_pred_ave, echo=FALSE}
+## Binned data
+binned_df <- binfun(simple_linear_mod, "x1", "x2", bins=15)
 
-```{r simple_linear_pred, exho=FALSE}
-pred_average <- varpred(simple_lm_mod, "x1", pop.ave="population", nlp.type="binned")
-plot(pred_average)
+## Averaged non-focal predictors
+pred_average <- varpred(simple_linear_mod, "x1", isolate=TRUE, pop.ave="none")
+pred_average_plot <- (plot(pred_average) 
+	+ geom_hline(yintercept=true_prop_linear, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_average$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_linear_df$x1), lty=2, colour="grey")
+	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
+)
+```
+
+
+```{r simple_linear_pred_binned, echo=FALSE}
+## Binned non-focal linear predictor
+pred_binned <- varpred(simple_linear_mod, "x1", isolate=TRUE
+	, pop.ave="population", nlp.type="binned"
+)
+pred_binned_plot <- (plot(pred_binned) 
+	+ geom_smooth(colour="red", size=0.5)
+	+ geom_hline(yintercept=true_prop_linear, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_binned$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_linear_df$x1), lty=2, colour="grey")
+	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
+)
+```
+
+Figure \ref{fig:simple_linear_pred_plots} compares variable predictions based on the three approaches highlighted above. All the three approaches give similar estimates (`r round(mean(pred_average$preds$fit), 3)`) of expected mean, $\bar{f(x)}$, and very close to the observed mean, $f(\bar{x})$. In other words, for the simple linear model, $\bar{f(x)} \approx f(\bar{x}) = `r round(true_prop_linear, 2)`$. For perfect predictions, we expect the blue, grey and the black (or red) to intersect at the same (or very close) point. Additional smoothing step is needed for binned-nlp, Figure \ref{fig:simple_linear_pred_plots}c, in order to generate smooth trend lines from noisy predictions. 
+
+
+```{r simple_linear_pred_whole, echo=FALSE}
+## Whole population non-focal linear predictor
+pred_whole <- varpred(simple_linear_mod, "x1", isolate=TRUE
+	, pop.ave="population", nlp.type="whole"
+)
+pred_whole_plot <- (plot(pred_whole) 
+	+ geom_hline(yintercept=true_prop_linear, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_whole$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_linear_df$x1), lty=2, colour="grey")
+	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
+)
+```
+
+
+```{r simple_linear_pred_plots, echo=FALSE, fig.cap=" \\label{fig:simple_linear_pred_plots}A comparison of variable predictions. The dotted blue and grey horizontal lines are the expected and observed/true means, respectively. The grey dots are the binned observations. The vertical grey line is the mean of the focal predictor (model center). In a) non-focal predictors averaged across the levels of focal predictor; b) non-focal linear predictor is binned across the levels of the focal predictor; and c) whole population non-focal linear predictor is used for each level of the focal predictor. In c, the noisy predictions, i.e., black lines, are smoothened resulting to the red trend-line with the corresponding CI represented by the grey shading."}
+ggarrange(pred_average_plot
+	, pred_binned_plot + rremove("ylab")
+	, pred_whole_plot
+	, labels = c("a)", "b)", "c)")
+	, common.legend=FALSE
+)
+```
+
+\subsection{Simple generalized linear model}
+
+Consider binary outcome simulation for improved (1) or unimproved (0) water services status, together with two socio-economic variables (age and wealth index), such that:
+\begin{align*}
+\mathrm{logit(status} = 1) &= \eta \\
+\eta &= \beta_0 + \beta_{\mathrm{A}} \mathrm{Age} + \beta_{\mathrm{W}} \mathrm{Wealthindex} \\
+\mathrm{Age} &\sim \mathrm{Normal}(0.2, 1) \\
+\mathrm{Wealthindex} &\sim \mathrm{Normal}(0, 1) \\
+\beta_0 &= 1.5 \\
+\beta_{\mathrm{A}} &= 1.0 \\
+\beta_{\mathrm{W}} &= 1
+\end{align*}
+
+
+```{r simple_glm_sim, echo=FALSE}
+sim_glm_df <- simplesim(N=1e4)
+true_prop_glm <- mean(sim_glm_df$status)
+```
+
+
+```{r simple_glm_model, echo=FALSE}
+simple_glm_mod <- glm(status ~ age + wealthindex, sim_glm_df, family="binomial")
+```
+
+```{r simple_glm_pred_ave, echo=FALSE}
+## Binned data
+binned_df_glm <- binfun(simple_glm_mod, "age", "wealthindex", bins=15)
+
+## Averaged non-focal predictors
+pred_average_glm <- varpred(simple_glm_mod, "age", isolate=TRUE, pop.ave="none")
+pred_average_glm_plot <- (plot(pred_average_glm) 
+	+ geom_hline(yintercept=true_prop_glm, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_average_glm$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_glm_df$age), lty=2, colour="grey")
+	+ geom_point(data=binned_df_glm, aes(x=age, y=status), colour="grey")
+	+ labs(y="Prob. of improved \n service")
+)
+```
+
+```{r simple_glm_pred_binned, echo=FALSE}
+## Binned non-focal linear predictor
+pred_binned_glm <- varpred(simple_glm_mod, "age", isolate=TRUE
+	, pop.ave="population", nlp.type="binned"
+)
+pred_binned_glm_plot <- (plot(pred_binned_glm) 
+	+ geom_smooth(colour="red", size=0.5)
+	+ geom_hline(yintercept=true_prop_glm, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_binned_glm$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_glm_df$age), lty=2, colour="grey")
+	+ geom_point(data=binned_df_glm, aes(x=age, y=status), colour="grey")
+	+ labs(y="Prob. of improved \n service")
+)
+```
+
+
+```{r simple_glm_pred_whole, echo=FALSE}
+## Whole non-focal linear predictor
+pred_whole_glm <- varpred(simple_glm_mod, "age", isolate=TRUE
+	, pop.ave="population", nlp.type="whole"
+)
+pred_whole_glm_plot <- (plot(pred_whole_glm) 
+	+ geom_hline(yintercept=true_prop_glm, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_whole_glm$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_glm_df$age), lty=2, colour="grey")
+	+ geom_point(data=binned_df_glm, aes(x=age, y=status), colour="grey")
+	+ labs(y="Prob. of improved \n service")
+)
+```
+
+Figure \ref{fig:simple_glm_pred_plots} shows predicted probability of improved services for a particular year old household head. In comparison to binned-nlp ($\bar{f(x)} = `r round(mean(pred_binned_glm$preds$fit), 3)`$) and whole-nlp ($\bar{f(x)} = `r round(mean(pred_whole_glm$preds$fit), 3)`$) which closely estimate the expected marginal probability ($\bar{f(x)} \approx f(\bar{x}) = `r round(true_prop_glm, 2)`$), averaged non-focal predictors approach (Figure \ref{fig:simple_glm_pred_plots}a) over-predicts the expected probabilities with $\bar{f(x)} = `r round(mean(pred_average_glm$preds$fit), 2)` > f(\bar{x})$. Because of the nonlinear link function in the model, our prediction are likely to be biased. However since population-based approaches (binned-nlp and whole-nlp) incorporate bias correction in their construction we see better estimates as opposed to averaged non-focal predictors approach.
+
+```{r simple_glm_pred_plots, echo=FALSE, fig.cap=" \\label{fig:simple_glm_pred_plots}A comparison of variable predictions. The dotted blue and grey horizontal lines are the expected and observed/true means, respectively. The grey dots are the binned observations. The vertical grey line is the mean of the focal predictor (model center). In a) non-focal predictors averaged across the levels of focal predictor; b) non-focal linear predictor is binned across the levels of the focal predictor; and c) whole population non-focal linear predictor is used for each level of the focal predictor. In c, the noisy predictions, i.e., black lines, are smoothened resulting to the red trend-line with the corresponding CI represented by the grey shading."}
+
+ggarrange(pred_average_glm_plot
+	, pred_binned_glm_plot + rremove("ylab")
+	, pred_whole_glm_plot
+	, labels = c("a)", "b)", "c)")
+	, common.legend=FALSE
+)
+```
+
+\subsection{Mixed models}
+
+We now consider more complex model involving fixed and random effects. We start with simple ones and then evolve to more complicated models.
+
+\subsubsection{One grouping factor, linear random effect model}
+
+Suppose in the first simulation (but now only a single predictor), the observations are recorded more than once from a number. In particular, let $H$ be the number of households indexed by the grouping factor, and $h[i]$ be household of the $i$th observation, so that:
+\begin{align*}
+y_i &= \beta_0 + \alpha_{h[i]}+ \beta_{\mathrm{x}} \mathrm{x}_i + \epsilon_i\\
+\alpha_h &\sim \mathrm{Normal}(0, 2), \quad \mathrm{h = 1, \cdots, H}\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
+\mathrm{x}_i &\sim \mathrm{Normal}(0.2, 1),  \quad \mathrm{i = 1, \cdots, n}\\
+\beta_0 &= 1.5 \\
+\beta_{\mathrm{x}} &= 1.0 \\
+\end{align*}
+
+```{r lme_sim, echo=FALSE}
+sim_lme_df <- randsim(nHH=1000, perHH=10, hh_sd=2, link_scale=TRUE)
+colnames(sim_lme_df) <- c("hhid", "x", "y")
+true_prop_lme <- mean(sim_lme_df$y)
+str(sim_lme_df)
+```
+
+```{r raneff_linear_model, echo=FALSE}
+lme_mod <- glmmTMB(y ~ x + (1|hhid)
+	, data = sim_lme_df
+	, family = gaussian()
+)
+summary(lme_mod)
+```
+
+```{r lme_pred_ave, echo=FALSE}
+## Binned data
+binned_df_lme <- binfun(lme_mod, "x", "hhid", bins=15)
+
+## Averaged non-focal predictors
+pred_average_lme <- varpred(lme_mod, "x", isolate=TRUE, pop.ave="none")
+pred_average_lme_plot <- (plot(pred_average_lme) 
+	+ geom_hline(yintercept=true_prop_lme, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_average_lme$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_lme_df$x), lty=2, colour="grey")
+	+ geom_point(data=binned_df_lme, aes(x=x, y=y), colour="grey")
+	+ labs(y="Predicted y")
+)
+```
+
+```{r lme_pred_binned, echo=FALSE}
+## Binned non-focal linear predictor
+pred_binned_lme <- varpred(lme_mod, "x", isolate=TRUE, pop.ave="population", nlp.type="binned")
+pred_binned_lme_plot <- (plot(pred_binned_lme) 
+	+ geom_smooth(colour="red", size=0.5)
+	+ geom_hline(yintercept=true_prop_lme, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_binned_lme$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_lme_df$x), lty=2, colour="grey")
+	+ geom_point(data=binned_df_lme, aes(x=x, y=y), colour="grey")
+	+ labs(y="Predicted y")
+)
+```
+
+```{r lme_pred_whole, echo=FALSE}
+## Whole non-focal linear predictor
+pred_whole_lme <- varpred(lme_mod, "x", isolate=TRUE, pop.ave="population", nlp.type="whole")
+pred_whole_lme_plot <- (plot(pred_whole_lme) 
+	+ geom_hline(yintercept=true_prop_lme, lty=2, colour="grey")
+	+ geom_hline(yintercept=mean(pred_whole_lme$preds$fit), lty=2, colour="blue")
+	+ geom_vline(xintercept=mean(sim_lme_df$x), lty=2, colour="grey")
+	+ geom_point(data=binned_df_lme, aes(x=x, y=y), colour="grey")
+	+ labs(y="Predicted y")
+)
+```
+
+In \ref{fig:simple_lme_pred_plots}, we investigate the contribution of random effects to bias in predictions in the case of a simple linear mixed model with only one predictor and random intercept effect. Similar to the case of simple linear model, the expected mean is very close to the observed in all the three approaches.
+
+```{r simple_lme_pred_plots, echo=FALSE, fig.cap=" \\label{fig:simple_lme_pred_plots}A comparison of variable predictions for simple linear mixed effect model. The dotted blue and grey horizontal lines are the expected and observed/true means, respectively. The grey dots are the binned observations. The vertical grey line is the mean of the focal predictor (model center). In a) non-focal predictors averaged across the levels of focal predictor; b) non-focal linear predictor is binned across the levels of the focal predictor; and c) whole population non-focal linear predictor is used for each level of the focal predictor. In c, the noisy predictions, i.e., black lines, are smoothened resulting to the red trend-line with the corresponding CI represented by the grey shading."}
+
+ggarrange(pred_average_lme_plot
+	, pred_binned_lme_plot + rremove("ylab")
+	, pred_whole_lme_plot
+	, labels = c("a)", "b)", "c)")
+	, common.legend=FALSE
+)
 ```
 
 \newpage
