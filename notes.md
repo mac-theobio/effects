@@ -1,8 +1,8 @@
 
-We'll discuss git_push/effects_writeup.pdf in effects repo and also jdeffects in the same repo.
+2021 Sep 16 (Thu)
+=================
 
-To jdeffects
-make build-package && install-package
+JD should edit structure.md. CB should do that, too!
 
 2020 Nov 25 (Wed)
 =================
