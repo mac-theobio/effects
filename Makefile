@@ -23,7 +23,7 @@ Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 ## Make Sweave weird depencies chain
 %: %.pdf ;
 
-Sources += glossary.md
+Sources += glossary.md structure.md
 
 autopipeR = defined
 
@@ -88,6 +88,21 @@ Ignore += effects_writeup.tex
 Ignore += effects_writeup*.pdf
 ## effects_writeup.pdf: effects_writeup.Rnw
 effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
+
+######################################################################
+
+## Variable prediction manuscript
+
+Ignore += variable_predictions.tex
+Ignore += variable_predictions*.pdf
+
+variable_predictions_funs.Rout: variable_predictions_funs.R
+	$(wrapR)
+variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions_funs.rda
+	$(wrapR)
+
+variable_predictions.tex: variable_predictions_objs.rda variable_predictions.Rnw
+
 
 ######################################################################
 

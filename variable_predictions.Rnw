@@ -1,0 +1,126 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{natbib}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{graphicx, subfig}
+\usepackage{float}
+\usepackage{hyperref}
+
+\def\code#1{\texttt{#1}}
+
+\newcommand{\JD}[1]{{\color{blue} \emph{#1}}}
+\newcommand{\bmb}[1]{{\color{RubineRed!70!} \emph{#1}}}
+\newcommand{\pkg}[1]{\textbf{#1}}
+
+\newcommand{\bX}{{\mathbf X}}
+\newcommand{\bbeta}{{\boldsymbol \beta}}
+\newcommand{\boldeta}{{\boldsymbol \eta}}
+\newcommand{\boldmu}{{\boldsymbol \mu}}
+
+\newcommand{\nset}[1]{#1_{\{n\}}}
+\newcommand{\yref}{y_{\textrm{ref}}}
+\newcommand{\cdist}{{D(\nset{x}|x_f)}}
+\newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
+\newcommand{\xfprime}{x_{f'}}
+
+\setlength{\parindent}{0pt}
+
+\title{Generating and visualizing predictor effects???}
+
+\begin{document}
+
+\maketitle
+\setkeys{Gin}{width=0.8\textwidth}
+
+
+\section{Introduction}
+
+<<setup, echo=FALSE, message=FALSE, warning=FALSE>>=
+library(ggplot2)
+library(stargazer)
+library(vareffects); varefftheme()
+
+
+set.seed(9991)
+load("variable_predictions_objs.rda")
+@
+
+In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing models estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the "effects" of covariates on predicted probabilities, or we may require predictions of responses at various levels of covariates. For example, as a way to plan, public health officials may want to know the predicted probability of improved water services in slums on the basis of the dwellers' household size, income, wealth index, etc.
+
+Both simple and generalized linear (mixed) models (GL(M)Ms) can examine very complex relationships, including nonlinear relationships between response and predictors, interactions between predictors (and via splines), and nonlinear transformations via link functions due to their flexibility. This flexibility comes at a cost, for example, complex multivariate models may risk misinterpretation, and miscalculation of quantities of interest. Also, coefficient estimates of models involving nonlinear link functions or interactions lose their direct interpretation \citep{leeper2017interpreting}, meaning that interpretation of derived quantities from these estimates requires some understanding of the specified model. 
+
+When visually presented, predictions provide a unified and intuitive way of describing relationships from a fitted model, especially complex models involving interaction terms or some kind transformations on the dependent variables whose estimates are usually, but not always, a subject to less clarity of interpretation. However, generating predictions and associated confidence intervals for regression models has a number of challenges. In particular: 
+\begin{enumerate}
+\item choice of representative values of \emph{focal} variable(s) and appropriate 'model center' for \emph{non-focal} variables in the case of multiple predictors
+\item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? Should we exclude variation in non-focal parameters?)
+\end{enumerate}
+
+Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their mean values. There a number of variations on description of this quantity -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{variable (effect?) predictions} since this quantity should, for example, tell us what we would expect the outcome to be at a particular value or level of the variable. An alternative, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. We give special focus to the second challenge later in the article.
+
+When dealing with nonlinear link functions, the correct predictions for example, are even much harder to estimate. One approach is to make predictions on the transformed scale (linear predictor scale), and then back-transform back to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation. In particular, Jensen's inequality and bias in expected mean prediction induced by nonlinear transformation of the response variable can lead inaccurate predictions. 
+
+The main purpose of this article is to discuss and implement various approaches for computing variable predictions and how to correctly compute the associated confidence intervals. We further explore approaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions.
+
+The outline of this article is as follows: Section \ref{sec:qoi} provides formal definition various quantities of interest, Section \ref{sec:stats_background} provides statistical background of estimation of model predictions, Section \ref{sec:uncertainity_propagation} describes mathematical and computation implementation of the proposed method for uncertainty propagation, and lastly Section \ref{sec:bias_correction} describes methods for bias correction in GL(M)M together with the computational implementation.
+
+\section{Quantities of interest}\label{sec:qoi}
+
+Several quantities of interest may be derived from regression models. The first one being the coefficient estimates. Others being predictors, model matrix, predicted values and marginal effects. \emph{predictors} are model input variables and is associated with one or more \emph{variables} (in polynomials, splines and models with interaction). Model matrix refers to the design matrix whose rows include all combination of variables appearing in the interaction terms, along with the ``typical" values of the focal and non-focal predictors.
+
+To illustrate some of the concepts, consider results from, hypothetical  simulated example, regression of household size as function of household wealth index and age of household head, and the second model involving these variables plus the interaction between them.
+
+<<qoi_coefs, echo=FALSE, results=tex, message=FALSE, warning=FALSE>>=
+stargazer(qoi_mod1, qoi_mod2
+	, title = "Example of simple linear model output"
+	, single.row=TRUE
+	, table.placement="H"
+	, label = "tab:qoi_coefs"
+)
+@
+
+In simple linear models with no interaction terms, the default out for the coefficient estimates in Table ~\ref{tab:qoi_coefs} model (1) is simple and directly interpretable as the expected change in household size for a unit change in age. In particular, a unit change in age is associated with a household that is \Sexpr{round(coef(qoi_mod1)[[2]], 3)} bigger. This is the \emph{unconditional marginal effect} \citep{leeper2017interpreting} and it is constant across all the observations and levels of all other variables. 
+
+Figure ~\ref{fig:qoi_pred_plot} shows the comparison of \emph{variable prediction} and unconditional marginal effect of effect of age on household size, based on model estimates in Table ~\ref{tab:qoi_coefs}. Since the model has no interactions, the relationship between the predicted household size and age is linear, hence the marginal effect of age is the slope ($\frac{\Delta \mathrm{hh size}}{\Delta \mathrm{age}}$) of the variable effect line and can be calculated irrespective of the values of wealth index. 
+%
+\begin{figure}[H]
+\begin{center}
+<<qoi_pred_plot, echo=FALSE, results=tex, fig=TRUE, message=FALSE>>=
+qoi_age_pred_plot
+@
+\end{center}
+\caption{Variable effect plot and marginal effect of age of household head on household size. For a linear model with no interaction, the marginal effect is the slope of the variable effect line.}
+\label{fig:qoi_pred_plot}
+\end{figure}
+%
+Variable effect, on the other hand, is the expected household size for a particular age, holding wealth index at its mean. In particular, the purpose and goal of a variable effect seems fairly straightforward; for specified values of (a) focal predictor(s), we want to give a point estimate and confidence intervals for the prediction of the model for a ``typical" (= random sample over the multivariate distribution of non-focal parameters) individual with those values of the predictors.
+
+On the other hand, when model specification involves other kinds of terms such as variable interactions, log and power transformations, etc., the coefficient estimates cannot easily and directly communicate the relationship between the outcome and the independent variable of interest because of the multiple coefficients of the same variable. For instance, in model (2), the interaction between age and wealth index is added, hence the coefficient estimate for age (\Sexpr{round(coef(qoi_mod2)[[2]], 3)}) can only be regarded as unconditional marginal effect when effect of wealth index (and thus \code{age:wealthindex}) is zero, which is never the case. In other words, for models involving interactions terms, looking at a single estimated coefficient in isolation and failing to take into account the estimates involving the interaction terms may lead to inaccurate interpretations \citep{brambor2006understanding, leeper2017interpreting}. 
+
+
+
+\section{Statistical background}\label{sec:stats_background}
+
+To get an intuition of how conditioning on the mean values of the non-focal predictors work, suppose we are interested in the variable predictions of a particular predictor (hence forth referred as \emph{focal} predictor otherwise \emph{non-focal}), $x_f$, from the set of predictors. To keep it simple, assume that the model has no interaction terms. Then the idea is to \emph{anchor} the values of non-focal predictors to some particular values. For example fixing the values of \emph{non-focal} predictor(s) at some typical values -- typically determined by averaging (for now) in some meaningful way, for example, arithmetic mean  for continuous and average over the levels of the factors for categorical non-focal predictors. The easiest way to achieve this is by constructing $\bX^\star$ by averaging the columns of non-focal variables in model matrix $\bX$, and together with appropriately chosen values of focal predictor(s).
+
+
+Consider a simple linear model with linear predictor $\eta = \bX\bbeta$ and let $g(\boldmu) = \boldeta$ be an identity link function (in the case of simple linear model), where $\boldmu$ is the expected value of response variable $y$. Let $\hat{\bbeta}$ be the estimate of $\bbeta$, together with the estimated covariance matrix $V(\hat{\bbeta})$ of $\hat{\bbeta}$. Let $\mathbf{X^*}$ be the model matrix, inheriting most of its key properties, for example transformations on predictors and interactions from the model matrix, $\mathbf{X}$. Then the prediction $\hat{\boldeta}^\star = \bX^\star\hat{\bbeta}$ is the variable effect for the focal predictor in question. 
+
+An alternative, save for later, formulation of variable effect involves, expressing the linear predictor as the sum of the focal and non-focal predictor linear predictor. In particular, $\eta^\star(x_f, \nset{{\bar{x}}}) = \beta_f x_f + \sum \nset{\beta} \nset{{\bar{x}^\star}}$, where $\nset{{\bar{x}^\star}}$ are the appropriately averaged entries of non-focal predictors and $\nset{x}$ is a vector of values of the non-focal predictors for a particular observation. 
+
+Generally, in generalized linear models with other link functions, the predictions are first generated in linear predictor scale, $\hat{\boldeta}^*$, and then transformed to the original response scale using $g^{-1}(\hat{\boldeta}^*)$.
+
+\section{Uncertainty propagation}\label{sec:uncertainity_propagation}
+
+What about the confidence intervals (CI)? The limits of the confidence intervals are points, not mean values. In principle, every observation/set of non-focal predictors has a different CI. 
+
+
+
+\section{Bias correction}\label{sec:bias_correction}
+
+
+\clearpage
+% References
+\bibliographystyle{plainnat}
+\bibliography{variable_predictions}
+
+\end{document}

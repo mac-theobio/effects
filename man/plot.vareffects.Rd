@@ -10,6 +10,7 @@
   xlabs = NULL,
   ylabs = NULL,
   pos = 0.5,
+  ci = TRUE,
   facet_scales = "fixed",
   facet_ncol = NULL
 )

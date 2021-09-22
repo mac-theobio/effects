@@ -25,7 +25,7 @@
 #' @import ggplot2
 #' @export
 
-plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet_scales = "fixed", facet_ncol = NULL){
+plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = TRUE, facet_scales = "fixed", facet_ncol = NULL){
 
 	lwr <- upr <- NULL
 	df <- x$preds
@@ -61,23 +61,29 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, facet
 	}
 	p1 <- p1 + labs(x = xlabs, y = ylabs)
 	if (class(df[[x.var]]) %in% c("numeric", "integer")) {
-		p2 <- (p1
-			+ geom_line()
-			+ geom_line(aes(y = lwr), lty = 2)
-			+ geom_line(aes(y = upr), lty = 2)
-			+ scale_colour_viridis_d(option = "plasma")
-		)
+		p2 <- p1 + geom_line()
+		if (ci) {
+			p2 <- (p2
+				+ geom_line(aes(y = lwr), lty = 2)
+				+ geom_line(aes(y = upr), lty = 2)
+				+ scale_colour_viridis_d(option = "plasma")
+			)
+		}
 	} else {
-		if (length(nn) > 1) {
-			p2 <- (p1 
-#				+ geom_point(aes(colour=model), position = pos, size = 0.6)
-				+ geom_pointrange(aes(ymin = lwr, ymax = upr, colour=model), size=0.2, position = pos)
-			)
+		if (ci) {
+			if (length(nn) > 1) {
+				p2 <- (p1 
+	#				+ geom_point(aes(colour=model), position = pos, size = 0.6)
+					+ geom_pointrange(aes(ymin = lwr, ymax = upr, colour=model), size=0.2, position = pos)
+				)
+			} else {
+				p2 <- (p1 
+	#				+ geom_point(position = pos, size = 0.6, colour="black")
+					+ geom_pointrange(aes(ymin = lwr, ymax = upr), colour = "black", size=0.2, position = pos)
+				)
+			}
 		} else {
-			p2 <- (p1 
-#				+ geom_point(position = pos, size = 0.6, colour="black")
-				+ geom_pointrange(aes(ymin = lwr, ymax = upr), colour = "black", size=0.2, position = pos)
-			)
+			p2 <- p1 + geom_point()
 		}
 	}
 
