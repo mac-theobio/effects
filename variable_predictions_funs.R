@@ -28,12 +28,12 @@ interactionsim <- function(N=1e4, beta0=1.5, beta1=1.0
 		, x2_sd=1, x2_mean=0
 		, x3_sd=1, x3_mean=0
 		, link_scale = FALSE
-		, form = ~x1 + x2 + x3 + x2:x3
+		, form = ~ 1 + x1 + x2 + x3 + x2:x3
 	) {
+	betas <- c(beta0, beta1, beta2, beta3, beta23)
 	x1 <- rnorm(N, x1_mean, x1_sd)
 	x2 <- rnorm(N, x2_mean, x2_sd)
 	x3 <- rnorm(N, x3_mean, x3_sd)
-	betas <- c(beta0, beta1, beta2, beta3, beta23)
 	df <- data.frame(x1=x1, x2=x2, x3=x3)
 	X <- model.matrix(form, df)
 	eta <- as.vector(X %*% betas)
