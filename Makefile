@@ -99,7 +99,6 @@ Ignore += variable_predictions*.pdf
 variable_predictions_funs.Rout: variable_predictions_funs.R
 	$(wrapR)
 variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions_funs.rda
-	$(wrapR)
 
 variable_predictions.tex: variable_predictions_objs.rda variable_predictions.Rnw
 

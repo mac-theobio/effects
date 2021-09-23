@@ -1,6 +1,6 @@
 # Internal functions used to condition the model. Some of the condition code is based on R package effects (clean_model). Transfered and modified here because they are not exported in effects.
 	
-get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, ...) {
+get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, ...) {
 	
 	if (is.null(vcov.)){
 		vc <- vcov(vareff_objects)

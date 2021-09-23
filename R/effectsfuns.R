@@ -176,7 +176,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		}
 		if (isolate || is.factor(mf_x.var)) {
 			pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2, col_mean=col_mean, isolate=isolate
-				, isolate.value=isolate.value, vareff_objects=vareff_objects, x.var=x.var
+				, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
 				, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
 			)
 		}
@@ -208,7 +208,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 					mm2[, terms_focal] <- mm_x.var[[i]]
 					pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2
 						, col_mean=col_mean, isolate=isolate, isolate.value=isolate.value
-						, vareff_objects=vareff_objects, x.var=x.var, typical=typical
+						, internal=internal, vareff_objects=vareff_objects, x.var=x.var, typical=typical
 						, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
 					)
 				} else {
@@ -271,7 +271,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		}
 		col_mean <- apply(mod.matrix.all, 2, typical)
 		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
-			, isolate.value=isolate.value, vareff_objects=vareff_objects, x.var=x.var
+			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
 			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
 		)
 		pred <- as.vector(mm %*% betahat)

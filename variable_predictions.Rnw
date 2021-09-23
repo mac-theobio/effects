@@ -31,14 +31,17 @@
 \begin{document}
 
 \maketitle
-\setkeys{Gin}{width=0.8\textwidth}
+%\setkeys{Gin}{width=0.8\textwidth}
 
 
 \section{Introduction}
 
 <<setup, echo=FALSE, message=FALSE, warning=FALSE>>=
 library(ggplot2)
+library(ggpubr)
+
 library(stargazer)
+
 library(vareffects); varefftheme()
 
 
@@ -110,6 +113,8 @@ An alternative, save for later, formulation of variable effect involves, express
 
 Generally, in generalized linear models with other link functions, the predictions are first generated in linear predictor scale, $\hat{\boldeta}^*$, and then transformed to the original response scale using $g^{-1}(\hat{\boldeta}^*)$.
 
+
+
 \section{Uncertainty propagation}\label{sec:uncertainity_propagation}
 
 What about the confidence intervals (CI)? The limits of the confidence intervals are points, not mean values. In principle, every observation/value of focal predictors has a different CI. The traditional way to compute variances for predictions is $\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})$ \citep{lenth2018package, fox2009effect}, so that the confidence intervals are $\eta \pm q\sigma$, where $q$ is an appropriate quantile of Normal or t distribution. This approach incorporates all the uncertainties -- including the uncertainty due to non-focal predictors.  But what if we are only interested in the uncertainty as a result of the focal predictor, so that the confidence intervals are $\eta \pm q \sigma_f$? 
@@ -123,35 +128,86 @@ The computation of $\hat{\eta}^\star$ remains the same as described above. Howev
 
 \subsection{Centered model matrix}
 
-Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\star} - \bar{\nset{{\bX^\star}}}\}$. It follows that the non-focal terms in $\bX^{\star}_{c}$ are all zero. Consequently the uncertainty due to non-focal predictors are all zeroed-out in the computation of $\sigma$. More generally, centered design matrix, $\bX^{\star}_{c}$, impacts on the estimated value of the intercept and its associated variance but not the slopes. Thus since non-focal terms in $\bX^{\star}_{c}$ are all zero, it does not matter what their corresponding values are in the variance-covariance matrix. Hence, we can compute CIs from non-centered predictors (in other words, fitted models with predictors in their natural scales).
+Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$. It follows that the non-focal terms in $\bX^{\star}_{c}$ are all zero. Consequently the uncertainty due to non-focal predictors are all zeroed-out in the computation of $\sigma$. More generally, centered design matrix, $\bX^{\star}_{c}$, impacts on the estimated value of the intercept and its associated variance but not the slopes. Thus since non-focal terms in $\bX^{\star}_{c}$ are all zero, it does not matter what their corresponding values are in the variance-covariance matrix. Hence, we can compute CIs from non-centered predictors (in other words, fitted models with predictors in their natural scales).
+
+\subsection{Handling higher order terms}
+
+In models containing higher order terms such as interactions, splines, polynomials, etc., we adopt the method implemented in \pkg{effects} package \citep{fox2009effect} which involves combining the interactions with the main effects marginal to the interaction.
+
 
 \subsection{Simulation examples}
 
 
-In this section, we illustrate variable effects in the context of linear models involving continuous and categorical predictors with or without interactions. We compare the expected to the known simulation "truth". We compare predictions when non-focal predictors averaging and when population-based approaches are used. Later on, we illustrate and compare our approaches for describing uncertainty in the predictions to existing major \textbf{R} packages for prediction.
+In this section, we illustrate variable effects (together with the associated CI) in the context of linear models involving continuous and categorical predictors with or without interactions. We compare the expected to the known simulation "truth".
 
-\subsection{Simple linear model}
+\subsection{Continuous predictors}
 
-Consider a simple simulation
+Consider simulation example described in Section \ref{sec:qoi}, with slight modifications to incorporate interaction between predictors. The first case, is the model with no interaction: 
+%
 \begin{align*}
-y &= \beta_0 + \beta_1\mathrm{x_1} + \beta_2\mathrm{x_2} + \epsilon \\
-\mathrm{x_1} &\sim \mathrm{Normal}(0.2, 1) \\
-\mathrm{x_2} &\sim \mathrm{Normal}(0, 1) \\
-\epsilon &\sim \mathrm{Normal}(0, 1) \\
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
 \beta_0 &= 1.5 \\
-\beta_{\mathrm{x_1}} &= 1.0 \\
-\beta_{\mathrm{x_2}} &= 2
+\beta_{\mathrm{A}} &= 0.2 \\
+\beta_{\mathrm{W}} &= 2 \\
+i &= 1,\cdots, 1000
 \end{align*}
-for $10000$ observations.
+%
+Secondly, we add interaction terms between the non-focal predictors (\code{wealth index} and \code{household expenditure}) but not with the focal predictor \code{age}:
+%
+\begin{align*}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i\\ 
+&+ \beta_{\mathrm{WE}}\mathrm{Wealthindex}_i*\mathrm{Expenditure}_i + \epsilon_i \\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \\
+\mathrm{Expenditure}_i &\sim \mathrm{Normal}(0, 1) \\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
+\beta_0 &= 1.5 \\
+\beta_{\mathrm{A}} &= 0.8 \\
+\beta_{\mathrm{W}} &= 2 \\
+\beta_{\mathrm{E}} &= 1.5 \\
+\beta_{\mathrm{WE}} &= 1 \\
+i &= 1,\cdots, 1000
+\end{align*}
+%
+And lastly, we now consider model with interaction terms between the focal predictor (\code{age}) and one of the non-focal predictor (\code{wealth index}):
+%
+\begin{align*}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i\\ 
+&+ \beta_{\mathrm{AW}}\mathrm{Age}_i*\mathrm{Wealthindex}_i + \epsilon_i \\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \\
+\mathrm{Expenditure}_i &\sim \mathrm{Normal}(0, 1) \\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
+\beta_0 &= 1.5 \\
+\beta_{\mathrm{A}} &= 0.2 \\
+\beta_{\mathrm{W}} &= 2 \\
+\beta_{\mathrm{E}} &= 1.5 \\
+\beta_{\mathrm{AW}} &= 1 \\
+i &= 1,\cdots, 1000
+\end{align*}
+%
 
-```{r simple_linear_sim, echo=FALSE}
-sim_linear_df <- simplesim(N=1e4, link_scale=TRUE)
-colnames(sim_linear_df) <- c("x1", "x2", "y")
-true_prop_linear <- mean(sim_linear_df$y)
-```
+We first fitted all the three models and in each case, compared three different variable effects together with the corresponding CIs -- 1) uncertainty due to non-focal predictors included (everything), 2) uncertainty due to non-focal predictors removed using variance-covariance matrix (zero-vcov), and 3) uncertainty due to non-focal predictors removed using centered model matrix (centered mm). The results are summarised in Figure ~\ref{fig:pred_age_cont_plots}. 
+
+Figure ~\ref{fig:pred_age_cont_plots}a represents variable effects for the model with no interaction, Figure ~\ref{fig:pred_age_cont_plots}b shows variable effects for model with non-focal predictors interacting with each other, and Figure ~\ref{fig:pred_age_cont_plots}c shows variable effects for the model with focal and non-focal predictors interacting.
+
+For perfect predictions, we expect the yellow and grey dotted lines to overlay each other and they should intersect with the black solid line and the vertical dotted grey line at the same point (or very close), Figure ~\ref{fig:pred_age_cont_plots}a. In other words, at the model center (mean of the focal predictor), generally, we expect the narrower CIs. If we properly anchor the model at its center (or any other appropriate value, assuming no interactions), we would expect the variance at the anchor to be zero, i.e., the CIs bands crosses at that point (see zero-cov and centered mm in Figure ~~\ref{fig:pred_age_cont_plots}). In Figure ~\ref{fig:pred_age_cont_plots}b, the predicted overall mean is slightly higher than the observed mean (yellow horizontal line is slightly above the horizontal grey line), and vice versa in Figure ~\ref{fig:pred_age_cont_plots}c.
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_age_cont_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_age_cont_plots)
+@
+\end{center}
+\caption{A comparison of variable effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The dotted yellow and grey horizontal lines are the expected and observed/true means, respectively. The vertical grey line is the mean of the focal predictor (model center). The solid black, red (non-focal uncertainty excluded) and blue lines (all uncertainty included) are the variable effects while their corresponding CIs are the dotted black, red and blue lines, respectively.}
+\label{fig:pred_age_cont_plots}
+\end{figure}
+%
 
 \section{Bias correction}\label{sec:bias_correction}
-
 
 \clearpage
 % References
