@@ -164,8 +164,9 @@ matrix.to.df <- function(matrix, colclasses){
   as.data.frame(result)
 }
 
-clean_model <- function(focal.predictors, mod, xlevels = list()
-	, default.levels=NULL, formula.rhs, steps = 101, x.var=NULL, typical=mean, vnames, which.interaction, pop.ave){
+clean_model <- function(focal.predictors, mod, xlevels
+	, default.levels, formula.rhs, steps, x.var, typical
+	, vnames, which.interaction, pop.ave){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
 
