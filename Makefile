@@ -102,6 +102,8 @@ variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions
 
 variable_predictions.tex: variable_predictions_objs.rda variable_predictions.Rnw
 
+## This should work but it doesn't
+bad_example.Rout: bad_example.R
 
 ######################################################################
 
