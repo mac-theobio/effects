@@ -1,16 +1,19 @@
 library(shellpipes)
 library(ggplot2)
 
+## Use this call to make bad_example.Rout independently
+rpcall("bad_example.Rout bad_example.R")
+
 commandEnvironments()
-makeGraphics()
- 
+startGraphics()
+
 set.seed(9991)
 
 ## Simple model with interaction on the non-focal predictors.
 ## We expect predictions to work in this case but that's not the
 ## case :(
 
-N <- 200
+N <- 20
 
 beta0 <- 1.5
 beta1 <- 1.0
@@ -35,7 +38,7 @@ x2 <- rnorm(N, x2_mean, x2_sd)
 x3 <- rnorm(N, x3_mean, x3_sd)
 df <- data.frame(x1=x1, x2=x2, x3=x3)
 X <- model.matrix(form, df)
-df$y <- rnorm(N, as.vector(X %*% betas), 1) 
+df$y <- rnorm(N, as.vector(X %*% betas), 1)
 
 ## Model
 
@@ -59,6 +62,6 @@ preds_df <- data.frame(x1=new_df$x1, y=preds)
 print(ggplot(preds_df, aes(x=x1, y=y))
  + geom_line()
  + geom_hline(aes(yintercept=true_y, colour="truth"), lty=2)
- + geom_hline(aes(yintercept=mean(preds_df$y), colour="pred"), lty=2)
+ + geom_hline(aes(yintercept=mean(y), colour="pred"), lty=2)
  + geom_vline(aes(xintercept=mean(df$x1)), colour="grey", lty=2)
 )
