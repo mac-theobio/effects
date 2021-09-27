@@ -6,7 +6,7 @@ current: target
 # -include makestuff/perl.def
 
 vim_session:
-	bash -cl "vmt notes.md"
+	bash -cl "vmt notes.md structure.md"
 
 ######################################################################
 
@@ -23,7 +23,7 @@ Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
 ## Make Sweave weird depencies chain
 %: %.pdf ;
 
-Sources += glossary.md structure.md
+Sources += notes.md glossary.md structure.md
 
 autopipeR = defined
 
