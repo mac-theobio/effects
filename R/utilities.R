@@ -362,7 +362,8 @@ get_model_matrix <- function(mod, mod.matrix, mod.matrix.all, X.mod,
       components <- unlist(strsplit(name, ':'))
       components <- components[components %in% cnames]
       if (length(components) > 1) {
-        mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
+		  ## Modified by SC
+        mod.matrix[,name] <- typical(apply(mod.matrix.all[,components], 1, prod))
       }
     }
   }

@@ -59,7 +59,9 @@ focal_prop_cni <- mean(sim_df_cni$age)
 ##### Non-centered
 mod_cni <- lm(hhsize~age+wealthindex, sim_df_cni)
 ##### Centered predictor
-mod_cen_cni <- lm(hhsize~scale(age, scale=FALSE)+wealthindex, sim_df_cni)
+sim_df_cni_cen <- sim_df_cni
+sim_df_cni_cen$age <- drop(scale(sim_df_cni$age, scale=FALSE))
+mod_cen_cni <- lm(hhsize~age+wealthindex, sim_df_cni_cen)
 
 #### Binned data
 binned_df_cni <- binfun(mod_cni, "age", "wealthindex", bins=10)
@@ -79,10 +81,10 @@ print(pred_age_trad_cni_plot)
 ##### Centered
 ###### Variance-covariance
 pred_age_vcov_cni <- varpred(mod_cen_cni, "age", isolate=FALSE
-	, vcov. = zero_vcov(mod_cni, "age"), pop.ave="none"
+	, vcov. = zero_vcov(mod_cen_cni, "age"), pop.ave="none"
 	, modelname = "zero-vcov"
 )
-
+pred_age_vcov_cni$preds$age <- pred_age_vcov_cni$preds$age + focal_prop_cni
 ##### Centered model matrix
 pred_age_centered_cni <- varpred(mod_cni, "age", isolate=TRUE
 	, pop.ave="none", modelname = "centered mm"
@@ -112,7 +114,9 @@ focal_prop_wi_nf <- mean(sim_df_wi_nf$age)
 ##### Non-centered
 mod_wi_nf <- lm(hhsize~age+wealthindex+expenditure+wealthindex:expenditure, sim_df_wi_nf)
 ##### Centered predictor
-mod_cen_wi_nf <- lm(hhsize~scale(age, scale=FALSE)+wealthindex+expenditure+wealthindex:expenditure, sim_df_wi_nf)
+sim_df_wi_nf_cen <- sim_df_wi_nf
+sim_df_wi_nf_cen$age <- drop(scale(sim_df_wi_nf$age, scale=FALSE))
+mod_cen_wi_nf <- lm(hhsize~age+wealthindex+expenditure+wealthindex:expenditure, sim_df_wi_nf_cen)
 
 #### Binned data
 binned_df_wi_nf <- binfun(mod_wi_nf, "age", c("wealthindex", "expenditure"), bins=10)
@@ -132,9 +136,10 @@ print(pred_age_trad_wi_nf_plot)
 ##### Centered
 ###### Variance-covariance
 pred_age_vcov_wi_nf <- varpred(mod_cen_wi_nf, "age", isolate=FALSE
-	, vcov. = zero_vcov(mod_wi_nf, "age"), pop.ave="none"
+	, vcov. = zero_vcov(mod_cen_wi_nf, "age"), pop.ave="none"
 	, modelname = "zero-vcov"
 )
+pred_age_vcov_wi_nf$preds$age <- pred_age_vcov_wi_nf$preds$age + focal_prop_wi_nf
 ##### Centered model matrix
 pred_age_centered_wi_nf <- varpred(mod_wi_nf, "age", isolate=TRUE
 	, pop.ave="none", modelname = "centered mm"
@@ -165,7 +170,9 @@ focal_prop_wi_f <- mean(sim_df_wi_f$age)
 ##### Non-centered
 mod_wi_f <- lm(hhsize~age+wealthindex+expenditure+age:wealthindex, sim_df_wi_f)
 ##### Centered predictor
-mod_cen_wi_f <- lm(hhsize~scale(age, scale=FALSE)+wealthindex+expenditure+age:wealthindex, sim_df_wi_f)
+sim_df_wi_f_cen <- sim_df_wi_f
+sim_df_wi_f_cen$age <- drop(scale(sim_df_wi_f_cen$age, scale=FALSE))
+mod_cen_wi_f <- lm(hhsize~age+wealthindex+expenditure+age:wealthindex, sim_df_wi_f_cen)
 
 #### Binned data
 binned_df_wi_f <- binfun(mod_wi_f, "age", c("wealthindex", "expenditure"), bins=10)
@@ -185,13 +192,18 @@ print(pred_age_trad_wi_f_plot)
 ##### Centered
 ###### Variance-covariance
 pred_age_vcov_wi_f <- varpred(mod_cen_wi_f, "age", isolate=FALSE
-	, vcov. = zero_vcov(mod_wi_f, "age"), pop.ave="none"
+	, vcov. = zero_vcov(mod_cen_wi_f, "age"), pop.ave="none"
 	, modelname = "zero-vcov"
 )
+## rescale age
+pred_age_vcov_wi_f$preds$age <- pred_age_vcov_wi_f$preds$age + focal_prop_wi_f
+
+
 ##### Centered model matrix
-pred_age_centered_wi_f <- varpred(mod_wi_f, "age", steps=10, isolate=TRUE
+pred_age_centered_wi_f <- varpred(mod_wi_f, "age", isolate=TRUE
 	, pop.ave="none", modelname = "centered mm"
 )
+head(pred_age_centered_wi_f$preds)
 pred_age_all_wi_f <- pred_age_centered_wi_f
 pred_age_all_wi_f$preds <- do.call("rbind", list(pred_age_trad_wi_f$preds, pred_age_centered_wi_f$preds, pred_age_vcov_wi_f$preds))
 pred_age_all_wi_f_plot <- (plot(pred_age_all_wi_f)

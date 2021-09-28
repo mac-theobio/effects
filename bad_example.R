@@ -1,3 +1,4 @@
+library(vareffects)
 library(shellpipes)
 library(ggplot2)
 
@@ -50,18 +51,33 @@ true_y <- mean(df$y)
 print(true_y)
 
 quants <- seq(0, 1, length.out=100)
-new_df <- data.frame(x1 = as.vector(quantile(df$x1, quants))
+x1_new <- as.vector(quantile(df$x1, quants))
+new_df <- data.frame(x1 = x1_new 
 	, x2 = mean(df$x2)
 	, x3 = mean(df$x3)
 )
 
 preds <- predict(mod, newdata=new_df)
-
 preds_df <- data.frame(x1=new_df$x1, y=preds)
+
+mm <- model.matrix(mod)
+col_mean <- colMeans(mm)
+mm_mean <- t(replicate(length(x1_new), col_mean))
+mm_mean[, "x1"] <- x1_new
+
+pred2 <- as.vector(mm_mean %*% coef(mod))
+preds_df2 <- data.frame(x1=x1_new, y=pred2)
+
+head(mm_mean)
+head(model.matrix(mod, new_df))
+head(varpred(mod, "x1"))
+head(new_df)
 
 print(ggplot(preds_df, aes(x=x1, y=y))
  + geom_line()
+ + geom_line(data=preds_df2, aes(x=x1, y=y))
  + geom_hline(aes(yintercept=true_y, colour="truth"), lty=2)
- + geom_hline(aes(yintercept=mean(y), colour="pred"), lty=2)
+ + geom_hline(aes(yintercept=mean(y), colour="pred-pred"), lty=2)
+ + geom_hline(aes(yintercept=mean(preds_df$y), colour="pred-var"), lty=2)
  + geom_vline(aes(xintercept=mean(df$x1)), colour="grey", lty=2)
 )
