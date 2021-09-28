@@ -83,7 +83,14 @@ stargazer(qoi_mod1, qoi_mod2
 )
 @
 
-In simple linear models with no interaction terms, the default out for the coefficient estimates in Table ~\ref{tab:qoi_coefs} model (1) is simple and directly interpretable as the expected change in household size for a unit change in age. In particular, a unit change in age is associated with a household that is \Sexpr{round(coef(qoi_mod1)[[2]], 3)} bigger. This is the \emph{unconditional marginal effect} \citep{leeper2017interpreting} and it is constant across all the observations and levels of all other variables. 
+In simple linear models with no interaction terms, the default out for the coefficient estimates in Table ~\ref{tab:qoi_coefs} model (1) is simple and directly interpretable as the expected change in household size for a unit change in age. In particular, a unit change in age is associated with a household that is \Sexpr{round(coef(qoi_mod1)[[2]], 3)} bigger. This is the \emph{unconditional marginal effect} \citep{leeper2017interpreting} and it is constant across all the observations and levels of all other variables. As a result, the interpretation of interaction models differs in an important way from linear-additive regression models. To see this more clearly, compare the marginal effect of $x_1$ in the following two models:
+%
+\begin{align}
+y_1 &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \epsilon_1 \label{eq:simple_lm}\\
+y_2 &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_{12}x_1x_2 + \epsilon_2 \label{eq:simple_inter_lm}
+\end{align}
+%
+The marginal effect of $x_1$ in Equation ~\ref{eq:simple_lm} is $\frac{\partial y_1}{\partial x_1} = \beta_1$. On the other hand, the marginal effect of $x_1$ in Equation ~\ref{eq:simple_inter_lm} is given by $\frac{\partial y_2}{\partial x_1} = \beta_1 + \beta_{12}x_2$. In other words, if there are no interactions, the marginal effect of $x_1$ on $y_1$ is constant, while, if there are interactions in the model, the marginal effect of a change in $x_1$ on $y_1$ depends on the value of the \emph{conditioning} predictor $x_2$.
 
 Figure ~\ref{fig:qoi_pred_plot} shows the comparison of predictor effect and unconditional marginal effect of age on household size, based on model estimates in Table ~\ref{tab:qoi_coefs}. Since the model has no interactions, the relationship between the predicted household size and age is linear, hence the marginal effect of age is the slope ($\frac{\Delta \mathrm{hh size}}{\Delta \mathrm{age}}$) of the variable effect line and can be calculated irrespective of the values of wealth index. 
 %
