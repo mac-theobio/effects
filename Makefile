@@ -100,10 +100,13 @@ variable_predictions_funs.Rout: variable_predictions_funs.R
 	$(wrapR)
 variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions_funs.rda
 
+## Categorical predictors
+categorical_predictors.Rout: categorical_predictors.R variable_predictions_funs.rda
+
 variable_predictions.tex: variable_predictions_objs.rda variable_predictions.Rnw
 
 ## This should work but it doesn't
-bad_example.Rout: bad_example.R
+bad_example.Rout: bad_example.R categorical_predictors.rda
 
 ######################################################################
 

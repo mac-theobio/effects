@@ -49,6 +49,47 @@ interactionsim <- function(N=1e4, beta0=1.5, beta1=1.0
 	return(df)
 }
 
+## More general simulation function
+### Default: Continuous outcome + 2 predictors
+### form : specify model using formula
+### addvars: add (matrix) customized predictors from other distributions
+linearsim <- function(N=1000, form=NULL
+	, betas=NULL, contvars=rnorm(N,0.2,1)
+	, catvars=sample(c("A", "B"), N, c(0.5,0.5), replace=TRUE)
+	, link_scale=FALSE, vnames=NULL) {
+	if (is.null(form)) {
+		nbetas <- NCOL(contvars) + NCOL(catvars) 
+		form <- as.formula(paste0("~1+",paste0("x", 1:nbetas, collapse="+")))
+	} else {
+		Terms <- attr(terms(form), "term.labels")
+		nbetas <- length(Terms)
+	}
+	contvars <- as.matrix(contvars, ncol=NCOL(contvars))
+	catvars <- as.matrix(catvars, ncol=NCOL(catvars))
+	X <- cbind.data.frame(contvars, catvars)
+	if (is.null(vnames)) {
+		colnames(X) <- all.vars(form)
+	} else {
+		colnames(X) <- vnames
+	}
+	
+	## Model matrix
+	df <- as.data.frame(X)
+	X <- model.matrix(form, df)
+	
+	if (!is.null(betas) & NCOL(X) != length(betas))
+		stop(paste0("betas should a vector of length ", NCOL(X)))
+	if (is.null(betas)) betas <- log(runif(NCOL(X), 0, 1))
+
+	eta <- as.vector(X %*% betas)
+	if (link_scale) {
+		df$y <- rnorm(N, mean=eta, sd=1) 
+	} else {
+		df$y <- rbinom(N, 1, plogis(eta))
+	}
+	return(list(data = df, betas = betas, formula=form))
+}
+
 
 ## Generate binned observations
 binfun <- function(mod, focal, non.focal, bins=50, ...) {
