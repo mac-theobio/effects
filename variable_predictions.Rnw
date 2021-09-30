@@ -47,6 +47,7 @@ library(vareffects); varefftheme()
 
 set.seed(9991)
 load("variable_predictions_objs.rda")
+load("categorical_predictors.rda")
 @
 
 In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing models estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the ``effects" of covariates on predicted probabilities, or predictions of responses at various levels of covariates. For example, as a way to plan, public health officials may want to know the predicted probability of improved water services in slums on the basis of the dwellers' household size, income, wealth index, etc.
@@ -215,7 +216,7 @@ print(pred_age_cont_plots)
 
 \subsubsection{Categorical predictors}
 
-Suppose, in Section ~\ref{sec:continuous_predictors}, in addition to the predictors already defined, we add gender and level of education of the household head. For example, we may want to know whether men (M) and females (F) differ in the relationship between age of the household head and the size of the household? How does households with male as their heads differ in size as compare to those with female heads? 
+Suppose, in Section ~\ref{sec:continuous_predictors}, in addition to the predictors already defined, we add gender and level of education of the household head. For example, we may want to know whether men (M) and females (F) differ in the relationship between age of the household head and the size of the household -- how does households with male as their heads differ in size as compare to those with female heads? 
 
 The first model in this case, slightly modifies the first model in Section ~\ref{sec:continuous_predictors} by adding gender of the household head. The proportion of households with males as their household heads is $60\%$:
 %
@@ -230,8 +231,18 @@ The first model in this case, slightly modifies the first model in Section ~\ref
 i &= 1,\cdots, 100
 \end{align*}
 %
-
-
+The second model has interaction between non-focal predictors (\code{age} and \code{wealth index}), while the third model has interaction between focal (\code{gender} and \code{age}). The results are shown in Figure ~\ref{fig:pred_gender_cat_plots}, which compares the predictors effects (either centered or all uncertainty included -- everything) for no interaction model (a), interaction between non-focal predictors (b) and interaction between focal and non-focal predictor (c). \textbf{For each gender, we expect the observed average household size ("truth" -- red dots), to be very close to the estimated predictor effects (blue and black dots and lines)??}
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_gender_cat_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_gender_cat_plots)
+@
+\end{center}
+\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The red dots are the observed observed/true means. The black (non-focal uncertainty excluded) and blue solid dots (all uncertainty included) are the predictor effects with their corresponding CIs, respectively. \textbf{For properly generated predictor effects, we expect the black, blue and red dots to be as close as possible???}.}
+\label{fig:pred_gender_cat_plots}
+\end{figure}
+%
 
 
 

@@ -1,84 +1,89 @@
-
-## Simulate data for simple lm or glm
-### If link_scale=TRUE -> lm otherwise glm
-simplesim <- function(N=1e4, beta0=1.5, beta1=1.0, beta2=2
-		, x1_sd=1, x1_mean=0.2
-		, x2_sd=1, x2_mean=0
-		, link_scale = FALSE
-	) {
-	x1 <- rnorm(N, x1_mean, x1_sd)
-	x2 <- rnorm(N, x2_mean, x2_sd)
-	eta <- beta0 + beta1 * x1 + beta2 * x2
-	if (link_scale) {
-		eta <- eta + rnorm(N) 
-	}
-	sim_df <- data.frame(x1=x1, x2=x2, y=eta)
-	if (!link_scale) {
-		sim_df <- (sim_df
-			%>% mutate(y = rbinom(N, 1, plogis(y)))
-		)
-	}
-	return(sim_df)
-}
-
-## Simulate data for lm and glm with interactions
-interactionsim <- function(N=1e4, beta0=1.5, beta1=1.0
-		, beta2=2, beta3=1.5, beta23=1
-		, x1_sd=1, x1_mean=0.2
-		, x2_sd=1, x2_mean=0
-		, x3_sd=1, x3_mean=0
-		, link_scale = FALSE
-		, form = ~ 1 + x1 + x2 + x3 + x2:x3
-	) {
-	betas <- c(beta0, beta1, beta2, beta3, beta23)
-	x1 <- rnorm(N, x1_mean, x1_sd)
-	x2 <- rnorm(N, x2_mean, x2_sd)
-	x3 <- rnorm(N, x3_mean, x3_sd)
-	df <- data.frame(x1=x1, x2=x2, x3=x3)
-	X <- model.matrix(form, df)
-	eta <- as.vector(X %*% betas)
-	if (link_scale) {
-		eta <- eta + rnorm(N) 
-	}
-	df$y <- eta 
-	if (!link_scale) {
-		df <- (df
-			%>% mutate(y = rbinom(N, 1, plogis(y)))
-		)
-	}
-	return(df)
-}
-
 ## More general simulation function
-### Default: Continuous outcome + 2 predictors
+### Default: Continuous outcome 2 and 1 categorical predictors
 ### form : specify model using formula
-### addvars: add (matrix) customized predictors from other distributions
-linearsim <- function(N=1000, form=NULL
-	, betas=NULL, contvars=rnorm(N,0.2,1)
-	, catvars=sample(c("A", "B"), N, c(0.5,0.5), replace=TRUE)
-	, link_scale=FALSE, vnames=NULL) {
-	if (is.null(form)) {
-		nbetas <- NCOL(contvars) + NCOL(catvars) 
-		form <- as.formula(paste0("~1+",paste0("x", 1:nbetas, collapse="+")))
-	} else {
-		Terms <- attr(terms(form), "term.labels")
-		nbetas <- length(Terms)
+
+linearsim <- function(N=1000, form=~1+x1+x2+x3
+	, betas=NULL, pgausian=list(p=2, fun=rnorm, mean=0, sd=1)
+	, pcat=list(p=1, fun=sample, nlevels=2, labels=NULL, prob=NULL, replace=TRUE)
+	, vnames=NULL, link_scale=FALSE) {
+	
+	Terms <- attr(terms(form), "term.labels")
+	nbetas <- length(Terms)
+	if (!is.null(betas) & length(betas) != (nbetas+1))
+		stop(paste0("betas should a vector of length ", nbetas+1))
+
+	p <- pgausian$p + pcat$p
+	nvars <- length(all.vars(form))
+
+	if (p != nvars) {
+		stop(paste0("\nNumber of predictors in form should be same as sum of p in pgausian and pcat: ", nvars, " != ", p))
 	}
-	contvars <- as.matrix(contvars, ncol=NCOL(contvars))
-	catvars <- as.matrix(catvars, ncol=NCOL(catvars))
-	X <- cbind.data.frame(contvars, catvars)
-	if (is.null(vnames)) {
-		colnames(X) <- all.vars(form)
+
+	mu <- pgausian$mean
+	.sd <- pgausian$sd
+	pg <- pgausian$p
+	pgausian$p <- NULL
+	gfun <- pgausian$fun
+	pgausian$fun <- NULL
+	pgausian$n <- N
+	if (length(mu)==1) {
+		X <- replicate(pg, do.call(gfun, pgausian))
 	} else {
-		colnames(X) <- vnames
+		X <- list()
+		if (length(mu)>pg)stop("p in pgausian should be greater than or equals to the length of mean")
+		for (m in 1:length(mu)) {
+			if(length(.sd)<length(mu)).sd <- 1 else .sd <- .sd[[m]]
+			pgausian$mean <- mu[[m]]
+			pgausian$sd <- .sd
+			X[[m]] <- do.call(gfun, pgausian)
+		}
+		X <- do.call("cbind", X)
 	}
+	
+	cp <- pcat$p
+	pcat$p <- NULL
+	if (cp > 0) {
+		nlevels <- pcat$nlevels
+		if (length(nlevels)!=cp)
+			stop("\n p in pcat must be equal to the length of nlevels")
+		Xcat <- list()
+		cfun <- pcat$fun
+		for (nl in 1:cp) {
+			if (nlevels[[nl]]<2)stop("Levels of categorical variable must be >1")
+			labels <- pcat$labels
+			if(is.list(labels)) labels <- labels[[nl]]
+			if (is.null(labels)) {
+				levs <- sample(LETTERS, nlevels[[nl]], replace=FALSE)
+			} else {
+				levs <- labels
+			}
+			if (length(levs) != nlevels[[nl]])
+				stop("nlevels must be equal to the length of labels")
+			pcat$labels <- NULL
+			pcat$x <- levs
+			prob <- pcat$prob
+			if(is.list(prob)) prob <- prob[[nl]]
+			if (is.null(prob)) {
+				prob <- rep(1/nlevels[[nl]], nlevels[[nl]])
+			}
+			if (length(prob) != length(levs))
+				stop("length of prob must be equal to the length of labels")
+
+			pcat$fun <- NULL
+			pcat$prob <- prob
+			pcat$nlevels <- NULL
+			pcat$size <- N
+			Xcat[[nl]] <- do.call(cfun, pcat)
+		}
+		Xcat <- do.call("cbind", Xcat)
+		X <- cbind.data.frame(X, Xcat)
+	}
+	colnames(X) <- all.vars(form)
 	
 	## Model matrix
 	df <- as.data.frame(X)
 	X <- model.matrix(form, df)
 	
-	if (!is.null(betas) & NCOL(X) != length(betas))
-		stop(paste0("betas should a vector of length ", NCOL(X)))
 	if (is.null(betas)) betas <- log(runif(NCOL(X), 0, 1))
 
 	eta <- as.vector(X %*% betas)
@@ -87,6 +92,13 @@ linearsim <- function(N=1000, form=NULL
 	} else {
 		df$y <- rbinom(N, 1, plogis(eta))
 	}
+	
+	if (is.null(vnames)) {
+		colnames(df) <- c(all.vars(form), "y")
+	} else {
+		colnames(df) <- vnames
+	}
+	
 	return(list(data = df, betas = betas, formula=form))
 }
 
@@ -106,5 +118,4 @@ binfun <- function(mod, focal, non.focal, bins=50, ...) {
 	)
 	return(check_df)
 }
-
 saveEnvironment()

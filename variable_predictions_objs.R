@@ -19,11 +19,15 @@ beta_age <- 0.1 # Focal predictor effect
 ############################################################################################
 
 ## Coefficient estimate
-qoi_df <- simplesim(N=1000, link_scale=TRUE)
+qoi_df <- linearsim(N=1000, form=~1+x1+x2
+	, betas=c(1.5, 1, 2)
+	, pgausian=list(p=2, fun=rnorm, mean=c(0.2,0), sd=1)
+	, pcat=list(p=0)
+	, link_scale = TRUE
+)$data
 colnames(qoi_df) <- c("age", "wealthindex", "hhsize")
 qoi_mod1 <- lm(hhsize~age+wealthindex, qoi_df)
 qoi_mod2 <- lm(hhsize~age*wealthindex, qoi_df)
-
 
 ## Prediction plot
 qoi_age_pred <- varpred(qoi_mod1, "age")
@@ -51,7 +55,12 @@ print(qoi_age_pred_plot)
 ### No interaction model
 
 #### Simulation
-sim_df_cni <- simplesim(N=N_obs, beta1=beta_age, link_scale=TRUE)
+sim_df_cni <- linearsim(N=N_obs, form=~1+x1+x2
+	, betas = c(1.5, 0.1, 2)
+	, pgausian=list(p=2,fun=rnorm, mean=c(0.2,0), sd=c(1,1))
+	, pcat=list(p=0)
+	, link_scale=TRUE
+)$data
 colnames(sim_df_cni) <- c("age", "wealthindex", "hhsize")
 true_prop_cni <- mean(sim_df_cni$hhsize)
 focal_prop_cni <- mean(sim_df_cni$age)
@@ -106,7 +115,12 @@ print(pred_age_all_cni_plot)
 ### With interaction between non-focal
 
 #### Simulation
-sim_df_wi_nf <- interactionsim(N=N_obs, beta1=beta_age, link_scale=TRUE)
+sim_df_wi_nf <- linearsim(N=N_obs, form=~1+x1+x2+x3+x2:x3
+	, betas=c(1.5,0.1,2,1.5,1)
+	, pgausian=list(p=3,fun=rnorm, mean=c(0.2,0,0), sd=c(1,1,1))
+	, pcat=list(p=0)
+	, link_scale=TRUE
+)$data
 colnames(sim_df_wi_nf) <- c("age", "wealthindex", "expenditure", "hhsize")
 true_prop_wi_nf <- mean(sim_df_wi_nf$hhsize)
 focal_prop_wi_nf <- mean(sim_df_wi_nf$age)
@@ -162,7 +176,12 @@ print(pred_age_all_wi_nf_plot)
 ### With interaction between focal and non-focal predictor
 
 #### Simulation
-sim_df_wi_f <- interactionsim(N=N_obs, beta1=beta_age, link_scale=TRUE, form=~x1+x2+x3+x1:x2)
+sim_df_wi_f <- linearsim(N=N_obs, form=~1+x1+x2+x3+x1:x2
+	, betas=c(1.5,0.1,2,1.5,1)
+	, pgausian=list(p=3,fun=rnorm, mean=c(0.2,0,0), sd=c(1,1,1))
+	, pcat=list(p=0)
+	, link_scale=TRUE
+)$data
 colnames(sim_df_wi_f) <- c("age", "wealthindex", "expenditure", "hhsize")
 true_prop_wi_f <- mean(sim_df_wi_f$hhsize)
 focal_prop_wi_f <- mean(sim_df_wi_f$age)
