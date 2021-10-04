@@ -103,6 +103,7 @@ variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions
 ## Categorical predictors
 categorical_predictors.Rout: categorical_predictors.R variable_predictions_funs.rda
 
+## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: categorical_predictors.rda variable_predictions_objs.rda \
 	variable_predictions.Rnw
 
