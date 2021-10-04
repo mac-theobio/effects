@@ -87,7 +87,7 @@
 varpred <- function(mod, focal_predictors, x.var = NULL
 	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL, level = 0.95
 	, steps = 100, at = list(),  dfspec = 100, vcov. = NULL, internal = FALSE, avefun = mean
-	, zero_out_interaction = FALSE, which.interaction = c("emmeans", "effects")
+	, zero_out_interaction = FALSE, which.interaction = c("emmeans", "effects"), within.category = TRUE
 	, pop.ave = c("none", "quantile", "population"), nlp.type=c("whole", "binned")
 	, include.re = FALSE, bias.adjust = FALSE, sigma = NULL
 	, modelname = NULL, returnall = FALSE, ...) {
@@ -115,11 +115,20 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	if (!is.null(x.var) & !any(focal.predictors %in% x.var) & length(focal.predictors)>1L) 
 		stop(paste0(x.var, " not in ", focal.predictors))
 
+	n.focal <- length(focal.predictors)
+	if (is.null(x.var) & n.focal>1L) {
+		x.var <- focal.predictors[[2]]
+		message(paste0("x.var was not specified, ", x.var, " is used instead."))
+	} else if (is.null(x.var)) {
+		x.var <- focal.predictors[[1]]
+	}
+	
 #	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
 	model_frame_objs <- clean_model(focal.predictors = focal.predictors, mod = mod
 		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
 		, x.var = x.var, typical = avefun, vnames = vnames
-		, which.interaction = which.interaction, pop.ave = pop.ave
+		, which.interaction = which.interaction, within.category=within.category
+		, pop.ave = pop.ave
 	)
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
 	excluded.predictors <- model_frame_objs$excluded.predictors
@@ -132,20 +141,21 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	cnames <- model_frame_objs$cnames
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
+	within.category <- model_frame_objs$within.category
 	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 	typical <- avefun
 	mod.matrix.all <- model.matrix(mod)
 	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
 	mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
 		, factor.cols, cnames, focal.predictors, excluded.predictors
-		, typical, apply.typical.to.factors = TRUE
+		, typical, apply.typical.to.factors = TRUE, focal.type=x[[x.var]]$is.factor
+		, within.category=within.category
 	)
 	
-	if (is.null(x.var) & n.focal>1L) {
-		x.var <- focal.predictors[[2]]
-		message(paste0("x.var was not specified, ", x.var, " is used instead."))
-	} else if (is.null(x.var)) {
-		x.var <- focal.predictors[[1]]
+	if (within.category & x[[x.var]]$is.factor) {
+		## FIXME: better way to average over categories of the focal predictors
+		mm <- lapply(split(as.data.frame(mm), x[[x.var]]$levels), colMeans)
+		mm <- do.call("rbind", mm)
 	}
 
 	check <- !termnames %in% x.var
@@ -303,7 +313,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		}
 		link <- .make.bias.adj.link(link, sigma)
 	}
-
+	
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
 		, variables = x, fit = pred
@@ -320,14 +330,27 @@ varpred <- function(mod, focal_predictors, x.var = NULL
    type <- match.arg(type)
    linkinv <- if (is.null(out$link$linkinv)) I else out$link$linkinv
    linkmu.eta <- if(is.null(out$link$mu.eta)) I else out$link$mu.eta
-   temp <- out$x
-   for (var in names(temp)){
+   
+	## FIXME: still on within category averaging
+	if (within.category) {
+		temp1 <- list()
+	}
+	temp <- out$x
+   for (var in colnames(temp)){
 	  if (is.factor(temp[[var]])){
 		 # handle factors with "valid" NA level
+		 if (within.category) {
+		 	temp1[[var]] <- factor.levels[[var]]
+		 }
 		 temp[[var]] <- addNA(temp[[var]]) 
+	  } else {
+		 if (within.category) {
+		 	temp1[[var]] <- unique(temp[[var]])
+		 }
 	  }
    }
-	out$temp <- temp
+	if (within.category) temp <- do.call("expand.grid", temp1)
+	out$x <- temp
 	result <- switch(type
 	  	, response= { if (is.null(out$se)) 
 		  	data.frame(out$x, fit=as.vector(transform(out$fit)))

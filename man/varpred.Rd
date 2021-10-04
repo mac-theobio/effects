@@ -20,6 +20,7 @@ varpred(
   avefun = mean,
   zero_out_interaction = FALSE,
   which.interaction = c("emmeans", "effects"),
+  within.category = TRUE,
   pop.ave = c("none", "quantile", "population"),
   nlp.type = c("whole", "binned"),
   include.re = FALSE,

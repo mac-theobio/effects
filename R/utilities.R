@@ -166,7 +166,7 @@ matrix.to.df <- function(matrix, colclasses){
 
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
-	, vnames, which.interaction, pop.ave){
+	, vnames, which.interaction, within.category, pop.ave){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
 
@@ -250,6 +250,9 @@ clean_model <- function(focal.predictors, mod, xlevels
     levs <- xlevels
     for(name in focal.predictors) xlevels[[name]] <- levs
   }
+
+  if (!is.factor(X[, x.var])) within.category <- FALSE
+
   oldlevels <- get_xlevels(mod)
   for (name in focal.predictors){
     levels <- oldlevels[[name]]
@@ -272,8 +275,12 @@ clean_model <- function(focal.predictors, mod, xlevels
 			 seq(min(X[, name]), max(X[,name]), length=xlevels[[name]])
 			} else xlevels[[name]]
 		}
+	 } else {
+		factor.levels[[name]] <- levels
+	 	if (pop.ave=="population" || (within.category & name==x.var)) {
+			levels <- as.vector(X[, name])
+		}
 	 }
-	 else factor.levels[[name]] <- levels
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
   }
 
@@ -283,25 +290,34 @@ clean_model <- function(focal.predictors, mod, xlevels
     if (is.logical(X[, name])) levels <- c("FALSE", "TRUE")
     fac <- !is.null(levels)
     level <- if (fac) {
-	 	levels[1]
+	 	if (within.category) {
+			as.vector(X[, name])
+		} else {
+	 		levels[1]
+		}
 	 } else {
 	 	if (pop.ave=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
 			as.vector(quantile(X[,name], quant))	
-		} else if (pop.ave=="population") {
+		} else if (pop.ave=="population" || (within.category & !is.factor(X[, name]))) {
 			as.vector(X[, name])
-		} else {
+		} else if (pop.ave=="none") {
 			typical(X[, name])	
 		}
 	 }
-    if (fac) factor.levels[[name]] <- levels
+	if (fac) { 
+		factor.levels[[name]] <- levels
+		if (pop.ave=="population" || within.category) {
+			levels <- as.vector(X[, name])
+		}
+	}
     x.excluded[[name]] <- list(name=name, is.factor=fac,
                                level=level)
   }
   n.focal <- length(focal.predictors)
   n.excluded <- length(excluded.predictors)
   n.vars <- n.focal + n.excluded
-  if (pop.ave=="none") {
+  if (pop.ave=="none" & !within.category) {
 	  dims <- sapply(x, function(x) length(x$levels))
 	  len <- prod(dims)
 	  predict.data <-matrix('', len, n.vars)
@@ -320,7 +336,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 	#		}
 		}
 	  }
-  } else if (pop.ave=="population" || pop.ave=="quantile") {
+  } else if (pop.ave=="population" || pop.ave=="quantile" || within.category) {
 	  excluded <- sapply(x.excluded, function(x) x$level, simplify=FALSE)
 	  ..focal <- sapply(focal.predictors, function(j) x[[j]]$levels, simplify=FALSE)
 	  predict.data <- do.call("cbind", c(..focal, excluded))
@@ -336,13 +352,13 @@ clean_model <- function(focal.predictors, mod, xlevels
        factor.levels=factor.levels, 
        factor.cols=factor.cols, focal.predictors=focal.predictors, n.focal=n.focal,
        excluded.predictors=excluded.predictors, n.excluded=n.excluded,
-       x=x, X.mod=X.mod, cnames=cnames, X=X, x.var=x.var)  
+       x=x, X.mod=X.mod, cnames=cnames, X=X, x.var=x.var, within.category=within.category)  
 }
 
 
 get_model_matrix <- function(mod, mod.matrix, mod.matrix.all, X.mod,
                                factor.cols, cnames, focal.predictors, excluded.predictors,
-                               typical, apply.typical.to.factors){
+                               typical, apply.typical.to.factors, focal.type, within.category){
   attr(mod.matrix, "assign") <- attr(mod.matrix.all, "assign")
   if (length(excluded.predictors) > 0){
     strangers <- get_strangers(mod, focal.predictors, excluded.predictors)
@@ -363,7 +379,11 @@ get_model_matrix <- function(mod, mod.matrix, mod.matrix.all, X.mod,
       components <- components[components %in% cnames]
       if (length(components) > 1) {
 		  ## Modified by SC
-        mod.matrix[,name] <- typical(apply(mod.matrix.all[,components], 1, prod))
+			if (!focal.type & !within.category) {
+				mod.matrix[,name] <- typical(apply(mod.matrix.all[,components], 1, prod))
+			} else {
+				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
+			}
       }
     }
   }
