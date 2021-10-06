@@ -19,8 +19,8 @@ beta_age <- 0.1 # Focal predictor effect
 ############################################################################################
 
 ## Coefficient estimate
-qoi_df <- linearsim(nHH=1000, form=~1+x1+x2
-	, betas=c(1.5, 1, 2)
+qoi_df <- linearsim(nHH=1000, form=~1+x1*x2
+	, betas=c(1.5, 1, 2, 0.5)
 	, pgausian=list(p=2, fun=rnorm, mean=c(0.2,0), sd=1)
 	, pcat=list(p=0)
 	, link_scale = TRUE
