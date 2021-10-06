@@ -103,9 +103,17 @@ variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions
 ## Categorical predictors
 categorical_predictors.Rout: categorical_predictors.R variable_predictions_funs.rda
 
+## Linear mixed effect
+lme_random_intercept.Rout: lme_random_intercept.R variable_predictions_funs.rda
+
+## Multiple outcomes
+multiple_outcomes.Rout: multiple_outcomes.R variable_predictions_funs.rda
+multiple_outcomes_model.Rout: multiple_outcomes_model.R multiple_outcomes.rda
+multiple_outcomes_preds.Rout: multiple_outcomes_preds.R multiple_outcomes_model.rda
+
 ## variable_predictions.pdf: variable_predictions.Rnw
-variable_predictions.tex: categorical_predictors.rda variable_predictions_objs.rda \
-	variable_predictions.Rnw
+variable_predictions.tex: multiple_outcomes_preds.rda lme_random_intercept.rda \
+	categorical_predictors.rda variable_predictions_objs.rda variable_predictions.Rnw
 
 ## This should work but it doesn't
 bad_example.Rout: bad_example.R categorical_predictors.rda

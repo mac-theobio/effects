@@ -48,6 +48,8 @@ library(vareffects); varefftheme()
 set.seed(9991)
 load("variable_predictions_objs.rda")
 load("categorical_predictors.rda")
+load("lme_random_intercept.rda")
+load("multiple_outcomes_preds.rda")
 @
 
 In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing models estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the ``effects" of covariates on predicted probabilities, or predictions of responses at various levels of covariates. For example, as a way to plan, public health officials may want to know the predicted probability of improved water services in slums on the basis of the dwellers' household size, income, wealth index, etc.
@@ -153,50 +155,50 @@ In this section, we illustrate predictor effects (together with the associated C
 
 Consider simulation example described in Section \ref{sec:qoi}, with slight modifications to incorporate interaction between predictors. The first case, is the model with no interaction: 
 %
-\begin{align*}
-\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \\
-\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
-\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \\
-\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
-\beta_0 &= 1.5 \\
-\beta_{\mathrm{A}} &= 0.1 \\
-\beta_{\mathrm{W}} &= 2 \\
+\begin{align}\label{sim:lm_no_interaction}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.1 \nonumber\\
+\beta_{\mathrm{W}} &= 2 \nonumber\\
 i &= 1,\cdots, 100
-\end{align*}
+\end{align}
 %
 Secondly, we add interaction terms between the non-focal predictors (\code{wealth index} and \code{household expenditure}) but not with the focal predictor \code{age}:
 %
-\begin{align*}
-\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i\\ 
-&+ \beta_{\mathrm{WE}}\mathrm{Wealthindex}_i*\mathrm{Expenditure}_i + \epsilon_i \\
-\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
-\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \\
-\mathrm{Expenditure}_i &\sim \mathrm{Normal}(0, 1) \\
-\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
-\beta_0 &= 1.5 \\
-\beta_{\mathrm{A}} &= 0.1 \\
-\beta_{\mathrm{W}} &= 2 \\
-\beta_{\mathrm{E}} &= 1.5 \\
-\beta_{\mathrm{WE}} &= 1 \\
+\begin{align}\label{sim:lm_nf_interaction}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i \nonumber\\ 
+&+ \beta_{\mathrm{WE}}\mathrm{Wealthindex}_i*\mathrm{Expenditure}_i + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Expenditure}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.1 \nonumber\\
+\beta_{\mathrm{W}} &= 2 \nonumber\\
+\beta_{\mathrm{E}} &= 1.5 \nonumber\\
+\beta_{\mathrm{WE}} &= 1 \nonumber\\
 i &= 1,\cdots, 100
-\end{align*}
+\end{align}
 %
 And lastly, we now consider model with interaction terms between the focal predictor (\code{age}) and one of the non-focal predictor (\code{wealth index}):
 %
-\begin{align*}
-\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i\\ 
-&+ \beta_{\mathrm{AW}}\mathrm{Age}_i*\mathrm{Wealthindex}_i + \epsilon_i \\
-\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
-\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \\
-\mathrm{Expenditure}_i &\sim \mathrm{Normal}(0, 1) \\
-\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
-\beta_0 &= 1.5 \\
-\beta_{\mathrm{A}} &= 0.1 \\
-\beta_{\mathrm{W}} &= 2 \\
-\beta_{\mathrm{E}} &= 1.5 \\
-\beta_{\mathrm{AW}} &= 1 \\
+\begin{align}\label{sim:lm_f_interaction}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i \nonumber\\ 
+&+ \beta_{\mathrm{AW}}\mathrm{Age}_i*\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Expenditure}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.1 \nonumber\\
+\beta_{\mathrm{W}} &= 2 \nonumber\\
+\beta_{\mathrm{E}} &= 1.5 \nonumber\\
+\beta_{\mathrm{AW}} &= 1 \nonumber\\
 i &= 1,\cdots, 100
-\end{align*}
+\end{align}
 %
 
 We first fitted all the three models and in each case, compared three different predictor effects together with the corresponding CIs -- 1) uncertainty due to non-focal predictors included (everything), 2) uncertainty due to non-focal predictors removed using variance-covariance matrix (zero-vcov), and 3) uncertainty due to non-focal predictors removed using centered model matrix (centered mm). The results are shown in Figure ~\ref{fig:pred_age_cont_plots}. 
@@ -214,22 +216,26 @@ print(pred_age_cont_plots)
 \end{figure}
 %
 
-\subsubsection{Categorical predictors}
+\subsubsection{Categorical predictors}\label{sec:categorical_predictors}
 
 Suppose, in Section ~\ref{sec:continuous_predictors}, in addition to the predictors already defined, we add gender and level of education of the household head. For example, we may want to know whether men (M) and females (F) differ in the relationship between age of the household head and the size of the household -- how does households with male as their heads differ in size as compare to those with female heads? 
 
 The first model in this case, slightly modifies the first model in Section ~\ref{sec:continuous_predictors} by adding gender of the household head. The proportion of households with males as their household heads is $60\%$:
 %
-\begin{align*}
-\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{M}}\mathbf{I}_{\mathrm{Gender}_i=Male} + \epsilon_i \\
-\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \\
-\mathbf{I}_{\mathrm{Gender}_i=Male} &\sim \mathrm{Sample}(\mathrm{Male}, 0.6) \\
-\epsilon_i &\sim \mathrm{Normal}(0, 1) \\
-\beta_0 &= 1.5 \\
-\beta_{\mathrm{A}} &= 0.8 \\
-\beta_{\mathrm{M}} &= 0.2 \\
+\begin{align}\label{sim:lm_no_interaction_cat}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{M}}{\mathrm{Gender}_i} + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
+\mathrm{Gender}_i &\sim \mathrm{Sample}(\mathrm{Gender_i}, p) \nonumber\\
+p &= \begin{cases}
+   0.4 & \mathrm{Gender_{i=Female}} \nonumber\\
+   0.6 & \mathrm{Gender_{i=Male}} \nonumber\\
+  \end{cases} \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.8 \nonumber\\
+\beta_{\mathrm{M}} &= 0.2 \nonumber\\
 i &= 1,\cdots, 100
-\end{align*}
+\end{align}
 %
 The second model has interaction between non-focal predictors (\code{age} and \code{wealth index}), while the third model has interaction between focal (\code{gender} and \code{age}). The results are shown in Figure ~\ref{fig:pred_gender_cat_plots}, which compares the predictors effects (either centered or all uncertainty included -- everything) for no interaction model (a), interaction between non-focal predictors (b) and interaction between focal and non-focal predictor (c). \textbf{For each gender, we expect the observed average household size ("truth" -- red dots), to be very close to the estimated predictor effects (blue and black dots and lines)??}
 %
@@ -244,8 +250,71 @@ print(pred_gender_cat_plots)
 \end{figure}
 %
 
+\subsubsection{Linear mixed effect model}
+
+We now consider linear models with additional random effects components. In the simplest case, we start with a single grouping factor as the random effect components. 
+
+Suppose, in the simulation described in Section ~\ref{sec:stats_background}, the observations are  recorded at least once per household. In particular, let $\mathrm{H}$ be the number of households indexed by the grouping factor, and $\mathrm{h}[i]$ be the household of the $i$th observation. We simulate three different models incorporating this kind of formulation -- first, one grouping factor-one predictor-linear random effect:
+%
+\begin{align}\label{sim:lme_one_pred}
+\mathrm{hh~size} &= \beta_0 + \alpha_{0,\mathrm{h}[i]} + \beta_{\mathrm{A}}\mathrm{Age}_i + \epsilon_i \nonumber\\
+\alpha_{0,\mathrm{h}} &\sim \mathrm{Normal}(0, 1), ~~ h=1, \cdots, \mathrm{H} \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 2) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.1 \nonumber\\
+i &= 1,\cdots, 100
+\end{align}
+%
+The second and third models add the random effects, $\alpha_{\mathrm{h}[i]}$, to models ~\ref{sim:lm_nf_interaction} and ~\ref{sim:lm_f_interaction}, respectively.
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_age_cont_lme_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_age_cont_lme_plots)
+@
+\end{center}
+\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The dotted yellow and grey horizontal lines are the expected and observed/true means, respectively. The vertical grey line is the mean of the focal predictor (model center). The solid black, red (non-focal uncertainty excluded) and blue lines (all uncertainty included) are the predictor effects while their corresponding CIs are the dotted black, red and blue lines, respectively. For properly generated predictor effects, we expect the yellow and the grey horizontal dotted lines to overlay each other and intersect with the black, blue, red solid trend lines, and the vertical dotted grey line at the same point (model center).}
+\label{fig:pred_age_cont_lme_plots}
+\end{figure}
+%
 
 
+\subsubsection{Multiple outcomes}
+
+We now consider a bit more complicated model involving more two outcome variables (services) -- household size and rental price. In particular, we simulate an intercept only multivariate random effect model to, \emph{jointly}, predict household size and rental price based on age and wealth index. Each household has its own correlated effect on the intercepts (random-intercept). In addition, we add latent variable to account for unobserved correlations.
+%
+\begin{align}\label{sim:lme_multi_outcome}
+\mathrm{y}_{\mathrm{h}[i]\mathrm{s}} &= \beta_{0,s} + \alpha_{0,\mathrm{h}[i]\mathrm{s}} + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{L}}\mathrm{Latent}_i + \epsilon_{i\mathrm{s}} \nonumber\\
+\alpha_{0,\mathrm{h}\mathrm{s}} &\sim \mathrm{Normal}(0, 2), ~~ h=1, \cdots, \mathrm{H} \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Latent}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_{i\mathrm{s}} &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.1 \nonumber\\
+\beta_{\mathrm{W}} &= 2 \nonumber\\
+\beta_{\mathrm{L}} &= 1 \nonumber\\
+i &= 1,\cdots, 100
+\end{align}
+%
+Where:
+\begin{itemize}
+\item $\beta_{0,s}$ \textbf{is the service specific effect???}, i.e., baseline household size and rental price
+\item $\alpha_{0,\mathrm{h}\mathrm{s}}$ household specific random intercepts, i.e., captures the offset from the overall baseline (mean)
+\end{itemize}
+
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_cont_joint_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_cont_joint_plots)
+@
+\end{center}
+\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The dotted yellow and grey horizontal lines are the expected and observed/true means, respectively. The vertical grey line is the mean of the focal predictor (model center). The solid black, red (non-focal uncertainty excluded) and blue lines (all uncertainty included) are the predictor effects while their corresponding CIs are the dotted black, red and blue lines, respectively. For properly generated predictor effects, we expect the yellow and the grey horizontal dotted lines to overlay each other and intersect with the black, blue, red solid trend lines, and the vertical dotted grey line at the same point (model center).}
+\label{fig:pred_cont_joint_plots}
+\end{figure}
+%
 
 
 

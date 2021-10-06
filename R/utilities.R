@@ -16,10 +16,7 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
 	## Center model matrix
 	if (isolate) {
 		mm_mean <- t(replicate(NROW(mm), col_mean))
-	#	if (any(grepl(":", get_termnames(mod))) & zero_out_interaction){
-	#		vc <- zero_vcov(mod, focal_vars=x.var)
-	#	}
-		if (zero_out_interaction){
+		if (zero_out_interaction & any(grepl(":", get_termnames(mod)))){
 			vc <- zero_vcov(mod, focal_vars=x.var)
 		}
 		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){

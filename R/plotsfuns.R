@@ -34,6 +34,7 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = 
 	if (!is.null(focal))	n.focal <- length(focal) else {n.focal <- 1L; focal <- "xvar"}
 	x.var <- attr(df, "x.var")
 	if (is.null(x.var)) x.var <- focal[[1]]
+	add_col <- df$.varpred
 	if (n.focal>1L) {
 		non.focal <- focal[!focal %in% x.var]
 		df[, non.focal] <- sapply(non.focal, function(x){
@@ -42,7 +43,13 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = 
 			ll <- paste0(x, ": ", xx)
 			return(ll)
 		})	
-		gform <- as.formula(paste0(".~", paste0(non.focal, collapse="+")))
+		if (is.null(add_col)) ff <- ".~" else ff <- ".varpred~"
+		gform <- as.formula(paste0(ff, paste0(non.focal, collapse="+")))
+	} else {
+		if (!is.null(add_col)) {
+			ff <- "~.varpred"
+			gform <- as.formula(ff)
+		}
 	}
 	if (is.null(xlabs)) xlabs <- x.var
 	if (is.null(ylabs)) ylabs <- attr(df, "response")
@@ -87,7 +94,7 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = 
 		}
 	}
 
-	if (n.focal>1L) {
+	if (n.focal>1L || !is.null(add_col)) {
 		p2 <- p2 + facet_wrap(gform, scales=facet_scales, ncol=facet_ncol)#, labeller = label_parsed)
 	}
 	return(p2)
