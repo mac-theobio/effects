@@ -139,7 +139,7 @@ focal_prop_catni$.varpred <- "a) No interaction"
 focal_prop_catwi_nf$.varpred <- "b) Non-focal interaction"
 focal_prop_catwi_f$.varpred <- "c) Focal-non-focal interaction"
 
-true_prop_cont_df <- do.call("rbind"
+true_prop_cat_df <- do.call("rbind"
 	, list(focal_prop_catni, focal_prop_catwi_nf, focal_prop_catwi_f)
 )
 lnames <- c("a) No interaction"
@@ -160,7 +160,7 @@ pred_gender_cat_plots <- (comparevarpred(vlist=vlist, lnames=lnames
 		, plotit=TRUE, addmarginals=FALSE
 		, facet_ncol=2
 	)
-	+ geom_point(data=true_prop_cont_df, aes(x=gender, y=hhsize, colour="truth"))
+	+ geom_point(data=true_prop_cat_df, aes(x=gender, y=hhsize, colour="truth"))
 	+ scale_colour_manual(breaks = c("truth", "everything", "centered mm")
 		, values=c(truth="red", everything="blue", "centered mm"="black")
 	)

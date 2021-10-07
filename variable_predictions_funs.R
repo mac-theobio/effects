@@ -249,7 +249,7 @@ comparevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE,
 
 ## Compare predictions from vareffects, emmeans, effects and margins
 ## funs: emmean; varpred; ...
-combinepreds <- function(mod, funs, focal, x.var, plotit=TRUE, print.head=FALSE, ...){
+combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRUE, print.head=FALSE, ...){
 	if (length(focal)>1) {
 		focal <- union(focal[focal %in% x.var], focal)
 		focal_temp <- c("xvar", focal[!focal %in% x.var])
@@ -291,20 +291,24 @@ combinepreds <- function(mod, funs, focal, x.var, plotit=TRUE, print.head=FALSE,
 		head(out)
 	}
 	if (plotit) {
-		pred_prop_df <- (out
-			%>% group_by_at(c("model", focal[!focal %in% x.var]))
-			%>% summarize(fit=mean(fit))
-			%>% data.frame()
-		)
-		print(pred_prop_df)
 		cols <- rainbow(length(funs))
 		names(cols) <- funs
-		out <- (vareffects:::plot.vareffects(out)
-			+ geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model), lty=2)
+		p1 <- (vareffects:::plot.vareffects(out)
 			+ scale_colour_manual(breaks = funs, values=cols)
 			+ labs(y="Predictions", x=x.var, colour="Method")
 			+ theme(legend.position="bottom")
 		)
+		if (!x.var.factor) {
+			pred_prop_df <- (out
+				%>% group_by_at(c("model", focal[!focal %in% x.var]))
+				%>% summarize(fit=mean(fit))
+				%>% data.frame()
+			)
+			print(pred_prop_df)
+			out <- p1 + geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model), lty=2)
+		} else {
+			out <- p1
+		}
 	}
 	return(out)
 }

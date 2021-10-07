@@ -1,5 +1,5 @@
 ---
-title: "Bias correction in GLMs"
+title: "emmeans and varpred comparison"
 author: Bicko, Jonathan & Ben
 date: "2021 Oct 06 (Wed)"
 compact-title: false
@@ -9,6 +9,7 @@ output:
 bibliography: bias_correction.bib
 link-citations: yes
 ---
+
 
 ```{r setup, include=FALSE, echo=FALSE}
 knitr::opts_chunk$set(fig.pos = "H", out.extra = "", message=FALSE, warning=FALSE, echo=FALSE)
@@ -33,11 +34,11 @@ vplots <- vareffects:::plot.vareffects
 
 \subsection{No interaction}
 
-```{r cont_no_interaction}
+```{r cont_no_interaction, fig.cap="Continuous: no interaction"}
 quants <- seq(0, 1, length.out=100)
 focal_levels <- quantile(sim_df_cni$age, quants)
-truth = c(truth=mean(sim_df_cni$hhsize))
-print(truth)
+print("Truth:")
+print(true_prop_cni)
 compare_cni_plots <- (combinepreds(mod_cni, focal="age"
 		, funs=c("emmeans", "varpred")
 		, at=list(age=focal_levels)
@@ -51,11 +52,10 @@ print(compare_cni_plots)
 
 \subsection{Interaction between non-focal predictors}
 
-```{r cont_nwi_nf_interaction}
-quants <- seq(0, 1, length.out=100)
+```{r cont_wi_nf_interaction, fig.cap="Continuous: non-focal predictors interaction"}
 focal_levels <- quantile(sim_df_wi_nf$age, quants)
-truth = c(truth=mean(sim_df_wi_nf$hhsize))
-print(truth)
+print("Truth:")
+print(true_prop_wi_nf)
 compare_wi_nf_plots <- (combinepreds(mod_wi_nf, focal="age"
 		, funs=c("emmeans", "varpred")
 		, at=list(age=focal_levels)
@@ -66,3 +66,40 @@ compare_wi_nf_plots <- (combinepreds(mod_wi_nf, focal="age"
 )
 print(compare_wi_nf_plots)
 ```
+
+
+\subsection{Interaction between focal and non-focal predictors}
+
+```{r cont_wi_f_interaction, fig.cap="Continuous: interaction betweem focal and non-focal predictors"}
+focal_levels <- quantile(sim_df_wi_f$age, quants)
+print("Truth:")
+print(true_prop_wi_f)
+compare_wi_f_plots <- (combinepreds(mod_wi_f, focal="age"
+		, funs=c("emmeans", "varpred")
+		, at=list(age=focal_levels)
+		, x.var="age"
+		, nesting="wealthindex %in% age"
+		, plotit=TRUE
+	)
+	+ geom_vline(aes(xintercept=mean(focal_levels)), lty=2, colour="grey")
+)
+print(compare_wi_f_plots)
+```
+
+\section{Categorical predictors}
+
+
+\subsection{No interaction}
+
+```{r catni, fig.cap="Categorical: no interaction"}
+compare_catni_plots <- (combinepreds(mod_catni, focal="gender"
+		, funs=c("emmeans", "varpred")
+		, x.var="gender"
+		, x.var.factor=TRUE
+		, plotit=TRUE
+	)
+	+ geom_point(data=focal_prop_catni, aes(x=gender, y=hhsize), colour="black")
+)
+print(compare_catni_plots)
+```
+

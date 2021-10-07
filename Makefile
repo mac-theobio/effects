@@ -118,7 +118,8 @@ variable_predictions.tex: multiple_outcomes_preds.rda lme_random_intercept.rda \
 	categorical_predictors.rda variable_predictions_objs.rda variable_predictions.Rnw
 
 ## Compare varpred with emmeans
-compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_objs.rda
+compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_objs.rda \
+	categorical_predictors.rda
 	$(knitpdf)
 
 ## This should work but it doesn't
