@@ -174,6 +174,8 @@ update-doc:
 install-all:
 	make update-doc && make build-package && make install-package
 
+## Note from Ben  devtools::build_manual() ?
+
 ######################################################################
 
 ### Makestuff
