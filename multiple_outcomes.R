@@ -30,8 +30,10 @@ sim_df_cont_joint <- linearsim(nHH=nHH_obs
 	, hhSD = c(2, 3)
 	, pgausian=list(p=3,fun=rnorm, mean=0, sd=1)
 	, pcat=list(p=0)
-	, link_scale=TRUE
 	, noutcomes=2
+	, separatelatent=TRUE
+	, link_scale=TRUE
+	, blatent=c(1, -5)
 	, vnames=c("age", "wealthindex", "latent", "hhsize", "rent")
 )$data
 head(sim_df_cont_joint)

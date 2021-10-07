@@ -19,6 +19,7 @@ pred_services_trad_cont_joint <- varpred(mod_cont_joint
 pred_services_centered_cont_joint <- varpred(mod_cont_joint
 	, "services"
 	, isolate=TRUE
+	, zero_out_interaction=TRUE
 	, modelname="centered mm"
 )
 
@@ -32,7 +33,7 @@ pred_services_cont_plots <- (comparevarpred(vlist=vlist
 	)
 	+ geom_point(data=true_prop_df, aes(x=services, y=fit), colour="red")
 	+ scale_colour_manual(breaks = c("everything", "centered mm")
-		, values=c(everything="black", "centered mm"="blue")
+		, values=c(everything="blue", "centered mm"="black")
 	)
 	+ labs(y="Predictions", colour="Method")
 	+ theme(legend.position="bottom")
@@ -52,7 +53,6 @@ pred_age_centered_cont_joint <- varpred(mod_cont_joint
 	, c("services", "age")
 	, x.var="age"
 	, isolate=TRUE
-	,  which.interaction = "effects"
 	, zero_out_interaction=TRUE
 	, modelname="centered mm"
 )
@@ -96,7 +96,7 @@ pred_age_cont_joint_plots <- (plot(pred_age_cont_joint)
 	+ geom_vline(data=focal_prop_df, aes(xintercept=age), lty=2, colour="grey")
 	+ geom_hline(data=true_prop_df, aes(yintercept=fit), lty=2, colour="yellow")
 	+ scale_colour_manual(breaks = c("everything", "centered mm")
-		, values=c(everything="black", "centered mm"="blue")
+		, values=c(everything="blue", "centered mm"="black")
 	)
 	+ labs(y="Predictions", colour="Method")
 	+ theme(legend.position="bottom")

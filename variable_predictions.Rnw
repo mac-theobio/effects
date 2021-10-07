@@ -62,7 +62,7 @@ When visually presented, predictor effects provide a unified and intuitive way o
 \item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? Should we exclude variation in non-focal parameters?)
 \end{enumerate}
 
-Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. An alternative to averaging the non-focal predictors, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. Dealing with second challenge is discussed in Section ~\ref{sec:uncertainity_propagation}
+Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. An alternative to averaging the non-focal predictors, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. Dealing with second challenge is discussed in Section~\ref{sec:uncertainity_propagation}
 
 When dealing with nonlinear link functions, the correct predictions for example, are even much harder to estimate. One approach is to make predictions on the transformed scale (linear predictor scale), and then back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation. In particular, bias in expected mean prediction induced by nonlinear transformation of the response variable can lead inaccurate predictions. 
 
@@ -86,16 +86,16 @@ stargazer(qoi_mod1, qoi_mod2
 )
 @
 
-In simple linear models with no interaction terms, the default out for the coefficient estimates in Table ~\ref{tab:qoi_coefs} model (1) is simple and directly interpretable as the expected change in household size for a unit change in age. In particular, a unit change in age is associated with a household that is \Sexpr{round(coef(qoi_mod1)[[2]], 3)} bigger. This is the \emph{unconditional marginal effect} \citep{leeper2017interpreting} and it is constant across all the observations and levels of all other predictors. As a result, the interpretation of interaction models differs in an important way from linear-additive regression models. To see this more clearly, compare the marginal effect of $x_1$ in the following two models:
+In simple linear models with no interaction terms, the default out for the coefficient estimates in Table~\ref{tab:qoi_coefs} model (1) is simple and directly interpretable as the expected change in household size for a unit change in age. In particular, a unit change in age is associated with a household that is \Sexpr{round(coef(qoi_mod1)[[2]], 3)} bigger. This is the \emph{unconditional marginal effect} \citep{leeper2017interpreting} and it is constant across all the observations and levels of all other predictors. As a result, the interpretation of interaction models differs in an important way from linear-additive regression models. To see this more clearly, compare the marginal effect of $x_1$ in the following two models:
 %
 \begin{align}
 y_1 &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \epsilon_1 \label{eq:simple_lm}\\
 y_2 &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_{12}x_1x_2 + \epsilon_2 \label{eq:simple_inter_lm}
 \end{align}
 %
-The marginal effect of $x_1$ in Equation ~\ref{eq:simple_lm} is $\frac{\partial y_1}{\partial x_1} = \beta_1$. On the other hand, the marginal effect of $x_1$ in Equation ~\ref{eq:simple_inter_lm} is given by $\frac{\partial y_2}{\partial x_1} = \beta_1 + \beta_{12}x_2$. In other words, if there are no interactions, the marginal effect of $x_1$ on $y_1$ is constant, while, if there are interactions in the model, the marginal effect of a change in $x_1$ on $y_1$ depends on the value of the \emph{conditioning} predictor $x_2$.
+The marginal effect of $x_1$ in Equation~\ref{eq:simple_lm} is $\frac{\partial y_1}{\partial x_1} = \beta_1$. On the other hand, the marginal effect of $x_1$ in Equation~\ref{eq:simple_inter_lm} is given by $\frac{\partial y_2}{\partial x_1} = \beta_1 + \beta_{12}x_2$. In other words, if there are no interactions, the marginal effect of $x_1$ on $y_1$ is constant, while, if there are interactions in the model, the marginal effect of a change in $x_1$ on $y_1$ depends on the value of the \emph{conditioning} predictor $x_2$.
 
-Figure ~\ref{fig:qoi_pred_plot} shows the comparison of predictor effect and unconditional marginal effect of age on household size, based on model estimates in Table ~\ref{tab:qoi_coefs}. Since the model has no interactions, the relationship between the predicted household size and age is linear, hence the marginal effect of age is the slope ($\frac{\Delta \mathrm{hh size}}{\Delta \mathrm{age}}$) of the predictor effect line and can be calculated irrespective of the values of wealth index. 
+Figure~\ref{fig:qoi_pred_plot} shows the comparison of predictor effect and unconditional marginal effect of age on household size, based on model estimates in Table~\ref{tab:qoi_coefs}. Since the model has no interactions, the relationship between the predicted household size and age is linear, hence the marginal effect of age is the slope ($\frac{\Delta \mathrm{hh size}}{\Delta \mathrm{age}}$) of the predictor effect line and can be calculated irrespective of the values of wealth index. 
 %
 \begin{figure}[H]
 \begin{center}
@@ -128,9 +128,9 @@ Generally, in generalized linear models with other link functions, the predictio
 
 \section{Uncertainty propagation}\label{sec:uncertainity_propagation}
 
-What about the confidence intervals (CI)? The limits of the confidence intervals are points, not mean values. In principle, every observation/value of focal predictors has a different CI. The traditional way to compute variances for predictions is $\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})$ \citep{lenth2018package, fox2009effect}, so that the confidence intervals are $\eta \pm q\sigma$, where $q$ is an appropriate quantile of Normal or t distribution. This approach incorporates all the uncertainties -- including the uncertainty due to non-focal predictors.  But what if we are only interested in the uncertainty as a result of the focal predictor, so that the confidence intervals are $\eta \pm q \sigma_f$? 
+What about the confidence intervals (CI)? The limits of the confidence intervals are points, not mean values. In principle, every observation/value of focal predictors has a different CI. The traditional way to compute variances for predictions is $\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})$ \citep{lenth2018package, fox2009effect}, so that the confidence intervals are $\eta \pm q\sigma$, where $q$ is an appropriate quantile of Normal or t distribution. This approach incorporates all the uncertainties -- including the uncertainty due to non-focal predictors.  But what if we are only interested in the uncertainty as a result of the focal predictor, so that the confidence intervals are $\eta \pm q \sigma_f$. 
 
-Currently, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from the \emph{non-focal} predictors when computing the CIs. A non-trivial way to exclude uncertainties associated with non-focal predictors in some of these packages is to provide a user defined variance-covariance matrix with the covariances of \emph{non-focal} terms set to $0$ -- \emph{zeroing-out} variance-covariance matrix. This only works when the input predictors are \emph{centered} prior to model fitting, in case of numerical predictors, and even much complicated when the predictors are categorical. We first describe this variance-covariance based approach and then discuss our proposed method which is based on \emph{model centering} and does not require input predictors to be scaled prior to model fitting. Model center is found by averaging the variables over the model matrix, $\bX^\star$.
+Currently, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from the non-focal predictors when computing the CIs. A non-trivial way to exclude uncertainties associated with non-focal predictors in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal terms set to $0$ -- \emph{zeroing-out} variance-covariance matrix. This only works when the input predictors are \emph{centered} prior to model fitting, in case of numerical predictors, and even much complicated when the predictors are categorical. We first describe this variance-covariance based approach and then discuss our proposed method which is based on \emph{model centering} and does not require input predictors to be scaled prior to model fitting. Model center is found by averaging the variables over the model matrix, $\bX^\star$.
 
 
 \subsection{Variance-covariance}
@@ -149,7 +149,7 @@ Higher order terms such as interactions, splines, polynomials, etc., can be betw
 \subsection{Simulation examples}
 
 
-In this section, we illustrate predictor effects (together with the associated CI) in the context of linear models involving continuous and categorical predictors with or without interactions. We compare the expected to the known simulation "truth".
+In this section, we illustrate predictor effects (together with the associated CI) in the context of linear models involving continuous and categorical predictors with or without interactions. We compare the expected to the known simulation ``truth".
 
 \subsubsection{Continuous predictors}\label{sec:continuous_predictors}
 
@@ -166,7 +166,7 @@ Consider simulation example described in Section \ref{sec:qoi}, with slight modi
 i &= 1,\cdots, 100
 \end{align}
 %
-Secondly, we add interaction terms between the non-focal predictors (\code{wealth index} and \code{household expenditure}) but not with the focal predictor \code{age}:
+Secondly, we add interaction between the non-focal predictors (\code{wealth index} and \code{household expenditure}) but not with the focal predictor \code{age}:
 %
 \begin{align}\label{sim:lm_nf_interaction}
 \mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i \nonumber\\ 
@@ -183,7 +183,7 @@ Secondly, we add interaction terms between the non-focal predictors (\code{wealt
 i &= 1,\cdots, 100
 \end{align}
 %
-And lastly, we now consider model with interaction terms between the focal predictor (\code{age}) and one of the non-focal predictor (\code{wealth index}):
+And lastly, the model with interaction terms between the focal predictor (\code{age}) and one of the non-focal predictor (\code{wealth index}):
 %
 \begin{align}\label{sim:lm_f_interaction}
 \mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{E}}\mathrm{Expenditure}_i \nonumber\\ 
@@ -201,9 +201,9 @@ i &= 1,\cdots, 100
 \end{align}
 %
 
-We first fitted all the three models and in each case, compared three different predictor effects together with the corresponding CIs -- 1) uncertainty due to non-focal predictors included (everything), 2) uncertainty due to non-focal predictors removed using variance-covariance matrix (zero-vcov), and 3) uncertainty due to non-focal predictors removed using centered model matrix (centered mm). The results are shown in Figure ~\ref{fig:pred_age_cont_plots}. 
+We first fitted all the three models and in each case, compared three different predictor effects together with the corresponding CIs -- 1) uncertainty due to non-focal predictors included (everything), 2) uncertainty due to non-focal predictors removed using variance-covariance matrix (zero-vcov), and 3) uncertainty due to non-focal predictors removed using centered model matrix (centered mm). The results are shown in Figure~\ref{fig:pred_age_cont_plots}. 
 
-Figure ~\ref{fig:pred_age_cont_plots}a represents predictor effects for the model with no interaction, Figure ~\ref{fig:pred_age_cont_plots}b shows predictor effects for model with non-focal predictors interacting with each other, and Figure ~\ref{fig:pred_age_cont_plots}c shows predictor effects for the model with focal and non-focal predictors interacting. For perfect predictions, we expect the yellow and grey dotted lines to overlay each other and they should intersect with the black solid line and the vertical dotted grey line at the same point (or very close). In other words, at the model center (mean of the focal predictor), generally, we expect the model to predict the average of the response variable and narrower CIs. If we properly anchor the model at its center (or any other appropriate value, assuming no interactions), we would expect the variance at the anchor to be zero, i.e., the CIs bands crosses at that point (see zero-cov and centered mm in Figure ~~\ref{fig:pred_age_cont_plots}). Although the overall predictor effects trend lines are different in each of the simulation, the expected household size for a household head with average age is not only the same in all the three simulations but also very close to the ``truth''.
+Figure~\ref{fig:pred_age_cont_plots}a represents predictor effects for the model with no interaction, Figure~\ref{fig:pred_age_cont_plots}b shows predictor effects for the model with interaction between non-focal predictors, and Figure~\ref{fig:pred_age_cont_plots}c shows predictor effects for the model with interaction between focal and non-focal predictors. For perfect predictions, we expect the yellow and grey dotted lines to overlay each other and they should intersect with the black solid line and the vertical dotted grey line at the same point (or very close). In other words, at the model center (mean of the focal predictor), generally, we expect the model to predict the average of the response variable and narrower CIs. If we properly anchor the model at its center (or any other appropriate value, assuming no interactions), we would expect the variance at the anchor to be zero, i.e., the CIs bands crosses at that point (see zero-cov and centered mm in Figure~~\ref{fig:pred_age_cont_plots}). Although the overall predictor effects trend lines are different in each of the simulation, the expected household size for a household head with average age is not only the same in all the three simulations but also very close to the ``truth''.
 %
 \begin{figure}[H]
 \begin{center}
@@ -218,9 +218,9 @@ print(pred_age_cont_plots)
 
 \subsubsection{Categorical predictors}\label{sec:categorical_predictors}
 
-Suppose, in Section ~\ref{sec:continuous_predictors}, in addition to the predictors already defined, we add gender and level of education of the household head. For example, we may want to know whether men (M) and females (F) differ in the relationship between age of the household head and the size of the household -- how does households with male as their heads differ in size as compare to those with female heads? 
+Suppose, in Section~\ref{sec:continuous_predictors}, in addition to the predictors already defined, we add gender of the household head. For example, we may want to know whether men (M) and females (F) differ in the relationship between age of the household head and the size of the household -- how does households with male as their heads differ in size as compare to those with female heads? 
 
-The first model in this case, slightly modifies the first model in Section ~\ref{sec:continuous_predictors} by adding gender of the household head. The proportion of households with males as their household heads is $60\%$:
+The first model in this case, slightly modifies the first model in Section~\ref{sec:continuous_predictors} by adding gender of the household head. The proportion of households with males as their household heads is $60\%$:
 %
 \begin{align}\label{sim:lm_no_interaction_cat}
 \mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{M}}{\mathrm{Gender}_i} + \epsilon_i \nonumber\\
@@ -237,7 +237,7 @@ p &= \begin{cases}
 i &= 1,\cdots, 100
 \end{align}
 %
-The second model has interaction between non-focal predictors (\code{age} and \code{wealth index}), while the third model has interaction between focal (\code{gender} and \code{age}). The results are shown in Figure ~\ref{fig:pred_gender_cat_plots}, which compares the predictors effects (either centered or all uncertainty included -- everything) for no interaction model (a), interaction between non-focal predictors (b) and interaction between focal and non-focal predictor (c). \textbf{For each gender, we expect the observed average household size ("truth" -- red dots), to be very close to the estimated predictor effects (blue and black dots and lines)??}
+The second model has interaction between non-focal predictors (\code{age} and \code{wealth index}), while the third model has interaction between focal (\code{gender} and \code{age}). The results are shown in Figure~\ref{fig:pred_gender_cat_plots}, which compares the predictors effects (either centered or all uncertainty included -- everything) for no interaction model (a), interaction between non-focal predictors (b) and interaction between focal and non-focal predictor (c). For each gender, we expect the observed average household size (``truth" -- red dots), to be very close to the estimated predictor effects (blue and black dots).
 %
 \begin{figure}[H]
 \begin{center}
@@ -245,28 +245,28 @@ The second model has interaction between non-focal predictors (\code{age} and \c
 print(pred_gender_cat_plots)
 @
 \end{center}
-\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The red dots are the observed observed/true means. The black (non-focal uncertainty excluded) and blue solid dots (all uncertainty included) are the predictor effects with their corresponding CIs, respectively. \textbf{For properly generated predictor effects, we expect the black, blue and red dots to be as close as possible???}.}
+\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The red dots are the observed observed/true means. The black (non-focal uncertainty excluded) and blue solid dots (all uncertainty included) are the predictor effects with their corresponding CIs, respectively. As espected, the observed average household size (red) is very similar to the predicted (red and blue).} 
 \label{fig:pred_gender_cat_plots}
 \end{figure}
 %
 
 \subsubsection{Linear mixed effect model}
 
-We now consider linear models with additional random effects components. In the simplest case, we start with a single grouping factor as the random effect components. 
+We now consider linear models with additional random effects components. In the simplest case, we start with a single grouping factor as the random effect component, i.e., random intercept model. This way, we can investigate the contribution of random effects overall expected mean. 
 
-Suppose, in the simulation described in Section ~\ref{sec:stats_background}, the observations are  recorded at least once per household. In particular, let $\mathrm{H}$ be the number of households indexed by the grouping factor, and $\mathrm{h}[i]$ be the household of the $i$th observation. We simulate three different models incorporating this kind of formulation -- first, one grouping factor-one predictor-linear random effect:
+Suppose, in the simulation described in Section~\ref{sec:stats_background}, the observations are  recorded at least once per household. In particular, let $\mathrm{H}$ be the number of households indexed by the grouping factor, and $\mathrm{h}[i]$ be the household of the $i$th observation. We simulate three different models incorporating this kind of formulation -- first, one grouping factor-one predictor-linear random effect model:
 %
 \begin{align}\label{sim:lme_one_pred}
 \mathrm{hh~size} &= \beta_0 + \alpha_{0,\mathrm{h}[i]} + \beta_{\mathrm{A}}\mathrm{Age}_i + \epsilon_i \nonumber\\
-\alpha_{0,\mathrm{h}} &\sim \mathrm{Normal}(0, 1), ~~ h=1, \cdots, \mathrm{H} \nonumber\\
+\alpha_{0,\mathrm{h}} &\sim \mathrm{Normal}(0, 1),~~ h=1, \cdots, \mathrm{10} \nonumber\\
 \mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
 \epsilon_i &\sim \mathrm{Normal}(0, 2) \nonumber\\
 \beta_0 &= 1.5 \nonumber\\
 \beta_{\mathrm{A}} &= 0.1 \nonumber\\
-i &= 1,\cdots, 100
+i &= 1,\cdots, 50
 \end{align}
 %
-The second and third models add the random effects, $\alpha_{\mathrm{h}[i]}$, to models ~\ref{sim:lm_nf_interaction} and ~\ref{sim:lm_f_interaction}, respectively.
+The second and third models add the random effects, $\alpha_{\mathrm{h}[i]}$, to models~\ref{sim:lm_nf_interaction} and~\ref{sim:lm_f_interaction}, respectively. Figre~\ref{fig:pred_age_cont_lme_plots} shows and compares predictor efffects for the three models.
 %
 \begin{figure}[H]
 \begin{center}
@@ -285,16 +285,17 @@ print(pred_age_cont_lme_plots)
 We now consider a bit more complicated model involving more two outcome variables (services) -- household size and rental price. In particular, we simulate an intercept only multivariate random effect model to, \emph{jointly}, predict household size and rental price based on age and wealth index. Each household has its own correlated effect on the intercepts (random-intercept). In addition, we add latent variable to account for unobserved correlations.
 %
 \begin{align}\label{sim:lme_multi_outcome}
-\mathrm{y}_{\mathrm{h}[i]\mathrm{s}} &= \beta_{0,s} + \alpha_{0,\mathrm{h}[i]\mathrm{s}} + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{L}}\mathrm{Latent}_i + \epsilon_{i\mathrm{s}} \nonumber\\
-\alpha_{0,\mathrm{h}\mathrm{s}} &\sim \mathrm{Normal}(0, 2), ~~ h=1, \cdots, \mathrm{H} \nonumber\\
+\mathrm{y}_{\mathrm{h}[i]\mathrm{s}} &= \beta_{0,s} + \alpha_{0,\mathrm{h}[i]\mathrm{s}} + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{Ls}}\mathrm{Latent}_{i\mathrm{s}} + \epsilon_{i\mathrm{s}} \nonumber\\
+\alpha_{0,\mathrm{h}\mathrm{s}} &\sim \mathrm{Normal}(0, 2),~~ h=1, \cdots, \mathrm{H} \nonumber\\
 \mathrm{Age}_i &\sim \mathrm{Normal}(0.2, 1) \nonumber\\
 \mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
-\mathrm{Latent}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Latent}_{i\mathrm{s}} &\sim \mathrm{Normal}(0, 1) \nonumber\\
 \epsilon_{i\mathrm{s}} &\sim \mathrm{Normal}(0, 1) \nonumber\\
 \beta_0 &= 1.5 \nonumber\\
 \beta_{\mathrm{A}} &= 0.1 \nonumber\\
 \beta_{\mathrm{W}} &= 2 \nonumber\\
-\beta_{\mathrm{L}} &= 1 \nonumber\\
+\beta_{\mathrm{L}1} &= 1 \nonumber\\
+\beta_{\mathrm{L}2} &= -5 \nonumber\\
 i &= 1,\cdots, 100
 \end{align}
 %
@@ -304,6 +305,7 @@ Where:
 \item $\alpha_{0,\mathrm{h}\mathrm{s}}$ household specific random intercepts, i.e., captures the offset from the overall baseline (mean)
 \end{itemize}
 
+Predictor effects for the above model are show in Figure~\ref{fig:pred_cont_joint_plots}. The top plot compares centered and model centered predictor effects with the observed average household size and rental price. The point estimates (black and blue dots) are the expected baseline household size and the rental price. The two bottom plots compares the predictor effect (of age) on the predicted household size and rental price. Again, in the case of joint model, at the model center, the expected predictions are very similar to the observed marginal averages for the outcomes. 
 %
 \begin{figure}[H]
 \begin{center}
@@ -311,7 +313,7 @@ Where:
 print(pred_cont_joint_plots)
 @
 \end{center}
-\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The dotted yellow and grey horizontal lines are the expected and observed/true means, respectively. The vertical grey line is the mean of the focal predictor (model center). The solid black, red (non-focal uncertainty excluded) and blue lines (all uncertainty included) are the predictor effects while their corresponding CIs are the dotted black, red and blue lines, respectively. For properly generated predictor effects, we expect the yellow and the grey horizontal dotted lines to overlay each other and intersect with the black, blue, red solid trend lines, and the vertical dotted grey line at the same point (model center).}
+\caption{Predictor effect of age on the predicted household size and rental price. The top plots shows the baseline (mean) predicted household size and rental price. The bottom plots compares the predictor effect of age on the predicted household size and rental price. The dotted yellow and grey horizontal lines are the expected and observed/true means, respectively. The vertical grey line is the mean of the focal predictor (model center). The solid black, red (non-focal uncertainty excluded) and blue lines (all uncertainty included) are the predictor effects while their corresponding CIs are the dotted black, red and blue lines, respectively. For properly generated predictor effects, we expect the yellow and the grey horizontal dotted lines to overlay each other and intersect with the black, blue, red solid trend lines, and the vertical dotted grey line at the same point (model center). Without removing the variations due to non-focal predictors, the confidence bands are very wide ("everything" in the figure). However, when CIs are centered, we are only focussing on the uncertainty due to the focal predictor.}
 \label{fig:pred_cont_joint_plots}
 \end{figure}
 %

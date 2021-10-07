@@ -98,6 +98,8 @@ Ignore += variable_predictions*.pdf
 
 variable_predictions_funs.Rout: variable_predictions_funs.R
 	$(wrapR)
+
+## Continuous predictors
 variable_predictions_objs.Rout: variable_predictions_objs.R variable_predictions_funs.rda
 
 ## Categorical predictors
@@ -114,6 +116,10 @@ multiple_outcomes_preds.Rout: multiple_outcomes_preds.R multiple_outcomes_model.
 ## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: multiple_outcomes_preds.rda lme_random_intercept.rda \
 	categorical_predictors.rda variable_predictions_objs.rda variable_predictions.Rnw
+
+## Compare varpred with emmeans
+compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_objs.rda
+	$(knitpdf)
 
 ## This should work but it doesn't
 bad_example.Rout: bad_example.R categorical_predictors.rda

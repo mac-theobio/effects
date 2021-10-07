@@ -1,0 +1,68 @@
+---
+title: "Bias correction in GLMs"
+author: Bicko, Jonathan & Ben
+date: "2021 Oct 06 (Wed)"
+compact-title: false
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+bibliography: bias_correction.bib
+link-citations: yes
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(fig.pos = "H", out.extra = "", message=FALSE, warning=FALSE, echo=FALSE)
+
+library(shellpipes)
+library(glmmTMB)
+library(dplyr)
+library(ggplot2)
+library(vareffects); varefftheme()
+library(emmeans)
+
+commandEnvironments()
+makeGraphics()
+ 
+set.seed(2121)
+
+vplots <- vareffects:::plot.vareffects
+
+```
+
+\section{Continuous predictors}
+
+\subsection{No interaction}
+
+```{r cont_no_interaction}
+quants <- seq(0, 1, length.out=100)
+focal_levels <- quantile(sim_df_cni$age, quants)
+truth = c(truth=mean(sim_df_cni$hhsize))
+print(truth)
+compare_cni_plots <- (combinepreds(mod_cni, focal="age"
+		, funs=c("emmeans", "varpred")
+		, at=list(age=focal_levels)
+		, x.var="age"
+		, plotit=TRUE
+	)
+	+ geom_vline(aes(xintercept=mean(focal_levels)), lty=2, colour="grey")
+)
+print(compare_cni_plots)
+```
+
+\subsection{Interaction between non-focal predictors}
+
+```{r cont_nwi_nf_interaction}
+quants <- seq(0, 1, length.out=100)
+focal_levels <- quantile(sim_df_wi_nf$age, quants)
+truth = c(truth=mean(sim_df_wi_nf$hhsize))
+print(truth)
+compare_wi_nf_plots <- (combinepreds(mod_wi_nf, focal="age"
+		, funs=c("emmeans", "varpred")
+		, at=list(age=focal_levels)
+		, x.var="age"
+		, plotit=TRUE
+	)
+	+ geom_vline(aes(xintercept=mean(focal_levels)), lty=2, colour="grey")
+)
+print(compare_wi_nf_plots)
+```

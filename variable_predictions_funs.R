@@ -5,7 +5,8 @@
 linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 	, hhSD=2, betas=NULL, pgausian=list(p=2, fun=rnorm, mean=0, sd=1)
 	, pcat=list(p=1, fun=sample, nlevels=2, labels=NULL, prob=NULL, replace=TRUE)
-	, noutcomes=1, vnames=NULL, link_scale=FALSE) {
+	, noutcomes=1, separatelatent=FALSE, blatent=1, mulatent=0
+	, sdlatent=1, vnames=NULL, link_scale=FALSE) {
 	
 	Terms <- attr(terms(form), "term.labels")
 	nbetas <- length(Terms)
@@ -138,9 +139,19 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 		}
 		ynames <- "y"
 	} else {
+		if (separatelatent) {
+			if (length(mulatent)==1) mulatent <- rep(mulatent, noutcomes)
+			if (length(sdlatent)==1) sdlatent <- rep(sdlatent, noutcomes)
+			if (length(blatent)==1) blatent <- rep(blatent, noutcomes)
+		}
 		out <- lapply(1:noutcomes, function(i){
+			if (separatelatent) {
+				latentvar <- blatent[[i]]*rnorm(N, mulatent[[i]], sdlatent[[i]])
+			} else {
+				latentvar <- 0
+			}
 			hhRE <- pull(hhRE, paste0("hhRE", i))
-			eta <- lp + hhRE
+			eta <- lp + hhRE + latentvar
 			if (link_scale) {
 				y <- rnorm(N, mean=eta, sd=1) 
 			} else {
@@ -234,4 +245,69 @@ comparevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE,
 		return(out)
 	}
 }
+
+
+## Compare predictions from vareffects, emmeans, effects and margins
+## funs: emmean; varpred; ...
+combinepreds <- function(mod, funs, focal, x.var, plotit=TRUE, print.head=FALSE, ...){
+	if (length(focal)>1) {
+		focal <- union(focal[focal %in% x.var], focal)
+		focal_temp <- c("xvar", focal[!focal %in% x.var])
+		spec <- as.formula(paste0("~", paste0(focal, collapse=":")))
+	} else {
+		spec <- as.formula(paste0("~", focal))
+		focal_temp <- "xvar"
+	}
+	args <- list(mod, spec=spec, focal_predictors=focal, x.var=x.var)
+	add_args <- list(...)
+	if (length(add_args)) args[names(add_args)] <- add_args
+
+	out <- sapply(funs, function(f){
+		est <- do.call(f, args)
+		if (inherits(est, c("emmeans", "emmGrid"))) {
+			est <- as.data.frame(est)
+			oldn <- c(focal, "emmean"
+				, grep("\\.CL", colnames(est), value=TRUE)
+			)
+			newn <- c(focal_temp, "fit", "lwr", "upr")
+			colnames(est)[colnames(est) %in% oldn] <-  newn
+		} else if (inherits(est, "eff")) {
+			est <- as.data.frame(est)
+			oldn <- c(focal, "lower", "upper")
+			newn <- c(focal_temp, "lwr", "upr")
+			colnames(est)[colnames(est) %in% oldn] <-  newn
+		} else {
+			est <- as.data.frame(est)
+			colnames(est)[colnames(est) %in% x.var] <- "xvar"
+		}
+		est <- est[, c(focal_temp, c("fit", "lwr", "upr"))]
+		est$model <- f
+		return(est)
+	}, simplify = FALSE)
+	out <- do.call("rbind", out)
+	rownames(out) <- NULL
+	class(out) <- c("jdeffects", "data.frame")
+	if (print.head){
+		head(out)
+	}
+	if (plotit) {
+		pred_prop_df <- (out
+			%>% group_by_at(c("model", focal[!focal %in% x.var]))
+			%>% summarize(fit=mean(fit))
+			%>% data.frame()
+		)
+		print(pred_prop_df)
+		cols <- rainbow(length(funs))
+		names(cols) <- funs
+		out <- (vareffects:::plot.vareffects(out)
+			+ geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model), lty=2)
+			+ scale_colour_manual(breaks = funs, values=cols)
+			+ labs(y="Predictions", x=x.var, colour="Method")
+			+ theme(legend.position="bottom")
+		)
+	}
+	return(out)
+}
+
+
 saveEnvironment()
