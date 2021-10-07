@@ -10,6 +10,10 @@ vim_session:
 
 ######################################################################
 
+today: compare_emmeans_varpred.pdf variable_predictions.pdf
+
+######################################################################
+
 Sources += $(wildcard *.R *.md *.Rnw *.rmd *.bib)
 Sources += $(wildcard R/*.R)
 Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
