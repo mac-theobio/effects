@@ -1,3 +1,20 @@
+2021 Oct 07 (Thu)
+=================
+JD:
+	- Short notes/highlights on averaging model matrix (variables) vs averaging the predictors
+	- Try the package codes otherwise BC to simplify functions for testing
+
+BC:
+	- Review and update package documentation
+	- Document (or explain) weighted averaging for categorical predictors
+	- Simple simulation (categorical) where the expected don't match
+	- Document what we are trying to achieve
+	- Troubleshoot _emmeans_ vs _varpred_ differences 
+	- Orthogonal interactions vs model matrix averaging
+
+
+Slightly older
+=================
 
 Plan: start simple, make clear pictures and explain them as if we are teaching. This will help us notice when we reach a place that we don't understand.
 

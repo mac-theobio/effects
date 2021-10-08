@@ -103,3 +103,113 @@ compare_catni_plots <- (combinepreds(mod_catni, focal="gender"
 print(compare_catni_plots)
 ```
 
+
+\section{Why the differences?}
+
+We actually don't know which method is correct. Let us consider a simple simulation:
+
+- Outcome: hhsize
+- Predictors:
+	- Gender (40\% Males)
+	- Age: Females are slightly older
+
+```{r sim_compare, echo=TRUE}
+## Simulation
+N <- 100
+extraAge <- 0.4
+meanAge <- 0.5
+sdAge <- 1
+prop <- c(0.6, 0.4)
+betas <- c(1.5, 0.5, 0.5)
+gender <- sample(c("Female", "Male"), N, replace = TRUE, prob = prop)
+df <- (data.frame(gender=gender)
+	%>% mutate(muAge=ifelse(gender=="Female", meanAge+extraAge, meanAge)
+		, age=rnorm(N, muAge, sdAge)
+	)
+	%>% select(-muAge)
+)
+
+mm <- model.matrix(~gender+age, df)
+df$hhsize <- rnorm(N, mean=as.vector(mm %*% betas), sd=1)
+
+## Model
+mod <- lm(hhsize~gender+age, data=df)
+print(mod)
+```
+
+Let us take a look at the observed marginals:
+
+
+```{r observed_margins, echo=TRUE}
+observed_margins <- (df
+	%>% group_by(gender)
+	%>% summarise_all(mean)
+)
+observed_margins
+```
+
+- **varpred** constructs model matrix by averaging _age_ within the levels of _gender_. The population average is the weighted (by the observed proportions) average of these averages:
+
+```{r varpred_mm, echo=TRUE}
+varpred_pred <- varpred(mod, "gender", within.category=TRUE, returnall=TRUE)
+varpred_mm <- varpred_pred$raw$model.matrix
+print(varpred_mm)
+```
+
+Estimates:
+```{r varpred_pred}
+print(varpred_pred)
+```
+
+By hand calculation:
+
+```{r varpred_hand, echo=TRUE}
+varpred_mm %*% coef(mod)
+```
+
+
+- **emmeans** uses the population average and seems not apply the weights:
+
+```{r emmeans_mm, echo=TRUE}
+emmeans_grid <- ref_grid(mod)
+emmeans_mm <- emmeans_grid@grid
+print(emmeans_mm)
+```
+
+
+Estimates:
+```{r emmeans_pred}
+emmeans_pred <- emmeans(emmeans_grid, spec=~gender)
+print(emmeans_pred)
+```
+
+By hand calculation:
+
+
+```{r emmeans_hand, echo=TRUE}
+emmeans_mm <- emmeans_pred@linfct
+print(emmeans_mm)
+
+as.matrix(emmeans_mm) %*% coef(mod)
+```
+
+Mathematically, in **varpred**
+
+\begin{align}
+\mathbb{E}(Y|X) =
+\begin{cases}
+(\beta_0 + \alpha) + \beta_1 \bar{{Age_{M}}},& \text{ if } gender = Male\\\\
+\beta_0 + \beta_1 \bar{{Age_{F}}},&  \text{ if } gender = Female\
+\end{cases}
+\end{align}
+
+
+**emmeans**
+
+\begin{align}
+\mathbb{E}(Y|X) =
+\begin{cases}
+(\beta_0 + \alpha) + \beta_1 \bar{{Age}},& \text{ if } gender = Male\\\\
+\beta_0 + \beta_1 \bar{{Age}},&  \text{ if } gender = Female\
+\end{cases}
+\end{align}
