@@ -26,7 +26,7 @@ makeGraphics()
  
 set.seed(2121)
 
-vplots <- vareffects:::plot.vareffects
+within.category <- TRUE
 
 ```
 
@@ -95,6 +95,7 @@ print(compare_wi_f_plots)
 compare_catni_plots <- (combinepreds(mod_catni, focal="gender"
 		, funs=c("emmeans", "varpred")
 		, x.var="gender"
+		, within.category=within.category
 		, x.var.factor=TRUE
 		, plotit=TRUE
 	)

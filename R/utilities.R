@@ -163,7 +163,7 @@ matrix.to.df <- function(matrix, colclasses){
 
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
-	, vnames, which.interaction, within.category, pop.ave){
+	, vnames, within.category, bias.adjust){
   if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
     class(mod$na.action) <- "omit"
 
@@ -207,9 +207,7 @@ clean_model <- function(focal.predictors, mod, xlevels
       factor.cols[names(grep(name, vnames, value=TRUE))] <- TRUE
     }
   }
-  if (which.interaction=="effects") {
-     factor.cols[grep(":", cnames)] <- FALSE   
-  }
+  factor.cols[grep(":", cnames)] <- FALSE   
 
   X <- recoverdata(mod=mod, extras=all.predictors)
   
@@ -258,9 +256,9 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
 			 quant <- seq(0, 1, length.out=steps)
-			 if (pop.ave=="quantile") {
+			 if (bias.adjust=="quantile") {
 			 	as.vector(quantile(X[,name], quant))
-			 } else if (pop.ave=="population") {
+			 } else if (bias.adjust=="population") {
 			 	as.vector(X[, name])
 			 } else {
 			 #	seq(min(X[, name]), max(X[, name]), length.out=steps)
@@ -274,7 +272,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 		}
 	 } else {
 		factor.levels[[name]] <- levels
-	 	if (pop.ave=="population" || (within.category & name==x.var)) {
+	 	if (bias.adjust=="population" || (within.category & name==x.var)) {
 			levels <- as.vector(X[, name])
 		}
 	 }
@@ -293,18 +291,18 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 		levels[1]
 		}
 	 } else {
-	 	if (pop.ave=="quantile") {
+	 	if (bias.adjust=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
 			as.vector(quantile(X[,name], quant))	
-		} else if (pop.ave=="population" || (within.category & !is.factor(X[, name]))) {
+		} else if (bias.adjust=="population" || (within.category & !is.factor(X[, name]))) {
 			as.vector(X[, name])
-		} else if (pop.ave=="none") {
+		} else if (bias.adjust=="none") {
 			typical(X[, name])	
 		}
 	 }
 	if (fac) { 
 		factor.levels[[name]] <- levels
-		if (pop.ave=="population" || within.category) {
+		if (bias.adjust=="population" || within.category) {
 			levels <- as.vector(X[, name])
 		}
 	}
@@ -314,7 +312,7 @@ clean_model <- function(focal.predictors, mod, xlevels
   n.focal <- length(focal.predictors)
   n.excluded <- length(excluded.predictors)
   n.vars <- n.focal + n.excluded
-  if (pop.ave=="none" & !within.category) {
+  if (bias.adjust=="none" & !within.category) {
 	  dims <- sapply(x, function(x) length(x$levels))
 	  len <- prod(dims)
 	  predict.data <-matrix('', len, n.vars)
@@ -326,14 +324,14 @@ clean_model <- function(focal.predictors, mod, xlevels
 			predict.data[i,j] <- x[[j]]$levels[subs[j]]
 		 }
 		 if (n.excluded > 0) {
-	#		if (pop.ave=="quantile" || pop.ave=="population") {
+	#		if (bias.adjust=="quantile" || bias.adjust=="population") {
 	#      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i,]
 	#		} else {
 				predict.data[i, (n.focal + 1):n.vars] <- excluded
 	#		}
 		}
 	  }
-  } else if (pop.ave=="population" || pop.ave=="quantile" || within.category) {
+  } else if (bias.adjust=="population" || bias.adjust=="quantile" || within.category) {
 	  excluded <- sapply(x.excluded, function(x) x$level, simplify=FALSE)
 	  ..focal <- sapply(focal.predictors, function(j) x[[j]]$levels, simplify=FALSE)
 	  predict.data <- do.call("cbind", c(..focal, excluded))

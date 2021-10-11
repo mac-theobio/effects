@@ -3,4 +3,4 @@
 \docType{package}
 \name{vareffects}
 \alias{vareffects}
-\title{Compute variable predictions and prediction intervals.}
+\title{Predictor effects for GL(M)Ms}

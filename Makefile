@@ -174,6 +174,9 @@ update-doc:
 install-all:
 	make update-doc && make build-package && make install-package
 
+build-manual:
+	echo "devtools::build_manual(pkg = '.')" | R --slave
+
 ## Note from Ben  devtools::build_manual() ?
 
 ######################################################################

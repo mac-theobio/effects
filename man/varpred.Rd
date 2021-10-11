@@ -2,7 +2,7 @@
 % Please edit documentation in R/effectsfuns.R
 \name{varpred}
 \alias{varpred}
-\title{Conditional and marginal predictions}
+\title{Predictor effects for GL(M)Ms}
 \usage{
 varpred(
   mod,
@@ -17,15 +17,12 @@ varpred(
   dfspec = 100,
   vcov. = NULL,
   internal = FALSE,
-  avefun = mean,
+  within.category = FALSE,
   zero_out_interaction = FALSE,
-  which.interaction = c("emmeans", "effects"),
-  within.category = TRUE,
-  pop.ave = c("none", "quantile", "population"),
-  nlp.type = c("whole", "binned"),
-  include.re = FALSE,
-  bias.adjust = FALSE,
+  avefun = mean,
+  bias.adjust = c("none", "delta", "quantile", "population"),
   sigma = NULL,
+  include.re = FALSE,
   modelname = NULL,
   returnall = FALSE,
   ...
@@ -34,41 +31,53 @@ varpred(
 \arguments{
 \item{mod}{fitted model object. See details for supported class of models.}
 
-\item{focal_predictors}{a character vector of one or more predictors. For models with interaction, the marginal predictions are obtained by specifying the corresponding predictors together. For example \code{~x1*x2} is specified as \code{c("x1", "x2")} to obtain the marginal prediction for \code{x1} with respect to \code{x2}. If no interactions are present in the model, specifying more than one predictors compares predictions between the predictors.}
+\item{focal_predictors}{a character vector of one or more predictors. For models with interaction, the marginal predictions are obtained by specifying the corresponding predictors together. For example \code{~x1*x2} is specified as \code{c("x1", "x2")} to obtain the predictor effect for \code{x1} while holding \code{x2} and \code{x1:x2} at their typical values. If no interactions are present in the model, specifying more than one predictors compares predictions between the predictors.}
 
 \item{x.var}{a character specifying the predictor to define the x variable (horizontal axis on the plot). The default is \code{NULL}, of which the first predictor in \code{focal_predictors} is used.}
 
 \item{type}{a character specifying the desired prediction. \code{type = "response"} applies inverse transformation, if exists. \code{type = "link"} requests the results as a linear predictor.}
 
-\item{isolate}{logical. If \code{TRUE}, the \code{SEs} are centered around the mean value of \code{x.var}. By default, it is the deviation of the predictor value from its mean but other values can be specified through \code{isolate.value}.}
+\item{isolate}{logical. If \code{TRUE}, the \code{CIs} are anchored around the mean value of \code{x.var}, i.e., centered model matrix. By default, it is the deviation of each of the variables in the model matrix from its mean but other values can be specified through \code{isolate.value}.}
 
-\item{isolate.value}{numeric (default \code{isolate.value = NULL}). If \code{isolate = TRUE}, otherwise ignored, is the deviation from the mean \code{x.var}. If \code{NULL} and \code{isolate = TRUE}, the resulting predictions are equivalent to that of model fitted with scaled predictor.}
+\item{isolate.value}{numeric (default \code{isolate.value = NULL}). If \code{isolate = TRUE}, otherwise ignored, is the deviation from the mean of \code{x.var}.}
 
 \item{level}{desired confidence interval for computing marginal predictions. Default is \code{0.95}.}
 
-\item{steps}{number of points to evaluate numerical predictors in \code{focal_predictors}. The default is \code{100}.}
+\item{steps}{number of points to evaluate numerical predictors in \code{focal_predictors}. The default is \code{100}. Unique levels of \code{focal_predictors} are used in the case categorical predictors.}
 
 \item{at}{default \code{NULL}. Otherwise, is a named \code{list} specifying points to evaluate \code{focal_predictors}. The names in the list should match the names used in \code{focal_predictors}.}
 
 \item{dfspec}{default \code{100}. Specified degrees of freedom for model which do not return \code{df}. This is used in computation of confidence intervals.}
 
-\item{vcov.}{a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} Is important when "zeroed-out" predictions are required. However, with this approach, the predictors should be centered. {isolate=TRUE} marginalizes without requiring zeroing-out. See examples.}
+\item{vcov.}{a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} is important when "anchored" CIs are required. However, with this approach, the predictors should be properly scaled, for example, scaled. {isolate=TRUE} centers at the mean of the model matrix without requiring the scaled input predictors. See examples.}
 
 \item{internal}{logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.}
 
+\item{within.category}{only for categorical focal predictors. If \code{TRUE}, the columns of the no-focal variables in the model matrix are averaged across the levels of the categorical focal predictors, i.e., unweighted average. If \code{FALSE} (default), the population (in the model matrix) or weighted averages is used, i.e., anchored at the model center.}
+
+\item{zero_out_interaction}{logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.}
+
 \item{avefun}{the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.}
 
-\item{zero_out_interaction}{logical. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect predictions are computed.}
+\item{bias.adjust}{specifies the bias correction method. If "none" (default), no bias correction method is applied; if "delta", delta method is used; if "population", all the values of non-focal predictors are used; otherwise, if "quantile", quantiles of non-focal numerical predictors are use. The options "quantile" and "population" (both EXPERIMENTAL) are used for bias correction in GL(M)M models involving non-linear link functions.}
 
-\item{which.interaction}{if \code{TRUE}, condition interactions the same Effect package}
+\item{sigma}{standard deviation used in delta method (only if \code{bias.adjust="delta"}).}
+
+\item{include.re}{logical. If \code{TRUE}, the random effects components of mixed models is included.}
 
 \item{returnall}{logical. If \code{TRUE}, all other named computed quantities are also returned. Otherwise, only predictions are returned.}
+
+\item{character}{string naming the predictions. Useful when comparing several predictions.}
 }
 \description{
-Computes conditional and marginal prediction for supported simple and generalized linear models.
+Computes predictor effect for generalized linear (mixed) models together with the associated confidence intervals anchored on some values, mostly, model center. It also incorporates proaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions.
 }
 \details{
-The main distinction between the two predictions lies on how the standard errors (SEs) are computed. In conditional predictions, non-focal predictors are conditioned (by some meaningful averaging) and standard errors computed using "full" variance-covariance matrix. However, in marginal predictions, the uncertainities relating to non-focal predictors are isolated (removed) using some meaningful way -- discussed somewhere else.
+Predictor effects computes \code{E(Y|X)} by meaningfully holding the non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the response (\code{E(Y|X)}) represents how the model responds to the changes in the focal predictor.
+
+The traditional way to compute variances for predictions is \eqn{\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})}, so that the confidence intervals are \eqn{\eta \pm q\sigma}, where \eqn{q} is an appropriate quantile of Normal or t distribution. This approach incorporates all the uncertainties -- including the uncertainty due to non-focal predictors.  But what if we are only interested in the uncertainty as a result of the focal predictor, so that the confidence intervals are \eqn{\eta \pm q \sigma_f} (what we call anchored CIs)? There are two ways to anchor CIs: \emph{variance-covariance} matrix based which requires properly scaled input predictors prior to model fitting; and \emph{centered model matrix} which is more general and does not require scaled input predictors prior to model fitting.
+
+Currently, the package supports \code{lm, glm, lme4} and \code{glmmTMB} models.
 }
 \examples{
 
@@ -97,18 +106,18 @@ head(df)
 
 # Unscaled model
 m1u <- lm(y ~ x1u + x2u, df)
-# Conditional prediction of x1u
+# Predictor rffects of x1u
 pred1u <- varpred(m1u, "x1u")
 plot(pred1u)
 
 # Scaled model (x1 centered = x1 - mean(x1))
 m1c <- lm(y ~ x1c + x2u, df)
-# Conditional prediction of x1u
+# All uncertainities included
 pred1c <- varpred(m1c, "x1c")
 plot(pred1c)
 
-# Marginal predictions
-# We can get marginal predictions from unscaled model similar to m1c
+# Centered predictor effects
+# Results similar to m1c
 # Using zero_vcov by specifying vcov.
 vv <- zero_vcov(m1c, "x1c")
 pred2c <- varpred(m1c, "x1c", vcov. = vv)

@@ -1,25 +1,33 @@
-#' Conditional and marginal predictions
+#' Predictor effects for GL(M)Ms
 #'
-#' Computes conditional and marginal prediction for supported simple and generalized linear models.
+#' Computes predictor effect for generalized linear (mixed) models together with the associated confidence intervals anchored on some values, mostly, model center. It also incorporates proaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions.
 #'
 #' @details
-#' The main distinction between the two predictions lies on how the standard errors (SEs) are computed. In conditional predictions, non-focal predictors are conditioned (by some meaningful averaging) and standard errors computed using "full" variance-covariance matrix. However, in marginal predictions, the uncertainities relating to non-focal predictors are isolated (removed) using some meaningful way -- discussed somewhere else.
+#' Predictor effects computes \code{E(Y|X)} by meaningfully holding the non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the response (\code{E(Y|X)}) represents how the model responds to the changes in the focal predictor.
+#'
+#' The traditional way to compute variances for predictions is \eqn{\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})}, so that the confidence intervals are \eqn{\eta \pm q\sigma}, where \eqn{q} is an appropriate quantile of Normal or t distribution. This approach incorporates all the uncertainties -- including the uncertainty due to non-focal predictors.  But what if we are only interested in the uncertainty as a result of the focal predictor, so that the confidence intervals are \eqn{\eta \pm q \sigma_f} (what we call anchored CIs)? There are two ways to anchor CIs: \emph{variance-covariance} matrix based which requires properly scaled input predictors prior to model fitting; and \emph{centered model matrix} which is more general and does not require scaled input predictors prior to model fitting.
+#'
+#' Currently, the package supports \code{lm, glm, lme4} and \code{glmmTMB} models.
 #'
 #' @param mod fitted model object. See details for supported class of models.
-#' @param focal_predictors a character vector of one or more predictors. For models with interaction, the marginal predictions are obtained by specifying the corresponding predictors together. For example \code{~x1*x2} is specified as \code{c("x1", "x2")} to obtain the marginal prediction for \code{x1} with respect to \code{x2}. If no interactions are present in the model, specifying more than one predictors compares predictions between the predictors.
+#' @param focal_predictors a character vector of one or more predictors. For models with interaction, the marginal predictions are obtained by specifying the corresponding predictors together. For example \code{~x1*x2} is specified as \code{c("x1", "x2")} to obtain the predictor effect for \code{x1} while holding \code{x2} and \code{x1:x2} at their typical values. If no interactions are present in the model, specifying more than one predictors compares predictions between the predictors.
 #' @param x.var a character specifying the predictor to define the x variable (horizontal axis on the plot). The default is \code{NULL}, of which the first predictor in \code{focal_predictors} is used.
 #' @param type a character specifying the desired prediction. \code{type = "response"} applies inverse transformation, if exists. \code{type = "link"} requests the results as a linear predictor.
-#' @param isolate logical. If \code{TRUE}, the \code{SEs} are centered around the mean value of \code{x.var}. By default, it is the deviation of the predictor value from its mean but other values can be specified through \code{isolate.value}.
-#' @param isolate.value numeric (default \code{isolate.value = NULL}). If \code{isolate = TRUE}, otherwise ignored, is the deviation from the mean \code{x.var}. If \code{NULL} and \code{isolate = TRUE}, the resulting predictions are equivalent to that of model fitted with scaled predictor.
+#' @param isolate logical. If \code{TRUE}, the \code{CIs} are anchored around the mean value of \code{x.var}, i.e., centered model matrix. By default, it is the deviation of each of the variables in the model matrix from its mean but other values can be specified through \code{isolate.value}.
+#' @param isolate.value numeric (default \code{isolate.value = NULL}). If \code{isolate = TRUE}, otherwise ignored, is the deviation from the mean of \code{x.var}.
 #' @param level desired confidence interval for computing marginal predictions. Default is \code{0.95}.
-#' @param steps number of points to evaluate numerical predictors in \code{focal_predictors}. The default is \code{100}.
+#' @param steps number of points to evaluate numerical predictors in \code{focal_predictors}. The default is \code{100}. Unique levels of \code{focal_predictors} are used in the case categorical predictors.  
 #' @param at default \code{NULL}. Otherwise, is a named \code{list} specifying points to evaluate \code{focal_predictors}. The names in the list should match the names used in \code{focal_predictors}.
 #' @param dfspec default \code{100}. Specified degrees of freedom for model which do not return \code{df}. This is used in computation of confidence intervals.
-#' @param vcov. a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} Is important when "zeroed-out" predictions are required. However, with this approach, the predictors should be centered. {isolate=TRUE} marginalizes without requiring zeroing-out. See examples.
+#' @param vcov. a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} is important when "anchored" CIs are required. However, with this approach, the predictors should be properly scaled, for example, scaled. {isolate=TRUE} centers at the mean of the model matrix without requiring the scaled input predictors. See examples.
 #' @param internal logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.
+#' @param within.category only for categorical focal predictors. If \code{TRUE}, the columns of the no-focal variables in the model matrix are averaged across the levels of the categorical focal predictors, i.e., unweighted average. If \code{FALSE} (default), the population (in the model matrix) or weighted averages is used, i.e., anchored at the model center. 
+#' @param zero_out_interaction logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.
 #' @param avefun the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.
-#' @param zero_out_interaction logical. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect predictions are computed.
-#' @param which.interaction if \code{TRUE}, condition interactions the same Effect package 
+#' @param bias.adjust specifies the bias correction method. If "none" (default), no bias correction method is applied; if "delta", delta method is used; if "population", all the values of non-focal predictors are used; otherwise, if "quantile", quantiles of non-focal numerical predictors are use. The options "quantile" and "population" (both EXPERIMENTAL) are used for bias correction in GL(M)M models involving non-linear link functions.
+#' @param sigma standard deviation used in delta method (only if \code{bias.adjust="delta"}).
+#' @param include.re logical. If \code{TRUE}, the random effects components of mixed models is included.
+#' @param character string naming the predictions. Useful when comparing several predictions.
 #' @param returnall logical. If \code{TRUE}, all other named computed quantities are also returned. Otherwise, only predictions are returned. 
 #'
 #' @seealso
@@ -52,18 +60,18 @@
 #'
 #' # Unscaled model
 #' m1u <- lm(y ~ x1u + x2u, df)
-#' # Conditional prediction of x1u
+#' # Predictor rffects of x1u
 #' pred1u <- varpred(m1u, "x1u")
 #' plot(pred1u)
 #'
 #' # Scaled model (x1 centered = x1 - mean(x1))
 #' m1c <- lm(y ~ x1c + x2u, df)
-#' # Conditional prediction of x1u
+#' # All uncertainities included
 #' pred1c <- varpred(m1c, "x1c")
 #' plot(pred1c)
 #'
-#' # Marginal predictions
-#' # We can get marginal predictions from unscaled model similar to m1c
+#' # Centered predictor effects
+#' # Results similar to m1c
 #' # Using zero_vcov by specifying vcov.
 #' vv <- zero_vcov(m1c, "x1c")
 #' pred2c <- varpred(m1c, "x1c", vcov. = vv)
@@ -84,16 +92,28 @@
 #' @export
 #'
 
-varpred <- function(mod, focal_predictors, x.var = NULL
-	, type = c("response", "link"), isolate = FALSE, isolate.value = NULL, level = 0.95
-	, steps = 100, at = list(),  dfspec = 100, vcov. = NULL, internal = FALSE, avefun = mean
-	, zero_out_interaction = FALSE, which.interaction = c("emmeans", "effects"), within.category = TRUE
-	, pop.ave = c("none", "quantile", "population"), nlp.type=c("whole", "binned")
-	, include.re = FALSE, bias.adjust = FALSE, sigma = NULL
-	, modelname = NULL, returnall = FALSE, ...) {
-	which.interaction <- match.arg(which.interaction)
-	pop.ave <- match.arg(pop.ave)
-	nlp.type <- match.arg(nlp.type)
+varpred <- function(mod
+	, focal_predictors
+	, x.var = NULL
+	, type = c("response", "link")
+	, isolate = FALSE
+	, isolate.value = NULL
+	, level = 0.95
+	, steps = 100
+	, at = list()
+	, dfspec = 100
+	, vcov. = NULL
+	, internal = FALSE
+	, within.category = FALSE
+	, zero_out_interaction = FALSE
+	, avefun = mean
+	, bias.adjust = c("none", "delta", "quantile", "population")
+	, sigma = NULL
+	, include.re = FALSE
+	, modelname = NULL
+	, returnall = FALSE, ...) {
+	
+	bias.adjust <- match.arg(bias.adjust)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
@@ -124,12 +144,19 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	}
 	
 #	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
-	model_frame_objs <- clean_model(focal.predictors = focal.predictors, mod = mod
-		, xlevels = at, default.levels = NULL, formula.rhs = rTerms, steps = steps
-		, x.var = x.var, typical = avefun, vnames = vnames
-		, which.interaction = which.interaction, within.category=within.category
-		, pop.ave = pop.ave
+	model_frame_objs <- clean_model(focal.predictors=focal.predictors
+		, mod = mod
+		, xlevels=at
+		, default.levels=NULL
+		, formula.rhs=rTerms
+		, steps=steps
+		, x.var=x.var
+		, typical=avefun
+		, vnames=vnames
+		, within.category=within.category
+		, bias.adjust = bias.adjust
 	)
+
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
 	excluded.predictors <- model_frame_objs$excluded.predictors
 	predict.data <- model_frame_objs$predict.data
@@ -142,13 +169,25 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
 	within.category <- model_frame_objs$within.category
-	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 	typical <- avefun
+	
+	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 	mod.matrix.all <- model.matrix(mod)
-	mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-	mm <- get_model_matrix(mod, mod.matrix, mod.matrix.all, X.mod
-		, factor.cols, cnames, focal.predictors, excluded.predictors
-		, typical, apply.typical.to.factors = TRUE, focal.type=x[[x.var]]$is.factor
+	mod.matrix <- model.matrix(formula.rhs
+		, data=mf
+		, contrasts.arg=vareff_objects$contrasts
+	)
+	mm <- get_model_matrix(mod
+		, mod.matrix
+		, mod.matrix.all
+		, X.mod
+		, factor.cols
+		, cnames
+		, focal.predictors
+		, excluded.predictors
+		, typical
+		, apply.typical.to.factors=TRUE
+		, focal.type=x[[x.var]]$is.factor
 		, within.category=within.category
 	)
 	
@@ -158,127 +197,10 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 		mm <- do.call("rbind", mm)
 	}
 
-	check <- !termnames %in% x.var
-	terms_non.focal <- termnames[check]
-	terms_focal <- termnames[!check]
-	betahat_non.focal <- betahat[check]
-	betahat_focal <- betahat[!check]
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
 	
-	if (pop.ave=="quantile" || pop.ave=="population") {
-		quant <- seq(0, 1, length.out=steps)
-		mf_x.var <- mf[[x.var]]
-		col_mean <- apply(mm, 2, typical)
-		mm2 <- mm
-		if (isolate) {
-			col_mean[check] <- 0
-			mm2[] <- 0
-			mm2[, terms_focal] <- mm[, terms_focal]
-		}
-		if (pop.ave=="population" && !is.factor(mf_x.var)) {
-			mm_x.var <- as.vector(mm[, terms_focal])
-			mm_x.var <- as.vector(quantile(mm_x.var, quant))
-			if (isolate) {
-				mm2 <- mm2[1:steps, , drop=FALSE]
-				mm2[, terms_focal] <- mm_x.var
-			}
-		}
-		if (isolate || is.factor(mf_x.var)) {
-			pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2, col_mean=col_mean, isolate=isolate
-				, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
-				, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
-			)
-		}
-		if (include.re) {
-			re <- includeRE(mod)
-		} else {
-			re <- 0
-		}
-		if (is.factor(mf_x.var)) {
-			pred <- mm %*% betahat + re
-		} else {
-			if (length(re)>1) {
-				if (pop.ave=="quantile") {
-					re <- as.vector(quantile(re, quant))
-				} 
-			}
-			mm_non.focal <- mm[, terms_non.focal, drop=FALSE]
-			pred_non.focal <- as.vector(mm_non.focal %*% betahat_non.focal)
-			if (pop.ave=="quantile") {
-				mm_x.var <- as.vector(mm[, terms_focal])
-			}
-			
-			pred_focal <- as.vector(as.matrix(mm_x.var) %*% betahat_focal)
-			cutpts <- c(-Inf, (mm_x.var[-1] + mm_x.var[-steps])/2, Inf)
-			lp.split <- split(pred_non.focal, cut(mm_x.var, cutpts))
-
-			est <- lapply(1:length(lp.split), function(i){
-				if (!isolate) {
-					mm2[, terms_focal] <- mm_x.var[[i]]
-					pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm2
-						, col_mean=col_mean, isolate=isolate, isolate.value=isolate.value
-						, internal=internal, vareff_objects=vareff_objects, x.var=x.var, typical=typical
-						, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
-					)
-				} else {
-					pse_var <- pse_var[[i]]
-				}
-				if (length(re)>1 && pop.ave=="quantile") {
-					out <- lapply(re, function(j){
-						if (nlp.type == "binned") {
-							out <- as.vector(pred_focal[[i]] + lp.split[[i]] + j)
-						} else {
-							out <- as.vector(pred_focal[[i]] + pred_non.focal + j)
-						}
-						return(data.frame(pred=out, pse_var=pse_var))
-					})
-					out <- do.call("rbind", out)
-					pred <- out[["pred"]]
-					pse_var <- out[["pse_var"]]
-				} else {
-					if (nlp.type == "binned") {
-						pred <- as.vector(pred_focal[[i]] + lp.split[[i]] + re)
-					} else {
-						pred <- as.vector(pred_focal[[i]] + pred_non.focal + re)
-					}
-				}
-				lwr <- pred - pse_var
-				upr <- pred + pse_var
-				out <- data.frame(x=mm_x.var[[i]], pred = pred, lwr=lwr, upr=upr, pse_var=pse_var)
-				return(out)
-			})
-			est <- do.call("rbind", est)
-			pred <- est[["pred"]]
-			lwr <- est[["lwr"]]
-			upr <- est[["upr"]]
-			pse_var <- est[["pse_var"]]
-			predict.data <- data.frame(...xxx=est[["x"]])
-			colnames(predict.data) <- x.var
-		}
-	} else if (pop.ave=="none") {
-		if (which.interaction=="emmeans") {
-			ff_cols <- factor.cols[factor.cols==TRUE]
-			if (length(focal.predictors)>1L) {
-				ncats <- 0
-				for (f in focal.predictors) {
-					name <- names(grep(f, vnames, value=TRUE))
-					if (!any(grepl("\\:", name)) & length(name)>1L) {
-						ncats <- ncats + length(name)
-					}	
-				}
-				ncats <- ifelse(ncats==0, 1, ncats)
-				ff_cols <- factor.cols[factor.cols==TRUE]
-				for (name in names(ff_cols)) {
-					components <- unlist(strsplit(name, ':'))
-					component <- components[1]
-					if (length(components) > 1) {
-						if (any(vnames[names(vnames) %in% name] %in% focal.predictors)) ncats <- 1
-						mm[,name] <- apply(mm[,c(component, name)], 1, prod) * ncats
-					}
-				}
-			}
-		}
+	if (bias.adjust=="none") {
 #		col_mean <- apply(mod.matrix.all, 2, typical)
 		col_mean <- apply(mm, 2, typical)
 		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
@@ -308,7 +230,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 
 	link <- vareff_objects$link
 
-	if (bias.adjust) {
+	if (bias.adjust=="delta") {
 		if (is.null(sigma)) {
 			sigma <- get_sigma(mod, ...)
 		}
@@ -318,7 +240,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
 		, variables = x, fit = pred
-		, x = if (pop.ave=="none") {predict.data[, 1:n.focal, drop=FALSE]} else predict.data[, x.var, drop=FALSE]
+		, x = if (bias.adjust=="none") {predict.data[, 1:n.focal, drop=FALSE]} else predict.data[, x.var, drop=FALSE]
 		, model.matrix = mm, data = X, x.var=x.var
 		, se = pse_var/mult
 		, lwr = lwr#pred - mult*pse_var
@@ -367,7 +289,7 @@ varpred <- function(mod, focal_predictors, x.var = NULL
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if (pop.ave=="quantile" || pop.ave=="population"){
+	if (bias.adjust=="quantile" || bias.adjust=="population"){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
 	} 
@@ -460,8 +382,8 @@ recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), .
 	f <- formula(mod)
 	data <- eval(getCall(mod)$data, envir)
 	if (is.null(data)) {
-            if (is.null(extras)) {
-                ## df <- eval(bquote(model.frame(.(f))), envir)
+      if (is.null(extras)) {
+         ## df <- eval(bquote(model.frame(.(f))), envir)
 			df <- eval(call("model.frame", f), envir) 
 		} else {
 			df <- eval(call("expand.model.frame", f, extras = extras), envir) 
