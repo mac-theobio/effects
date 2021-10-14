@@ -21,7 +21,7 @@ varpred(
   zero_out_interaction = FALSE,
   avefun = mean,
   bias.adjust = c("none", "delta", "quantile", "population"),
-  sigma = NULL,
+  sigma = c("lp", "mod"),
   include.re = FALSE,
   modelname = NULL,
   returnall = FALSE,

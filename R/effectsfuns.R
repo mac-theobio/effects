@@ -108,12 +108,17 @@ varpred <- function(mod
 	, zero_out_interaction = FALSE
 	, avefun = mean
 	, bias.adjust = c("none", "delta", "quantile", "population")
-	, sigma = NULL
+	, sigma = c("lp", "mod")
 	, include.re = FALSE
 	, modelname = NULL
 	, returnall = FALSE, ...) {
 	
 	bias.adjust <- match.arg(bias.adjust)
+
+	if (!is.numeric(sigma)) {
+		sigma <- match.arg(sigma)
+	}
+
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
@@ -199,18 +204,17 @@ varpred <- function(mod
 
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
-	
-	if (bias.adjust=="none") {
-#		col_mean <- apply(mod.matrix.all, 2, typical)
-		col_mean <- apply(mm, 2, typical)
-		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
-			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
-			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
-		)
-		pred <- as.vector(mm %*% betahat)
-		lwr <- pred - pse_var
-		upr <- pred + pse_var
-	}
+		
+	# Predictions
+	# col_mean <- apply(mod.matrix.all, 2, typical)
+	col_mean <- apply(mm, 2, typical)
+	pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
+		, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
+		, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
+	)
+	pred <- as.vector(mm %*% betahat)
+	lwr <- pred - pse_var
+	upr <- pred + pse_var
 	
 	# For bias-adjustment: coppied directry from emmeans
 	## Currently, we just use a 2nd-order approx for everybody:
@@ -231,8 +235,10 @@ varpred <- function(mod
 	link <- vareff_objects$link
 
 	if (bias.adjust=="delta") {
-		if (is.null(sigma)) {
+		if (sigma=="mod") {
 			sigma <- get_sigma(mod, ...)
+		} else if (sigma=="lp") {
+			sigma <- sd(pred) 
 		}
 		link <- .make.bias.adj.link(link, sigma)
 	}
@@ -240,7 +246,7 @@ varpred <- function(mod
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod), response = get_response(mod)
 		, variables = x, fit = pred
-		, x = if (bias.adjust=="none") {predict.data[, 1:n.focal, drop=FALSE]} else predict.data[, x.var, drop=FALSE]
+		, x = if (bias.adjust=="none"||bias.adjust=="delta") {predict.data[, 1:n.focal, drop=FALSE]} else predict.data[, x.var, drop=FALSE]
 		, model.matrix = mm, data = X, x.var=x.var
 		, se = pse_var/mult
 		, lwr = lwr#pred - mult*pse_var

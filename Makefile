@@ -117,9 +117,16 @@ multiple_outcomes.Rout: multiple_outcomes.R variable_predictions_funs.rda
 multiple_outcomes_model.Rout: multiple_outcomes_model.R multiple_outcomes.rda
 multiple_outcomes_preds.Rout: multiple_outcomes_preds.R multiple_outcomes_model.rda
 
+## Complex interaction
+### Cubic polynomial
+cubic_predictors.Rout: cubic_predictors.R variable_predictions_funs.rda
+cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
+cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda
+
 ## variable_predictions.pdf: variable_predictions.Rnw
-variable_predictions.tex: multiple_outcomes_preds.rda lme_random_intercept.rda \
-	categorical_predictors.rda variable_predictions_objs.rda variable_predictions.Rnw
+variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda \
+	lme_random_intercept.rda categorical_predictors.rda variable_predictions_objs.rda \
+	variable_predictions.Rnw
 
 ## Compare varpred with emmeans
 compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_objs.rda \

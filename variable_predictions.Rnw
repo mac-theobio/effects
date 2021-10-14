@@ -50,6 +50,7 @@ load("variable_predictions_objs.rda")
 load("categorical_predictors.rda")
 load("lme_random_intercept.rda")
 load("multiple_outcomes_preds.rda")
+load("cubic_predictors_preds.rda")
 @
 
 In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing models estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the ``effects" of covariates on predicted probabilities, or predictions of responses at various levels of covariates -- \emph{predictor effects}. For example, as a way to plan, public health officials may want to know the ``effects" of household income, wealth index, etc, on the predicted probability of having improved water services among slum dwellers.
@@ -215,6 +216,36 @@ print(pred_age_cont_plots)
 \label{fig:pred_age_cont_plots}
 \end{figure}
 %
+
+\subsection{Polynomial interaction}
+
+We consider more complex interactions in which the focal predictor is modelled as a cubic polynomial. Specifically:
+%
+\begin{align}\label{sim:lm_cubic}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}^3_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Uniform}(-1, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.3 \nonumber\\
+\beta_{\mathrm{W}} &= 2 \nonumber\\
+i &= 1,\cdots, 100
+\end{align}
+%
+
+
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_cubic_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_cubic_plots)
+@
+\end{center}
+\caption{A comparison of predictor effects and their corresponding CIs. Figure a) shows model with no interaction, Figure b) shows model with non-focal predictors interacting with each other, and Figure c) shows model with focal and non-focal predictors interacting. The dotted yellow and grey horizontal lines are the expected and observed/true means, respectively. The vertical grey line is the mean of the focal predictor (model center). The solid black, red (non-focal uncertainty excluded) and blue lines (all uncertainty included) are the predictor effects while their corresponding CIs are the dotted black, red and blue lines, respectively. For properly generated predictor effects, we expect the yellow and the grey horizontal dotted lines to overlay each other and intersect with the black, blue, red solid trend lines, and the vertical dotted grey line at the same point (model center).}
+\label{fig:pred_cubic_plots}
+\end{figure}
+%
+
 
 \subsubsection{Categorical predictors}\label{sec:categorical_predictors}
 
