@@ -13,7 +13,7 @@ set.seed(9991)
 # Global variables
 nHH_obs <- 100
 
-within.category <- TRUE
+within.category <- FALSE
 
 ############################################################################################
 # Section: 4.4.2 Categorical predictors

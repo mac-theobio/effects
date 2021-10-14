@@ -19,7 +19,7 @@ true_prop_df <- (sim_df_cubic
 print(true_prop_df)
 
 ## Models
-mod_cubic <- lm(y ~ ns(x1, df=3)+x2
+mod_cubic <- lm(y ~ poly(x1, degree=3, raw=TRUE)+x2
 	, data=sim_df_cubic
 )
 summary(mod_cubic)

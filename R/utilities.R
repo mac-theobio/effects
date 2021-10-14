@@ -52,16 +52,6 @@ get_vnames <- function(mod){
 	return(list(vnames = vnames, termnames = termnames, Terms = Terms))
 }
 
-get_xlevels <- function(mod){
-	if (inherits(mod, "glmmTMB")) {
-		xlevels <- .getXlevels(terms(mod), model.frame(mod))
-	} else {
-		xlevels <- mod$xlevels
-	}
-	return(xlevels)
-}
-
-
 check_numeric <- function(xvar, mod) {
 	xlevels <- get_xlevels(mod)
 	is.null(xlevels[[xvar]])
@@ -164,8 +154,12 @@ matrix.to.df <- function(matrix, colclasses){
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
 	, vnames, within.category, bias.adjust){
-  if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
-    class(mod$na.action) <- "omit"
+  
+  ## FIXME: How to assign NA to a lme4 object 
+  if (!isS4(mod)) {
+	  if ((!is.null(mod$nan.action)) && inherits(mod$na.action, "exclude"))
+		 class(mod$na.action) <- "omit"
+  }
 
   terms <- attr(formula.rhs, "term.labels")
   all.predictors <- all.vars(parse(text=terms))

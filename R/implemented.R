@@ -34,8 +34,51 @@ get_xlevels.glmmTMB <- function(mod) {
 	return(xlevels)
 }
 
+## lme4
+vareffobj.glmerMod <- function(mod, ...) {
+	out <- list()
+	out$coefficients <- lme4::fixef(mod)
+	out$variance_covariance <- vcov(mod)
+	out$formula <- formula(mod, fixed.only=TRUE)
+	out$link <- family(mod)
+	out$contrasts <- attr(getME(mod, "X"), "contrasts")
+	class(out) <- "vareffobj"
+	return(out)
+}
+
+vareffobj.merMod <- function(mod, ...) {
+	out <- list()
+	out$coefficients <- lme4::fixef(mod)
+	out$variance_covariance <- vcov(mod)
+	out$formula <- formula(mod, fixed.only=TRUE)
+	out$link <- family(mod)
+	out$contrasts <- attr(getME(mod, "X"), "contrasts")
+	class(out) <- "vareffobj"
+	return(out)
+}
+
+get_xlevels.glmerMod <- function(mod) {
+	xlevels <- .getXlevels(terms(mod), model.frame(mod))
+	return(xlevels)
+}
+
+get_xlevels.merMod <- function(mod) {
+	xlevels <- .getXlevels(terms(mod), model.frame(mod))
+	return(xlevels)
+}
+
 ## Statistics
 get_stats.glmmTMB <- function(mod, level, dfspec, ...) {
+	mulz <- qnorm(1 - (1 - level)/2)
+	return(mulz)
+}
+
+get_stats.glmerMod <- function(mod, level, dfspec, ...) {
+	mulz <- qnorm(1 - (1 - level)/2)
+	return(mulz)
+}
+
+get_stats.merMod <- function(mod, level, dfspec, ...) {
 	mulz <- qnorm(1 - (1 - level)/2)
 	return(mulz)
 }
@@ -65,8 +108,15 @@ get_sigma.glmmTMB <- function(mod, ...) {
 	total_sd
 }
 
-get_sigma.lme4 <- function(mod, ...) {
-	rand_comp <- lme4::VarCorr(mod)$cond
+get_sigma.merMod <- function(mod, ...) {
+	rand_comp <- lme4::VarCorr(mod)
+	sigma <- unlist(lapply(names(rand_comp), function(x)attr(rand_comp[[x]], "stddev")))
+	total_sd <- sqrt(sum(sigma^2))
+	total_sd
+}
+
+get_sigma.glmerMod <- function(mod, ...) {
+	rand_comp <- lme4::VarCorr(mod)
 	sigma <- unlist(lapply(names(rand_comp), function(x)attr(rand_comp[[x]], "stddev")))
 	total_sd <- sqrt(sum(sigma^2))
 	total_sd
@@ -92,3 +142,9 @@ includeRE.merMod <- function(mod, ...){
 	return(re)	
 }
 		
+includeRE.glmerMod <- function(mod, ...){
+	ran_eff <- as.data.frame(ranef(mod))
+	ran_eff <- ran_eff[, "condval", drop=FALSE]
+	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
+	return(re)	
+}
