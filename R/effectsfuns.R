@@ -24,6 +24,7 @@
 #' @param within.category only for categorical focal predictors. If \code{TRUE}, the columns of the no-focal variables in the model matrix are averaged across the levels of the categorical focal predictors, i.e., unweighted average. If \code{FALSE} (default), the population (in the model matrix) or weighted averages is used, i.e., anchored at the model center. 
 #' @param zero_out_interaction logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.
 #' @param avefun the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.
+#' @param offset a function or a value (FIXME:).
 #' @param bias.adjust specifies the bias correction method. If "none" (default), no bias correction method is applied; if "delta", delta method is used; if "population", all the values of non-focal predictors are used; otherwise, if "quantile", quantiles of non-focal numerical predictors are use. The options "quantile" and "population" (both EXPERIMENTAL) are used for bias correction in GL(M)M models involving non-linear link functions.
 #' @param sigma standard deviation used in delta method (only if \code{bias.adjust="delta"}).
 #' @param include.re logical. If \code{TRUE}, the random effects components of mixed models is included.
@@ -107,6 +108,7 @@ varpred <- function(mod
 	, within.category = FALSE
 	, zero_out_interaction = FALSE
 	, avefun = mean
+	, offset = NULL
 	, bias.adjust = c("none", "delta", "quantile", "population")
 	, sigma = c("lp", "mod")
 	, include.re = FALSE
@@ -212,7 +214,23 @@ varpred <- function(mod
 		, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
 		, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
 	)
-	pred <- as.vector(mm %*% betahat)
+
+	# Offset
+	if (is.null(offset)) offset <- mean
+	if (is.numeric(offset) && length(offset) == 1) {
+		off <- offset
+	} else if (is.function(offset)) {
+		mod.off <- model.offset(model.frame(mod))
+		if (is.null(mod.off)) {
+			off <- 0
+		} else {
+			off <- offset(mod.off)
+		}
+	} else {
+		stop("offset must be a function or a number")
+	}
+
+	pred <- off + as.vector(mm %*% betahat)
 	lwr <- pred - pse_var
 	upr <- pred + pse_var
 	

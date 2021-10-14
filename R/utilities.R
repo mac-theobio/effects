@@ -161,8 +161,8 @@ clean_model <- function(focal.predictors, mod, xlevels
 		 class(mod$na.action) <- "omit"
   }
 
-  terms <- attr(formula.rhs, "term.labels")
-  all.predictors <- all.vars(parse(text=terms))
+# terms <- attr(formula.rhs, "term.labels")
+  all.predictors <- all.vars(formula.rhs)
   if (is.numeric(xlevels)){
     if (length(xlevels) > 1 || round(xlevels != xlevels)) stop("xlevels must be a single whole number or a list")
     xlevs <- list()

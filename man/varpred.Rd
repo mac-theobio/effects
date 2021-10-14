@@ -20,6 +20,7 @@ varpred(
   within.category = FALSE,
   zero_out_interaction = FALSE,
   avefun = mean,
+  offset = NULL,
   bias.adjust = c("none", "delta", "quantile", "population"),
   sigma = c("lp", "mod"),
   include.re = FALSE,
@@ -58,6 +59,8 @@ varpred(
 \item{zero_out_interaction}{logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.}
 
 \item{avefun}{the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.}
+
+\item{offset}{a function or a value (FIXME:).}
 
 \item{bias.adjust}{specifies the bias correction method. If "none" (default), no bias correction method is applied; if "delta", delta method is used; if "population", all the values of non-focal predictors are used; otherwise, if "quantile", quantiles of non-focal numerical predictors are use. The options "quantile" and "population" (both EXPERIMENTAL) are used for bias correction in GL(M)M models involving non-linear link functions.}
 
