@@ -13,12 +13,11 @@ vim_session:
 
 autopipeR = defined
 
-Sources += inputs/fake.rds
+Sources += inputs/fake.rds $(wildcard *.R)
 
 fit.Rout: fit.R inputs/fake.rds
 
 varEf.Rout: varEf.R fit.rda
-
 
 ######################################################################
 
