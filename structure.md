@@ -1,5 +1,6 @@
 2021 Oct 07 (Thu)
 =================
+
 JD:
 	- Short notes/highlights on averaging model matrix (variables) vs averaging the predictors
 	- Try the package codes otherwise BC to simplify functions for testing
