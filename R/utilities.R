@@ -296,7 +296,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 			as.vector(quantile(X[,name], quant))	
 		} else if (bias.adjust=="population" || (within.category & !is.factor(X[, name]))) {
 			as.vector(X[, name])
-		} else if (bias.adjust=="none") {
+		} else {
 			typical(X[, name])	
 		}
 	 }
@@ -312,7 +312,7 @@ clean_model <- function(focal.predictors, mod, xlevels
   n.focal <- length(focal.predictors)
   n.excluded <- length(excluded.predictors)
   n.vars <- n.focal + n.excluded
-  if (bias.adjust=="none" & !within.category) {
+  if ((bias.adjust=="none"|bias.adjust=="delta") & !within.category) {
 	  dims <- sapply(x, function(x) length(x$levels))
 	  len <- prod(dims)
 	  predict.data <-matrix('', len, n.vars)
