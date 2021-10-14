@@ -11,5 +11,5 @@ poism <- glmer(inc ~ group*wave + (1 | date) + offset(log(susc))
 
 summary(poism)
 
-saveVars(poism)
+saveVars(poism, d)
 
