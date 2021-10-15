@@ -220,7 +220,7 @@ varpred <- function(mod
 	if (is.numeric(offset) && length(offset) == 1) {
 		off <- offset
 	} else if (is.function(offset)) {
-		mod.off <- model.offset(model.frame(mod))
+		mod.off <- model.offset(mf)
 		if (is.null(mod.off)) {
 			off <- 0
 		} else {
