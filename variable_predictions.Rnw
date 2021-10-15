@@ -61,6 +61,7 @@ When visually presented, predictor effects provide a unified and intuitive way o
 \begin{enumerate}
 \item choice of representative values of \emph{focal} predictor(s) and appropriate ``model center" for \emph{non-focal} predictors especially in multivariate models
 \item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? Should we exclude variation in non-focal parameters?)
+\item bias in the expected mean prediction induced by the nonlinear transformation of the response variable (especially in GL(M)M)
 \end{enumerate}
 
 Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. An alternative to averaging the non-focal predictors, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. Dealing with second challenge is discussed in Section~\ref{sec:uncertainity_propagation}
