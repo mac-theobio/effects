@@ -4,6 +4,7 @@ library(splines)
 library(ggpubr)
 library(ggplot2)
 library(dplyr)
+library(emmeans)
 
 commandEnvironments()
 makeGraphics()
@@ -11,77 +12,89 @@ makeGraphics()
 ## Focal polynomial
 
 ### All uncertainties 
-pred_x1_trad_cubic <- varpred(mod_cubic
-	, "x1"
+pred_age_trad_cubic <- varpred(mod_cubic
+	, "age"
 	, modelname="everything"
 )
 
 ### Centered predictions
-pred_x1_centered_cubic <- varpred(mod_cubic
-	, "x1"
+pred_age_centered_cubic <- varpred(mod_cubic
+	, "age"
 	, isolate=TRUE
 	, modelname="centered mm"
 )
 
 ### Combine
-vlist <- list(pred_x1_trad_cubic, pred_x1_centered_cubic)
+vlist <- list(pred_age_trad_cubic, pred_age_centered_cubic)
 
-pred_x1_cubic_plots <- (comparevarpred(vlist=vlist
+pred_age_cubic_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL
 		, plotit=TRUE
 		, addmarginals=FALSE
 	)
-	+ geom_hline(data=true_prop_df, aes(yintercept=y), colour="grey", lty=2)
-	+ geom_vline(data=true_prop_df, aes(xintercept=x1), colour="grey", lty=2)
+	+ geom_hline(data=true_prop_df, aes(yintercept=hhsize), colour="grey", lty=2)
+	+ geom_vline(data=true_prop_df, aes(xintercept=age), colour="grey", lty=2)
 	+ scale_colour_manual(breaks = c("everything", "centered mm")
 		, values=c(everything="blue", "centered mm"="black")
 	)
 	+ labs(title="a) Focal polynomial", y="Predictions", colour="Method")
 	+ theme(legend.position="bottom")
 )
-print(pred_x1_cubic_plots)
+print(pred_age_cubic_plots)
 
 ## Non-focal polynomial
 
 ### All uncertainties 
-pred_x2_trad_cubic <- varpred(mod_cubic
-	, "x2"
+pred_wealthindex_trad_cubic <- varpred(mod_cubic
+	, "wealthindex"
 	, modelname="everything"
 )
 
 ### Centered predictions
-pred_x2_centered_cubic <- varpred(mod_cubic
-	, "x2"
+pred_wealthindex_centered_cubic <- varpred(mod_cubic
+	, "wealthindex"
 	, isolate=TRUE
 	, modelname="centered mm"
 )
 
 ### Combine
-vlist <- list(pred_x2_trad_cubic, pred_x2_centered_cubic)
+vlist <- list(pred_wealthindex_trad_cubic, pred_wealthindex_centered_cubic)
 
-pred_x2_cubic_plots <- (comparevarpred(vlist=vlist
+pred_wealthindex_cubic_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL
 		, plotit=TRUE
 		, addmarginals=FALSE
 	)
-	+ geom_hline(data=true_prop_df, aes(yintercept=y), colour="grey", lty=2)
-	+ geom_vline(data=true_prop_df, aes(xintercept=x2), colour="grey", lty=2)
+	+ geom_hline(data=true_prop_df, aes(yintercept=hhsize), colour="grey", lty=2)
+	+ geom_vline(data=true_prop_df, aes(xintercept=wealthindex), colour="grey", lty=2)
 	+ scale_colour_manual(breaks = c("everything", "centered mm")
 		, values=c(everything="blue", "centered mm"="black")
 	)
 	+ labs(title="b) Non-focal is a polynomial", y="Predictions", colour="Method")
 	+ theme(legend.position="bottom")
 )
-print(pred_x2_cubic_plots)
+print(pred_wealthindex_cubic_plots)
 
 ## Combine all prediction for faceting
-pred_cubic_plots <- ggarrange(pred_x1_cubic_plots
-	, pred_x2_cubic_plots + rremove("ylab")
+pred_cubic_plots <- ggarrange(pred_age_cubic_plots
+	, pred_wealthindex_cubic_plots + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
 )
 print(pred_cubic_plots)
 
+quants <- seq(0, 1, length.out=100)
+focal_levels <- quantile(sim_df_cubic$wealthindex, quants)
+compare_cubic_plots <- (combinepreds(mod_cubic, focal="wealthindex"
+		, funs=c("emmeans", "varpred")
+		, at=list(wealthindex=focal_levels)
+		, x.var="wealthindex"
+		, isolate=TRUE
+		, plotit=TRUE
+	)
+	+ geom_vline(aes(xintercept=mean(focal_levels)), lty=2, colour="grey")
+)
+print(compare_cubic_plots)
 
 saveEnvironment()

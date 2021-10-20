@@ -265,8 +265,14 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 	out <- sapply(funs, function(f){
 		est <- do.call(f, args)
 		if (inherits(est, c("emmeans", "emmGrid"))) {
+			type <- est@misc$predict.type
 			est <- as.data.frame(est)
-			oldn <- c(focal, "emmean"
+			if (type=="response") {
+				.nn <- "prob"
+			} else {
+				.nn <- "emmean"
+			}
+			oldn <- c(focal, .nn
 				, grep("\\.CL", colnames(est), value=TRUE)
 			)
 			newn <- c(focal_temp, "fit", "lwr", "upr")

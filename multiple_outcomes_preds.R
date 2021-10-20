@@ -9,9 +9,12 @@ makeGraphics()
 
 ## Services
 
+within.category <- FALSE
+
 ### All uncertainties 
 pred_services_trad_cont_joint <- varpred(mod_cont_joint
 	, "services"
+	, within.category=within.category
 	, modelname="everything"
 )
 
@@ -19,7 +22,8 @@ pred_services_trad_cont_joint <- varpred(mod_cont_joint
 pred_services_centered_cont_joint <- varpred(mod_cont_joint
 	, "services"
 	, isolate=TRUE
-	, zero_out_interaction=TRUE
+	, within.category=within.category
+	, zero_out_interaction=FALSE
 	, modelname="centered mm"
 )
 
@@ -45,6 +49,7 @@ pred_services_cont_plots <- (comparevarpred(vlist=vlist
 pred_age_trad_cont_joint <- varpred(mod_cont_joint
 	, c("services", "age")
 	, x.var="age"
+	, within.category=within.category
 	, modelname="everything"
 )
 
@@ -53,7 +58,8 @@ pred_age_centered_cont_joint <- varpred(mod_cont_joint
 	, c("services", "age")
 	, x.var="age"
 	, isolate=TRUE
-	, zero_out_interaction=TRUE
+	, within.category=within.category
+	, zero_out_interaction=FALSE
 	, modelname="centered mm"
 )
 

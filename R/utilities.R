@@ -1,5 +1,80 @@
 # Internal functions used to condition the model. Some of the condition code is based on R package effects (clean_model). Transfered and modified here because they are not exported in effects.
+
+
+focal_pop <- function(mf, betahat, formula.rhs, rTerms, contr
+	, x, x.var, factor.levels, steps, stats, ...) {
 	
+	.focal <- names(x)
+
+	quant <- seq(0, 1, length.out=steps)
+	for (f in 1:length(.focal)) {
+		.x.focal <- .focal[f]
+		if (!(x[[.x.focal]]$is.factor)) {
+			x[[.x.focal]]$levels <- quantile(x[[.x.focal]]$levels, quant, names=FALSE)
+		}
+	}
+	
+	if (length(.focal) > 1) {
+		for (f in 1:length(.focal)) {
+			.x.focal <- .focal[f]
+			if (x[[.x.focal]]$is.factor) {
+				.new_xf <- x[[.x.focal]]$levels
+			} else {
+				.new_xf <- x[[.x.focal]]$levels
+				.new_xf <- quantile(.new_xf, quant, names=FALSE)
+			}
+
+			pred_focal <- list()
+			for (i in 1:length(.new_x)) {
+				mf_focal[[x.var]] <- .new_x[i]
+				pred_j <- list()
+				for (j in 1:length(.new_xf)) {
+					mf_focal[[.x.focal]] <- .new_xf[j]
+					mf_focal <- model.frame(rTerms, mf_focal, xlev=factor.levels)
+					mm <- model.matrix(formula.rhs, data=mf_focal, contrasts.arg=contr)
+					pred <- as.vector(mm %*% betahat)
+					out <- data.frame(..xx1=.new_x[i], xx2=.new_xf[j], fit=pred)
+					colnames(out) <- c(x.var, .x.focal, "fit")
+					pred_j[[j]] <- out
+				}
+				pred_focal[[i]] <- out		
+			}
+			pred_all[[.x.focal]] <- do.call("rbind", pred_focal)
+		}
+		
+	}
+
+	mf_focal <- mf
+
+
+
+	quant <- seq(0, 1, length.out=steps)
+	pred_all <- list()
+	for (f in 1:length(.focal)) {
+		.x.focal <- .focal[f]
+		if (x[[.x.focal]]$is.factor) {
+			.new_x <- x[[.x.focal]]$levels
+		} else {
+			.new_x <- x[[.x.focal]]$levels
+			.new_x <- quantile(.new_x, quant, names=FALSE)
+		}
+		mf_focal <- mf
+		pred_focal <- list()
+		for (i in 1:length(.new_x)) {
+			mf_focal[[.x.focal]] <- .new_x[i]
+			mf_focal <- model.frame(rTerms, mf_focal, xlev=factor.levels)
+			mm <- model.matrix(formula.rhs, data=mf_focal, contrasts.arg=contr)
+			pred <- as.vector(mm %*% betahat)
+			out <- data.frame(..xx=.new_x[i], fit=pred)
+			colnames(out) <- c(.x.focal, "fit")
+			pred_focal[[i]] <- out		
+		}
+		pred_all[[.x.focal]] <- do.call("rbind", pred_focal)
+	}
+	return(pred_all)
+}
+
+
 get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, ...) {
 	
 	if (is.null(vcov.)){

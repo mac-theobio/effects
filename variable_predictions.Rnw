@@ -64,7 +64,10 @@ When visually presented, predictor effects provide a unified and intuitive way o
 \item bias in the expected mean prediction induced by the nonlinear transformation of the response variable (especially in GL(M)M)
 \end{enumerate}
 
-Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. An alternative to averaging the non-focal predictors, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. Dealing with second challenge is discussed in Section~\ref{sec:uncertainity_propagation}
+Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. Formerly, predictor effects computes the expected outcome by meaningfully holding the non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the outcome expected prediction represents how the model responds to the changes in the focal predictor.
+
+
+An alternative to averaging the non-focal predictors, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. Dealing with second challenge is discussed in Section~\ref{sec:uncertainity_propagation}
 
 When dealing with nonlinear link functions, the correct predictions for example, are even much harder to estimate. One approach is to make predictions on the transformed scale (linear predictor scale), and then back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation. In particular, bias in expected mean prediction induced by nonlinear transformation of the response variable can lead inaccurate predictions. 
 
@@ -223,7 +226,7 @@ print(pred_age_cont_plots)
 We consider more complex interactions in which the focal predictor is modelled as a cubic polynomial. Specifically:
 %
 \begin{align}\label{sim:lm_cubic}
-\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}^3_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
 \mathrm{Age}_i &\sim \mathrm{Uniform}(-1, 1) \nonumber\\
 \mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
 \epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\

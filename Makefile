@@ -121,7 +121,7 @@ multiple_outcomes_preds.Rout: multiple_outcomes_preds.R multiple_outcomes_model.
 ### Cubic polynomial
 cubic_predictors.Rout: cubic_predictors.R variable_predictions_funs.rda
 cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
-cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda
+cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
 
 ## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda \
@@ -135,6 +135,13 @@ compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_ob
 
 ## This should work but it doesn't
 bad_example.Rout: bad_example.R categorical_predictors.rda
+
+######################################################################
+
+cp2comp_exam:
+	cp variable_predictions-qoi_pred_plot.pdf variable_predictions-pred_cubic_plots.pdf \
+	variable_predictions-pred_cont_joint_plots.pdf ../comp_exam/
+
 
 ######################################################################
 
