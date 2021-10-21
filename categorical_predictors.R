@@ -13,7 +13,6 @@ set.seed(9991)
 # Global variables
 nHH_obs <- 100
 
-within.category <- FALSE
 
 ############################################################################################
 # Section: 4.4.2 Categorical predictors
@@ -51,7 +50,6 @@ summary(mod_catni)
 ##### Traditional CI
 pred_gender_trad_catni <- varpred(mod_catni, "gender"
 	, isolate=FALSE
-	, within.category=within.category
 	, pop.ave="none"
 	, modelname="everything"
 )
@@ -60,7 +58,6 @@ pred_gender_trad_catni <- varpred(mod_catni, "gender"
 pred_gender_centered_catni <- varpred(mod_catni
 	, "gender"
 	, isolate=TRUE
-	, within.category=within.category
 	, pop.ave="none"
 	, modelname="centered mm"
 )
@@ -98,7 +95,6 @@ summary(mod_catwi_nf)
 pred_gender_trad_catwi_nf <- varpred(mod_catwi_nf
 	, "gender"
 	, isolate=FALSE
-	, within.category=within.category
 	, pop.ave="none"
 	, modelname="everything"
 )
@@ -107,7 +103,6 @@ pred_gender_trad_catwi_nf <- varpred(mod_catwi_nf
 pred_gender_centered_catwi_nf <- varpred(mod_catwi_nf
 	, "gender"
 	, isolate=TRUE
-	, within.category=within.category
 	, pop.ave="none"
 	, modelname="centered mm"
 )
@@ -145,7 +140,6 @@ summary(mod_catwi_f)
 pred_gender_trad_catwi_f <- varpred(mod_catwi_f
 	, "gender"
 	, isolate=FALSE
-	, within.category=within.category
 	, pop.ave="none"
 	, modelname="everything"
 )
@@ -154,7 +148,6 @@ pred_gender_trad_catwi_f <- varpred(mod_catwi_f
 pred_gender_centered_catwi_f <- varpred(mod_catwi_f
 	, "gender"
 	, isolate=TRUE
-	, within.category=within.category
 	, pop.ave="none"
 	, modelname="centered mm"
 )

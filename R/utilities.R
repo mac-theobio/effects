@@ -1,77 +1,21 @@
 # Internal functions used to condition the model. Some of the condition code is based on R package effects (clean_model). Transfered and modified here because they are not exported in effects.
 
 
-focal_pop <- function(mf, betahat, formula.rhs, rTerms, contr
-	, x, x.var, factor.levels, steps, stats, ...) {
+focal_pop <- function(x.focal, x.excluded, betahat, formula.rhs
+	, rTerms, factor.levels, contr, x.var, steps, stats, off, ...) {
 	
-	.focal <- names(x)
-
-	quant <- seq(0, 1, length.out=steps)
-	for (f in 1:length(.focal)) {
-		.x.focal <- .focal[f]
-		if (!(x[[.x.focal]]$is.factor)) {
-			x[[.x.focal]]$levels <- quantile(x[[.x.focal]]$levels, quant, names=FALSE)
-		}
+	pred_list <- list()
+	for (i in 1:NROW(x.focal)) {
+		focal_i <- x.focal[i, ,drop=FALSE]
+		focal_i[1:NROW(x.excluded), ] <- focal_i
+		mf_i <- cbind(focal_i, x.excluded)
+		mf_i <- model.frame(rTerms, mf_i, xlev=factor.levels, na.action=NULL)
+		mm_i <- model.matrix(formula.rhs, data = mf_i, contrasts.arg = contr)
+		focal_i$fit <- off + as.vector(mm_i %*% betahat)
+		pred_list[[i]] <- focal_i
 	}
-	
-	if (length(.focal) > 1) {
-		for (f in 1:length(.focal)) {
-			.x.focal <- .focal[f]
-			if (x[[.x.focal]]$is.factor) {
-				.new_xf <- x[[.x.focal]]$levels
-			} else {
-				.new_xf <- x[[.x.focal]]$levels
-				.new_xf <- quantile(.new_xf, quant, names=FALSE)
-			}
-
-			pred_focal <- list()
-			for (i in 1:length(.new_x)) {
-				mf_focal[[x.var]] <- .new_x[i]
-				pred_j <- list()
-				for (j in 1:length(.new_xf)) {
-					mf_focal[[.x.focal]] <- .new_xf[j]
-					mf_focal <- model.frame(rTerms, mf_focal, xlev=factor.levels)
-					mm <- model.matrix(formula.rhs, data=mf_focal, contrasts.arg=contr)
-					pred <- as.vector(mm %*% betahat)
-					out <- data.frame(..xx1=.new_x[i], xx2=.new_xf[j], fit=pred)
-					colnames(out) <- c(x.var, .x.focal, "fit")
-					pred_j[[j]] <- out
-				}
-				pred_focal[[i]] <- out		
-			}
-			pred_all[[.x.focal]] <- do.call("rbind", pred_focal)
-		}
-		
-	}
-
-	mf_focal <- mf
-
-
-
-	quant <- seq(0, 1, length.out=steps)
-	pred_all <- list()
-	for (f in 1:length(.focal)) {
-		.x.focal <- .focal[f]
-		if (x[[.x.focal]]$is.factor) {
-			.new_x <- x[[.x.focal]]$levels
-		} else {
-			.new_x <- x[[.x.focal]]$levels
-			.new_x <- quantile(.new_x, quant, names=FALSE)
-		}
-		mf_focal <- mf
-		pred_focal <- list()
-		for (i in 1:length(.new_x)) {
-			mf_focal[[.x.focal]] <- .new_x[i]
-			mf_focal <- model.frame(rTerms, mf_focal, xlev=factor.levels)
-			mm <- model.matrix(formula.rhs, data=mf_focal, contrasts.arg=contr)
-			pred <- as.vector(mm %*% betahat)
-			out <- data.frame(..xx=.new_x[i], fit=pred)
-			colnames(out) <- c(.x.focal, "fit")
-			pred_focal[[i]] <- out		
-		}
-		pred_all[[.x.focal]] <- do.call("rbind", pred_focal)
-	}
-	return(pred_all)
+	pred_df <- do.call("rbind", pred_list)
+	return(pred_df)
 }
 
 
@@ -228,7 +172,7 @@ matrix.to.df <- function(matrix, colclasses){
 
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
-	, vnames, within.category, bias.adjust){
+	, vnames, bias.adjust){
   
   ## FIXME: How to assign NA to a lme4 object 
   if (!isS4(mod)) {
@@ -315,8 +259,6 @@ clean_model <- function(focal.predictors, mod, xlevels
     for(name in focal.predictors) xlevels[[name]] <- levs
   }
 
-  if (!is.factor(X[, x.var])) within.category <- FALSE
-
   oldlevels <- get_xlevels(mod)
   for (name in focal.predictors){
     levels <- oldlevels[[name]]
@@ -325,45 +267,39 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
 			 quant <- seq(0, 1, length.out=steps)
-			 if (bias.adjust=="quantile") {
-			 	as.vector(quantile(X[,name], quant))
-			 } else if (bias.adjust=="population") {
-			 	as.vector(X[, name])
-			 } else {
-			 #	seq(min(X[, name]), max(X[, name]), length.out=steps)
-			 	as.vector(quantile(X[,name], quant))
-			 }
-		}
-		else {
+			  quantile(X[,name], quant, names=FALSE)
+		} else {
 		  if(length(xlevels[[name]]) == 1L) { 
-			 seq(min(X[, name]), max(X[,name]), length=xlevels[[name]])
+			# seq(min(X[, name]), max(X[,name]), length=xlevels[[name]])
+			  xlevels[[name]]
 			} else xlevels[[name]]
 		}
 	 } else {
 		factor.levels[[name]] <- levels
-	 	if (bias.adjust=="population" || (within.category & name==x.var)) {
-			levels <- as.vector(X[, name])
-		}
 	 }
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
   }
 
+  colclasses <- lapply(X, class)
+  colclasses[colclasses == "matrix"] <- "numeric"
+  colclasses[colclasses == "array"] <- "numeric"
+  
   x.excluded <- list()
   for (name in excluded.predictors){
     levels <- oldlevels[[name]] 
     if (is.logical(X[, name])) levels <- c("FALSE", "TRUE")
     fac <- !is.null(levels)
     level <- if (fac) {
-	 	if (within.category) {
-			as.vector(X[, name])
-		} else {
-	 		levels[1]
-		}
+	 		if (bias.adjust=="quantile"||bias.adjust=="population") {
+				as.vector(X[, name])
+			} else {
+	 			levels[1]
+			}
 	 } else {
 	 	if (bias.adjust=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
-			as.vector(quantile(X[,name], quant))	
-		} else if (bias.adjust=="population" || (within.category & !is.factor(X[, name]))) {
+			quantile(X[,name], quant, names=FALSE)
+		} else if (bias.adjust=="population") {
 			as.vector(X[, name])
 		} else {
 			typical(X[, name])	
@@ -371,9 +307,6 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 }
 	if (fac) { 
 		factor.levels[[name]] <- levels
-		if (bias.adjust=="population" || within.category) {
-			levels <- as.vector(X[, name])
-		}
 	}
     x.excluded[[name]] <- list(name=name, is.factor=fac,
                                level=level)
@@ -381,7 +314,7 @@ clean_model <- function(focal.predictors, mod, xlevels
   n.focal <- length(focal.predictors)
   n.excluded <- length(excluded.predictors)
   n.vars <- n.focal + n.excluded
-  if ((bias.adjust=="none"|bias.adjust=="delta") & !within.category) {
+  if (bias.adjust=="none"|bias.adjust=="delta") {
 	  dims <- sapply(x, function(x) length(x$levels))
 	  len <- prod(dims)
 	  predict.data <-matrix('', len, n.vars)
@@ -393,36 +326,33 @@ clean_model <- function(focal.predictors, mod, xlevels
 			predict.data[i,j] <- x[[j]]$levels[subs[j]]
 		 }
 		 if (n.excluded > 0) {
-	#		if (bias.adjust=="quantile" || bias.adjust=="population") {
-	#      	predict.data[i, (n.focal + 1):n.vars] <- excluded[i,]
-	#		} else {
 				predict.data[i, (n.focal + 1):n.vars] <- excluded
-	#		}
 		}
 	  }
-  } else if (bias.adjust=="population" || bias.adjust=="quantile" || within.category) {
-	  excluded <- sapply(x.excluded, function(x) x$level, simplify=FALSE)
-	  ..focal <- sapply(focal.predictors, function(j) x[[j]]$levels, simplify=FALSE)
-	  predict.data <- do.call("cbind", c(..focal, excluded))
+	  colnames(predict.data) <- c(sapply(x, function(x) x$name),
+											sapply(x.excluded, function(x) x$name))
+	  predict.data <-  matrix.to.df(predict.data, colclasses=colclasses)
+  } else if (bias.adjust=="population" || bias.adjust=="quantile") {
+	  ..excluded <- do.call("cbind", sapply(x.excluded, function(x) x$level, simplify=FALSE))
+	  ..col.excluded <- sapply(x.excluded, function(x) x$name)
+	  ..excluded.data <-  matrix.to.df(..excluded, colclasses=..col.excluded)
+	  ..focal <- do.call("expand.grid", sapply(focal.predictors, function(j) x[[j]]$levels, simplify=FALSE))
+	  ..col.focal <- sapply(x, function(x) x$name)
+	  ..focal.data <-  matrix.to.df(..focal, colclasses=..col.focal)
+	  predict.data <-  list(focal=..focal.data, excluded=..excluded.data)
   }
 
-  colnames(predict.data) <- c(sapply(x, function(x) x$name),
-                              sapply(x.excluded, function(x) x$name))
-  colclasses <- lapply(X, class)
-  colclasses[colclasses == "matrix"] <- "numeric"
-  colclasses[colclasses == "array"] <- "numeric"
-  predict.data <-  matrix.to.df(predict.data, colclasses=colclasses)
   list(predict.data=predict.data, 
        factor.levels=factor.levels, 
        factor.cols=factor.cols, focal.predictors=focal.predictors, n.focal=n.focal,
        excluded.predictors=excluded.predictors, n.excluded=n.excluded,
-       x=x, X.mod=X.mod, cnames=cnames, X=X, x.var=x.var, within.category=within.category)  
+       x=x, X.mod=X.mod, cnames=cnames, X=X, x.var=x.var)  
 }
 
 
 get_model_matrix <- function(mod, mod.matrix, mod.matrix.all, X.mod,
                                factor.cols, cnames, focal.predictors, excluded.predictors,
-                               typical, apply.typical.to.factors, focal.type, within.category){
+                               typical, apply.typical.to.factors, focal.type){
   attr(mod.matrix, "assign") <- attr(mod.matrix.all, "assign")
   if (length(excluded.predictors) > 0){
     strangers <- get_strangers(mod, focal.predictors, excluded.predictors)
@@ -443,7 +373,7 @@ get_model_matrix <- function(mod, mod.matrix, mod.matrix.all, X.mod,
       components <- components[components %in% cnames]
       if (length(components) > 1) {
 		  ## Modified by SC
-			if (!focal.type & !within.category) {
+			if (!focal.type) {
 				mod.matrix[,name] <- typical(apply(mod.matrix.all[,components], 1, prod))
 			} else {
 				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)

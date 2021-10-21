@@ -21,7 +21,6 @@
 #' @param dfspec default \code{100}. Specified degrees of freedom for model which do not return \code{df}. This is used in computation of confidence intervals.
 #' @param vcov. a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} is important when "anchored" CIs are required. However, with this approach, the predictors should be properly scaled, for example, scaled. {isolate=TRUE} centers at the mean of the model matrix without requiring the scaled input predictors. See examples.
 #' @param internal logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.
-#' @param within.category only for categorical focal predictors. If \code{TRUE}, the columns of the no-focal variables in the model matrix are averaged across the levels of the categorical focal predictors, i.e., unweighted average. If \code{FALSE} (default), the population (in the model matrix) or weighted averages is used, i.e., anchored at the model center. 
 #' @param zero_out_interaction logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.
 #' @param avefun the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.
 #' @param offset a function or a value (FIXME:).
@@ -105,7 +104,6 @@ varpred <- function(mod
 	, dfspec = 100
 	, vcov. = NULL
 	, internal = FALSE
-	, within.category = FALSE
 	, zero_out_interaction = FALSE
 	, avefun = mean
 	, offset = NULL
@@ -160,7 +158,6 @@ varpred <- function(mod
 		, x.var=x.var
 		, typical=avefun
 		, vnames=vnames
-		, within.category=within.category
 		, bias.adjust = bias.adjust
 	)
 
@@ -175,7 +172,6 @@ varpred <- function(mod
 	cnames <- model_frame_objs$cnames
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
-	within.category <- model_frame_objs$within.category
 	typical <- avefun
 	
 	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
@@ -195,15 +191,8 @@ varpred <- function(mod
 		, typical
 		, apply.typical.to.factors=TRUE
 		, focal.type=x[[x.var]]$is.factor
-		, within.category=within.category
 	)
 	
-	if (within.category & x[[x.var]]$is.factor) {
-		## FIXME: better way to average over categories of the focal predictors
-		mm <- lapply(split(as.data.frame(mm), x[[x.var]]$levels), colMeans)
-		mm <- do.call("rbind", mm)
-	}
-
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
 		
@@ -278,25 +267,14 @@ varpred <- function(mod
    linkinv <- if (is.null(out$link$linkinv)) I else out$link$linkinv
    linkmu.eta <- if(is.null(out$link$mu.eta)) I else out$link$mu.eta
    
-	## FIXME: still on within category averaging
-	if (within.category) {
-		temp1 <- list()
-	}
 	temp <- out$x
-   for (var in colnames(temp)){
-	  if (is.factor(temp[[var]])){
-		 # handle factors with "valid" NA level
-		 if (within.category) {
-		 	temp1[[var]] <- factor.levels[[var]]
-		 }
-		 temp[[var]] <- addNA(temp[[var]]) 
-	  } else {
-		 if (within.category) {
-		 	temp1[[var]] <- unique(temp[[var]])
-		 }
-	  }
-   }
-	if (within.category) temp <- do.call("expand.grid", temp1)
+	for (var in names(temp)){
+	 if (is.factor(temp[[var]])){
+		# handle factors with "valid" NA level
+		temp[[var]] <- addNA(temp[[var]]) 
+	 }
+	}
+	
 	out$x <- temp
 	result <- switch(type
 	  	, response= { if (is.null(out$se)) 

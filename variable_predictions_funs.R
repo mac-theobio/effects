@@ -267,7 +267,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 		if (inherits(est, c("emmeans", "emmGrid"))) {
 			type <- est@misc$predict.type
 			est <- as.data.frame(est)
-			if (type=="response") {
+			if (length(type) && type=="response") {
 				.nn <- "prob"
 			} else {
 				.nn <- "emmean"

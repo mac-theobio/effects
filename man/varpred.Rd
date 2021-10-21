@@ -17,7 +17,6 @@ varpred(
   dfspec = 100,
   vcov. = NULL,
   internal = FALSE,
-  within.category = FALSE,
   zero_out_interaction = FALSE,
   avefun = mean,
   offset = NULL,
@@ -53,8 +52,6 @@ varpred(
 \item{vcov.}{a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} is important when "anchored" CIs are required. However, with this approach, the predictors should be properly scaled, for example, scaled. {isolate=TRUE} centers at the mean of the model matrix without requiring the scaled input predictors. See examples.}
 
 \item{internal}{logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.}
-
-\item{within.category}{only for categorical focal predictors. If \code{TRUE}, the columns of the no-focal variables in the model matrix are averaged across the levels of the categorical focal predictors, i.e., unweighted average. If \code{FALSE} (default), the population (in the model matrix) or weighted averages is used, i.e., anchored at the model center.}
 
 \item{zero_out_interaction}{logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.}
 

@@ -150,6 +150,9 @@ Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\st
 
 Higher order terms such as interactions, splines, polynomials, etc., can be between the non-focal predictors or focal and non-focal predictor(s). In the former case, we treat the interactions as just another column in the variable space (of the model matrix). \textbf{Still figuring out the later case but currently treating everything as just additional column???}
 
+\subsubsection{Numeric interactions}
+
+Consider a multiple linear regression model such that 
 
 \subsection{Simulation examples}
 
