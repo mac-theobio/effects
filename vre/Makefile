@@ -21,6 +21,19 @@ varEf.Rout: varEf.R fit.rda
 
 ######################################################################
 
+## Teaching JD how to vareffects
+
+mediate.Rout: mediate.R
+
+spline.Rout: spline.R
+
+## Work on this one!!!
+binom.Rout: binom.R
+
+######################################################################
+
+
+
 ### Makestuff
 
 Sources += Makefile
