@@ -176,7 +176,10 @@ Ignore += vareffects_1*
 build-package:
 	R CMD build .
 
-install-package:
+install:
+	make update-doc && make build-package && make install-tarball
+
+install-tarball:
 	R CMD INSTALL vareffects_1*
 
 check-package:
@@ -184,9 +187,6 @@ check-package:
 
 update-doc:
 	echo "devtools::document('.')" | R --slave
-
-install-all:
-	make update-doc && make build-package && make install-package
 
 build-manual:
 	echo "devtools::build_manual(pkg = '.')" | R --slave
