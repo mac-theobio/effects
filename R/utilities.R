@@ -1,23 +1,83 @@
 # Internal functions used to condition the model. Some of the condition code is based on R package effects (clean_model). Transfered and modified here because they are not exported in effects.
 
 
-focal_pop <- function(x.focal, x.excluded, betahat, formula.rhs
-	, rTerms, factor.levels, contr, x.var, steps, stats, off, ...) {
+pop_bias_correction <- function(x.focal, x.excluded, betahat, formula.rhs
+	, rTerms, factor.levels, contr, offset, mult, ...
+	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
+	, typical, zero_out_interaction) {
 	
 	pred_list <- list()
 	for (i in 1:NROW(x.focal)) {
 		focal_i <- x.focal[i, ,drop=FALSE]
 		focal_i[1:NROW(x.excluded), ] <- focal_i
-		mf_i <- cbind(focal_i, x.excluded)
+		mf_i <- if(!is.null(x.excluded)) cbind(focal_i, x.excluded) else focal_i
 		mf_i <- model.frame(rTerms, mf_i, xlev=factor.levels, na.action=NULL)
 		mm_i <- model.matrix(formula.rhs, data = mf_i, contrasts.arg = contr)
-		focal_i$fit <- off + as.vector(mm_i %*% betahat)
+		col_mean <- apply(mm_i, 2, typical)
+		
+		off <- get_offset(offset, mf_i)
+		pred <- off + as.vector(mm_i %*% betahat)
+		
+		pse_var <- mult*get_sderror(mod=mod
+			, vcov.=vcov.
+			, mm=mm_i
+			, col_mean=col_mean
+			, isolate=isolate
+			, isolate.value=isolate.value
+			, internal=internal
+			, vareff_objects=vareff_objects
+			, x.var=x.var
+			, typical=typical
+			, formula.rhs=formula.rhs
+			, zero_out_interaction=zero_out_interaction
+			, mf=mf_i
+		)
+		
+		lwr <- pred - pse_var
+		upr <- pred + pse_var
+		focal_i$pred <- pred
+		focal_i$lwr <- lwr
+		focal_i$upr <- upr
+		focal_i$pse_var <- pse_var
 		pred_list[[i]] <- focal_i
 	}
 	pred_df <- do.call("rbind", pred_list)
 	return(pred_df)
 }
 
+# Offset
+get_offset <- function(offset, mf) {
+	if (is.null(offset)) offset <- mean
+	if (is.numeric(offset) && length(offset) == 1) {
+		off <- offset
+	} else if (is.function(offset)) {
+		mod.off <- model.offset(mf)
+		if (is.null(mod.off)) {
+			off <- 0
+		} else {
+			off <- offset(mod.off)
+		}
+	} else {
+		stop("offset must be a function or a number")
+	}
+	return(off)
+}
+
+# For bias-adjustment: coppied directry from emmeans
+## Currently, we just use a 2nd-order approx for everybody:
+## E(h(nu + E))  ~=  h(nu) + 0.5*h"(nu)*var(E)
+.make.bias.adj.link <- function(link, sigma) {
+	 if (is.null(sigma))
+		  stop("Must specify 'sigma' to obtain bias-adjusted back transformations", call. = FALSE)
+	 link$inv = link$linkinv
+	 link$der = link$mu.eta
+	 link$sigma22 = sigma^2 / 2
+	 link$der2 = function(eta) with(link, 1000 * (der(eta + .0005) - der(eta - .0005)))
+	 link$linkinv = function(eta) with(link, inv(eta) + sigma22 * der2(eta))
+	 link$mu.eta = function(eta) with(link, der(eta) +
+													  1000 * sigma22 * (der2(eta + .0005) - der2(eta - .0005)))
+	 link
+}
 
 get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, ...) {
 	
@@ -333,9 +393,13 @@ clean_model <- function(focal.predictors, mod, xlevels
 											sapply(x.excluded, function(x) x$name))
 	  predict.data <-  matrix.to.df(predict.data, colclasses=colclasses)
   } else if (bias.adjust=="population" || bias.adjust=="quantile") {
-	  ..excluded <- do.call("cbind", sapply(x.excluded, function(x) x$level, simplify=FALSE))
-	  ..col.excluded <- sapply(x.excluded, function(x) x$name)
-	  ..excluded.data <-  matrix.to.df(..excluded, colclasses=..col.excluded)
+	  if (n.excluded>0) {
+		  ..excluded <- do.call("cbind", sapply(x.excluded, function(x) x$level, simplify=FALSE))
+		  ..col.excluded <- sapply(x.excluded, function(x) x$name)
+		  ..excluded.data <-  matrix.to.df(..excluded, colclasses=..col.excluded)
+	  } else {
+	  	..excluded.data=NULL
+	  }
 	  ..focal <- do.call("expand.grid", sapply(focal.predictors, function(j) x[[j]]$levels, simplify=FALSE))
 	  ..col.focal <- sapply(x, function(x) x$name)
 	  ..focal.data <-  matrix.to.df(..focal, colclasses=..col.focal)

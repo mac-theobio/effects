@@ -173,93 +173,102 @@ varpred <- function(mod
 	X <- model_frame_objs$X
 	x.var <- model_frame_objs$x.var
 	typical <- avefun
+	.link <- vareff_objects$link
+	.family <- vareff_objects$link$family
+	.contr <- vareff_objects$contrasts
 	
-	mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
-	mod.matrix.all <- model.matrix(mod)
-	mod.matrix <- model.matrix(formula.rhs
-		, data=mf
-		, contrasts.arg=vareff_objects$contrasts
-	)
-	mm <- get_model_matrix(mod
-		, mod.matrix
-		, mod.matrix.all
-		, X.mod
-		, factor.cols
-		, cnames
-		, focal.predictors
-		, excluded.predictors
-		, typical
-		, apply.typical.to.factors=TRUE
-		, focal.type=x[[x.var]]$is.factor
-	)
-	
+		
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
+			
+	
+	## No or delta bias adjustment
+	if (bias.adjust=="none" || bias.adjust=="delta") {
+		mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
+		mod.matrix.all <- model.matrix(mod)
+		mod.matrix <- model.matrix(formula.rhs
+			, data=mf
+			, contrasts.arg=.contr
+		)
+		mm <- get_model_matrix(mod
+			, mod.matrix
+			, mod.matrix.all
+			, X.mod
+			, factor.cols
+			, cnames
+			, focal.predictors
+			, excluded.predictors
+			, typical
+			, apply.typical.to.factors=TRUE
+			, focal.type=x[[x.var]]$is.factor
+		)
 		
-	# Predictions
-	# col_mean <- apply(mod.matrix.all, 2, typical)
-	col_mean <- apply(mm, 2, typical)
-	pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
-		, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
-		, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
-	)
-
-	# Offset
-	if (is.null(offset)) offset <- mean
-	if (is.numeric(offset) && length(offset) == 1) {
-		off <- offset
-	} else if (is.function(offset)) {
-		mod.off <- model.offset(mf)
-		if (is.null(mod.off)) {
-			off <- 0
-		} else {
-			off <- offset(mod.off)
+		# Predictions
+		# col_mean <- apply(mod.matrix.all, 2, typical)
+		col_mean <- apply(mm, 2, typical)
+		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
+			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
+			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
+		)
+		off <- get_offset(offset, mf)
+		pred <- off + as.vector(mm %*% betahat)
+		lwr <- pred - pse_var
+		upr <- pred + pse_var
+		
+		if (bias.adjust=="delta") {
+			if (sigma=="mod") {
+				sigma <- get_sigma(mod, ...)
+			} else if (sigma=="lp") {
+				sigma <- sd(pred) 
+			}
+			.link <- .make.bias.adj.link(.link, sigma)
 		}
-	} else {
-		stop("offset must be a function or a number")
-	}
-
-	pred <- off + as.vector(mm %*% betahat)
-	lwr <- pred - pse_var
-	upr <- pred + pse_var
-	
-	# For bias-adjustment: coppied directry from emmeans
-	## Currently, we just use a 2nd-order approx for everybody:
-	## E(h(nu + E))  ~=  h(nu) + 0.5*h"(nu)*var(E)
-	.make.bias.adj.link <- function(link, sigma) {
-		 if (is.null(sigma))
-			  stop("Must specify 'sigma' to obtain bias-adjusted back transformations", call. = FALSE)
-		 link$inv = link$linkinv
-		 link$der = link$mu.eta
-		 link$sigma22 = sigma^2 / 2
-		 link$der2 = function(eta) with(link, 1000 * (der(eta + .0005) - der(eta - .0005)))
-		 link$linkinv = function(eta) with(link, inv(eta) + sigma22 * der2(eta))
-		 link$mu.eta = function(eta) with(link, der(eta) +
-														  1000 * sigma22 * (der2(eta + .0005) - der2(eta - .0005)))
-		 link
-	}
-
-	link <- vareff_objects$link
-
-	if (bias.adjust=="delta") {
-		if (sigma=="mod") {
-			sigma <- get_sigma(mod, ...)
-		} else if (sigma=="lp") {
-			sigma <- sd(pred) 
-		}
-		link <- .make.bias.adj.link(link, sigma)
+		
+	} else if (bias.adjust=="population" || bias.adjust=="quantile") {
+		x.focal <- predict.data$focal
+		x.excluded <- predict.data$excluded
+		pred_obj <- pop_bias_correction(x.focal=x.focal
+			, x.excluded=x.excluded
+			, betahat=betahat
+			, formula.rhs=formula.rhs
+			, rTerms=rTerms
+			, factor.levels=factor.levels
+			, contr=.contr
+			, mult=mult
+			, offset=offset
+			, mod=mod
+			, vcov.=vcov.
+			, isolate=isolate
+			, isolate.value=isolate.value
+			, internal=internal
+			, vareff_objects=vareff_objects
+			, x.var=x.var
+			, typical=typical
+			, zero_out_interaction=zero_out_interaction
+		)
+		predict.data <- pred_obj[, colnames(x.focal), drop=FALSE]
+		pred <- pred_obj$pred
+		lwr <- pred_obj$lwr
+		upr <- pred_obj$upr
+		pse_var <- pred_obj$pse_var
+		mm <- NULL
 	}
 	
+
 	out <- list(term = paste(focal.predictors, collapse="*")
-		, formula = formula(mod), response = get_response(mod)
-		, variables = x, fit = pred
-		, x = if (bias.adjust=="none"||bias.adjust=="delta") {predict.data[, 1:n.focal, drop=FALSE]} else predict.data[, x.var, drop=FALSE]
-		, model.matrix = mm, data = X, x.var=x.var
+		, formula = formula(mod)
+		, response = get_response(mod)
+		, variables = x
+		, fit = pred
+		, x = predict.data[, 1:n.focal, drop=FALSE]
+		, model.matrix = mm
+		, data = X
+		, x.var=x.var
 		, se = pse_var/mult
-		, lwr = lwr#pred - mult*pse_var
-		, upr = upr#pred + mult*pse_var
-		, family = vareff_objects$link$family
-		, link = link 
+		, lwr = lwr
+		, upr = upr
+		, family = .family
+		, link = .link 
 	)
 
 	## Organize
