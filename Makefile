@@ -123,6 +123,17 @@ cubic_predictors.Rout: cubic_predictors.R variable_predictions_funs.rda
 cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
 cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
 
+## Mediation and confounders
+mediate.Rout: mediate.R variable_predictions_funs.rda
+mediate_model.Rout: mediate_model.R mediate.rda
+mediate_preds.Rout: mediate_preds.R mediate_model.rda
+
+## Correlated predictor glm
+binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda
+binom_correlated_model.Rout: binom_correlated_model.R binom_correlated.rda
+binom_correlated_preds.Rout: binom_correlated_preds.R binom_correlated_model.rda
+
+
 ## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda \
 	lme_random_intercept.rda categorical_predictors.rda variable_predictions_objs.rda \
