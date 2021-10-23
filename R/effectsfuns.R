@@ -236,6 +236,7 @@ varpred <- function(mod
 			, contr=.contr
 			, mult=mult
 			, offset=offset
+			, vnames=vnames
 			, mod=mod
 			, vcov.=vcov.
 			, isolate=isolate
