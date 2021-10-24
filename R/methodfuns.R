@@ -65,3 +65,7 @@ get_sigma <- function(mod, ...)UseMethod("get_sigma")
 #'
 #' @keywords internal
 includeRE <- function(mod, ...)UseMethod("includeRE")
+
+#'
+#' @keywords internal
+check_intercept <- function(mod, ...)UseMethod("check_intercept")

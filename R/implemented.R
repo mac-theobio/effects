@@ -16,6 +16,10 @@ get_xlevels.lm <- function(mod) {
 	return(mod$xlevels)
 }
 
+check_intercept.default <- function(mod, ...) {
+	any(names(coefficients(mod))=="(Intercept)")
+}
+
 ## glmmTMB
 
 vareffobj.glmmTMB <- function(mod, ...) {
@@ -32,6 +36,10 @@ vareffobj.glmmTMB <- function(mod, ...) {
 get_xlevels.glmmTMB <- function(mod) {
 	xlevels <- .getXlevels(terms(mod), model.frame(mod))
 	return(xlevels)
+}
+
+check_intercept.glmmTMB <- function(mod, ...) {
+	any(names(fixef(mod)$cond)=="(Intercept)")	
 }
 
 ## lme4
@@ -65,6 +73,14 @@ get_xlevels.glmerMod <- function(mod) {
 get_xlevels.merMod <- function(mod) {
 	xlevels <- .getXlevels(terms(mod), model.frame(mod))
 	return(xlevels)
+}
+
+check_intercept.glmerMod <- function(mod, ...) {
+	any(names(fixef(mod))=="(Intercept)")	
+}
+
+check_intercept.merMod <- function(mod, ...) {
+	any(names(fixef(mod))=="(Intercept)")	
 }
 
 ## Statistics
