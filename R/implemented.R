@@ -12,6 +12,15 @@ vareffobj.lm <- function(mod, ...){
 	return(out)
 }
 
+get_model.mm.default <- function(mod, ...) {
+	mm <- model.matrix(mod, ...)
+	return(mm)
+}
+
+get_contrasts.lm <- function(mod, ...) {
+	mod$contrasts
+}
+
 get_xlevels.lm <- function(mod) {
 	return(mod$xlevels)
 }
@@ -28,9 +37,18 @@ vareffobj.glmmTMB <- function(mod, ...) {
 	out$variance_covariance <- vcov(mod)$cond
 	out$formula <- formula(mod, fixed.only=TRUE)
 	out$link <- family(mod)
-	out$contrasts <- mod$modelInfo$contrasts
+	out$contrasts <- attr(getME(mod, "X"), "contrasts")
 	class(out) <- "vareffobj"
 	return(out)
+}
+
+get_model.mm.glmmTMB <- function(mod, ...) {
+	mm <- getME(mod,"X")
+	return(mm)
+}
+
+get_contrasts.glmmTMB <- function(mod, ...) {
+	attr(getME(mod, "X"), "contrasts")
 }
 
 get_xlevels.glmmTMB <- function(mod) {
@@ -54,6 +72,15 @@ vareffobj.glmerMod <- function(mod, ...) {
 	return(out)
 }
 
+get_model.mm.glmerMod <- function(mod, ...) {
+	mm <- getME(mod,"X")
+	return(mm)
+}
+
+get_contrasts.glmerMod <- function(mod, ...) {
+	attr(getME(mod, "X"), "contrasts")
+}
+
 vareffobj.merMod <- function(mod, ...) {
 	out <- list()
 	out$coefficients <- lme4::fixef(mod)
@@ -63,6 +90,15 @@ vareffobj.merMod <- function(mod, ...) {
 	out$contrasts <- attr(getME(mod, "X"), "contrasts")
 	class(out) <- "vareffobj"
 	return(out)
+}
+
+get_model.mm.merMod <- function(mod, ...) {
+	mm <- getME(mod,"X")
+	return(mm)
+}
+
+get_contrasts.merMod <- function(mod, ...) {
+	attr(getME(mod, "X"), "contrasts")
 }
 
 get_xlevels.glmerMod <- function(mod) {

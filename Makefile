@@ -150,7 +150,9 @@ bad_example.Rout: bad_example.R categorical_predictors.rda
 ######################################################################
 
 cp2comp_exam:
-	cp variable_predictions-qoi_pred_plot.pdf variable_predictions-pred_cubic_plots.pdf \
+	cp variable_predictions-pred_age_cont_plots.pdf \
+	variable_predictions-qoi_pred_plot.pdf \
+	variable_predictions-pred_cubic_plots.pdf \
 	variable_predictions-pred_cont_joint_plots.pdf ../comp_exam/
 
 

@@ -3,6 +3,7 @@ library(vareffects); varefftheme()
 library(ggpubr)
 library(ggplot2)
 library(dplyr)
+library(glmmTMB)
 
 commandEnvironments()
 makeGraphics()

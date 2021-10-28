@@ -20,6 +20,7 @@ library(dplyr)
 library(ggplot2)
 library(vareffects); varefftheme()
 library(emmeans)
+library(effects)
 
 commandEnvironments()
 makeGraphics()
@@ -214,3 +215,59 @@ Mathematically, in **varpred**
 \beta_0 + \beta_1 \bar{{Age}},&  \text{ if } gender = Female\
 \end{cases}
 \end{align}
+
+
+\section{Dealing with categorical iterations}
+
+```{r categorical_toy, echo=TRUE}
+df <- (expand.grid(services=c("water", "garbage", "toilet")
+		, gender=c("Male", "Female")
+		, statusP=c("Base year", "Not observed", "Unimproved", "Improved")
+	)
+	%>% mutate(age = rnorm(n())
+		, status=rbinom(n(), 1, plogis(rnorm(n(), 3, 5)))
+	)
+)
+head(df)
+```
+
+Model:
+
+```{r toy_model, echo=TRUE}
+toy_mod <- glm(status~-1+services+(age+gender+statusP):services
+	, data=df
+	, family="binomial"
+	, contrasts=list(services="contr.sum")
+)
+```
+
+\subsection{varpred}
+
+- Averaging all the columns of model matrix?
+
+```{r varpred_all_av}
+varpred_all_av <- varpred(toy_mod, "services", handle.inter="emmeans", returnall=TRUE)
+print(varpred_all_av$raw$model.matrix)
+```
+
+- On baseline level?
+
+```{r varpred_no_av}
+varpred_no_av <- varpred(toy_mod, "services", handle.inter="effects", returnall=TRUE)
+print(varpred_no_av$raw$model.matrix)
+```
+
+
+\subsection{emmeans}
+
+```{r emmeans_toy}
+emmeans_toy <- emmeans(toy_mod, specs=~services, nesting=NULL, weighting="equal")
+print(emmeans_toy@linfct)
+```
+
+\subsection{Effects}
+
+```{r effects_toy}
+effects_toy <- Effect("services", toy_mod)
+print(effects_toy$model.matrix)
+```

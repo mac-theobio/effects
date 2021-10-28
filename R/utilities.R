@@ -9,7 +9,7 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
 	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
 
-	mm <- model.matrix(mod)
+	mm <- get_model.mm(mod)
 	col_mean <- colMeans(mm)
 	
 	if (isolate) {
@@ -143,7 +143,7 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
 }
 
 get_vnames <- function(mod){
-	mat <- model.matrix(mod)
+	mat <- get_model.mm(mod)
 	coefnames <- colnames(mat)
 	Terms <- terms(mod)
 	vnames <- all.vars(parse(text=delete.response(Terms)))
@@ -168,7 +168,7 @@ check_numeric <- function(xvar, mod) {
 }
 
 check_factor <- function(xvar, mod) {
-  xvar %in% names(attr(model.matrix(mod), "contrasts"))
+  xvar %in% names(get_contrasts(mod)) #names(attr(model.matrix(mod), "contrasts"))
 }
 
 is.numeric.predictor <- function(predictor, model) {
@@ -255,7 +255,7 @@ matrix.to.df <- function(matrix, colclasses){
 
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
-	, vnames, bias.adjust, .contr, handle.inter){
+	, vnames, bias.adjust, handle.inter){
   
   ## FIXME: How to assign NA to a lme4 object 
   if (!isS4(mod)) {
@@ -285,7 +285,7 @@ clean_model <- function(focal.predictors, mod, xlevels
                paste(focal.predictors[check.vars], collapse=", "))
     stop(message)
   }
-  X.mod <- model.matrix(mod, contrasts.arg=.contr)
+  X.mod <- get_model.mm(mod)
   cnames <- colnames(X.mod)
   factor.cols <- rep(FALSE, length(cnames))
   names(factor.cols) <- cnames
@@ -293,9 +293,12 @@ clean_model <- function(focal.predictors, mod, xlevels
   for (name in all.predictors){
     if (check_factor(name, mod)) {
       factor.cols[grep(paste("^", name, sep=""), cnames)] <- TRUE
-    }
+    } 
+#	 else {
+#      factor.cols[grep(paste0(":", name), cnames)] <- FALSE 
+#	 }
   }
-# factor.cols[grep(":", cnames)] <- FALSE   
+#  factor.cols[grep(":", cnames)] <- FALSE   
 
 ## FIXME: For compatibility with emmeans. Otherwise uncomment above block and comment the block below
 #  for (name in all.predictors){
