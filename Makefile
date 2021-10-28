@@ -150,7 +150,9 @@ bad_example.Rout: bad_example.R categorical_predictors.rda
 ######################################################################
 
 cp2comp_exam:
-	cp variable_predictions-qoi_pred_plot.pdf variable_predictions-pred_cubic_plots.pdf \
+	cp variable_predictions-pred_age_cont_plots.pdf \
+	variable_predictions-qoi_pred_plot.pdf \
+	variable_predictions-pred_cubic_plots.pdf \
 	variable_predictions-pred_cont_joint_plots.pdf ../comp_exam/
 
 
@@ -190,6 +192,7 @@ build-package:
 install:
 	make update-doc && make build-package && make install-tarball
 
+Ignore += vareffects_1*
 install-tarball:
 	R CMD INSTALL vareffects_1*
 
@@ -206,7 +209,7 @@ build-manual:
 
 ######################################################################
 
-alldirs += vre
+alldirs += dev
 
 ######################################################################
 

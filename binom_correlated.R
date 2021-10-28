@@ -31,4 +31,20 @@ head(sim_df_bin_corr)
 sim_df_bin_noncorr <- simcorr(N = N, beta_xy=0)
 head(sim_df_bin_noncorr)
 
-saveVars(sim_df_bin_corr, sim_df_bin_noncorr, comparevarpred)
+## Observed marginals
+observed_df_corr <- (sim_df_bin_corr
+	%>% summarise_all(mean)
+)
+observed_df_corr
+
+observed_df_noncorr <- (sim_df_bin_noncorr
+	%>% summarise_all(mean)
+)
+observed_df_noncorr
+
+saveVars(sim_df_bin_corr
+	, sim_df_bin_noncorr
+	, comparevarpred
+	, observed_df_corr
+	, observed_df_noncorr
+)

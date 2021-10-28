@@ -273,7 +273,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 				.nn <- "emmean"
 			}
 			oldn <- c(focal, .nn
-				, grep("\\.CL", colnames(est), value=TRUE)
+				, grep("\\.CL|\\.LCL|\\.UCL", colnames(est), value=TRUE)
 			)
 			newn <- c(focal_temp, "fit", "lwr", "upr")
 			colnames(est)[colnames(est) %in% oldn] <-  newn

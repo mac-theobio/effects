@@ -104,16 +104,18 @@ varpred <- function(mod
 	, dfspec = 100
 	, vcov. = NULL
 	, internal = FALSE
+	, handle.inter=c("emmeans", "effects")
 	, zero_out_interaction = FALSE
 	, avefun = mean
 	, offset = NULL
-	, bias.adjust = c("none", "delta", "quantile", "population")
-	, sigma = c("lp", "mod")
+	, bias.adjust = c("none", "delta", "mcculloch", "diggle", "quantile", "population")
+	, sigma = c("mod", "lp", "total")
 	, include.re = FALSE
 	, modelname = NULL
 	, returnall = FALSE, ...) {
 	
 	bias.adjust <- match.arg(bias.adjust)
+	handle.inter <- match.arg(handle.inter)
 
 	if (!is.numeric(sigma)) {
 		sigma <- match.arg(sigma)
@@ -148,6 +150,7 @@ varpred <- function(mod
 		x.var <- focal.predictors[[1]]
 	}
 	
+	.contr <- vareff_objects$contrasts
 #	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
 	model_frame_objs <- clean_model(focal.predictors=focal.predictors
 		, mod = mod
@@ -159,6 +162,7 @@ varpred <- function(mod
 		, typical=avefun
 		, vnames=vnames
 		, bias.adjust = bias.adjust
+		, handle.inter=handle.inter
 	)
 
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
@@ -175,24 +179,22 @@ varpred <- function(mod
 	typical <- avefun
 	.link <- vareff_objects$link
 	.family <- vareff_objects$link$family
-	.contr <- vareff_objects$contrasts
-	
-		
+	factor.weights <- model_frame_objs$factor.weights
+	factor.type <- model_frame_objs$factor.type
+
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
 			
 	
 	## No or delta bias adjustment
-	if (bias.adjust=="none" || bias.adjust=="delta") {
+	if (bias.adjust=="none" || bias.adjust=="delta" ||bias.adjust=="mcculloch"||bias.adjust=="diggle") {
 		mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
-		mod.matrix.all <- model.matrix(mod)
 		mod.matrix <- model.matrix(formula.rhs
 			, data=mf
 			, contrasts.arg=.contr
 		)
 		mm <- get_model_matrix(mod
 			, mod.matrix
-			, mod.matrix.all
 			, X.mod
 			, factor.cols
 			, cnames
@@ -200,11 +202,14 @@ varpred <- function(mod
 			, excluded.predictors
 			, typical
 			, apply.typical.to.factors=TRUE
-			, focal.type=x[[x.var]]$is.factor
+			, factor.type=factor.type
+			, x.var=x.var
+			, factor.weights=factor.weights
+			, vnames=vnames
 		)
 		
 		# Predictions
-		# col_mean <- apply(mod.matrix.all, 2, typical)
+		# col_mean <- apply(X.mod, 2, typical)
 		col_mean <- apply(mm, 2, typical)
 		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
 			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
@@ -215,19 +220,48 @@ varpred <- function(mod
 		lwr <- pred - pse_var
 		upr <- pred + pse_var
 		
-		if (bias.adjust=="delta") {
+		if (bias.adjust=="delta" ||bias.adjust=="mcculloch"||bias.adjust=="diggle") {
 			if (sigma=="mod") {
-				sigma <- get_sigma(mod, ...)
+				sigma <- get_sigma(mod)
 			} else if (sigma=="lp") {
-				sigma <- sd(pred) 
+				# FIXME: seems not appropriate
+				if (bias.adjust=="delta") {
+					message("sigma='lp' ignored, sigma='mod' used instead!")
+					sigma <- get_sigma(mod)
+				} else {
+					sigma <- sd(pred) 
+				}
+			} else if (sigma=="total") {
+#				sigma <- sqrt(get_sigma(mod)^2 + sd(pred)^2)
+
+				# FIXME: emmeans issue 231 (https://github.com/rvlenth/emmeans/issues/231)
+				fixed_vcomp <- vcov(vareff_objects)
+				ones <- rep(1, NCOL(fixed_vcomp))
+				fixed_vcomp <- t(ones) %*% fixed_vcomp %*% ones
+				sigma <- sqrt(get_sigma(mod)^2 + as.vector(fixed_vcomp)^2)
 			}
+		} 
+
+		if (bias.adjust=="mcculloch") {
+			pred <- mcculloch.bias.adjust(pred, sigma)		
+			lwr <- mcculloch.bias.adjust(lwr, sigma)		
+			upr <- mcculloch.bias.adjust(upr, sigma)		
+		}
+		
+		if (bias.adjust=="diggle") {
+			pred <- diggle.bias.adjust(pred, sigma)		
+			lwr <- diggle.bias.adjust(lwr, sigma)		
+			upr <- diggle.bias.adjust(upr, sigma)		
+		}
+		
+		if (bias.adjust=="delta") {
 			.link <- .make.bias.adj.link(.link, sigma)
 		}
 		
 	} else if (bias.adjust=="population" || bias.adjust=="quantile") {
 		x.focal <- predict.data$focal
 		x.excluded <- predict.data$excluded
-		pred_obj <- pop_bias_correction(x.focal=x.focal
+		pred_obj_all <- pop.bias.adjust(x.focal=x.focal
 			, x.excluded=x.excluded
 			, betahat=betahat
 			, formula.rhs=formula.rhs
@@ -235,8 +269,8 @@ varpred <- function(mod
 			, factor.levels=factor.levels
 			, contr=.contr
 			, mult=mult
-			, offset=offset
 			, vnames=vnames
+			, offset=offset
 			, mod=mod
 			, vcov.=vcov.
 			, isolate=isolate
@@ -247,11 +281,13 @@ varpred <- function(mod
 			, typical=typical
 			, zero_out_interaction=zero_out_interaction
 		)
+		pred_obj <- pred_obj_all$pred_df
 		predict.data <- pred_obj[, colnames(x.focal), drop=FALSE]
 		pred <- pred_obj$pred
 		lwr <- pred_obj$lwr
 		upr <- pred_obj$upr
 		pse_var <- pred_obj$pse_var
+		off <- pred_obj_all$off
 		mm <- NULL
 	}
 	
@@ -269,7 +305,9 @@ varpred <- function(mod
 		, lwr = lwr
 		, upr = upr
 		, family = .family
-		, link = .link 
+		, link = .link
+		, offset=off
+		, bias.adjust.sigma = if (bias.adjust %in% c("none", "population")) NULL else sigma
 	)
 
 	## Organize
@@ -314,9 +352,9 @@ varpred <- function(mod
 	attr(result, "response") <- out$response
 	attr(result, "x.var") <- out$x.var 
 	if (returnall) {
-		res <- list(preds = result, raw = out)
+		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw = out, factor.cols=factor.cols)
 	} else {
-		res <- list(preds = result)
+		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma)
 	}
 	res$call <- match.call()
 	class(res) <- c("vareffects", "varpred")

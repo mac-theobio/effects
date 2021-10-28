@@ -37,7 +37,7 @@ binom.Rout: binom.R
 
 ## Spline exploration
 
-nbs.Rout: nbs.R
+bs.Rout: bs.R
 
 ######################################################################
 
