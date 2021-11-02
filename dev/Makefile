@@ -23,6 +23,9 @@ varEf.Rout: varEf.R fit.rda
 
 ## Teaching JD how to vareffects
 
+## Ancient, can we drop? 2021 Oct 22 (Fri)
+demonstrate.Rout: demonstrate.R
+
 mediate.Rout: mediate.R
 
 spline.Rout: spline.R
@@ -31,6 +34,8 @@ spline.Rout: spline.R
 binom.Rout: binom.R
 
 ######################################################################
+
+## Spline exploration
 
 bs.Rout: bs.R
 
