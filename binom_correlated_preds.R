@@ -3,6 +3,7 @@ library(vareffects); varefftheme()
 library(ggpubr)
 library(ggplot2)
 library(dplyr)
+library(emmeans)
 
 commandEnvironments()
 makeGraphics()
@@ -19,6 +20,11 @@ pred_x_centered_bin_corr <- varpred(mod_bin_corr
 	, isolate=TRUE
 	, modelname="centered mm"
 )
+true_corr <- mean(pred_x_centered_bin_corr$preds$fit)
+print(true_corr)
+em_preds <- emmeans(mod_bin_corr, "x", at=list(x=pred_x_centered_bin_corr$preds$x), type="response")
+em_preds <- as.data.frame(em_preds)
+mean(em_preds$prob)
 
 ### Combine all predictions
 vlist <- list(pred_x_trad_bin_corr, pred_x_centered_bin_corr)
@@ -31,7 +37,8 @@ pred_x_bin_corr_plots <- (comparevarpred(vlist=vlist
 	+ scale_colour_manual(breaks = c("everything", "centered mm")
 		, values=c(everything="blue", "centered mm"="black")
 	)
-	+ geom_hline(data=observed_df_corr, aes(yintercept=z), lty=2)
+	+ geom_hline(data=observed_df_corr, aes(yintercept=z), lty=2, col="red")
+	+ geom_hline(yintercept=true_corr, lty=2)
 	+ labs(y="Predictions", colour="Method", title="Correlated")
 	+ theme(legend.position="bottom")
 )
@@ -49,6 +56,7 @@ pred_x_centered_bin_noncorr <- varpred(mod_bin_noncorr
 	, isolate=TRUE
 	, modelname="centered mm"
 )
+true_noncorr <- mean(pred_x_centered_bin_noncorr$preds$fit)
 
 ### Combine all predictions
 vlist <- list(pred_x_trad_bin_noncorr, pred_x_centered_bin_noncorr)
@@ -61,7 +69,8 @@ pred_x_bin_noncorr_plots <- (comparevarpred(vlist=vlist
 	+ scale_colour_manual(breaks = c("everything", "centered mm")
 		, values=c(everything="blue", "centered mm"="black")
 	)
-	+ geom_hline(data=observed_df_noncorr, aes(yintercept=z), lty=2)
+	+ geom_hline(data=observed_df_noncorr, aes(yintercept=z), lty=2, col="red")
+	+ geom_hline(yintercept=true_noncorr, lty=2)
 	+ labs(y="Predictions", colour="Method", title="No correlation")
 	+ theme(legend.position="bottom")
 )

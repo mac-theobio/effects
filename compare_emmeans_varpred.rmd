@@ -234,10 +234,10 @@ head(df)
 Model:
 
 ```{r toy_model, echo=TRUE}
-toy_mod <- glm(status~-1+services+(age+gender+statusP):services
+toy_mod <- glm(status~services*age
 	, data=df
 	, family="binomial"
-	, contrasts=list(services="contr.sum")
+#	, contrasts=list(services="contr.sum")
 )
 ```
 

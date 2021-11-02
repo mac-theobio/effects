@@ -291,7 +291,8 @@ varpred <- function(mod
 		mm <- NULL
 	}
 	
-
+	attr(mm,"contrasts") <- NULL
+	attr(mm, "assign") <- NULL
 	out <- list(term = paste(focal.predictors, collapse="*")
 		, formula = formula(mod)
 		, response = get_response(mod)

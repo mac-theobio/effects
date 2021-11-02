@@ -1,4 +1,6 @@
 ## This is mac-theobio/effects
+setssh:
+	git remote set-url origin git@github.com:mac-theobio/effects.git
 
 current: target
 -include target.mk
@@ -139,6 +141,14 @@ variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda
 	lme_random_intercept.rda categorical_predictors.rda variable_predictions_objs.rda \
 	variable_predictions.Rnw
 
+######################################################################
+
+## Understanding model matrix*
+understanding_mm.pdf: variable_predictions_funs.rda understanding_mm.rmd
+	$(knitpdf)
+
+######################################################################
+
 ## Compare varpred with emmeans
 compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_objs.rda \
 	categorical_predictors.rda
@@ -146,6 +156,12 @@ compare_emmeans_varpred.pdf: compare_emmeans_varpred.rmd variable_predictions_ob
 
 ## This should work but it doesn't
 bad_example.Rout: bad_example.R categorical_predictors.rda
+
+## Short lab reports
+short_lab_report.pdf: binom_correlated_preds.rda variable_predictions_objs.rda \
+	short_lab_report.rmd
+	$(knitpdf)
+
 
 ######################################################################
 

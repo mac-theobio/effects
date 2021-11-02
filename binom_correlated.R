@@ -17,7 +17,7 @@ simcorr <- function(N = 100
 	df <- data.frame(x=rnorm(N))
 	df <- (df
 		%>% mutate(y = rnorm(N) + beta_xy*x
-			, z_eta = rnorm(N) + beta_xz*x + beta_yz*y
+			, z_eta = rnorm(N, mean=1) + beta_xz*x + beta_yz*y
 			, z = rbinom(N, 1, plogis(z_eta))
 		)
 		%>% select(-z_eta)
@@ -25,7 +25,7 @@ simcorr <- function(N = 100
 	return(df)
 }
 
-N <- 100
+N <- 500
 sim_df_bin_corr <- simcorr(N = N, beta_xy=2)
 head(sim_df_bin_corr)
 sim_df_bin_noncorr <- simcorr(N = N, beta_xy=0)

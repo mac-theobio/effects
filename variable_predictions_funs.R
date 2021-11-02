@@ -64,20 +64,27 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 		Xcat <- list()
 		cfun <- pcat$fun
 		if (is.null(cfun)) cfun <- sample
+		labels_temp <- pcat$labels
+		prob_temp <- pcat$prob
 		for (nl in 1:cp) {
+			if(is.list(labels)) {
+				labels <- labels_temp[[nl]]
+				prob <- prob_temp[[nl]]
+			} else {
+				labels <- labels_temp
+				prob <- prob_temp
+			}
 			if (nlevels[[nl]]<2)stop("Levels of categorical variable must be >1")
-			labels <- pcat$labels
-			if(is.list(labels)) labels <- labels[[nl]]
 			if (is.null(labels)) {
 				levs <- sample(LETTERS, nlevels[[nl]], replace=FALSE)
 			} else {
 				levs <- labels
+				if (is.list(levs)) levs <- levs[[nl]]
 			}
 			if (length(levs) != nlevels[[nl]])
 				stop("nlevels must be equal to the length of labels")
 			pcat$labels <- NULL
 			pcat$x <- levs
-			prob <- pcat$prob
 			if(is.list(prob)) prob <- prob[[nl]]
 			if (is.null(prob)) {
 				prob <- rep(1/nlevels[[nl]], nlevels[[nl]])

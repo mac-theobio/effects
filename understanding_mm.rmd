@@ -1,0 +1,395 @@
+---
+title: "How to we handle the categorical predictors?"
+author: Bicko, Jonathan & Ben
+date: "2021 Nov 01 (Mon)"
+compact-title: false
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+---
+
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(fig.pos = "H"
+	, out.extra = ""
+	, message=FALSE
+	, warning=FALSE
+	, echo=FALSE
+	, comment=""
+)
+
+library(shellpipes)
+library(dplyr)
+library(ggplot2)
+library(vareffects); varefftheme()
+library(emmeans)
+library(effects)
+
+commandEnvironments()
+makeGraphics()
+ 
+set.seed(2121)
+
+load("variable_predictions_funs.rda")
+```
+
+\section{Single categorical, single continuous predictors}
+
+```{r global_vars}
+N <- 100
+```
+
+```{r single_cat_single_cont}
+single_cat_single_cont_sim <- linearsim(nHH=N
+	, form=~1+x1+x2
+	, betas=NULL
+	, pgausian=list(p=1)
+	, pcat=list(p=1
+		, fun=sample
+		, nlevels=3
+		, labels=c("Christian","Muslim","Jews")
+		, prob=c(0.4, 0.35, 0.25)
+		, replace=TRUE
+	)
+	, link_scale=TRUE
+	, vnames=c("age", "rel", "hhsize")
+)
+single_cat_single_cont_sim_df <- single_cat_single_cont_sim$data
+head(single_cat_single_cont_sim_df)
+```
+
+```{r single_cat_single_cont_mod}
+single_cat_single_cont_mod <- lm(hhsize ~ age + rel, data=single_cat_single_cont_sim_df)
+```
+
+\subsection{religion}
+
+\subsubsection{varpred}
+
+```{r single_cat_single_cont_vpred1}
+single_cat_single_cont_vpred1 <- varpred(single_cat_single_cont_mod
+	, "rel"
+	, handle.inter="emmeans"
+	, returnall=TRUE
+)
+single_cat_single_cont_vpred1$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r single_cat_single_cont_em1}
+single_cat_single_cont_em1 <- emmeans(single_cat_single_cont_mod
+	, specs=~rel
+)
+single_cat_single_cont_em1@linfct
+```
+
+\subsubsection{effects}
+
+```{r single_cat_single_cont_eff1}
+single_cat_single_cont_eff1 <- Effect("rel"
+	, single_cat_single_cont_mod
+)
+eff_mm <- single_cat_single_cont_eff1$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+\subsection{age}
+
+\subsubsection{varpred}
+
+```{r single_cat_single_cont_vpred_age}
+quant <- seq(0,1,length.out=4)
+age_at <- quantile(single_cat_single_cont_sim_df$age, quant)
+single_cat_single_cont_vpred_age <- varpred(single_cat_single_cont_mod
+	, "age"
+	, at=list(age=age_at)
+	, handle.inter="emmeans"
+	, returnall=TRUE
+)
+single_cat_single_cont_vpred_age$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r single_cat_single_cont_em_age}
+single_cat_single_cont_em_age <- emmeans(single_cat_single_cont_mod
+	, specs=~age
+	, at=list(age=age_at)
+	, weights="proportional"
+)
+single_cat_single_cont_em_age@linfct
+```
+
+\subsubsection{effects}
+
+```{r single_cat_single_cont_eff_age}
+single_cat_single_cont_eff_age <- Effect("age"
+	, single_cat_single_cont_mod
+	, xlevels=list(age=age_at)
+)
+eff_mm <- single_cat_single_cont_eff_age$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+\section{age and religion interaction}
+
+```{r single_cat_single_cont_mod_inter}
+single_cat_single_cont_mod_inter <- lm(hhsize ~ age*rel, data=single_cat_single_cont_sim_df)
+```
+
+\subsection{religion$\star$age}
+
+\subsubsection{varpred}
+
+```{r single_cat_single_cont_vpred1_inter}
+age_mean <- mean(single_cat_single_cont_sim_df$age)
+single_cat_single_cont_vpred1_inter <- varpred(single_cat_single_cont_mod_inter
+	, c("rel", "age")
+	, x.var="rel"
+	, at=list(age=age_at)
+	, handle.inter="emmeans"
+	, returnall=TRUE
+)
+single_cat_single_cont_vpred1_inter$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r single_cat_single_cont_em1_inter}
+single_cat_single_cont_em1_inter <- emmeans(single_cat_single_cont_mod_inter
+	, specs=~rel*age
+	, at=list(age=age_at)
+)
+single_cat_single_cont_em1_inter@linfct
+```
+
+\subsubsection{effects}
+
+```{r single_cat_single_cont_eff1_inter}
+single_cat_single_cont_eff1_inter <- Effect(c("rel", "age")
+	, single_cat_single_cont_mod_inter
+	, x.var="rel"
+	, xlevels=list(age=age_at)
+)
+eff_mm <- single_cat_single_cont_eff1_inter$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+
+\subsection{Ignore interaction}
+
+\subsection{religion}
+
+\subsubsection{varpred}
+
+```{r single_cat_single_cont_vpred1_inter_ign}
+single_cat_single_cont_vpred1_inter_ign <- varpred(single_cat_single_cont_mod_inter
+	, "rel"
+	, handle.inter="emmeans"
+	, returnall=TRUE
+)
+single_cat_single_cont_vpred1_inter_ign$raw$model.matrix
+```
+
+
+\subsubsection{emmeans}
+
+```{r single_cat_single_cont_em1_inter_ign}
+single_cat_single_cont_em1_inter_ign <- emmeans(single_cat_single_cont_mod_inter
+	, specs=~rel
+	, nesting=NULL
+)
+single_cat_single_cont_em1_inter_ign@linfct
+```
+
+\subsubsection{effects}
+
+```{r single_cat_single_cont_eff1_inter_ign}
+single_cat_single_cont_eff1_inter_ign <- Effect("rel"
+	, single_cat_single_cont_mod_inter
+)
+eff_mm <- single_cat_single_cont_eff1_inter_ign$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+\subsection{age}
+
+\subsubsection{varpred}
+
+```{r single_cat_single_cont_vpred_age_inter_ign}
+single_cat_single_cont_vpred_age_inter_ign <- varpred(single_cat_single_cont_mod_inter
+	, "age"
+	, at=list(age=age_at)
+	, handle.inter="emmeans"
+	, returnall=TRUE
+)
+single_cat_single_cont_vpred_age_inter_ign$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r single_cat_single_cont_em_age_inter_ign}
+single_cat_single_cont_em_age_inter_ign <- emmeans(single_cat_single_cont_mod_inter
+	, specs=~age
+#	, cov.keep="age"
+	, at=list(age=age_at)
+	, nesting=NULL
+	, weights="proportional"
+)
+single_cat_single_cont_em_age_inter_ign@linfct
+```
+
+\subsubsection{effects}
+
+```{r single_cat_single_cont_eff_age_inter_ign}
+single_cat_single_cont_eff_age_inter_ign <- Effect("age"
+	, single_cat_single_cont_mod_inter
+	, xlevels=list(age=age_at)
+)
+eff_mm <- single_cat_single_cont_eff_age_inter_ign$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+
+\section{Two categorical, single continuous predictors}
+
+```{r two_cat_single_cont}
+two_cat_sim <- linearsim(nHH=N
+	, form=~1+x1+x2+x3
+	, betas=NULL
+	, pgausian=list(p=1)
+	, pcat=list(p=2
+		, fun=sample
+		, nlevels=c(3,2)
+		, labels=list(c("Christian","Muslim","Jews"), c("Male", "Female"))
+		, prob=list(c(0.4, 0.35, 0.25), c(0.6, 0.4))
+		, replace=TRUE
+	)
+	, link_scale=TRUE
+	, vnames=c("age", "rel", "gender", "hhsize")
+)
+two_cat_sim_df <- two_cat_sim$data
+age_at <- quantile(two_cat_sim_df$age, quant)
+head(two_cat_sim_df)
+```
+
+```{r two_cat_mod}
+two_cat_mod <- lm(hhsize~rel*gender+age, data=two_cat_sim_df)
+```
+
+\subsection{religion$\star$gender}
+
+\subsubsection{varpred}
+
+```{r two_cat_vpred_inter}
+two_cat_vpred_inter <- varpred(two_cat_mod
+	, c("rel", "gender")
+	, x.var="rel"
+	, returnall=TRUE
+)
+two_cat_vpred_inter$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r two_cat_em_inter}
+two_cat_em_inter <- emmeans(two_cat_mod
+	, specs=~rel*gender
+	, weights="proportional"
+)
+two_cat_em_inter@linfct
+```
+
+\subsubsection{effects}
+
+```{r two_cat_eff_inter}
+two_cat_eff_inter <- Effect(c("rel", "gender")
+	, two_cat_mod
+	, x.var="rel"
+)
+eff_mm <- two_cat_eff_inter$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+\subsection{age}
+
+\subsubsection{varpred}
+
+```{r two_cat_vpred_inter_age}
+two_cat_vpred_inter_age <- varpred(two_cat_mod
+	, "age"
+	, at=list(age=age_at)
+	, returnall=TRUE
+)
+two_cat_vpred_inter_age$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r two_cat_em_inter_age}
+two_cat_em_inter_age <- emmeans(two_cat_mod
+	, specs=~age
+	, at=list(age=age_at)
+	, weights="proportional"
+	, nesting="rel %in% gender"
+)
+two_cat_em_inter_age@linfct
+```
+
+\subsubsection{effects}
+
+```{r two_cat_eff_inter_age}
+two_cat_eff_inter_age <- Effect("age"
+	, two_cat_mod
+	, xlevels=list(age=age_at)
+)
+eff_mm <- two_cat_eff_inter_age$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
+
+\subsection{religion}
+
+\subsubsection{varpred}
+
+```{r two_cat_vpred_inter_gender}
+two_cat_vpred_inter_rel <- varpred(two_cat_mod
+	, "rel"
+	, returnall=TRUE
+)
+two_cat_vpred_inter_rel$raw$model.matrix
+```
+
+\subsubsection{emmeans}
+
+```{r two_cat_em_inter_rel}
+two_cat_em_inter_rel <- emmeans(two_cat_mod
+	, specs=~rel
+	, weights="proportional"
+	, nesting=NULL
+)
+two_cat_em_inter_rel@linfct
+```
+
+
+
+**Check**
+
+```{r}
+colMeans(model.matrix(two_cat_mod))
+```
+

@@ -1,0 +1,46 @@
+---
+title: "Predictor effects and Bias correction in GL(M)M"
+author: Bicko, Ben & Jonathan
+date: "2021 Oct 29 (Fri)"
+compact-title: false
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+bibliography: bias_correction.bib
+link-citations: yes
+---
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+library(vareffects); varefftheme()
+
+set.seed(9991)
+load("variable_predictions_objs.rda")
+load("binom_correlated_preds.rda")
+```
+
+
+We want:
+
+\[
+E(y|\{X_f, \bar{X}_{\{n\}}\})
+\]
+
+
+Challenges:
+
+\begin{enumerate}
+\item choice of representative values of \emph{focal} predictor(s) and appropriate ``model center" for \emph{non-focal} predictors especially in multivariate models
+\item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? Should we exclude variation in non-focal parameters?)
+\item bias in the expected mean prediction induced by the nonlinear transformation of the response variable (especially in GL(M)M)
+\end{enumerate}
+
+```{r echo=FALSE, fig.height=10}
+print(pred_age_cont_plots)
+```
+
+```{r echo=FALSE, fig.height=10}
+print(pred_bin_corr_plots)
+```
+

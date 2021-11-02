@@ -466,9 +466,9 @@ clean_model <- function(focal.predictors, mod, xlevels
 }
 
 
-get_model_matrix <- function(mod, mod.matrix, X.mod
-	, factor.cols, cnames, focal.predictors, excluded.predictors
-	, typical, apply.typical.to.factors, factor.type, x.var, factor.weights, vnames){
+get_model_matrix <- function(mod, mod.matrix, X.mod, factor.cols, cnames
+	, focal.predictors, excluded.predictors, typical, apply.typical.to.factors
+	, factor.type, x.var, factor.weights, vnames){
   attr(mod.matrix, "assign") <- attr(X.mod, "assign")
   if (length(excluded.predictors) > 0){
     strangers <- get_strangers(mod, focal.predictors, excluded.predictors)
@@ -488,28 +488,11 @@ get_model_matrix <- function(mod, mod.matrix, X.mod
       components <- unlist(strsplit(name, ':'))
       components <- components[components %in% cnames]
       if (length(components) > 1) {
-		  ## Modified by SC
-			mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
-#			if (!factor.cols[[x.var]]$is.factor) {
-#				mod.matrix[,name] <- typical(apply(mod.matrix.all[,components], 1, prod))
-#			} else {
-#				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
+#			if (!factor.cols[[name]]) {
+				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
 #			}
       }
     }
   }
-	
-#	for (v in unique(vnames)) {
-#		v.type <- factor.type[[v]]
-#		if ((!v.type)) {
-#			components2 <- grep(":", names(vnames)[vnames==v], value=TRUE)
-#			if (length(components2) > 1) {
-#				weights <- factor.weights[[vnames[names(vnames) %in% unlist(strsplit(components2[1], ':'))]]]
-#				level.weight <- weights$level.prop
-#				mod.matrix[,components2] <- apply(mod.matrix[,components2], 1, sum)
-#				mod.matrix[,components2] <- sweep(mod.matrix[,components2], 2, level.weight, "*")
-#			}
-#		}
-#	}
   mod.matrix
 }
