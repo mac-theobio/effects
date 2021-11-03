@@ -353,7 +353,7 @@ varpred <- function(mod
 	attr(result, "response") <- out$response
 	attr(result, "x.var") <- out$x.var 
 	if (returnall) {
-		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw = out, factor.cols=factor.cols)
+		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw = out, factor.cols=factor.cols, ff=factor.type)
 	} else {
 		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma)
 	}

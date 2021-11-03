@@ -291,12 +291,13 @@ clean_model <- function(focal.predictors, mod, xlevels
   names(factor.cols) <- cnames
 
   for (name in all.predictors){
-    if (check_factor(name, mod)) {
+    ff_check <- check_factor(name, mod)
+    if (ff_check) {
       factor.cols[grep(paste("^", name, sep=""), cnames)] <- TRUE
-    } 
-#	 else {
-#      factor.cols[grep(paste0(":", name), cnames)] <- FALSE 
-#	 }
+    }
+	 if (!ff_check) {
+	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
+	 }
   }
 #  factor.cols[grep(":", cnames)] <- FALSE   
 
@@ -487,10 +488,15 @@ get_model_matrix <- function(mod, mod.matrix, X.mod, factor.cols, cnames
     for (name in cnames){
       components <- unlist(strsplit(name, ':'))
       components <- components[components %in% cnames]
+		if (length(components)==1) components <- unique(c(components, name))
       if (length(components) > 1) {
-#			if (!factor.cols[[name]]) {
+			if (factor.type[[x.var]]) {
 				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
-#			}
+			} else {
+				if (grepl(x.var, name)) {
+					mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
+				}
+			}
       }
     }
   }

@@ -385,6 +385,17 @@ two_cat_em_inter_rel <- emmeans(two_cat_mod
 two_cat_em_inter_rel@linfct
 ```
 
+\subsubsection{effects}
+
+```{r two_cat_eff_inter_gender}
+two_cat_eff_inter_rel <- Effect("rel"
+	, two_cat_mod
+)
+eff_mm <- two_cat_eff_inter_rel$model.matrix
+attr(eff_mm, "contrasts") <- NULL
+attr(eff_mm, "assign") <- NULL
+eff_mm
+```
 
 
 **Check**
