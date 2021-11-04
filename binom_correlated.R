@@ -18,7 +18,7 @@ simcorr <- function(N = 100
 	df <- (df
 		%>% mutate(y = rnorm(N) + beta_xy*x
 			, z_eta = rnorm(N, mean=1) + beta_xz*x + beta_yz*y
-			, z = rbinom(N, 1, plogis(z_eta))
+			, z = rbinom(n(), 1, plogis(z_eta))
 		)
 		%>% select(-z_eta)
 	)

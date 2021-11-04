@@ -8,13 +8,13 @@ commandEnvironments()
 makeGraphics()
 
 ## Not mediated
-pred_x_trad_notmediated <- varpred(mod_notmediated
+pred_x_trad_notmediated <- varpred(mod_notmediated_bin
 	, "x"
 	, isolate=FALSE
 	, modelname="everything"
 )
 
-pred_x_centered_notmediated <- varpred(mod_notmediated
+pred_x_centered_notmediated <- varpred(mod_notmediated_bin
 	, "x"
 	, isolate=TRUE
 	, modelname="centered mm"
@@ -33,7 +33,7 @@ pred_x_notmediated_plots <- (comparevarpred(vlist=vlist
 		, values=c(everything="blue", "centered mm"="black")
 	)
 	+ geom_hline(yintercept=pred_prop_notmed, lty=2, col="black")
-	+ geom_hline(data=observed_df_med, aes(yintercept=z), lty=2, col="red")
+	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ labs(y="Predictions", colour="Method", title="Not mediated")
 	+ theme(legend.position="bottom")
@@ -41,13 +41,13 @@ pred_x_notmediated_plots <- (comparevarpred(vlist=vlist
 print(pred_x_notmediated_plots)
 
 ## Mediated
-pred_x_trad_mediated <- varpred(mod_mediated
+pred_x_trad_mediated <- varpred(mod_mediated_bin
 	, "x"
 	, isolate=FALSE
 	, modelname="everything"
 )
 
-pred_x_centered_mediated <- varpred(mod_mediated
+pred_x_centered_mediated <- varpred(mod_mediated_bin
 	, "x"
 	, isolate=TRUE
 	, modelname="centered mm"
@@ -66,7 +66,7 @@ pred_x_mediated_plots <- (comparevarpred(vlist=vlist
 		, values=c(everything="blue", "centered mm"="black")
 	)
 	+ geom_hline(yintercept=pred_prop_med, lty=2, col="black")
-	+ geom_hline(data=observed_df_med, aes(yintercept=z), lty=2, col="red")
+	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ labs(y="Predictions", colour="Method", title="Mediated")
 	+ theme(legend.position="bottom")

@@ -1,6 +1,4 @@
 ## This is mac-theobio/effects
-setssh:
-	git remote set-url origin git@github.com:mac-theobio/effects.git
 
 current: target
 -include target.mk
@@ -10,9 +8,13 @@ current: target
 vim_session:
 	bash -cl "vmt notes.md structure.md"
 
+setssh:
+	git remote set-url origin git@github.com:mac-theobio/effects.git
+
 ######################################################################
 
-today: compare_emmeans_varpred.pdf variable_predictions.pdf
+today: mediate_bin_preds.Rout.pdf.go mediate_preds.Rout.pdf.go \
+	binom_correlated_preds.Rout.pdf.go understanding_mm.pdf.go
 
 ######################################################################
 
@@ -129,6 +131,7 @@ cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda
 mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
+mediate_bin_preds.Rout: mediate_bin_preds.R mediate_model.rda
 
 ## Correlated predictor glm
 binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda

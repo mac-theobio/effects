@@ -18,9 +18,16 @@ df <- data.frame(x=rnorm(N))
 sim_df_mediate <- (df
 	%>% mutate(y = rnorm(N) + beta_xy*x
 		, z = rnorm(N) + beta_xz*x + beta_yz*y
+		, zbin = rbinom(n(), 1, plogis(z))
 	)
 )
 
 head(sim_df_mediate)
 
-saveVars(sim_df_mediate, comparevarpred)
+## Observed marginals
+observed_df_med <- (sim_df_mediate
+	%>% summarise_all(mean)
+)
+observed_df_med
+
+saveVars(sim_df_mediate, observed_df_med, comparevarpred)
