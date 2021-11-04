@@ -13,8 +13,8 @@ setssh:
 
 ######################################################################
 
-today: mediate_bin_preds.Rout.pdf.go mediate_preds.Rout.pdf.go \
-	binom_correlated_preds.Rout.pdf.go understanding_mm.pdf.go
+today: mediate_bin_preds.Rout.pdf mediate_preds.Rout.pdf \
+	binom_correlated_preds.Rout.pdf understanding_mm.pdf
 
 ######################################################################
 
