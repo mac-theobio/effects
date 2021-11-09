@@ -1,0 +1,249 @@
+---
+title: "How to we handle the categorical predictors?"
+author: Bicko, Jonathan & Ben
+date: "2021 Nov 06 (Sat)"
+compact-title: false
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+---
+
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(fig.pos = "H"
+	, out.extra = ""
+	, message=FALSE
+	, warning=FALSE
+	, echo=FALSE
+	, comment=""
+)
+
+library(shellpipes)
+library(dplyr)
+library(ggplot2)
+library(vareffects); varefftheme()
+library(emmeans)
+library(effects)
+
+commandEnvironments()
+makeGraphics()
+ 
+set.seed(2121)
+
+load("variable_predictions_funs.rda")
+
+cols <- c(Effect="black", varpred="red", emmeans="blue")
+```
+
+\section{Two categorical, single continuous predictors}
+
+
+\begin{align}\label{sim:lm_no_interaction_cat}
+\mathrm{hh~size} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{[\mathrm{r}]}\mathrm{Religion_i} + \beta_{[\mathrm{g}]}{\mathrm{Gender}_i} + \beta_{[\mathrm{rg}]}\mathrm{Gender_i
+\times Religion_i} + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0, 3) \nonumber\\
+\mathrm{Prob(Gender_{i})} &= \begin{cases}
+   0.4 & \mathrm{i=Female} \nonumber\\
+   0.6 & \mathrm{i=Male} \nonumber\\
+  \end{cases} \nonumber\\
+\mathrm{Prob(Religion_{i})} &= \begin{cases}
+   0.6 & \mathrm{i=Christian} \nonumber\\
+   0.3 & \mathrm{i=Muslim} \nonumber\\
+   0.1 & \mathrm{i=Jew} \nonumber\\
+  \end{cases} \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 1.5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.8 \nonumber\\
+\vdots \nonumber \\
+i &= 1,\cdots, 100
+\end{align}
+
+
+```{r depend_eff, echo=TRUE}
+N <- 100
+quant <- seq(0,1,length.out=50)
+## Betas
+b0 <- 10
+b_age <- 0.8
+b_jew <- 1
+b_muslim <- 0.4
+b_male <- 2
+b_male_jew <- 0.7
+b_male_muslim <- 0.2
+betas <- c(b0, b_age, b_jew, b_muslim, b_male, b_male_jew, b_male_muslim)
+
+## Proportions
+rel_prob <- c(Christian=0.6, Muslim=0.3, Jew=0.1)
+gender_prob <- c(Male=0.6, Female=0.4)
+
+dat <- tibble(age=rnorm(N, 0, 3)
+	, rel=sample(c("Christian", "Muslim", "Jew"), size=N, prob=rel_prob, replace=TRUE)
+	, gender=sample(c("Male", "Female"), size=N, prob=gender_prob, replace=TRUE)
+)
+mm <- model.matrix(~1+age+rel*gender, dat)
+eta <- as.vector(mm %*% betas)
+
+df <- (dat
+	%>% mutate(hhsize=rnorm(N, mean=eta, sd=1))
+)
+age_at <- quantile(df$age, quant)
+head(df)
+```
+
+
+The model:
+
+```{r depend_eff_mod, echo=TRUE}
+depend_eff_mod <- lm(hhsize~rel*gender+age, df)
+```
+
+\newpage
+
+\subsubsection{gender$\star$religion}
+
+- All the three methods seems to be doing the same thing:
+	- product of interacting terms 
+
+```{r depend_eff_pred}
+depend_eff_pred <- combinepreds(depend_eff_mod, c("emmeans", "varpred", "Effect"), c("gender","rel")
+	, x.var = "gender"
+	, weights="proportional"
+	, x.var.factor = TRUE, plotit = TRUE
+)
+print(depend_eff_pred 
+	+ facet_wrap(~rel, scales = "free_y")
+	+ scale_colour_manual(values=cols)
+)
+```
+
+\newpage
+
+\subsubsection{Main effect of non-interacting predictor}
+
+- If we ignore the interactions:
+	- **varpred** and **emmeans** averages the columns of the interaction terms
+	- **effects** computes the product of the interacting terms
+	- The predictions are similar but slightly different
+
+```{r depend_eff_age}
+depend_eff_age <- combinepreds(depend_eff_mod, c("emmeans", "varpred", "Effect"), "age"
+	, x.var = "age"
+	, at=list(age=age_at)
+	, xlevel=list(age=age_at)
+	, nesting=NULL
+	, weights="proportional"
+	, plotit = TRUE
+)
+cat("Truth: \n", mean(df$hhsize))
+print(depend_eff_age
+	+ scale_colour_manual(values=cols)
+)
+```
+
+
+\section{Unbalanced data}
+
+
+
+```{r unbalanced_sim, echo=TRUE}
+N <- 100
+quant <- seq(0,1,length.out=50)
+## Betas
+b0 <- 10
+b_age <- 0.8
+b_jew <- 1
+b_muslim <- 0.4
+b_male <- 2
+b_male_jew <- 0.7
+b_male_muslim <- 0.2
+betas <- c(b0, b_age, b_jew, b_muslim, b_male, b_male_jew, b_male_muslim)
+
+## Proportions
+rel_prob <- c(Christian=0.6, Muslim=0.3, Jew=0.1)
+gender_prob <- list(Christian=c(0.97, 0.03)
+	, Muslim=c(0.01, 0.99)
+	, Jew=c(0.5, 0.5)
+)
+
+samplefun <- function(prob, n) {
+	out <- sample(c("Male", "Female"), size=n, prob=prob, replace=TRUE)
+}
+
+dat <- tibble(age=rnorm(N, 0, 3)
+	, rel=sample(c("Christian", "Muslim", "Jew"), size=N, prob=rel_prob, replace=TRUE)
+)
+dat <- (dat
+	%>% group_by(rel)
+	%>% mutate(gender=ifelse(rel=="Christian"
+			, samplefun(gender_prob[["Christian"]], n())
+				, ifelse(rel=="Muslim", samplefun(gender_prob[["Muslim"]], n())
+				, samplefun(gender_prob[["Jew"]], n())
+			)
+		)
+	)
+	%>% ungroup()
+)
+head(dat)
+mm <- model.matrix(~1+age+rel*gender, dat)
+eta <- as.vector(mm %*% betas)
+
+unbalanced_df <- (dat
+	%>% mutate(hhsize=rnorm(N, mean=eta, sd=1))
+)
+age_at <- quantile(unbalanced_df$age, quant)
+head(unbalanced_df)
+
+```
+
+The model:
+
+```{r unbalanced_mod, echo=TRUE}
+unbalanced_mod <- lm(hhsize~rel*gender+age, unbalanced_df)
+```
+
+\newpage
+
+\subsubsection{gender$\star$religion}
+
+- All the three methods seems to be doing the same thing:
+	- product of interacting terms 
+
+```{r unbalanced_pred}
+unbalanced_pred <- combinepreds(unbalanced_mod, c("emmeans", "varpred", "Effect"), c("gender","rel")
+	, x.var = "gender"
+	, weights="proportional"
+	, x.var.factor = TRUE, plotit = TRUE
+)
+print(unbalanced_pred 
+	+ facet_wrap(~rel, scales = "free_y")
+	+ scale_colour_manual(values=cols)
+)
+table(unbalanced_df$rel, unbalanced_df$gender)
+```
+
+\newpage
+
+\subsubsection{Main effect of non-interacting predictor}
+
+- If we ignore the interactions:
+	- **varpred** and **emmeans** averages the columns of the interaction terms
+	- **effects** computes the product of the interacting terms
+	- The predictions are similar but slightly different
+
+- CIs excluded for clarity
+
+```{r unbalanced_age}
+unbalanced_age <- combinepreds(unbalanced_mod, c("emmeans", "varpred", "Effect"), "age"
+	, x.var = "age"
+	, at=list(age=age_at)
+	, xlevel=list(age=age_at)
+	, nesting=NULL
+	, weights="proportional"
+	, plotit = TRUE
+	, ci=FALSE
+)
+cat("Truth: \n", mean(unbalanced_df$hhsize))
+print(unbalanced_age
+	+ scale_colour_manual(values=cols)
+)
+```

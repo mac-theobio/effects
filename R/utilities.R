@@ -17,12 +17,18 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		mm[,non_focal_terms] <- 0
 		col_mean[non_focal_terms] <- 0
 	}
+	
+	if (!is.null(x.excluded)) {
+		nM <- NROW(x.excluded)
+	} else {
+		nM <- NROW(mm)
+	}
 
 	pred_list <- list()
 	offs <- NULL
 	for (i in 1:NROW(x.focal)) {
 		focal_i <- x.focal[i, ,drop=FALSE]
-		focal_i[1:NROW(x.excluded), ] <- focal_i
+		focal_i[1:nM, ] <- focal_i
 		mf_i <- if(!is.null(x.excluded)) cbind.data.frame(focal_i, x.excluded) else focal_i
 		mf_i <- model.frame(rTerms, mf_i, xlev=factor.levels, na.action=NULL)
 		mm_i <- model.matrix(formula.rhs, data = mf_i, contrasts.arg = contr)

@@ -132,6 +132,7 @@ mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
 mediate_bin_preds.Rout: mediate_bin_preds.R mediate_model.rda
+mediate_bin_preds_adjust.Rout: mediate_bin_preds_adjust.R mediate_model.rda
 
 ## Correlated predictor glm
 binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda
@@ -145,9 +146,15 @@ variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda
 	variable_predictions.Rnw
 
 ######################################################################
+bias_correction_methods.pdf: bias_correction_methods.rmd
+	$(knitpdf)
+
+######################################################################
 
 ## Understanding model matrix*
 understanding_mm.pdf: variable_predictions_funs.rda understanding_mm.rmd
+	$(knitpdf)
+understanding_mm_special.pdf: variable_predictions_funs.rda understanding_mm_special.rmd
 	$(knitpdf)
 
 ######################################################################

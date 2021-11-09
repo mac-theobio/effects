@@ -226,8 +226,8 @@ varpred <- function(mod
 			} else if (sigma=="lp") {
 				# FIXME: seems not appropriate
 				if (bias.adjust=="delta") {
-					message("sigma='lp' ignored, sigma='mod' used instead!")
-					sigma <- get_sigma(mod)
+					message("NOTE: sigma='lp' is experimental, results might be incorrect!")
+					sigma <- sd(pred) #get_sigma(mod)
 				} else {
 					sigma <- sd(pred) 
 				}

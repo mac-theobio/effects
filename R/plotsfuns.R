@@ -57,12 +57,12 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = 
 	nn <- unique(df$model)
 	if (!(length(nn)>1)){
 		p1 <- (ggplot(df, aes_string(x = x.var, y = "fit"), colour="black", alpha = 0.2)
-			+ guides(fill = FALSE)
+			+ guides(fill = "none")
 			+ theme(legend.position = "none")
 		)
 	} else {
 		p1 <- (ggplot(df, aes_string(x = x.var, y = "fit", colour ="model"), alpha = 0.2)
-			+ guides(fill = FALSE)
+			+ guides(fill = "none")
 			+ theme(legend.position = "right")
 		)
 	}

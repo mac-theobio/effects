@@ -265,7 +265,11 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 		spec <- as.formula(paste0("~", focal))
 		focal_temp <- "xvar"
 	}
-	args <- list(mod, spec=spec, focal_predictors=focal, x.var=x.var)
+	args <- list(mod, spec=spec
+		, focal.predictors=focal
+		, focal_predictors=focal
+		, x.var=x.var
+	)
 	add_args <- list(...)
 	if (length(add_args)) args[names(add_args)] <- add_args
 
@@ -305,14 +309,18 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 	}
 	if (plotit) {
 		cols <- rainbow(length(funs))
+#		colfun <- colorRampPalette(c("black", "red"))
+#		cols <- colfun(length(funs))
 		names(cols) <- funs
-		p1 <- (vareffects:::plot.vareffects(out)
+		out <- list(out)
+		out[names(add_args)] <- add_args
+		p1 <- (do.call(vareffects:::plot.vareffects, out)
 			+ scale_colour_manual(breaks = funs, values=cols)
 			+ labs(y="Predictions", x=x.var, colour="Method")
 			+ theme(legend.position="bottom")
 		)
 		if (!x.var.factor) {
-			pred_prop_df <- (out
+			pred_prop_df <- (out[[1]]
 				%>% group_by_at(c("model", focal[!focal %in% x.var]))
 				%>% summarize(fit=mean(fit))
 				%>% data.frame()

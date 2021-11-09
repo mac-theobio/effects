@@ -9,7 +9,7 @@ set.seed(991)
 ## Simulate mediated variables such that:
 ### x -> y -> z
 
-N <- 100
+N <- 10000
 beta_xy <- 0.8
 beta_xz <- 0	# Set to 0 -> x: no direct of x on z
 beta_yz <- 0.8

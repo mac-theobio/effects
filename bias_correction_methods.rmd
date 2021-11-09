@@ -1,0 +1,103 @@
+---
+title: "Bias correction in GLMs"
+author: Bicko, Jonathan & Ben
+date: "2021 Jun 21 (Mon)"
+compact-title: false
+output:
+  pdf_document:
+    extra_dependencies: ["float"]
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+knitr::opts_chunk$set(fig.pos = "H", out.extra = "", message=FALSE, warning=FALSE)
+
+library(shellpipes)
+library(dplyr)
+library(ggplot2)
+library(vareffects); varefftheme()
+
+commandEnvironments()
+makeGraphics()
+ 
+set.seed(9991)
+```
+
+\newcommand{\nset}[1]{#1_{\{n\}}}
+\newcommand{\yref}{y_{\textrm{ref}}}
+\newcommand{\cdist}{{D(\nset{x}|x_f)}}
+\newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
+\newcommand{\xfprime}{x_{f'}}
+
+\newcommand{\bX}{{\mathbf X}}
+\newcommand{\bbeta}{{\boldsymbol \beta}}
+\newcommand{\boldeta}{{\boldsymbol \eta}}
+
+Notation :
+
+- $x_f$: a value of the focal predictor
+- $\nset{x}$: a vector of values of the non-focal predictors for a particular observation
+- $\eta(x_f, \nset{x}) = \beta_f x_f + \sum \nset{\beta} \nset{x}$ = linear predictor (e.g. prediction on the log-odds scale)
+- $g^{-1}()$: inverse-link function (e.g. logistic)
+- $\cdist$: distribution of the non-focal predictors conditional on a particular value of the focal predictor
+- $\beta_{fi}$: the coefficient describing the interaction(s) of the focal and non-focal parameters
+
+_\
+
+
+\section{Population-based approach for bias correction}
+
+
+\subsection{Binned non-focal linear predictor}
+
+To implement this:
+\begin{itemize}
+\item compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+\item find a list of vectors of observations of $\nset{\eta}$ associated with each value (bin) of the focal predictor, $\nset{{\eta_j}}$, $j = 1, 2, \cdots$
+\item for each $\nset{{\eta_j}}$:
+\begin{itemize}
+\item compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{{\eta_j}}\right)$
+\end{itemize}
+\end{itemize}
+
+If we compute the individual back-transformed predictions for a poorly sampled/finely spaced set of focal values, we will get a noisy prediction line as the values of the non-focal predictors shift across the focal values. Simple example: suppose everyone below the median age has wealth index $w_1$, everyone above the median has $w_2$.  Then the predicted value will have a discontinuity at the median age. We can deal with this by taking bigger bins (a form of smoothing), or by post-smoothing the results (by loess, for example). The principled form of this would be to assume/recognize that our uneven distribution of observed non-focal predictors actually represents a sample of a distribution that will vary \emph{smoothly} as a function of the focal predictor.
+
+
+\subsection{Whole population non-focal linear predictor}
+
+Instead of binning non-focal associated with particular level of focal predictor, we add the overall contribution of the non-focal predictor to the corresponding value of the focal linear predictor. In particular:  
+
+\begin{itemize}
+\item compute linear predictor of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+\item for every value of the focal predictor, $x_{j_f}$:
+\begin{itemize}
+\item compute $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\beta_f x_{j_f} + \nset{\eta}\right)$
+\end{itemize}
+\end{itemize}
+
+
+\section{Delta method}
+
+Suppose that we have a response $Y$ and the transformed response on the link scale, $\eta$ and an inverse-link function $h(.) = g^{-1}(.)$. We consider $\eta$ as a one-dimensional random variable with mean ($\mu_{\eta}$) and standard deviation ($\sigma_{\eta}$). We are interested in the expected value of $h(\eta)$, i.e., the back-transformed values so that $Y = h(\eta)$. More specifically, based on a second-order Taylor expansion
+
+\begin{align*}
+Y \approx h(\mu_{\eta}) + h'(\eta)(\eta - \mu_{\eta}) + \frac{1}{2}h''(\eta)(\eta - \mu_{\eta})^2
+\end{align*}
+
+so that
+
+\begin{align*}
+E(Y) = h(\eta) + \frac{1}{2}h''(\mu_{\eta})\sigma^2_{\eta}
+\end{align*}
+
+
+\section{McCulloch and Searle (2001)}
+\[
+E(Y) \approx h\left(\eta-\frac{0.5\sigma^2\tanh(\eta(1 + 2\exp(-0.5\sigma^2)))}{6}\right)
+\]
+
+
+\section{Diggle et al. (2004)}
+\[
+E(Y) \approx h\left(\frac{\eta}{\sqrt{1 + \left(\frac{16\sqrt{3}}{15\pi}\right)^2\sigma^2}}\right)
+\]
+
