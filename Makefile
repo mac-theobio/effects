@@ -13,8 +13,9 @@ setssh:
 
 ######################################################################
 
-today: mediate_bin_preds.Rout.pdf mediate_preds.Rout.pdf \
-	binom_correlated_preds.Rout.pdf understanding_mm.pdf
+today: bias_correction_methods.pdf mediate_bin_preds_adjust.Rout.pdf \
+	glme_random_intercept_preds.Rout.pdf
+
 
 ######################################################################
 
@@ -139,6 +140,10 @@ binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda
 binom_correlated_model.Rout: binom_correlated_model.R binom_correlated.rda
 binom_correlated_preds.Rout: binom_correlated_preds.R binom_correlated_model.rda
 
+## One predictor, single intercept glme
+glme_random_intercept.Rout: glme_random_intercept.R variable_predictions_funs.rda
+glme_random_intercept_model.Rout: glme_random_intercept_model.R glme_random_intercept.rda
+glme_random_intercept_preds.Rout: glme_random_intercept_preds.R glme_random_intercept_model.rda
 
 ## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda \

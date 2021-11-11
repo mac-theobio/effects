@@ -30,4 +30,4 @@ observed_df_med <- (sim_df_mediate
 )
 observed_df_med
 
-saveVars(sim_df_mediate, observed_df_med, comparevarpred)
+saveVars(sim_df_mediate, observed_df_med, comparevarpred, binfun)

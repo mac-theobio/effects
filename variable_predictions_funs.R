@@ -184,15 +184,17 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 
 
 ## Generate binned observations
-binfun <- function(mod, focal, non.focal, bins=50, ...) {
+binfun <- function(mod, focal, bins=50, groups=NULL, ...) {
+	if (!is.null(groups)) {
+		bins_all <- c(groups, "bin")
+	} else {
+		bins_all <- "bin"
+	}
 	mf <- model.frame(mod)
-	mm <- (mf
-		%>% select_at(c(focal, non.focal))
-	)
 	check_df <- (mf
 		%>% arrange_at(focal)
 		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
-		%>% group_by(bin)
+		%>% group_by_at(bins_all)
 		%>% summarise_all(mean)
 		%>% mutate(model="binned")
 	)

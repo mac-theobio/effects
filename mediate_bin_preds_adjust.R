@@ -61,6 +61,9 @@ pred_pop_notmediated <- varpred(mod_notmediated_bin
 	, modelname="pop"
 )
 
+## Bins 
+binned_df <- binfun(mod_notmediated_bin, focal="x", bins=50, groups=NULL)
+
 ### Combine all predictions
 vlist <- list(pred_none_notmediated
 	, pred_delta_mod_notmediated
@@ -77,6 +80,7 @@ pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, ci=FALSE
 	)
 #	+ geom_hline(yintercept=pred_prop_notmed, lty=2, col="black")
+	+ geom_point(data=binned_df, aes(x=x, y=zbin), colour="grey")
 	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ labs(y="Predictions", colour="Method", title="Not mediated")
@@ -137,6 +141,9 @@ pred_pop_mediated <- varpred(mod_mediated_bin
 	, modelname="pop"
 )
 
+## Bins 
+binned_df <- binfun(mod_mediated_bin, focal="x", bins=50, groups=NULL)
+
 ### Combine all predictions
 vlist <- list(pred_none_mediated
 	, pred_delta_mod_mediated
@@ -153,6 +160,7 @@ pred_mediated_plots <- (comparevarpred(vlist=vlist
 		, ci=FALSE
 	)
 #	+ geom_hline(yintercept=pred_prop_notmed, lty=2, col="black")
+#	+ geom_point(data=binned_df, aes(x=x, y=zbin), colour="grey")
 	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ labs(y="Predictions", colour="Method", title="Not mediated")
