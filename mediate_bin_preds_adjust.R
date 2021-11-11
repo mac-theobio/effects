@@ -6,7 +6,7 @@ library(dplyr)
 
 rpcall("mediate_bin_preds_adjust.Rout mediate_bin_preds_adjust.R mediate_model.rda")
 commandEnvironments()
-makeGraphics()
+startGraphics()
 
 ## Not mediated
 ### No bias adjustment

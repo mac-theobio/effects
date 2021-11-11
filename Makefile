@@ -13,9 +13,7 @@ setssh:
 
 ######################################################################
 
-today: bias_correction_methods.pdf mediate_bin_preds_adjust.Rout.pdf \
-	glme_random_intercept_preds.Rout.pdf
-
+today: bias_correction_methods.pdf glme_random_intercept_preds.Rout.pdf mediate_bin_preds_adjust.Rout.pdf
 
 ######################################################################
 
@@ -151,6 +149,7 @@ variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda
 	variable_predictions.Rnw
 
 ######################################################################
+
 bias_correction_methods.pdf: bias_correction_methods.rmd
 	$(knitpdf)
 
