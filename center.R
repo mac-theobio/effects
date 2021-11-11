@@ -1,9 +1,20 @@
 
 n <- 100
+r <- 0.8
+s <- 0.8
 
-x <- rnorm(n)
-y <- rnorm(n)
-z <- rnorm(n)
-w <- x+y
+bx <- 0.5
+by <- 1
 
-m <- 3
+a <- rnorm(n)
+b <- rnorm(n)
+c <- rnorm(n)
+
+x <- a
+y <- r*a + s*b
+
+z <- bx*x + by*y + c
+
+m <- lm(z ~ x+y)
+
+summary(m)
