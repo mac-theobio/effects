@@ -193,6 +193,11 @@ cp2comp_exam:
 	variable_predictions-pred_cubic_plots.pdf \
 	variable_predictions-pred_cont_joint_plots.pdf ../comp_exam/
 
+######################################################################
+
+## Is the model center a thing??
+
+center.Rout: center.R
 
 ######################################################################
 
