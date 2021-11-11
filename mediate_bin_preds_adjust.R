@@ -5,7 +5,7 @@ library(ggplot2)
 library(dplyr)
 
 commandEnvironments()
-makeGraphics()
+startGraphics()
 
 ## Not mediated
 ### No bias adjustment
