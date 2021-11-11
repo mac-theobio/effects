@@ -17,6 +17,14 @@ today: bias_correction_methods.pdf glme_random_intercept_preds.Rout.pdf mediate_
 
 ######################################################################
 
+Makefile: varpred.stamp
+
+varpred.stamp: DESCRIPTION
+	$(touch)
+	$(MAKE) install || ($(rm) && false)
+
+######################################################################
+
 Sources += $(wildcard *.R *.md *.Rnw *.rmd *.bib)
 Sources += $(wildcard R/*.R)
 Sources += $(wildcard man/*.Rd) NAMESPACE DESCRIPTION
