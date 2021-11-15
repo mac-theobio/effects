@@ -13,9 +13,15 @@ setssh:
 
 ######################################################################
 
-today: bias_correction_methods.pdf mediate_bin_preds_adjust.Rout.pdf \
-	glme_random_intercept_preds.Rout.pdf
+today: bias_correction_methods.pdf glme_random_intercept_preds.Rout.pdf mediate_bin_preds_adjust.Rout.pdf
 
+######################################################################
+
+Makefile: varpred.stamp
+
+varpred.stamp: DESCRIPTION
+	$(touch)
+	$(MAKE) install || ($(rm) && false)
 
 ######################################################################
 
@@ -151,6 +157,7 @@ variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda
 	variable_predictions.Rnw
 
 ######################################################################
+
 bias_correction_methods.pdf: bias_correction_methods.rmd
 	$(knitpdf)
 
@@ -186,6 +193,11 @@ cp2comp_exam:
 	variable_predictions-pred_cubic_plots.pdf \
 	variable_predictions-pred_cont_joint_plots.pdf ../comp_exam/
 
+######################################################################
+
+## Is the model center a thing??
+
+center.Rout: center.R
 
 ######################################################################
 

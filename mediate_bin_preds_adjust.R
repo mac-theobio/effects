@@ -4,8 +4,9 @@ library(ggpubr)
 library(ggplot2)
 library(dplyr)
 
+rpcall("mediate_bin_preds_adjust.Rout mediate_bin_preds_adjust.R mediate_model.rda")
 commandEnvironments()
-makeGraphics()
+startGraphics()
 
 ## Not mediated
 ### No bias adjustment
@@ -61,7 +62,7 @@ pred_pop_notmediated <- varpred(mod_notmediated_bin
 	, modelname="pop"
 )
 
-## Bins 
+## Bins
 binned_df <- binfun(mod_notmediated_bin, focal="x", bins=50, groups=NULL)
 
 ### Combine all predictions
@@ -141,7 +142,7 @@ pred_pop_mediated <- varpred(mod_mediated_bin
 	, modelname="pop"
 )
 
-## Bins 
+## Bins
 binned_df <- binfun(mod_mediated_bin, focal="x", bins=50, groups=NULL)
 
 ### Combine all predictions
