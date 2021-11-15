@@ -147,7 +147,7 @@ print(depend_eff_age
 
 ```{r unbalanced_sim, echo=TRUE}
 N <- 100
-quant <- seq(0,1,length.out=50)
+quant <- seq(0,1,length.out=100)
 ## Betas
 b0 <- 10
 b_age <- 0.8
@@ -246,4 +246,10 @@ cat("Truth: \n", mean(unbalanced_df$hhsize))
 print(unbalanced_age
 	+ scale_colour_manual(values=cols)
 )
+```
+
+
+```{r}
+varpred(unbalanced_mod, "age", at=list(age=mean(unbalanced_df$age)))
+emmeans(unbalanced_mod, specs=~age, weights="proportional", nesting=NULL)
 ```

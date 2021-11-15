@@ -163,14 +163,13 @@ pred_mediated_plots <- (comparevarpred(vlist=vlist
 #	+ geom_point(data=binned_df, aes(x=x, y=zbin), colour="grey")
 	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
-	+ labs(y="Predictions", colour="Method", title="Not mediated")
+	+ labs(y="Predictions", colour="Method", title="Mediated")
 	+ theme(legend.position="right")
 )
 print(pred_mediated_plots)
 
-quit()
-pred_mediate_plots <- ggarrange(pred_x_notmediated_plots
-	, pred_x_mediated_plots + rremove("ylab")
+pred_mediate_plots <- ggarrange(pred_notmediated_plots
+	, pred_mediated_plots + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
