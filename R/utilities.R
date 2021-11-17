@@ -4,14 +4,15 @@
 pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	, rTerms, factor.levels, contr, offset, mult, vnames, ...
 	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
-	, typical, zero_out_interaction) {
+	, typical, zero_out_interaction, include.re) {
 
 	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
 	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
 
 	mm <- get_model.mm(mod)
 	col_mean <- colMeans(mm)
-	
+
+	mm_temp <- mm
 	if (isolate) {
 		# FIXME: assuming pop of non-focal -> no variance
 		mm[,non_focal_terms] <- 0
@@ -22,6 +23,12 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		nM <- NROW(x.excluded)
 	} else {
 		nM <- NROW(mm)
+	}
+
+	if (include.re) {
+		re <- includeRE(mod)	
+	} else {
+		re <- 0
 	}
 
 	pred_list <- list()
@@ -42,7 +49,7 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		
 		off <- get_offset(offset, mf_i)
 		offs[i] <- off
-		pred <- off + as.vector(mm_i %*% betahat)
+		pred <- off + as.vector(mm_i %*% betahat) + re
 		
 		pse_var <- mult*get_sderror(mod=mod
 			, vcov.=vcov.

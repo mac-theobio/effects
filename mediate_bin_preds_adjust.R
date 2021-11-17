@@ -67,10 +67,10 @@ binned_df <- binfun(mod_notmediated_bin, focal="x", bins=50, groups=NULL)
 
 ### Combine all predictions
 vlist <- list(pred_none_notmediated
-	, pred_delta_mod_notmediated
-	, pred_delta_lp_notmediated
-	, pred_mc_mod_notmediated
-	, pred_mc_lp_notmediated
+#	, pred_delta_mod_notmediated
+#	, pred_delta_lp_notmediated
+#	, pred_mc_mod_notmediated
+#	, pred_mc_lp_notmediated
 	, pred_pop_notmediated
 )
 
@@ -147,10 +147,10 @@ binned_df <- binfun(mod_mediated_bin, focal="x", bins=50, groups=NULL)
 
 ### Combine all predictions
 vlist <- list(pred_none_mediated
-	, pred_delta_mod_mediated
-	, pred_delta_lp_mediated
-	, pred_mc_mod_mediated
-	, pred_mc_lp_mediated
+#	, pred_delta_mod_mediated
+#	, pred_delta_lp_mediated
+#	, pred_mc_mod_mediated
+#	, pred_mc_lp_mediated
 	, pred_pop_mediated
 )
 

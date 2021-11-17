@@ -318,6 +318,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 		out[names(add_args)] <- add_args
 		p1 <- (do.call(vareffects:::plot.vareffects, out)
 			+ scale_colour_manual(breaks = funs, values=cols)
+#			+ scale_linetype_manual(values=1:length(funs), breaks=funs)
 			+ labs(y="Predictions", x=x.var, colour="Method")
 			+ theme(legend.position="bottom")
 		)
@@ -328,7 +329,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 				%>% data.frame()
 			)
 			print(pred_prop_df)
-			out <- p1 + geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model), lty=2)
+			out <- p1 + geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model))
 		} else {
 			out <- p1
 		}

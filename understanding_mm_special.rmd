@@ -114,6 +114,9 @@ print(depend_eff_pred
 	+ facet_wrap(~rel, scales = "free_y")
 	+ scale_colour_manual(values=cols)
 )
+
+# varpred(depend_eff_mod, "gender")
+# varpred(depend_eff_mod, "gender", bias.adjust="population")
 ```
 
 \newpage
@@ -146,7 +149,7 @@ print(depend_eff_age
 
 
 ```{r unbalanced_sim, echo=TRUE}
-N <- 100
+N <- 1000
 quant <- seq(0,1,length.out=100)
 ## Betas
 b0 <- 10
@@ -225,31 +228,91 @@ table(unbalanced_df$rel, unbalanced_df$gender)
 
 \subsubsection{Main effect of non-interacting predictor}
 
+We are interested in predicted _hhsize_ at the model center. We can explore this in two different ways:
+
+1. **Center of the focal predictor**
+$$\mathrm{E(hhsize|\{\bar{x}_{\{f\}}, \bar{x}_{\{n\}}\})}$$
+
+2. **Averaged over levels of focal predictor**
+$$\mathrm{mean ~ E(hhsize_i|\{x_{i\{f\}}, \bar{x}_{\{n\}}\})}$$
+
+A few challenges:
+
+- How do we get the representative samples of $x_{i\{f\}}$?
+	- `quantiles`
+	- `seq`
+	- `entire population`
+
+In our simulation example:
+\begin{align}
+\mathrm{E(hhsize|age)} &= \mathrm{\beta_0 + \beta_A Age + \beta_J Jew + \beta_M Muslim + \beta_M Male}\nonumber\\
+&+ \mathrm{\beta_{MJ} Male \times Jew + \beta_{MM} Male \times Muslim}
+\end{align}
+
+The non-focal categorical interactions can be handled in two ways:
+
+- product of interacting variables (**effects**)
+- model center, i.e., average of all columns of the variables in model matrix (**varpred** and **emmeans**)
+
 - If we ignore the interactions:
 	- **varpred** and **emmeans** averages the columns of the interaction terms
 	- **effects** computes the product of the interacting terms
 	- The predictions are similar but slightly different
 
-- CIs excluded for clarity
+Using Eqn. 2 with approach 1 (center of the focal predictor)
+
+<br>
 
 ```{r unbalanced_age}
-unbalanced_age <- combinepreds(unbalanced_mod, c("emmeans", "varpred", "Effect"), "age"
+mean_age <- mean(unbalanced_df$age)
+mean_hhsize <- mean(unbalanced_df$hhsize)
+unbalanced_age <- combinepreds(unbalanced_mod, c("emmeans", "varpred", "Effect")
+	, focal = "age"
+	, x.var = "age"
+	, at=list(age=mean_age)
+	, xlevel=list(age=rep(mean_age,5))
+	, nesting=NULL
+	, weights="proportional"
+	, plotit = FALSE
+	, ci=FALSE
+)
+unbalanced_age <- (unbalanced_age
+	%>% group_by(model)
+	%>% summarize(fit=mean(fit))
+	%>% mutate(age=mean_age
+		, dev=abs(fit-mean_hhsize)
+	)
+	%>% data.frame()
+)
+unbalanced_age
+```
+
+An alternative is using Eqn 2 with approach 2
+
+<br>
+
+```{r unbalanced_age_levels}
+mean_age <- mean(age_at)
+unbalanced_age_levels <- combinepreds(unbalanced_mod, c("emmeans", "varpred", "Effect")
+	, focal = "age"
 	, x.var = "age"
 	, at=list(age=age_at)
 	, xlevel=list(age=age_at)
 	, nesting=NULL
 	, weights="proportional"
-	, plotit = TRUE
+	, plotit = FALSE
 	, ci=FALSE
 )
-cat("Truth: \n", mean(unbalanced_df$hhsize))
-print(unbalanced_age
-	+ scale_colour_manual(values=cols)
+unbalanced_age_levels <- (unbalanced_age_levels
+	%>% group_by(model)
+	%>% summarize(fit=mean(fit))
+	%>% mutate(age=mean_age
+		, dev=abs(fit-mean_hhsize)
+	)
+	%>% data.frame()
 )
+unbalanced_age_levels
 ```
 
+**The later heavily depends on the choice of the levels of the focal predictor**
 
-```{r}
-varpred(unbalanced_mod, "age", at=list(age=mean(unbalanced_df$age)))
-emmeans(unbalanced_mod, specs=~age, weights="proportional", nesting=NULL)
-```

@@ -280,6 +280,7 @@ varpred <- function(mod
 			, x.var=x.var
 			, typical=typical
 			, zero_out_interaction=zero_out_interaction
+			, include.re=include.re
 		)
 		pred_obj <- pred_obj_all$pred_df
 		predict.data <- pred_obj[, colnames(x.focal), drop=FALSE]

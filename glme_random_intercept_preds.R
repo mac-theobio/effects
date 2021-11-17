@@ -85,6 +85,7 @@ glme_pred_pop <- varpred(glme_mod
 	, isolate=FALSE
 	, bias.adjust="population"
 	, modelname="pop"
+	, include.re=TRUE
 )
 est_prop_pop <- data.frame(fit=mean(glme_pred_pop$preds$fit), model="pop")
 
@@ -95,7 +96,7 @@ binned_df <- binfun(glme_mod, focal="age", bins=50, groups=NULL)
 vlist <- list(glme_pred_none
 #	, glme_pred_delta_lp
 #	, glme_pred_delta_mod
-	, glme_pred_mc_lp
+#	, glme_pred_mc_lp
 #	, glme_pred_mc_mod
 #	, glme_pred_dig_lp
 #	, glme_pred_dig_mod
@@ -111,9 +112,9 @@ glme_plots <- (comparevarpred(vlist=vlist
 	+ geom_point(data=binned_df, aes(x=age, y=status), colour="grey")
 	+ geom_hline(data=true_prop_df, aes(yintercept=status), lty=1, col="black")
 	+ geom_hline(data=est_prop_none, aes(yintercept=fit, colour=model), lty=2)
-	+ geom_hline(data=est_prop_delta_lp, aes(yintercept=fit, colour=model), lty=2)
+#	+ geom_hline(data=est_prop_delta_lp, aes(yintercept=fit, colour=model), lty=2)
 #	+ geom_hline(data=est_prop_delta_mod, aes(yintercept=fit, colour=model), lty=2)
-	+ geom_hline(data=est_prop_mc_lp, aes(yintercept=fit, colour=model), lty=2)
+#	+ geom_hline(data=est_prop_mc_lp, aes(yintercept=fit, colour=model), lty=2)
 #	+ geom_hline(data=est_prop_mc_mod, aes(yintercept=fit, colour=model), lty=2)
 #	+ geom_hline(data=est_prop_dig_lp, aes(yintercept=fit, colour=model), lty=2)
 #	+ geom_hline(data=est_prop_dig_mod, aes(yintercept=fit, colour=model), lty=2)
@@ -124,20 +125,20 @@ glme_plots <- (comparevarpred(vlist=vlist
 )
 glme_plots
 
-glme_pred_delta_mod$bias.adjust.sigma
-VarCorr(glme_mod)
-
-quit()
-
-xx <- quantile(glme_sim_df$age, seq(0,1,length.out=100))
-dd <- emmeans(glme_mod, specs=~age, at=list(age=xx), type="response", bias.adjust=TRUE)
-d1 <- as.data.frame(dd)
-dd@misc$sigma
-(plot(glme_pred_delta_lp)
-	+ geom_line(data=d1, aes(x=age, y=prob, col="emmeans"))
-	+ geom_line(data=d1, aes(x=age, y=lower.CL, col="emmeans"))
-	+ theme(legend.position="bottom")
+## Compare with emmeans
+age_at <- quantile(glme_sim_df$age, seq(0,1,length.out=100))
+glme_varpred_emmeans_plots <- combinepreds(glme_mod, c("emmeans", "varpred")
+	, focal = "age"
+	, x.var = "age"
+	, at=list(age=age_at)
+	, xlevel=list(age=age_at)
+	, nesting=NULL
+	, type="response"
+	, weights="proportional"
+	, plotit = TRUE
+	, ci=FALSE
 )
+glme_varpred_emmeans_plots
 
 saveEnvironment()
 
