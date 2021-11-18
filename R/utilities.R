@@ -268,7 +268,7 @@ matrix.to.df <- function(matrix, colclasses){
 
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
-	, vnames, bias.adjust, handle.inter){
+	, vnames, bias.adjust){
   
   ## FIXME: How to assign NA to a lme4 object 
   if (!isS4(mod)) {
@@ -302,17 +302,20 @@ clean_model <- function(focal.predictors, mod, xlevels
   cnames <- colnames(X.mod)
   factor.cols <- rep(FALSE, length(cnames))
   names(factor.cols) <- cnames
-
+  
+  components <- unlist(strsplit(cnames, ':'))
   for (name in all.predictors){
     ff_check <- check_factor(name, mod)
     if (ff_check) {
       factor.cols[grep(paste("^", name, sep=""), cnames)] <- TRUE
-    }
-	 if (!ff_check) {
+    } else if (ff_check && (!any(name %in% components))) {
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
 	 }
+	 if (!ff_check) {
+	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
+	 } 
   }
-#  factor.cols[grep(":", cnames)] <- FALSE   
+# factor.cols[grep(":", cnames)] <- FALSE   
 
 ## FIXME: For compatibility with emmeans. Otherwise uncomment above block and comment the block below
 #  for (name in all.predictors){
@@ -320,11 +323,10 @@ clean_model <- function(focal.predictors, mod, xlevels
 #      factor.cols[names(grep(name, vnames, value=TRUE))] <- TRUE
 #    }
 #  }
-# factor.cols[grep(":", cnames)] <- TRUE
 
-  if (handle.inter=="effects") {
-     factor.cols[grep(":", cnames)] <- FALSE 
-  }
+#  if (handle.inter=="effects") {
+#     factor.cols[grep(":", cnames)] <- FALSE 
+#  }
 
   X <- recoverdata(mod=mod, extras=all.predictors)
   
@@ -505,11 +507,11 @@ get_model_matrix <- function(mod, mod.matrix, X.mod, factor.cols, cnames
       if (length(components) > 1) {
 			if (factor.type[[x.var]]) {
 				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
-			} else {
-				if (grepl(x.var, name)) {
-					mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
-				}
-			}
+			} else if (all(!factor.cols[components]) & factor.type[[x.var]]){
+				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
+			} else if (grepl(x.var, name)) {
+				mod.matrix[,name] <- apply(mod.matrix[,components], 1, prod)
+			} 
       }
     }
   }

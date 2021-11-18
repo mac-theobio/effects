@@ -17,7 +17,6 @@ varpred(
   dfspec = 100,
   vcov. = NULL,
   internal = FALSE,
-  handle.inter = c("emmeans", "effects"),
   zero_out_interaction = FALSE,
   avefun = mean,
   offset = NULL,

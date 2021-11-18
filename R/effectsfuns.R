@@ -104,7 +104,6 @@ varpred <- function(mod
 	, dfspec = 100
 	, vcov. = NULL
 	, internal = FALSE
-	, handle.inter=c("emmeans", "effects")
 	, zero_out_interaction = FALSE
 	, avefun = mean
 	, offset = NULL
@@ -115,7 +114,6 @@ varpred <- function(mod
 	, returnall = FALSE, ...) {
 	
 	bias.adjust <- match.arg(bias.adjust)
-	handle.inter <- match.arg(handle.inter)
 
 	if (!is.numeric(sigma)) {
 		sigma <- match.arg(sigma)
@@ -162,7 +160,6 @@ varpred <- function(mod
 		, typical=avefun
 		, vnames=vnames
 		, bias.adjust = bias.adjust
-		, handle.inter=handle.inter
 	)
 
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
@@ -354,7 +351,7 @@ varpred <- function(mod
 	attr(result, "response") <- out$response
 	attr(result, "x.var") <- out$x.var 
 	if (returnall) {
-		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw = out, factor.cols=factor.cols, ff=factor.type)
+		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw=out, factor.cols=factor.cols, mm2=mod.matrix)
 	} else {
 		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma)
 	}

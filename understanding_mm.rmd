@@ -362,6 +362,11 @@ attr(eff_mm, "assign") <- NULL
 eff_mm
 ```
 
+```{r}
+two_cat_vpred_inter_age$factor.cols
+```
+
+
 \subsection{religion}
 
 \subsubsection{varpred}
