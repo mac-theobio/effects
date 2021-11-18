@@ -13,7 +13,9 @@ setssh:
 
 ######################################################################
 
-today: bias_correction_methods.pdf glme_random_intercept_preds.Rout.pdf mediate_bin_preds_adjust.Rout.pdf
+today: understanding_mm_special.pdf mediate_bin_preds_adjust.Rout.pdf \
+	binom_correlated_preds.Rout.pdf glme_random_intercept_preds.Rout.pdf
+
 
 ######################################################################
 
