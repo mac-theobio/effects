@@ -16,7 +16,6 @@ setssh:
 today: understanding_mm_special.pdf mediate_bin_preds_adjust.Rout.pdf \
 	binom_correlated_preds.Rout.pdf glme_random_intercept_preds.Rout.pdf
 
-
 ######################################################################
 
 Makefile: varpred.stamp
@@ -142,6 +141,7 @@ mediate_model.Rout: mediate_model.R mediate.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
 mediate_bin_preds.Rout: mediate_bin_preds.R mediate_model.rda
 mediate_bin_preds_adjust.Rout: mediate_bin_preds_adjust.R mediate_model.rda
+mediate_bin_bias.Rout: mediate_bin_bias.R mediate_model.rda
 
 ## Correlated predictor glm
 binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda
