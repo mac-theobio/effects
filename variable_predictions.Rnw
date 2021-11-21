@@ -26,7 +26,7 @@
 
 \setlength{\parindent}{0pt}
 
-\title{Uncertainty propagation for variable (predictor) effects and bias correction in generalized linear (mixed) models???}
+\title{Uncertainty propagation for predictor effects and bias correction in generalized linear (mixed) models}
 
 \begin{document}
 
@@ -53,15 +53,15 @@ load("multiple_outcomes_preds.rda")
 load("cubic_predictors_preds.rda")
 @
 
-In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing models estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the ``effects" of covariates on predicted probabilities, or predictions of responses at various levels of covariates -- \emph{predictor effects}. For example, as a way to plan, public health officials may want to know the ``effects" of household income, wealth index, etc, on the predicted probability of having improved water services among slum dwellers.
+In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing model estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the ``effects" of covariates on predicted probabilities, or predictions of responses at various levels of covariates -- \emph{predictor effects}. For example, as a way to plan, public health officials may want to know the ``effects" of household income, wealth index, etc, on the predicted probability of having improved water services among slum dwellers.
 
 Both simple and generalized linear (mixed) models (GL(M)Ms) can examine very complex relationships, including nonlinear relationships between response and predictors, interactions between predictors (and via splines for example), and nonlinear transformations via link functions due to their flexibility. This flexibility comes at a cost, for example, complex multivariate models may risk misinterpretation, and miscalculation of quantities of interest. Also, coefficient estimates of models involving nonlinear link functions or interactions lose their direct interpretation \citep{leeper2017interpreting}, meaning that interpretation of derived quantities from these estimates requires some understanding of the specified model. 
 
 When visually presented, predictor effects provide a unified and intuitive way of describing relationships from a fitted model, especially complex models involving interaction terms or some kind of transformations on the predictors whose estimates are usually, but not always, a subject to less clarity of interpretation. Further, generating predictor effects together with the associated confidence intervals for regression models has a number of challenges. In particular: 
 \begin{enumerate}
 \item choice of representative values of \emph{focal} predictor(s) and appropriate ``model center" for \emph{non-focal} predictors especially in multivariate models
-\item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)LMMs? Should we exclude variation in non-focal parameters?)
-\item bias in the expected mean prediction induced by the nonlinear transformation of the response variable (especially in GL(M)M)
+\item  propagation of uncertainty ([how] can we incorporate uncertainty in nonlinear components of (G)L(M)Ms? Should we exclude variation in non-focal parameters?)
+\item bias in the expected mean prediction induced by the nonlinear transformation of the response variable (especially in GL(M)Ms)
 \end{enumerate}
 
 Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. Formerly, predictor effects computes the expected outcome by meaningfully holding the non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the outcome expected prediction represents how the model responds to the changes in the focal predictor.
@@ -73,7 +73,7 @@ When dealing with nonlinear link functions, the correct predictions for example,
 
 The main purpose of this article is to discuss and implement various approaches for computing predictor effects and provide an alternative method for computing the associated confidence intervals. We further explore approaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions.
 
-The outline of this article is as follows: Section \ref{sec:qoi} provides formal definition various quantities of interest, Section \ref{sec:stats_background} provides statistical background of estimation of model predictions, Section \ref{sec:uncertainity_propagation} describes mathematical and computation implementation of the proposed method for uncertainty propagation, and lastly Section \ref{sec:bias_correction} describes methods for bias correction in GL(M)M together with the computational implementation.
+The outline of this article is as follows: Section \ref{sec:qoi} provides formal definition various quantities of interest, Section \ref{sec:stats_background} provides statistical background of estimation of model predictions, Section \ref{sec:uncertainity_propagation} describes mathematical and computation implementation of the proposed method for uncertainty propagation, Section \ref{sec:bias_correction} describes methods for bias correction in GL(M)M together with the computational implementation, and lastly, in Section \ref{sec:simulation_example} we consider some simulation examples.
 
 \section{Quantities of interest}\label{sec:qoi}
 
@@ -154,27 +154,61 @@ In general, our formulation, even for more complicated interactions, follow thes
 
 What about the confidence intervals (CI)? The limits of the confidence intervals are points, not mean values. In principle, every observation/value of focal predictors has a different CI. The traditional way to compute variances for predictions is $\sigma^2 = \textrm{Diag}(\bX^\star \Sigma \bX^{\star\top})$ \citep{lenth2018package, fox2009effect}, so that the confidence intervals are $\eta \pm q\sigma$, where $q$ is an appropriate quantile of Normal or t distribution. This approach incorporates all the uncertainties -- including the uncertainty due to non-focal predictors.  But what if we are only interested in the uncertainty as a result of the focal predictor, so that the confidence intervals are $\eta \pm q \sigma_f$, i.e., \emph{isolated} confidence intervals?  
 
-Currently, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from the non-focal predictors when computing the CIs. A non-trivial way to exclude uncertainties associated with non-focal predictors in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal terms set to $0$ -- \emph{zeroing-out} variance-covariance matrix. This only works when the input predictors are \emph{centered} prior to model fitting, in case of numerical predictors, and even much complicated when the predictors are categorical. We first describe this variance-covariance based approach and then discuss our proposed method which is based on \emph{model centering} and does not require input predictors to be scaled prior to model fitting. Model center is found by averaging the variables over the model matrix, $\bX^\star$.
+Currently, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from the non-focal predictors when computing the CIs. A non-trivial way to exclude uncertainties associated with non-focal predictors in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal terms set to $0$ -- \emph{zeroing-out} variance-covariance matrix. This only works when the input predictors are \emph{centered} prior to model fitting, in case of numerical predictors, and even much complicated when the predictors are categorical. We first describe this variance-covariance based approach and then discuss our proposed method which is based on \emph{model centering} and does not require input predictors to be scaled prior to model fitting.
 
 
 \subsection{Variance-covariance}
 
-The computation of $\hat{\eta}^\star$ remains the same as described above. However, to compute $\sigma$, $\Sigma$ is modified by \emph{zeroing-out} (the variance-covariance of all non-focal predictors are assigned zero) variances of non-focal terms. Although this is the simplest approach, it requires centering of continuous predictors prior to model fitting and proper way to average categorical predictors. One way to center predictors is to create a design matrix, $\bX$, and then compute $\bX_{c} = \bX - \bar{\bX}$.
+The computation of $\hat{\eta}^\star$ remains the same as described above. However, to compute $\sigma$, $\Sigma$ is modified by \emph{zeroing-out} (the variance-covariance of all non-focal predictors are set to zero) variances of non-focal terms. Although this is the simplest approach, it requires centering of continuous, i.e., $x_c = x - \bar{x}$, predictors prior to model fitting and proper way to average categorical predictors.
 
 \subsection{Centered model matrix}
 
-Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$. It follows that the non-focal terms in $\bX^{\star}_{c}$ are all zero. Consequently the uncertainty due to non-focal predictors are all zeroed-out in the computation of $\sigma$. More generally, centered design matrix, $\bX^{\star}_{c}$, impacts on the estimated value of the intercept and its associated variance but not the slopes. Thus since non-focal terms in $\bX^{\star}_{c}$ are all zero, it does not matter what their corresponding values are in the variance-covariance matrix. Hence, we can compute CIs from non-centered predictors (in other words, fitted models with predictors in their natural scales).
+Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$. It follows that the non-focal terms in $\bX^{\star}_{c}$ are all zero in simple models without interactions but are isolated (narrower) around the model center. Consequently the uncertainty due to non-focal predictors are isolated in the computation of $\sigma^2 = \textrm{Diag}(\bX^\star_c \Sigma \bX^{\star\top}_c)$. In addition, the computation of $\bX^{\star}_c$ impacts only on the intercepts and the non-focal terms, i.e., the slopes and variance of the focal predictors are not affected. This means that we can still generate isolated CIs without necessarily centering the predictors prior to model fitting. 
 
-\subsubsection{Numeric interactions}
 
-Consider a multiple linear regression model such that 
+\section{Bias correction}\label{sec:bias_correction}
 
-\subsection{Simulation examples}
+In many applications, it usually important to report the estimates that reflect the expected values of the untransformed response. However, when dealing with nonlinear link functions, it is even harder to generate correct predictions that reflect the untransformed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable. In such cases, bias correction is needed when back-transforming the predictions to the original scales. Most common approach for bias-adjustment is second-order Taylor approximation \citep{lenth2018package, duursma2003bias}. Here, we describe and implement a different approach, \emph{population-based} approach for bias correction.
+
+
+\subsection{Population-based approach for bias correction}
+
+The most precise (although not necessarily accurate!) way to predict is to condition on a value $F$ of the focal predictor and make predictions for all observations (members of the population) for which $x_f = F$ (or in a small range around $F$ ...). A key point is that the nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population (e.g. all individuals with $x_f = F$) to a one-dimensional distribution of $\eta^\star$.
+
+Once we have got our vector of $\eta^\star$ (which is essentially a set of samples from the distribution over $\eta^\star(x_f, \nset{x})$ for the conditional set), we may want a mean and confidence intervals on the mean on the response (data) scale, i.e. after back-transforming. In other words we can use the observations themselves then we just compute the individual values of $g^{-1}(\eta^\star)$ and compute their mean.
+
+In population-based approach, $\eta^\star$ is constructed as a function of properly constituted levels of focal predictors, $x_f$, and entire population of the non-focal predictors, $\nset{x}$, as opposed to averaged non-focal predictors, $\nset{{\bar{x}}}$, described in the previous section. More specifically:
+%
+\begin{itemize}
+\item compute linear predictor associated with the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+\item compute linear predictor associated with the focal predictors, $\eta_{jf} = \sum{\beta_f x_{jf}}$
+\item for every value of the focal predictor, $\eta_{jf}$:
+\begin{itemize}
+\item $\eta_j^\star  = \eta_{jf} + \nset{\eta}$
+\item $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\eta_j^\star\right)$
+\end{itemize}
+\end{itemize}
+%
+We make similar adjustments to compute the variances of the predictions at every level of the focal predictor:
+%
+\begin{align}
+\sigma_{jf}^2 = \textrm{Diag}(\bX^\star_{jc} \Sigma \bX^{\star\top}_{jc})
+\end{align}
+%
+where $\bX^{\star}_{jc} = \{\bX_{jf}^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$ and 
+%
+\begin{align}
+\mathrm{CI}_j = \mathrm{mean} ~ \eta_j^\star \pm q\sigma_{jf}
+\end{align}
+%
+
+
+\section{Simulation examples}\label{sec:simulation_example}
 
 
 In this section, we illustrate predictor effects (together with the associated CI) in the context of linear models involving continuous and categorical predictors with or without interactions. We compare the expected to the known simulation ``truth".
 
-\subsubsection{Continuous predictors}\label{sec:continuous_predictors}
+\subsection{Continuous predictors}\label{sec:continuous_predictors}
 
 Consider simulation example described in Section \ref{sec:qoi}, with slight modifications to incorporate interaction between predictors. The first case, is the model with no interaction: 
 %
@@ -269,7 +303,7 @@ print(pred_cubic_plots)
 %
 
 
-\subsubsection{Categorical predictors}\label{sec:categorical_predictors}
+\subsection{Categorical predictors}\label{sec:categorical_predictors}
 
 Suppose, in Section~\ref{sec:continuous_predictors}, in addition to the predictors already defined, we add gender of the household head. For example, we may want to know whether men (M) and females (F) differ in the relationship between age of the household head and the size of the household -- how does households with male as their heads differ in size as compare to those with female heads? 
 
@@ -303,7 +337,7 @@ print(pred_gender_cat_plots)
 \end{figure}
 %
 
-\subsubsection{Linear mixed effect model}
+\subsection{Linear mixed effect model}
 
 We now consider linear models with additional random effects components. In the simplest case, we start with a single grouping factor as the random effect component, i.e., random intercept model. This way, we can investigate the contribution of random effects overall expected mean. 
 
@@ -333,7 +367,7 @@ print(pred_age_cont_lme_plots)
 %
 
 
-\subsubsection{Multiple outcomes}
+\subsection{Multiple outcomes}
 
 We now consider a bit more complicated model involving more two outcome variables (services) -- household size and rental price. In particular, we simulate an intercept only multivariate random effect model to, \emph{jointly}, predict household size and rental price based on age and wealth index. Each household has its own correlated effect on the intercepts (random-intercept). In addition, we add latent variable to account for unobserved correlations.
 %
@@ -371,9 +405,6 @@ print(pred_cont_joint_plots)
 \end{figure}
 %
 
-
-
-\section{Bias correction}\label{sec:bias_correction}
 
 \clearpage
 % References
