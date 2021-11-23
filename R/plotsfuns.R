@@ -68,13 +68,25 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = 
 	}
 	p1 <- p1 + labs(x = xlabs, y = ylabs)
 	if (class(df[[x.var]]) %in% c("numeric", "integer")) {
-		p2 <- p1 + geom_line()
+		if (length(nn)>1) {
+			p2 <- p1 + geom_line(aes(linetype=model))
+		} else {
+			p2 <- p1 + geom_line()
+		}
 		if (ci) {
-			p2 <- (p2
-				+ geom_line(aes(y = lwr), lty = 2)
-				+ geom_line(aes(y = upr), lty = 2)
-				+ scale_colour_viridis_d(option = "plasma")
-			)
+#			if (length(nn)>1) {
+#				p2 <- (p2
+#					+ geom_line(aes(y = lwr))
+#					+ geom_line(aes(y = upr))
+#					+ scale_colour_viridis_d(option = "plasma")
+#				)
+#			} else {
+				p2 <- (p2
+					+ geom_line(aes(y = lwr), lty=2)
+					+ geom_line(aes(y = upr), lty=2)
+					+ scale_colour_viridis_d(option = "plasma")
+				)
+#			}
 		}
 	} else {
 		if (ci) {

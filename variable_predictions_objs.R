@@ -20,7 +20,7 @@ beta_age <- 0.1 # Focal predictor effect
 
 ## Coefficient estimate
 qoi_df <- linearsim(nHH=1000, form=~1+x1*x2
-	, betas=c(1.5, 1, 2, 0.5)
+	, betas=c(5, 1, 2, 0.5)
 	, pgausian=list(p=2, fun=rnorm, mean=c(0.2,0), sd=1)
 	, pcat=list(p=0)
 	, link_scale = TRUE
@@ -56,7 +56,7 @@ print(qoi_age_pred_plot)
 
 #### Simulation
 sim_df_cni <- linearsim(nHH=nHH_obs, form=~1+x1+x2
-	, betas = c(1.5, 0.1, 2)
+	, betas = c(5, 0.1, 2)
 	, pgausian=list(p=2,fun=rnorm, mean=c(0.2,0), sd=c(1,1))
 	, pcat=list(p=0)
 	, link_scale=TRUE
@@ -83,19 +83,19 @@ pred_age_trad_cni <- varpred(mod_cni, "age", isolate=FALSE, pop.ave="none", mode
 ###### Variance-covariance
 pred_age_vcov_cni <- varpred(mod_cen_cni, "age", isolate=FALSE
 	, vcov. = zero_vcov(mod_cen_cni, "age"), pop.ave="none"
-	, modelname = "zero-vcov"
+	, modelname = "isolated (vcov)"
 )
 pred_age_vcov_cni$preds$age <- pred_age_vcov_cni$preds$age + focal_prop_cni
 ##### Centered model matrix
 pred_age_centered_cni <- varpred(mod_cni, "age", isolate=TRUE
-	, pop.ave="none", modelname = "centered mm"
+	, pop.ave="none", modelname = "isolated (mm)"
 )
 
 ### With interaction between non-focal
 
 #### Simulation
 sim_df_wi_nf <- linearsim(nHH=nHH_obs, form=~1+x1+x2+x3+x2:x3
-	, betas=c(1.5,0.1,2,1.5,1)
+	, betas=c(5,0.1,2,1.5,1)
 	, pgausian=list(p=3,fun=rnorm, mean=c(0.2,0,0), sd=c(1,1,1))
 	, pcat=list(p=0)
 	, link_scale=TRUE
@@ -122,19 +122,19 @@ pred_age_trad_wi_nf <- varpred(mod_wi_nf, "age", isolate=FALSE, pop.ave="none", 
 ###### Variance-covariance
 pred_age_vcov_wi_nf <- varpred(mod_cen_wi_nf, "age", isolate=FALSE
 	, vcov. = zero_vcov(mod_cen_wi_nf, "age"), pop.ave="none"
-	, modelname = "zero-vcov"
+	, modelname = "isolated (vcov)"
 )
 pred_age_vcov_wi_nf$preds$age <- pred_age_vcov_wi_nf$preds$age + focal_prop_wi_nf
 ##### Centered model matrix
 pred_age_centered_wi_nf <- varpred(mod_wi_nf, "age", isolate=TRUE
-	, pop.ave="none", modelname = "centered mm"
+	, pop.ave="none", modelname = "isolated (mm)"
 )
 
 ### With interaction between focal and non-focal predictor
 
 #### Simulation
 sim_df_wi_f <- linearsim(nHH=nHH_obs, form=~1+x1+x2+x3+x1:x2
-	, betas=c(1.5,0.1,2,1.5,1)
+	, betas=c(5,0.1,2,1.5,1)
 	, pgausian=list(p=3,fun=rnorm, mean=c(0.2,0,0), sd=c(1,1,1))
 	, pcat=list(p=0)
 	, link_scale=TRUE
@@ -161,7 +161,7 @@ pred_age_trad_wi_f <- varpred(mod_wi_f, "age", isolate=FALSE, pop.ave="none", mo
 ###### Variance-covariance
 pred_age_vcov_wi_f <- varpred(mod_cen_wi_f, "age", isolate=FALSE
 	, vcov. = zero_vcov(mod_cen_wi_f, "age"), pop.ave="none"
-	, modelname = "zero-vcov"
+	, modelname = "isolated (vcov)"
 )
 ## rescale age
 pred_age_vcov_wi_f$preds$age <- pred_age_vcov_wi_f$preds$age + focal_prop_wi_f
@@ -169,7 +169,7 @@ pred_age_vcov_wi_f$preds$age <- pred_age_vcov_wi_f$preds$age + focal_prop_wi_f
 
 ##### Centered model matrix
 pred_age_centered_wi_f <- varpred(mod_wi_f, "age", isolate=TRUE
-	, pop.ave="none", modelname = "centered mm"
+	, pop.ave="none", modelname = "isolated (mm)"
 )
 
 
@@ -212,12 +212,18 @@ pred_age_cont_plots <- (comparevarpred(vlist=vlist, lnames=lnames
 		, facet_ncol=2
 	)
 	+ geom_hline(data=true_prop_cont_df, aes(yintercept=y), lty=2, colour="yellow")
-	+ scale_colour_manual(breaks = c("everything", "centered mm", "zero-vcov")
-		, values=c(everything="blue", "centered mm"="red", "zero-vcov"="black")
+	+ scale_colour_manual(breaks = c("everything", "isolated (mm)", "isolated (vcov)")
+		, values=c(everything="blue", "isolated (mm)"="red", "isolated (vcov)"="black")
 	)
-	+ labs(y="Predicted household size", colour="Method")
+	+ labs(y="Predicted household size", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 print(pred_age_cont_plots)
+
+## Simple check
+print(mean(pred_age_centered_wi_nf$preds$fit))
+print(true_prop_wi_nf)
+
+plot(pred_age_centered_cni)
 
 saveEnvironment()

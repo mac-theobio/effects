@@ -134,6 +134,7 @@ multiple_outcomes_preds.Rout: multiple_outcomes_preds.R multiple_outcomes_model.
 cubic_predictors.Rout: cubic_predictors.R variable_predictions_funs.rda
 cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
 cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
+cubic_predictors_preds_adjust.Rout: cubic_predictors_preds_adjust.R cubic_predictors_model.rda variable_predictions_funs.rda
 
 ## Mediation and confounders
 mediate.Rout: mediate.R variable_predictions_funs.rda
@@ -154,9 +155,8 @@ glme_random_intercept_model.Rout: glme_random_intercept_model.R glme_random_inte
 glme_random_intercept_preds.Rout: glme_random_intercept_preds.R glme_random_intercept_model.rda
 
 ## variable_predictions.pdf: variable_predictions.Rnw
-variable_predictions.tex: cubic_predictors_preds.rda multiple_outcomes_preds.rda \
-	lme_random_intercept.rda categorical_predictors.rda variable_predictions_objs.rda \
-	variable_predictions.Rnw
+variable_predictions.tex: glme_random_intercept_preds.rda cubic_predictors_preds_adjust.rda \
+	cubic_predictors_preds.rda variable_predictions_objs.rda variable_predictions.Rnw
 
 ######################################################################
 

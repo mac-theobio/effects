@@ -96,7 +96,7 @@ varpred <- function(mod
 	, focal_predictors
 	, x.var = NULL
 	, type = c("response", "link")
-	, isolate = FALSE
+	, isolate = TRUE
 	, isolate.value = NULL
 	, level = 0.95
 	, steps = 100
