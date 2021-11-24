@@ -214,8 +214,26 @@ varpred <- function(mod
 		)
 		off <- get_offset(offset, mf)
 		pred <- off + as.vector(mm %*% betahat)
-		lwr <- pred - pse_var
-		upr <- pred + pse_var
+		if (include.re) {
+			re <- includeRE(mod)
+		}
+		if (include.re && any(re!=0) && bias.adjust=="none" ) {
+			predict.data <- predict.data[rep(1:length(pred), each=length(re)), 1:n.focal, drop=FALSE]
+			lwr <- list()
+			upr <- list()
+			pred_temp <- list()
+			for (p in 1:length(pred)) {
+				pred_temp[[p]] <- pred[[p]] + re
+				lwr[[p]] <- pred_temp[[p]] - pse_var[[p]]
+				upr[[p]] <- pred_temp[[p]] + pse_var[[p]]
+			}
+			pred <- do.call("c", pred_temp)
+			upr <- do.call("c", upr)
+			lwr <- do.call("c", lwr)
+		} else {
+			lwr <- pred - pse_var
+			upr <- pred + pse_var
+		}
 		
 		if (bias.adjust=="delta" ||bias.adjust=="mcculloch"||bias.adjust=="diggle") {
 			if (sigma=="mod") {
@@ -338,7 +356,7 @@ varpred <- function(mod
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if (bias.adjust=="quantile" || bias.adjust=="population"){
+	if (bias.adjust=="quantile"||bias.adjust=="population"||include.re){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
 	} 
