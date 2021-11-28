@@ -417,34 +417,33 @@ zero_vcov <- function(m, focal_vars, complete) {
 	return(v)
 }
 
-##' Recover data from the data from the model 
-##'
-##' @param mod fitted model
-##' @param optional character vector or formula specifying the predictors. Important when the transformation are applied in the formula. 
-##' @param envir data environment 
-##' @param ... for future implementations
-##'
-##' @details
-##' It uses the fitted model and the global environment to reconstruct the data used in the model. If \code{data} option is specified in the model formula, a dataframe with columns corresponding to the variable in the formula is returned. Any transformation, e.g. \code{log} specified in the formula terms is not evaluated on the returned data frame. However, if no is provided, the dataframe is constructed from the formula terms with all transformations evaluated.
-##'
-##' @return a dataframe
-##'
-##' @examples
-##' set.seed(4567)
-##' x <- rnorm(100, 3, 5)
-##' y <- 0.4 + 0.7*x + rnorm(100)
-##' df <- data.frame(y = y, x = x)
-##' m1 <- lm(y ~ x, df)
-##' d1 <- recoverdata(m1)
-##' head(d1)
-##' m2 <- lm(y ~ x)
-##' d2 <- recoverdata(m2)
-##' head(d2)
-##'
-##' @export 
-##'
-## add Stack Overflow URL
-## TEST CASES???
+#' Recover data from the data from the model 
+#'
+#' @param mod fitted model
+#' @param optional character vector or formula specifying the predictors. Important when the transformation are applied in the formula. 
+#' @param envir data environment 
+#' @param ... for future implementations
+#'
+#' @details
+#' It uses the fitted model and the global environment to reconstruct the data used in the model. If \code{data} option is specified in the model formula, a dataframe with columns corresponding to the variable in the formula is returned. Any transformation, e.g. \code{log} specified in the formula terms is not evaluated on the returned data frame. However, if no is provided, the dataframe is constructed from the formula terms with all transformations evaluated.
+#'
+#' @return a dataframe
+#'
+#' @examples
+#' set.seed(4567)
+#' x <- rnorm(100, 3, 5)
+#' y <- 0.4 + 0.7*x + rnorm(100)
+#' df <- data.frame(y = y, x = x)
+#' m1 <- lm(y ~ x, df)
+#' d1 <- recoverdata(m1)
+#' head(d1)
+#' m2 <- lm(y ~ x)
+#' d2 <- recoverdata(m2)
+#' head(d2)
+#'
+#' @export 
+#'
+
 recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), ...) {
 	f <- formula(mod)
 	data <- eval(getCall(mod)$data, envir)
@@ -466,3 +465,61 @@ recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), .
 	return(df)
 }
 
+#' Combine varpred objects
+#'
+#' Combines and plots comparison plots for more than two named varpred objects. 
+#'
+#' @export 
+#'
+
+combinevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE, margindex, ...) {
+	if (!is.list(vlist))stop("vlist should be a list of objects of class varpred")
+	nobjs <- length(vlist)
+	if (!is.null(lnames)) {
+		if (nobjs==1) lnames <- rep(lnames, nobjs)
+	} 
+	preds <- lapply(1:nobjs, function(v){
+		pp <- vlist[[v]]$preds
+		if (!is.null(lnames)) {
+			pp$.varpred <- lnames[[v]]
+		}
+		return(pp)
+	})
+	preds <- do.call("rbind", preds)
+	if (addmarginals) {
+		if (missing(margindex))stop("Specify margindex of vlist objects to compute marginals")
+		marg_df <- lapply(margindex, function(i){
+			pp <- vlist[[i]]$preds
+			df <- data.frame(muy=mean(pp$fit)
+				, mux=mean(pp[[attr(pp, "x.var")]])
+			)
+			if (!is.null(lnames)) {
+				df$.varpred <- lnames[[i]]
+			}
+			return(df)
+		})
+		marg_df <- do.call("rbind", marg_df)
+	}
+	
+	out <- vlist[[1]]
+	out$preds <- preds
+	if (plotit) {
+		add_args <- list(...)
+		if (length(add_args)) {
+			out <- list(out)
+			out[names(add_args)] <- add_args
+			p <- do.call(plot, out)
+		} else {
+			p <- plot(out)
+		}
+		if (addmarginals) {
+			p <- (p
+				+ geom_hline(data=marg_df, aes(yintercept=muy), lty=2, colour="grey")
+				+ geom_vline(data=marg_df, aes(xintercept=mux), lty=2, colour="grey")
+			)
+		}
+		return(p)
+	} else {
+		return(out)
+	}
+}
