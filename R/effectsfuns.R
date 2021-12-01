@@ -107,7 +107,7 @@ varpred <- function(mod
 	, zero_out_interaction = FALSE
 	, avefun = mean
 	, offset = NULL
-	, bias.adjust = c("none", "delta", "mcculloch", "diggle", "quantile", "population")
+	, bias.adjust = c("none", "delta", "mcculloch", "diggle", "quantile", "population", "population2", "logitnorm")
 	, sigma = c("mod", "lp", "total")
 	, include.re = FALSE
 	, modelname = NULL
@@ -184,7 +184,7 @@ varpred <- function(mod
 			
 	
 	## No or delta bias adjustment
-	if (bias.adjust=="none" || bias.adjust=="delta" ||bias.adjust=="mcculloch"||bias.adjust=="diggle") {
+	if (bias.adjust %in% c("none", "delta", "mcculloch", "diggle", "logitnorm")) {
 		mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 		mod.matrix <- model.matrix(formula.rhs
 			, data=mf
@@ -217,7 +217,7 @@ varpred <- function(mod
 		if (include.re) {
 			re <- includeRE(mod)
 		}
-		if (include.re && any(re!=0) && bias.adjust=="none" ) {
+		if (include.re && any(re!=0) && bias.adjust=="none") {
 			predict.data <- predict.data[rep(1:length(pred), each=length(re)), 1:n.focal, drop=FALSE]
 			lwr <- list()
 			upr <- list()
@@ -230,12 +230,20 @@ varpred <- function(mod
 			pred <- do.call("c", pred_temp)
 			upr <- do.call("c", upr)
 			lwr <- do.call("c", lwr)
+		} else if (bias.adjust=="logitnorm" && type=="response") {
+			## FIXME: result is in probability scale, should I 
+			## transform it back to logit scale for type=="link"?
+			out <- logitnorm.bias.adjust(pred, pse_var/mult)
+			pred <- out[["pred"]]
+			pse_var <- mult*sqrt(out[["var"]])
+			lwr <- pred - pse_var
+			upr <- pred + pse_var
 		} else {
 			lwr <- pred - pse_var
 			upr <- pred + pse_var
 		}
 		
-		if (bias.adjust=="delta" ||bias.adjust=="mcculloch"||bias.adjust=="diggle") {
+		if (bias.adjust %in% c("delta", "mcculloch","diggle")) {
 			if (sigma=="mod") {
 				sigma <- get_sigma(mod)
 			} else if (sigma=="lp") {
@@ -273,36 +281,64 @@ varpred <- function(mod
 			.link <- .make.bias.adj.link(.link, sigma)
 		}
 		
-	} else if (bias.adjust=="population" || bias.adjust=="quantile") {
+	} else if (bias.adjust %in% c("population", "population2", "quantile")) {
 		x.focal <- predict.data$focal
 		x.excluded <- predict.data$excluded
-		pred_obj_all <- pop.bias.adjust(x.focal=x.focal
-			, x.excluded=x.excluded
-			, betahat=betahat
-			, formula.rhs=formula.rhs
-			, rTerms=rTerms
-			, factor.levels=factor.levels
-			, contr=.contr
-			, mult=mult
-			, vnames=vnames
-			, offset=offset
-			, mod=mod
-			, vcov.=vcov.
-			, isolate=isolate
-			, isolate.value=isolate.value
-			, internal=internal
-			, vareff_objects=vareff_objects
-			, x.var=x.var
-			, typical=typical
-			, zero_out_interaction=zero_out_interaction
-			, include.re=include.re
-		)
-		pred_obj <- pred_obj_all$pred_df
-		predict.data <- pred_obj[, colnames(x.focal), drop=FALSE]
+
+		if (bias.adjust %in% c("population", "quantile")) {
+			pred_obj_all <- pop.bias.adjust(x.focal=x.focal
+				, x.excluded=x.excluded
+				, betahat=betahat
+				, formula.rhs=formula.rhs
+				, rTerms=rTerms
+				, factor.levels=factor.levels
+				, contr=.contr
+				, mult=mult
+				, vnames=vnames
+				, offset=offset
+				, mod=mod
+				, vcov.=vcov.
+				, isolate=isolate
+				, isolate.value=isolate.value
+				, internal=internal
+				, vareff_objects=vareff_objects
+				, x.var=x.var
+				, typical=typical
+				, zero_out_interaction=zero_out_interaction
+				, include.re=include.re
+			)
+			pred_obj <- pred_obj_all$pred_df
+			predict.data <- pred_obj[, colnames(x.focal), drop=FALSE]
+			pse_var <- pred_obj$pse_var
+		} else if (bias.adjust=="population2") {
+			pred_obj_all <- pop2.bias.adjust(x.focal=x.focal
+				, x.excluded=x.excluded
+				, betahat=betahat
+				, formula.rhs=formula.rhs
+				, rTerms=rTerms
+				, factor.levels=factor.levels
+				, contr=.contr
+				, mult=mult
+				, vnames=vnames
+				, offset=offset
+				, mod=mod
+				, vcov.=vcov.
+				, isolate=isolate
+				, isolate.value=isolate.value
+				, internal=internal
+				, vareff_objects=vareff_objects
+				, x.var=x.var
+				, typical=typical
+				, zero_out_interaction=zero_out_interaction
+				, include.re=include.re
+			)
+			pred_obj <- pred_obj_all$pred_df
+			predict.data <- x.focal[rep(1:NROW(x.focal), each=NROW(x.excluded)), 1:n.focal, drop=FALSE]
+			pse_var <- unname(pred_obj_all$pse_var)[rep(1:NROW(x.focal), each=NROW(x.excluded))]
+		}
 		pred <- pred_obj$pred
 		lwr <- pred_obj$lwr
 		upr <- pred_obj$upr
-		pse_var <- pred_obj$pse_var
 		off <- pred_obj_all$off
 		mm <- NULL
 	}
@@ -324,7 +360,7 @@ varpred <- function(mod
 		, family = .family
 		, link = .link
 		, offset=off
-		, bias.adjust.sigma = if (bias.adjust %in% c("none", "population")) NULL else sigma
+		, bias.adjust.sigma = if (bias.adjust %in% c("none", "population", "population2")) NULL else sigma
 	)
 
 	## Organize
@@ -344,11 +380,21 @@ varpred <- function(mod
 	result <- switch(type
 	  	, response= { if (is.null(out$se)) 
 		  	data.frame(out$x, fit=as.vector(transform(out$fit)))
-			else 
-				data.frame(out$x, fit=as.vector(linkinv(out$fit))
-					, se = as.vector(linkmu.eta(out$fit) * out$se)
-					, lwr=as.vector(linkinv(out$lwr))
-					, upr=as.vector(linkinv(out$upr)))
+			else
+				if (bias.adjust=="logitnorm") {
+					data.frame(out$x, fit=as.vector(out$fit)
+						, se = as.vector(out$se)
+						, lwr=as.vector(out$lwr)
+						, upr=as.vector(out$up)
+					)
+					
+				} else {
+					data.frame(out$x, fit=as.vector(linkinv(out$fit))
+						, se = as.vector(linkmu.eta(out$fit) * out$se)
+						, lwr=as.vector(linkinv(out$lwr))
+						, upr=as.vector(linkinv(out$upr))
+					)
+				}
 		} , link = { if (is.null(out$se)) 
 		  	data.frame(out$x, fit=as.vector(out$fit))
 		 	else 
@@ -356,7 +402,7 @@ varpred <- function(mod
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if (bias.adjust=="quantile"||bias.adjust=="population"||include.re){
+	if ((bias.adjust %in% c("quantile", "population", "population2"))||include.re){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
 	} 

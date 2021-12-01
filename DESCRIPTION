@@ -1,10 +1,10 @@
 Package: vareffects
 Type: Package
-Title: Compute Conditional and Marginal Predictions 
-Version: 1.0.2
+Title: isolated confidence intervals and bias-corrected predictor effects
+Version: 1.0.3
 Author: Bicko Cygu
 Maintainer: Bicko Cygu <cygubicko@gmail.com>
-Description: Computes conditional and marginal predictions together with centered model equivalents from uncentered models.
+Description: Implements an alternative method for computing the associated confidence intervals for predictor effects. It also provides various methods for correcting bias in predictions for GL(M)Ms involving nonlinear link functions or complicated interactions.
 License: GPL (>= 2)
 Depends: R (>= 3.5.0)
 Imports: ggplot2, lme4

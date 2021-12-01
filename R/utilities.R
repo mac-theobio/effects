@@ -1,6 +1,6 @@
 # Some of the condition code is based on R package effects (clean_model). Transfered and modified here because they are not exported in effects.
 
-
+## Population-based bias adjustment
 pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	, rTerms, factor.levels, contr, offset, mult, vnames, ...
 	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
@@ -78,6 +78,100 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	return(list(pred_df=pred_df, off=mean(offs)))
 }
 
+## Population-based adjustment (better computational speed?)
+pop2.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
+	, rTerms, factor.levels, contr, offset, mult, vnames, ...
+	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
+	, typical, zero_out_interaction, include.re) {
+
+	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
+	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
+
+	mm <- get_model.mm(mod)
+	col_mean <- colMeans(mm)
+	
+	non_focal_mm <- mm[, non_focal_terms, drop=FALSE]
+	non_focal_betahat <- betahat[non_focal_terms]
+	pred_non_focal <- as.vector(non_focal_mm %*% non_focal_betahat)
+
+
+	factor.levels_update <- factor.levels
+	factor.levels_update[!names(factor.levels_update) %in% names(x.focal)] <- NULL
+	drop_index <- grep(paste(colnames(x.excluded), collapse = "|"), attr(rTerms, "term.labels"))
+	rTerms_update <- drop.terms(rTerms, drop_index)
+	formula.rhs_update <- drop.terms(terms(formula.rhs), drop_index)
+	contr_update <- contr
+	contr_update[!names(contr_update) %in% names(x.focal)] <- NULL
+	
+	focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
+	focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
+	
+	off <- get_offset(offset, model.frame(mod)) # FIXME: or focal_mf?
+	
+	focal_betahat <- betahat[focal_terms]
+	pred_focal <- off + as.vector(focal_mm %*% focal_betahat)
+
+	if (isolate) {
+		# FIXME: assuming pop of non-focal -> no variance
+		mm[,non_focal_terms] <- 0
+		col_mean[non_focal_terms] <- 0
+	}
+	
+	pse_var <- mult*get_sderror(mod=mod
+		, vcov.=vcov.
+		, mm=focal_mm
+		, col_mean=col_mean
+		, isolate=isolate
+		, isolate.value=isolate.value
+		, internal=internal
+		, vareff_objects=vareff_objects
+		, x.var=x.var
+		, typical=typical
+		, formula.rhs=formula.rhs
+		, zero_out_interaction=zero_out_interaction
+		, mf=focal_mf
+		, focal_terms=focal_terms
+	)
+
+	if (include.re) {
+		re <- includeRE(mod)	
+	} else {
+		re <- 0
+	}
+
+	pred_list <- list()
+	for (i in 1:length(pred_focal)) {
+		pred_list[[i]] <- transform(
+			data.frame(pred=pred_focal[[i]] + pred_non_focal + re)
+			, lwr=pred-pse_var[[i]]
+			, upr=pred+pse_var[[i]]
+		)	
+	}
+	pred_df <- do.call("rbind", pred_list)
+	return(list(pred_df=pred_df, off=off, pse_var=pse_var))
+}
+
+
+## Logistic normal approximation
+logitnorm.bias.adjust <- function(pred, sigma, abs.tol=0, ...) {
+	.logitnorm <- function (mu, sigma, abs.tol=abs.tol, ...) {
+		fExp <- function(x) plogis(x) * dnorm(x, mean = mu, sd = sigma)
+		.exp <- integrate(fExp, -Inf, Inf, abs.tol = abs.tol, ...)$value
+		fVar <- function(x) (plogis(x) - .exp)^2 * dnorm(x, mean = mu, sd = sigma)
+		.var <- integrate(fVar, -Inf, Inf, abs.tol = abs.tol, ...)$value
+		return(list(mean = .exp, var = .var))
+	}
+	.pred <- numeric()
+	.var <- numeric()
+	for (i in 1:length(pred)) {
+		out <- .logitnorm(pred[[i]], sigma[[i]], abs.tol)
+		.pred[[i]] <- out$mean
+		.var[[i]] <- out$var
+	}
+	out <- list(pred=.pred, var=.var)
+	return(out)
+}
+
 ## MCMCglmm vignettes: 
 mcculloch.bias.adjust <- function(pred, sigma, ...) {
 	out <- pred-0.5*sigma^2*tanh(pred*(1 + 2*exp(-0.5*sigma^2))/6)
@@ -123,7 +217,7 @@ get_offset <- function(offset, mf) {
 	 link
 }
 
-get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, ...) {
+get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, focal_terms=NULL, ...) {
 	
 	if (is.null(vcov.)){
 		vc <- vcov(vareff_objects)
@@ -135,12 +229,20 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
 		vc <- vcov.
 	}
   	
+	if (!is.null(focal_terms)) {
+		vc <- vc[focal_terms, focal_terms]
+		col_mean <- col_mean[focal_terms]
+	}
+
 	# (Centered) predictions for SEs
 	## Center model matrix
 	if (isolate) {
 		mm_mean <- t(replicate(NROW(mm), col_mean))
 		if (zero_out_interaction & any(grepl(":", get_termnames(mod)))){
 			vc <- zero_vcov(mod, focal_vars=x.var)
+			if (!is.null(focal_terms)) {
+				vc <- vc[focal_terms, focal_terms]
+			}
 		}
 		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
 			mf[x.var] <- 0*mf[x.var]+isolate.value
@@ -408,7 +510,7 @@ clean_model <- function(focal.predictors, mod, xlevels
     if (is.logical(X[, name])) levels <- c("FALSE", "TRUE")
     fac <- !is.null(levels)
     level <- if (fac) {
-	 		if (bias.adjust=="quantile"||bias.adjust=="population") {
+	 		if (bias.adjust %in% c("quantile", "population", "population2")) {
 				as.vector(X[, name])
 			} else {
 	 			levels[1]
@@ -417,7 +519,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 	if (bias.adjust=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
 			quantile(X[,name], quant, names=FALSE)
-		} else if (bias.adjust=="population") {
+		} else if (bias.adjust %in% c("population", "population2")) {
 			as.vector(X[, name])
 		} else {
 			typical(X[, name])	
@@ -438,7 +540,7 @@ clean_model <- function(focal.predictors, mod, xlevels
   n.excluded <- length(excluded.predictors)
   n.vars <- n.focal + n.excluded
   
-  if (bias.adjust=="population" || bias.adjust=="quantile") {
+  if (bias.adjust %in% c("quantile", "population", "population2")) {
 	  if (n.excluded>0) {
 		  ..excluded <- do.call("data.frame", sapply(x.excluded, function(x) x$level, simplify=FALSE))
 		  ..col.excluded <- sapply(x.excluded, function(x) x$name)
