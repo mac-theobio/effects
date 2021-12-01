@@ -308,7 +308,7 @@ varpred <- function(mod
 				, include.re=include.re
 			)
 			pred_obj <- pred_obj_all$pred_df
-			predict.data <- x.focal[rep(1:NROW(x.focal), each=NROW(x.excluded)), 1:n.focal, drop=FALSE]
+			predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
 			pse_var <- pred_obj$pse_var
 		} else if (bias.adjust=="population2") {
 			pred_obj_all <- pop2.bias.adjust(x.focal=x.focal

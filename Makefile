@@ -13,8 +13,7 @@ setssh:
 
 ######################################################################
 
-today: understanding_mm_special.pdf mediate_bin_preds_adjust.Rout.pdf \
-	binom_correlated_preds.Rout.pdf glme_random_intercept_preds.Rout.pdf
+today: binom_multiple_outcomes_preds_plots.Rout.pdf variable_predictions.pdf 
 
 ######################################################################
 
@@ -125,9 +124,17 @@ categorical_predictors.Rout: categorical_predictors.R variable_predictions_funs.
 lme_random_intercept.Rout: lme_random_intercept.R variable_predictions_funs.rda
 
 ## Multiple outcomes
+### gaussian
 multiple_outcomes.Rout: multiple_outcomes.R variable_predictions_funs.rda
 multiple_outcomes_model.Rout: multiple_outcomes_model.R multiple_outcomes.rda
 multiple_outcomes_preds.Rout: multiple_outcomes_preds.R multiple_outcomes_model.rda
+
+### Binomial
+binom_multiple_outcomes.Rout: binom_multiple_outcomes.R variable_predictions_funs.rda
+binom_multiple_outcomes_binned.Rout: binom_multiple_outcomes_binned.R binom_multiple_outcomes.rda
+binom_multiple_outcomes_model.Rout: binom_multiple_outcomes_model.R binom_multiple_outcomes.rda
+binom_multiple_outcomes_preds.Rout: binom_multiple_outcomes_preds.R binom_multiple_outcomes_model.rda
+binom_multiple_outcomes_preds_plots.Rout: binom_multiple_outcomes_preds_plots.R binom_multiple_outcomes_binned.rda binom_multiple_outcomes_preds.rda
 
 ## Complex interaction
 ### Cubic polynomial

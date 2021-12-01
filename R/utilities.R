@@ -8,22 +8,55 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 
 	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
 	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
-
 	mm <- get_model.mm(mod)
-	col_mean <- colMeans(mm)
 
-	mm_temp <- mm
 	if (isolate) {
-		# FIXME: assuming pop of non-focal -> no variance
-		mm[,non_focal_terms] <- 0
-		col_mean[non_focal_terms] <- 0
+		if (!is.null(x.excluded)) {
+			factor.levels_update <- factor.levels
+			factor.levels_update[!names(factor.levels_update) %in% names(x.focal)] <- NULL
+			drop_index <- grep(paste(colnames(x.excluded), collapse = "|"), attr(rTerms, "term.labels"))
+			rTerms_update <- drop.terms(rTerms, drop_index)
+			formula.rhs_update <- drop.terms(terms(formula.rhs), drop_index)
+			contr_update <- contr
+			contr_update[!names(contr_update) %in% names(x.focal)] <- NULL
+		} else {
+			rTerms_update <- rTerms
+			factor.levels_update <- factor.levels
+			formula.rhs_update <- formula.rhs
+			contr_update <- contr
+		}
+		focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
+		focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
+		focal_terms_update <- focal_terms #attr(terms(formula.rhs_update), "term.labels")
+	} else {
+		focal_mf <- model.frame(mod)
+		focal_mm <- mm
+		focal_terms_update <- NULL
 	}
+	col_mean <- colMeans(focal_mm)
 	
 	if (!is.null(x.excluded)) {
 		nM <- NROW(x.excluded)
 	} else {
 		nM <- NROW(mm)
 	}
+	
+	
+	pse_var <- mult*get_sderror(mod=mod
+		, vcov.=vcov.
+		, mm=focal_mm
+		, col_mean=col_mean
+		, isolate=isolate
+		, isolate.value=isolate.value
+		, internal=internal
+		, vareff_objects=vareff_objects
+		, x.var=x.var
+		, typical=typical
+		, formula.rhs=formula.rhs
+		, zero_out_interaction=zero_out_interaction
+		, mf=focal_mf
+		, focal_terms=focal_terms_update
+	)
 
 	if (include.re) {
 		re <- includeRE(mod)	
@@ -40,39 +73,40 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		mf_i <- model.frame(rTerms, mf_i, xlev=factor.levels, na.action=NULL)
 		mm_i <- model.matrix(formula.rhs, data = mf_i, contrasts.arg = contr)
 
-		if (isolate) {
-			# FIXME: assuming pop of non-focal -> no variance
-			mm[, focal_terms] <- mm_i[, focal_terms]
-		} else {
-			mm <- mm_i
-		}
-		
 		off <- get_offset(offset, mf_i)
 		offs[i] <- off
 		
-		pse_var <- mult*get_sderror(mod=mod
-			, vcov.=vcov.
-			, mm=mm
-			, col_mean=col_mean
-			, isolate=isolate
-			, isolate.value=isolate.value
-			, internal=internal
-			, vareff_objects=vareff_objects
-			, x.var=x.var
-			, typical=typical
-			, formula.rhs=formula.rhs
-			, zero_out_interaction=zero_out_interaction
-			, mf=mf_i
-		)
+#		if (isolate) {
+#			# FIXME: assuming pop of non-focal -> no variance
+#			mm[, focal_terms] <- mm_i[, focal_terms]
+#		} else {
+#			mm <- mm_i
+#		}
+		
+#		pse_var <- mult*get_sderror(mod=mod
+#			, vcov.=vcov.
+#			, mm=mm
+#			, col_mean=col_mean
+#			, isolate=isolate
+#			, isolate.value=isolate.value
+#			, internal=internal
+#			, vareff_objects=vareff_objects
+#			, x.var=x.var
+#			, typical=typical
+#			, formula.rhs=formula.rhs
+#			, zero_out_interaction=zero_out_interaction
+#			, mf=mf_i
+#		)
+
 		pred_list[[i]] <- transform(
 			data.frame(pred=off + as.vector(mm_i %*% betahat) + re)
-			, lwr=pred - pse_var
-			, upr=pred + pse_var
-			, pse_var=pse_var
+			, lwr=pred - ifelse(isolate, pse_var[[i]], pse_var)
+			, upr=pred + ifelse(isolate, pse_var[[i]], pse_var)
+			, pse_var=ifelse(isolate, pse_var[[i]], pse_var)
 		)
 	}
 	pred_df <- do.call("rbind", pred_list)
-	return(list(pred_df=pred_df, off=mean(offs)))
+	return(list(pred_df=pred_df, off=mean(offs), dim=nM))
 }
 
 ## Population-based adjustment (better computational speed?)
@@ -91,7 +125,6 @@ pop2.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	non_focal_betahat <- betahat[non_focal_terms]
 	pred_non_focal <- as.vector(non_focal_mm %*% non_focal_betahat)
 
-
 	factor.levels_update <- factor.levels
 	factor.levels_update[!names(factor.levels_update) %in% names(x.focal)] <- NULL
 	drop_index <- grep(paste(colnames(x.excluded), collapse = "|"), attr(rTerms, "term.labels"))
@@ -102,18 +135,13 @@ pop2.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	
 	focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
 	focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
+#	focal_terms <- attr(terms(formula.rhs_update), "term.labels")
 	
 	off <- get_offset(offset, model.frame(focal_mf)) # FIXME: or model.frame(mod)?
 	
 	focal_betahat <- betahat[focal_terms]
 	pred_focal <- off + as.vector(focal_mm %*% focal_betahat)
 
-	if (isolate) {
-		# FIXME: assuming pop of non-focal -> no variance
-		mm[,non_focal_terms] <- 0
-		col_mean[non_focal_terms] <- 0
-	}
-	
 	pse_var <- mult*get_sderror(mod=mod
 		, vcov.=vcov.
 		, mm=focal_mm
@@ -228,13 +256,16 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
   	
 	if (!is.null(focal_terms)) {
 		vc <- vc[focal_terms, focal_terms]
-		col_mean <- col_mean[focal_terms]
+		mm <- mm[, focal_terms, drop=FALSE]
 	}
 
 	# (Centered) predictions for SEs
 	## Center model matrix
 	if (isolate) {
 		mm_mean <- t(replicate(NROW(mm), col_mean))
+		if (!is.null(focal_terms)) {
+			mm_mean <- mm_mean[, focal_terms, drop=FALSE]
+		}
 		if (zero_out_interaction & any(grepl(":", get_termnames(mod)))){
 			vc <- zero_vcov(mod, focal_vars=x.var)
 			if (!is.null(focal_terms)) {
