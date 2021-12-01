@@ -13,7 +13,7 @@ setssh:
 
 ######################################################################
 
-today: binom_multiple_outcomes_preds_plots.Rout.pdf variable_predictions.pdf 
+today: variable_predictions.tex.pdf binom_multiple_outcomes_preds_plots.Rout.pdf
 
 ######################################################################
 
