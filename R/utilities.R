@@ -49,7 +49,6 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		
 		off <- get_offset(offset, mf_i)
 		offs[i] <- off
-		pred <- off + as.vector(mm_i %*% betahat) + re
 		
 		pse_var <- mult*get_sderror(mod=mod
 			, vcov.=vcov.
@@ -65,14 +64,12 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 			, zero_out_interaction=zero_out_interaction
 			, mf=mf_i
 		)
-		
-		lwr <- pred - pse_var
-		upr <- pred + pse_var
-		focal_i$pred <- pred
-		focal_i$lwr <- lwr
-		focal_i$upr <- upr
-		focal_i$pse_var <- pse_var
-		pred_list[[i]] <- focal_i
+		pred_list[[i]] <- transform(
+			data.frame(pred=off + as.vector(mm_i %*% betahat) + re)
+			, lwr=pred - pse_var
+			, upr=pred + pse_var
+			, pse_var=pse_var
+		)
 	}
 	pred_df <- do.call("rbind", pred_list)
 	return(list(pred_df=pred_df, off=mean(offs)))
@@ -106,7 +103,7 @@ pop2.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
 	focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
 	
-	off <- get_offset(offset, model.frame(mod)) # FIXME: or focal_mf?
+	off <- get_offset(offset, model.frame(focal_mf)) # FIXME: or model.frame(mod)?
 	
 	focal_betahat <- betahat[focal_terms]
 	pred_focal <- off + as.vector(focal_mm %*% focal_betahat)
