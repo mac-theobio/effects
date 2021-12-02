@@ -23,9 +23,21 @@ update_scripts:
 
 Makefile: varpred.stamp
 
+Ignore += *.stamp
 varpred.stamp: DESCRIPTION
 	$(touch)
 	$(MAKE) install || ($(rm) && false)
+
+######################################################################
+
+Rnw = $(wildcard *.Rnw)
+rmd = $(wildcard *.rmd)
+md = $(wildcard *.md)
+
+pdftargets = $(Rnw:Rnw=pdf) $(rmd:rmd=pdf) $(md:md=pdf)
+htmltargets = $(pdftargets:pdf=html)
+
+Ignore += $(pdftargets) $(htmltargets)
 
 ######################################################################
 
