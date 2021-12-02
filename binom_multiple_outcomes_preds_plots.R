@@ -5,8 +5,8 @@ library(ggplot2)
 library(dplyr)
 library(glmmTMB)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 ### Combine all the predictions
 all_vars_pred_plots <- lapply(all_pred_vars, function(x){
