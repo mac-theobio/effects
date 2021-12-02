@@ -1,3 +1,23 @@
+2021 Sep 16 (Thu)
+=================
+
+- We should (or a attempt to) provide a clear definition of the following:
+	- input variables
+	- predictor variables
+	- an anchor
+	- reference point
+	- model center
+- We can possible define macro in the text for future changes in the choice of terminology. We can edit **structure.md** for the definitions or maybe add them directly to the **variable_predictions.Rmd**
+
+- We should document what the central line, the outer curves and the cross (or isolated) curves means.
+
+- **BC** should provide a mathematical formulation of the model for Figure 3 together with the corresponding analytical `E(.)` to justify why or not the yellow and grey vertical lines should be different. Also, look at the back-end code for any _bugs_.
+
+- In future, think about a clear example to justify our proposed method.
+
+
+
+
 
 2021 Sep 16 (Thu)
 =================
