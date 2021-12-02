@@ -15,6 +15,10 @@ setssh:
 
 today: variable_predictions.tex.pdf binom_multiple_outcomes_preds_plots.Rout.pdf
 
+update_scripts:
+	perl -pi -e "s/makeGraphics/startGraphics/; s/commandEnvironments/loadEnvironments/;" *.R
+
+
 ######################################################################
 
 Makefile: varpred.stamp

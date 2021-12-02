@@ -1,7 +1,7 @@
 library(shellpipes)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
  
 set.seed(9991)
 

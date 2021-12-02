@@ -6,8 +6,8 @@ library(dplyr)
 library(glmmTMB)
 library(emmeans)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 ## No bias adjustment
 glme_pred_none <- varpred(glme_mod

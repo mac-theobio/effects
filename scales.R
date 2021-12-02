@@ -1,6 +1,6 @@
 
 source("makestuff/makeRfuns.R") ## Will eventually be a package
-commandEnvironments() ## Read in any environments specified as dependencies
+loadEnvironments() ## Read in any environments specified as dependencies
 
 m <- lm(y1 ~ x1+x2, data=sim_df)
 vcov(m)

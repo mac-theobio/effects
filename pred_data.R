@@ -1,6 +1,6 @@
 library(shellpipes)
 
-commandEnvironments()
+loadEnvironments()
 
 rsteps <- 50
 

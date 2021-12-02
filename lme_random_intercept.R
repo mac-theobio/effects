@@ -5,8 +5,8 @@ library(ggplot2)
 library(dplyr)
 library(glmmTMB)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
  
 set.seed(9991)
 

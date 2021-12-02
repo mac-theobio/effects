@@ -1,7 +1,7 @@
 library(shellpipes)
 library(dplyr)
 
-commandEnvironments()
+loadEnvironments()
 
 
 ## Generate binned observations

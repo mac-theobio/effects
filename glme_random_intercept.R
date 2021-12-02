@@ -4,8 +4,8 @@ library(ggpubr)
 library(ggplot2)
 library(dplyr)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
  
 set.seed(9991)
 

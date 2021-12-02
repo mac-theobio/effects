@@ -6,8 +6,8 @@ library(ggplot2)
 library(dplyr)
 library(emmeans)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 ## Focal polynomial
 

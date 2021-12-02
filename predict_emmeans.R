@@ -4,7 +4,7 @@ library(jdeffects)
 library(emmeans)
 library(shellpipes)
 
-commandEnvironments()
+loadEnvironments()
 
 ## emmeans function
 empredfun <- function(mod, spec, at, cov.keep, model, vvfun=NULL){

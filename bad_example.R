@@ -6,7 +6,7 @@ library(ggplot2)
 ## Use this call to make bad_example.Rout independently
 rpcall("bad_example.Rout bad_example.R")
 
-commandEnvironments()
+loadEnvironments()
 startGraphics()
 
 set.seed(9991)

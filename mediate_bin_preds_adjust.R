@@ -5,7 +5,7 @@ library(ggplot2)
 library(dplyr)
 
 rpcall("mediate_bin_preds_adjust.Rout mediate_bin_preds_adjust.R mediate_model.rda")
-commandEnvironments()
+loadEnvironments()
 startGraphics()
 
 ## Not mediated

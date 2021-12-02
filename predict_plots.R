@@ -2,8 +2,8 @@ library(dplyr)
 library(ggplot2); theme_set(theme_bw())
 library(shellpipes)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 ## Some checks
 base <- (predict_x1_base

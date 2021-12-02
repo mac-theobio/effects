@@ -1,6 +1,6 @@
 library(shellpipes)
 
-commandEnvironments()
+loadEnvironments()
  
 
 mod_bin_corr <- glm(z~x+y, sim_df_bin_corr, family=binomial)

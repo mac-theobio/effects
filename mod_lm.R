@@ -1,5 +1,5 @@
 source("makestuff/makeRfuns.R")
-commandEnvironments()
+loadEnvironments()
 sourceFiles()
 
 ## Fit lm model

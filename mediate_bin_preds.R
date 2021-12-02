@@ -4,8 +4,8 @@ library(ggpubr)
 library(ggplot2)
 library(dplyr)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 ## Not mediated
 pred_x_trad_notmediated <- varpred(mod_notmediated_bin

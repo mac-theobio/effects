@@ -1,8 +1,8 @@
 library(shellpipes)
 library(dplyr)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 set.seed(991)
 

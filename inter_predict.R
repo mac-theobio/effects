@@ -4,7 +4,7 @@ library(emmeans)
 
 source("makestuff/makeRfuns.R")
 callArgs <- "inter_predict.Rout inter_predict.R effectsfuns.R inter_mod_lm.rda"
-commandEnvironments()
+loadEnvironments()
 sourceFiles()
 
 

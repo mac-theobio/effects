@@ -1,8 +1,8 @@
 library(shellpipes)
 library(glmmTMB)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
  
 #### Model
 glme_mod <- glmmTMB(status~age+(1|hhid)

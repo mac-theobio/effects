@@ -5,8 +5,8 @@ library(ggplot2)
 library(dplyr)
 library(emmeans)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
 
 ## Correlated
 pred_x_trad_bin_corr <- varpred(mod_bin_corr

@@ -2,8 +2,8 @@ library(shellpipes)
 library(dplyr)
 library(splines)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
  
 set.seed(9991)
 

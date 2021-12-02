@@ -3,7 +3,7 @@ library(data.table)
 library(vareffects)
 library(shellpipes)
 
-commandEnvironments()
+loadEnvironments()
 
 ## Varpred function function
 varpredfun <- function(mod, focal, at, vcmat = NULL, model){

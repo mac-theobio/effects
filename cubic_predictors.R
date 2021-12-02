@@ -2,8 +2,8 @@ library(shellpipes)
 library(tidyr)
 library(dplyr)
 
-commandEnvironments()
-makeGraphics()
+loadEnvironments()
+startGraphics()
  
 set.seed(9991)
 

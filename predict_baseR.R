@@ -2,7 +2,7 @@ library(dplyr)
 library(jdeffects)
 library(shellpipes)
 
-commandEnvironments()
+loadEnvironments()
 
 ## Predict function. Calls customized base R predict
 predfun <- function(mod, var, newdata, model, level = 0.95, vvfun=NULL){
