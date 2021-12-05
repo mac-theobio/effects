@@ -298,7 +298,20 @@ get_vnames <- function(mod){
 		termnames <- c("(Intercept)", termnames)
 		assign <- assign + 1
 	}
-	vnames <- setNames(vnames[assign], coefnames)
+	
+	## assign doesn not group _I(_ terms
+	if (any(grepl("^I\\(", termnames))) {
+		assign2 <- unlist(lapply(1:length(termnames), function(x){
+			if(grepl(paste0(vnames, collapse="|"), termnames[[x]])){
+				return(gsub(".*I\\(|\\^.*", "", termnames[[x]]))
+			}
+		}))
+		assign2 <- match(assign2, assign2)
+		vnames <- setNames(vnames[assign2], coefnames)
+	} else {
+		vnames <- setNames(vnames[assign], coefnames)
+	}
+
 	termnames <- setNames(termnames[assign], coefnames)
 	# In case there are interactions
 	vnames[is.na(vnames)] <- termnames[is.na(vnames)]

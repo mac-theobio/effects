@@ -24,6 +24,8 @@
 \newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
 \newcommand{\xfprime}{x_{f'}}
 
+\newcommand{\yE}{{\mathrm E}}
+
 \setlength{\parindent}{0pt}
 
 \title{Uncertainty propagation for predictor effects and bias correction in generalized linear (mixed) models}
@@ -289,6 +291,51 @@ We consider more complex interactions in which the focal predictor is modelled a
 \beta_{\mathrm{A}_3} &= 0.3 \nonumber\\
 \beta_{\mathrm{W}} &= 0.8 \nonumber\\
 i &= 1,\cdots, 100
+\end{align}
+%
+We may be interested in comparing the observed average household size ($\yE(\mathrm{hh~size})$) and the predicted average household size ($\yE(\widehat{\mathrm{hh~size}})$). 
+%
+\begin{align}\label{sim:lm_cubic_mean}
+\yE(\mathrm{hh~size}) &\approx \beta_0 + \beta_{\mathrm{A_1}}\yE(\mathrm{Age}_i) + \beta_{\mathrm{A_2}}\yE(\mathrm{Age}^2_i) + \beta_{\mathrm{A_3}}\yE(\mathrm{Age}^3_i) \nonumber\\ 
+	& + \beta_{\mathrm{W}}\yE(\mathrm{Wealthindex}_i)
+\end{align}
+%
+
+We provide analytical comparison in two cases, i.e., when the interaction is in the focal predictor ($\mathrm{Age}$ is the focal predictor)
+%
+\begin{align}\label{sim:lm_cubic_analytic_age}
+\eta^\star(\mathrm{Age}_i, \nset{{\overline{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\ 
+	& + \beta_{\mathrm{W}}\overline{\mathrm{Wealthindex}} \nonumber\\
+\yE({\eta^\star(\mathrm{Age}_i, \nset{{\overline{\mathrm{Wealthindex}}}})}) &= \beta_0 + \beta_{\mathrm{A_1}}\yE({\mathrm{Age}_i}) + \beta_{\mathrm{A_2}}\yE({\mathrm{Age}^2_i}) + \beta_{\mathrm{A_3}}\yE({\mathrm{Age}^3_i}) \nonumber\\ 
+	& + \beta_{\mathrm{W}}\overline{\mathrm{Wealthindex}}
+\end{align}
+%
+and when the interaction is in the non-focal predictor ($\mathrm{Wealthindex}$ is the focal predictor)
+%
+\begin{align}\label{sim:lm_cubic_analytic_wealthindex}
+\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\overline{\mathrm{Age}}, \overline{\mathrm{Age}}^2, \overline{\mathrm{Age}}^3\}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\overline{\mathrm{Age}} + \beta_{\mathrm{A_2}}\overline{\mathrm{Age}}^2 + \beta_{\mathrm{A_3}}\overline{\mathrm{Age}}^3 \nonumber\\ 
+	& + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i \nonumber\\
+\yE(\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\overline{\mathrm{Age}}, \overline{\mathrm{Age}}^2, \overline{\mathrm{Age}}^3\}}})) &= \beta_0 + \beta_{\mathrm{A_1}}\overline{\mathrm{Age}} + \beta_{\mathrm{A_2}}\overline{\mathrm{Age}}^2 + \beta_{\mathrm{A_3}}\overline{\mathrm{Age}}^3 \nonumber\\ 
+	& + \beta_{\mathrm{W}}\yE(\mathrm{Wealthindex}_i)
+\end{align}
+%
+From Equation~\ref{sim:lm_cubic_mean} and ~\ref{sim:lm_cubic_analytic_age}
+%
+\begin{align*}
+\yE(\mathrm{hh~size}) &\approx \yE({\eta^\star(\mathrm{Age}_i, \nset{{\overline{\mathrm{Wealthindex}}}})})
+\end{align*}
+%
+since $\overline{\mathrm{Wealthindex}} = \yE(\mathrm{Wealthindex}_i)$. On the other hand
+%
+\begin{align*}
+\yE(\mathrm{hh~size}) &\approx \yE(\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\overline{\mathrm{Age}}, \overline{\mathrm{Age}}^2, \overline{\mathrm{Age}}^3\}}}))
+\end{align*}
+%
+if and only if $\yE(\mathrm{Age^2}) = \yE(\mathrm{Age}) \yE(\mathrm{Age})$ and $\yE(\mathrm{Age^3}) = \yE(\mathrm{Age}) \yE(\mathrm{Age}) \yE(\mathrm{Age})$, but, without loss of generality, for example 
+%
+\begin{align}
+\yE(\mathrm{Age^2}) &= \yE(\mathrm{Age}) \yE(\mathrm{Age}) + \sigma^2_{\mathrm{Age}} \nonumber\\
+&= \overline{\mathrm{Age}}^2 + \sigma^2_{\mathrm{Age}}
 \end{align}
 %
 
