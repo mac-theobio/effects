@@ -2,7 +2,7 @@
 
 - Visualize variable effects for linear models 
 
-- To install run `make install-all` from the `terminal`
+- To install run `make install` from the `terminal`
 
 OR
 
