@@ -329,7 +329,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 				%>% data.frame()
 			)
 			print(pred_prop_df)
-			out <- p1 + geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model))
+			out <- p1 + geom_hline(data=pred_prop_df, aes(yintercept=fit, colour=model, linetype=model))
 		} else {
 			out <- p1
 		}

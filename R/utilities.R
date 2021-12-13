@@ -135,6 +135,11 @@ pop2.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	
 	focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
 	focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
+	focal_mm <- focal_mm[, focal_terms, drop=FALSE]
+#	assign <- attr(focal_mm, "assign")
+#	if(any(assign==0)) {
+#		focal_mm <- focal_mm[, -1, drop=FALSE]
+#	}
 #	focal_terms <- attr(terms(formula.rhs_update), "term.labels")
 	
 	off <- get_offset(offset, model.frame(focal_mf)) # FIXME: or model.frame(mod)?
@@ -456,6 +461,8 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 }
 	 if (!ff_check) {
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
+      ## FIXME: Best way to identify all polynomial/function terms in a model
+		factor.cols[grep(paste("^[aA-zZ]+\\(", name, sep=""), cnames)] <- TRUE
 	 } 
   }
 # factor.cols[grep(":", cnames)] <- FALSE   

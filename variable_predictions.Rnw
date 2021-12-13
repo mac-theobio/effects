@@ -25,6 +25,7 @@
 \newcommand{\xfprime}{x_{f'}}
 
 \newcommand{\yE}{{\mathrm E}}
+\let\over=\overline
 
 \setlength{\parindent}{0pt}
 
@@ -293,51 +294,33 @@ We consider more complex interactions in which the focal predictor is modelled a
 i &= 1,\cdots, 100
 \end{align}
 %
-We may be interested in comparing the observed average household size ($\yE(\mathrm{hh~size})$) and the predicted average household size ($\yE(\widehat{\mathrm{hh~size}})$). 
+We may be interested in comparing the observed average household size ($\over{\mathrm{hh~size}}$) and the predicted average household size ($\over{\widehat{\mathrm{hh~size}}}$). 
 %
 \begin{align}\label{sim:lm_cubic_mean}
-\yE(\mathrm{hh~size}) &\approx \beta_0 + \beta_{\mathrm{A_1}}\yE(\mathrm{Age}_i) + \beta_{\mathrm{A_2}}\yE(\mathrm{Age}^2_i) + \beta_{\mathrm{A_3}}\yE(\mathrm{Age}^3_i) \nonumber\\ 
-	& + \beta_{\mathrm{W}}\yE(\mathrm{Wealthindex}_i)
+\over{\mathrm{hh~size}} &\approx \beta_0 + \beta_{\mathrm{A_1}}\over{\mathrm{Age}_i} + \beta_{\mathrm{A_2}}\over{\mathrm{Age}^2_i} + \beta_{\mathrm{A_3}}\over{\mathrm{Age}^3_i} \nonumber\\ 
+	& + \beta_{\mathrm{W}}\over{\mathrm{Wealthindex}_i}
 \end{align}
 %
 
 We provide analytical comparison in two cases, i.e., when the interaction is in the focal predictor ($\mathrm{Age}$ is the focal predictor)
 %
 \begin{align}\label{sim:lm_cubic_analytic_age}
-\eta^\star(\mathrm{Age}_i, \nset{{\overline{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\ 
-	& + \beta_{\mathrm{W}}\overline{\mathrm{Wealthindex}} \nonumber\\
-\yE({\eta^\star(\mathrm{Age}_i, \nset{{\overline{\mathrm{Wealthindex}}}})}) &= \beta_0 + \beta_{\mathrm{A_1}}\yE({\mathrm{Age}_i}) + \beta_{\mathrm{A_2}}\yE({\mathrm{Age}^2_i}) + \beta_{\mathrm{A_3}}\yE({\mathrm{Age}^3_i}) \nonumber\\ 
-	& + \beta_{\mathrm{W}}\overline{\mathrm{Wealthindex}}
+\eta^\star(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\ 
+	& + \beta_{\mathrm{W}}\over{\mathrm{Wealthindex}} \nonumber\\
+\over{{\eta^\star(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}})}} &= \beta_0 + \beta_{\mathrm{A_1}}\over{{\mathrm{Age}_i}} + \beta_{\mathrm{A_2}}\over{{\mathrm{Age}^2_i}} + \beta_{\mathrm{A_3}}\over{{\mathrm{Age}^3_i}} \nonumber\\ 
+	& + \beta_{\mathrm{W}}\over{\mathrm{Wealthindex}}
 \end{align}
 %
 and when the interaction is in the non-focal predictor ($\mathrm{Wealthindex}$ is the focal predictor)
 %
 \begin{align}\label{sim:lm_cubic_analytic_wealthindex}
-\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\overline{\mathrm{Age}}, \overline{\mathrm{Age}}^2, \overline{\mathrm{Age}}^3\}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\overline{\mathrm{Age}} + \beta_{\mathrm{A_2}}\overline{\mathrm{Age}}^2 + \beta_{\mathrm{A_3}}\overline{\mathrm{Age}}^3 \nonumber\\ 
+\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\over{\mathrm{Age}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^2}\}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\over{\mathrm{Age}} + \beta_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \beta_{\mathrm{A_3}}\over{\mathrm{Age}^3} \nonumber\\ 
 	& + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i \nonumber\\
-\yE(\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\overline{\mathrm{Age}}, \overline{\mathrm{Age}}^2, \overline{\mathrm{Age}}^3\}}})) &= \beta_0 + \beta_{\mathrm{A_1}}\overline{\mathrm{Age}} + \beta_{\mathrm{A_2}}\overline{\mathrm{Age}}^2 + \beta_{\mathrm{A_3}}\overline{\mathrm{Age}}^3 \nonumber\\ 
-	& + \beta_{\mathrm{W}}\yE(\mathrm{Wealthindex}_i)
+\yE(\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\over{\mathrm{Age}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^3}\}}})) &= \beta_0 + \beta_{\mathrm{A_1}}\over{\mathrm{Age}} + \beta_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \beta_{\mathrm{A_3}}\over{\mathrm{Age}^3} \nonumber\\ 
+	& + \beta_{\mathrm{W}}\over{\mathrm{Wealthindex}_i}
 \end{align}
 %
-From Equation~\ref{sim:lm_cubic_mean} and ~\ref{sim:lm_cubic_analytic_age}
-%
-\begin{align*}
-\yE(\mathrm{hh~size}) &\approx \yE({\eta^\star(\mathrm{Age}_i, \nset{{\overline{\mathrm{Wealthindex}}}})})
-\end{align*}
-%
-since $\overline{\mathrm{Wealthindex}} = \yE(\mathrm{Wealthindex}_i)$. On the other hand
-%
-\begin{align*}
-\yE(\mathrm{hh~size}) &\approx \yE(\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\overline{\mathrm{Age}}, \overline{\mathrm{Age}}^2, \overline{\mathrm{Age}}^3\}}}))
-\end{align*}
-%
-if and only if $\yE(\mathrm{Age^2}) = \yE(\mathrm{Age}) \yE(\mathrm{Age})$ and $\yE(\mathrm{Age^3}) = \yE(\mathrm{Age}) \yE(\mathrm{Age}) \yE(\mathrm{Age})$, but, without loss of generality, for example 
-%
-\begin{align}
-\yE(\mathrm{Age^2}) &= \yE(\mathrm{Age}) \yE(\mathrm{Age}) + \sigma^2_{\mathrm{Age}} \nonumber\\
-&= \overline{\mathrm{Age}}^2 + \sigma^2_{\mathrm{Age}}
-\end{align}
-%
+Depending on the choice of the values of the focal predictors in each case, Equation~\ref{sim:lm_cubic_analytic_age} and \ref{sim:lm_cubic_analytic_wealthindex} approximates \ref{sim:lm_cubic_mean} i.e., mean household size at the model center. In Equation~\ref{sim:lm_cubic_analytic_age}, the model center is not a point in the predictor space but rather described by the terms of the cubic polynomial, as opposed to \ref{sim:lm_cubic_analytic_wealthindex} which has the model center as point.
 
 In Figure~\ref{fig:pred_cubic_plots} we compare the non-isolated (everything) and the isolated predictor effects. In the first case (Figure~\ref{fig:pred_cubic_plots}a), the focal predictor, \code{age}, has a higher order interaction in the form of cubic polynomial while in the second case (Figure~\ref{fig:pred_cubic_plots}b), the focal predictor, \code{wealthindex}, is simple but the non-focal predictor is a cubic polynomial. In Figure~\ref{fig:pred_cubic_plots}a, the average prediction and the ``truth'' are very similar but in this case, cubic polynomial, the model center is not a point in the predictor space. On the hand, in Figure~\ref{fig:pred_cubic_plots}b, the average prediction is higher than the observed marginal, ``truth'' but the model center is a point in the predictor space. 
 %

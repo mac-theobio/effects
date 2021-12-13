@@ -100,6 +100,8 @@ compare_cubic_plots <- (combinepreds(mod_cubic, focal="wealthindex"
 		, plotit=TRUE
 	)
 	+ geom_vline(aes(xintercept=mean(focal_levels)), lty=2, colour="grey")
+	+ geom_hline(yintercept=pred_wealthindex_mean, colour="yellow", lty=1, alpha=0.5)
+	+ labs(colour="Method", linetype="Method")
 )
 print(compare_cubic_plots)
 

@@ -310,8 +310,9 @@ varpred <- function(mod
 			pred_obj <- pred_obj_all$pred_df
 			predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
 			pse_var <- pred_obj$pse_var
+			off <- pred_obj_all$off
 		} else if (bias.adjust=="population2") {
-			pred_obj_all <- pop2.bias.adjust(x.focal=x.focal
+			pred_obj <- pop2.bias.adjust(x.focal=x.focal
 				, x.excluded=x.excluded
 				, betahat=betahat
 				, formula.rhs=formula.rhs
@@ -332,14 +333,15 @@ varpred <- function(mod
 				, zero_out_interaction=zero_out_interaction
 				, include.re=include.re
 			)
-			pred_obj <- pred_obj_all$pred_df
-			predict.data <- x.focal[rep(1:NROW(x.focal), each=NROW(x.excluded)), 1:n.focal, drop=FALSE]
-			pse_var <- unname(pred_obj_all$pse_var)[rep(1:NROW(x.focal), each=NROW(x.excluded))]
+#			pred_obj <- pred_obj_all$pred_df
+			predict.data <- x.focal[rep(1:NROW(x.focal), each=NROW(X.mod)), 1:n.focal, drop=FALSE]
+#			pse_var <- unname(pred_obj_all$pse_var)[rep(1:NROW(x.focal), each=NROW(x.excluded))]
+			pse_var <- pred_obj$pse_var
+			off <- pred_obj$off
 		}
 		pred <- pred_obj$pred
 		lwr <- pred_obj$lwr
 		upr <- pred_obj$upr
-		off <- pred_obj_all$off
 		mm <- NULL
 	}
 	
