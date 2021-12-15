@@ -115,10 +115,12 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 		hhid <- rep(1:nHH, each=perHH)
 		if (length(hhSD)==1) hhSD <- rep(hhSD, noutcomes)
 		names(hhSD) <- paste0("hhRE", 1:noutcomes)
+		sdfun <- function(){hhSD}
 		df <- (df
 			%>% mutate(hhid=hhid)
 			%>% group_by(hhid)
-			%>% mutate_(.dots=hhSD)
+			%>% mutate(!!!sdfun())
+#			%>% mutate_(.dots=hhSD)
 			%>% mutate_at(names(hhSD), function(x)rnorm(1, 0, x))
 			%>% ungroup()
 		)

@@ -171,14 +171,20 @@ binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda
 binom_correlated_model.Rout: binom_correlated_model.R binom_correlated.rda
 binom_correlated_preds.Rout: binom_correlated_preds.R binom_correlated_model.rda
 
+## One predictor glm
+glm_one_predictor.Rout: glm_one_predictor.R variable_predictions_funs.rda
+glm_one_predictor_model.Rout: glm_one_predictor_model.R glm_one_predictor.rda
+glm_one_predictor_preds.Rout: glm_one_predictor_preds.R glm_one_predictor_model.rda
+
 ## One predictor, single intercept glme
 glme_random_intercept.Rout: glme_random_intercept.R variable_predictions_funs.rda
 glme_random_intercept_model.Rout: glme_random_intercept_model.R glme_random_intercept.rda
 glme_random_intercept_preds.Rout: glme_random_intercept_preds.R glme_random_intercept_model.rda
 
 ## variable_predictions.pdf: variable_predictions.Rnw
-variable_predictions.tex: glme_random_intercept_preds.rda cubic_predictors_preds_adjust.rda \
-	cubic_predictors_preds.rda variable_predictions_objs.rda variable_predictions.Rnw
+variable_predictions.tex: binom_multiple_outcomes_preds_plots.rda glm_one_predictor_preds.rda \
+	glme_random_intercept_preds.rda cubic_predictors_preds_adjust.rda cubic_predictors_preds.rda \
+	variable_predictions_objs.rda variable_predictions.Rnw
 
 ######################################################################
 

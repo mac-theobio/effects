@@ -460,7 +460,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
 	 }
 	 if (!ff_check) {
-	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
+	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- TRUE # FALSE for product of means as opposed to mean of products
       ## FIXME: Best way to identify all polynomial/function terms in a model
 		factor.cols[grep(paste("^[aA-zZ]+\\(", name, sep=""), cnames)] <- TRUE
 	 } 

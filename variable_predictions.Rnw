@@ -54,7 +54,9 @@ set.seed(9991)
 load("variable_predictions_objs.rda")
 load("cubic_predictors_preds.rda")
 load("cubic_predictors_preds_adjust.rda")
+load("glm_one_predictor_preds.rda")
 load("glme_random_intercept_preds.rda")
+load("binom_multiple_outcomes_preds_plots.rda")
 @
 
 In many applications, predictions of expected responses, or response probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and are very useful for interpreting and visualizing model estimates using graphs. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret, and we may want to explore the ``effects" of covariates on predicted probabilities, or predictions of responses at various levels of covariates -- \emph{predictor effects}. For example, as a way to plan, public health officials may want to know the ``effects" of household income, wealth index, etc, on the predicted probability of having improved water services among slum dwellers.
@@ -143,7 +145,7 @@ y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilo
 For the first case, if we consider $x_1$ as the focal predictor, the interaction ($x_2x_3$) is between the non-focal predictors, $x_2$ and $x_3$, the linear predictor is 
 %
 \begin{align*}
-\eta^\star(x_{1i}, \nset{{\bar{x}^\star}}) = \beta_0\mathbf{1} + \beta_1 x_{1i} + \beta_2\bar{x}_2 + \beta_3\bar{x}_3 + \beta_{23}\bar{x}_2\bar{x}_3
+\eta^\star(x_{1i}, \nset{{\bar{x}^\star}}) = \beta_0\mathbf{1} + \beta_1 x_{1i} + \beta_2\bar{x}_2 + \beta_3\bar{x}_3 + \beta_{23}\over{x_2x_3}
 \end{align*}
 %
 where $x_{1i}$ are the carefully chosen levels of the focal predictor. On the other hand, for the second case, if we consider $x_2$ as the focal predictor, then the interaction ($x_2x_3$) is between focal and non-focal predictor. In this case, the linear predictor is given by 
@@ -322,7 +324,7 @@ and when the interaction is in the non-focal predictor ($\mathrm{Wealthindex}$ i
 %
 Depending on the choice of the values of the focal predictors in each case, Equation~\ref{sim:lm_cubic_analytic_age} and \ref{sim:lm_cubic_analytic_wealthindex} approximates \ref{sim:lm_cubic_mean} i.e., mean household size at the model center. In Equation~\ref{sim:lm_cubic_analytic_age}, the model center is not a point in the predictor space but rather described by the terms of the cubic polynomial, as opposed to \ref{sim:lm_cubic_analytic_wealthindex} which has the model center as point.
 
-In Figure~\ref{fig:pred_cubic_plots} we compare the non-isolated (everything) and the isolated predictor effects. In the first case (Figure~\ref{fig:pred_cubic_plots}a), the focal predictor, \code{age}, has a higher order interaction in the form of cubic polynomial while in the second case (Figure~\ref{fig:pred_cubic_plots}b), the focal predictor, \code{wealthindex}, is simple but the non-focal predictor is a cubic polynomial. In Figure~\ref{fig:pred_cubic_plots}a, the average prediction and the ``truth'' are very similar but in this case, cubic polynomial, the model center is not a point in the predictor space. On the hand, in Figure~\ref{fig:pred_cubic_plots}b, the average prediction is higher than the observed marginal, ``truth'' but the model center is a point in the predictor space. 
+In Figure~\ref{fig:pred_cubic_plots} we compare the non-isolated (everything) and the isolated predictor effects. In the first case (Figure~\ref{fig:pred_cubic_plots}a), the focal predictor, \code{age}, has a higher order interaction in the form of cubic polynomial while in the second case (Figure~\ref{fig:pred_cubic_plots}b), the focal predictor, \code{wealthindex}, is simple but the non-focal predictor is a cubic polynomial. In both cases, the average prediction and the ``truth'' are very similar but in Figure~\ref{fig:pred_cubic_plots}a, cubic polynomial focal predictor, the model center is not a point in the predictor space. On the hand, in Figure~\ref{fig:pred_cubic_plots}b, the model center is a point in the predictor space. 
 %
 \begin{figure}[H]
 \begin{center}
@@ -335,17 +337,27 @@ print(pred_cubic_plots)
 \end{figure}
 %
 
+\subsection{Generalized linear model}
 
-Even in simple interaction model in Figure~\ref{fig:pred_age_cont_plots}b and Figure~\ref{fig:pred_cubic_plots}b, we start to observe bias in the predicted and observed means. To illustrate the bias correction, we regenerate the predictor effects in Figure~\ref{fig:pred_cubic_plots}b but incorporate bias adjustment.
+Consider model described in \ref{sim:lm_no_interaction} with only \code{Age} as the predictor such that 
+%
+\begin{align}\label{sim:glm_one_pred}
+\mathrm{logit(status} = 1) &= \eta \nonumber\\
+\mathrm{\eta} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \epsilon_i
+\end{align}
+%
+where \code{status} is a binary outcome with 0 for unimproved and 1 for improved water quality in the slums. By having only a single predictor, we may be able to investigate the contribution of nonlinear link function on the predicted probability of improved water quality. 
+
+Figure~\ref{fig:glm_plots} shows the predictor effect of \code{age} on predicted probability of improved water quality. For such a simple generalized linear model, there is no much bias induced by the nonlinear averaging induced by the nonlinear link function. In particular, the predicted average probability of improved water quality, horizontal black line, closely match the observed proportion of households with improved water quality, horizontal solid black line.
 %
 \begin{figure}[H]
 \begin{center}
-<<pred_cubic_plots_adjust, echo=FALSE, fig=TRUE, message=FALSE>>=
-print(pred_cubic_plots_adjust)
+<<glm_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(glm_plots)
 @
 \end{center}
-\caption{A comparison of bias corrected and uncorrected predictor effects. The red solid and dotted lines are not bias corrected (none), the black ones are corrected for bias, the horizontal grey and yellow lines are the observed and predicted average household size, respectively, while the vertical dotted line is the average wealth index. In the absence of bias, the two approaches give similar estimates (Figure a). On the other hand, in Figure b, without correcting for the bias, the predictions are slightly higher than the corrected ones which matches the observed relatively well.}
-\label{fig:pred_cubic_plots_adjust}
+\caption{Predictor effect of age on improved water quality. The horizontal black and grey lines are the average predicted probability and observed proportion of improved water quality, respectively. The vertical dotted grey line is the mean age while the red points are the observed bines of proportion of improved water quality.}
+\label{fig:glm_plots}
 \end{figure}
 %
 
@@ -366,7 +378,7 @@ Suppose, in the simulation described in Section~\ref{sec:stats_background}, the 
 i &= 1,\cdots, 500
 \end{align}
 %
-We compare predictor effects generated without any bias correction to those corrected for the bias, and then compare the average predicted probability to the observed. The results are shown in Figure~\ref{fig:glme_plots}. The uncorrected approach overestimated the predicted probabilities as opposed to the bias corrected estimates which closely match the observations and the observed average probability. 
+We compare predictor effects generated without any bias correction to those corrected for the bias, and then compare the average predicted probability to the observed. The results are shown in Figure~\ref{fig:glme_plots}. The uncorrected approach overestimates the predicted probabilities as opposed to the bias corrected estimates which closely match the observations and the observed average probability. 
 %
 \begin{figure}[H]
 \begin{center}
@@ -374,11 +386,49 @@ We compare predictor effects generated without any bias correction to those corr
 print(glme_plots)
 @
 \end{center}
-\caption{A compare of bias corrected and uncorrected predictor effects. The red lines are the bias uncorrected estimates while the black ones are the bias corrected. The horizontal red and black lines are average predicted probability of improved water. The horizontal grey (overlaid by the black) dotted line is the observed average probability of improved water. The vertical dotted grey line is the average age while the grey points are the binned observations.}
+\caption{A comparison of bias corrected and uncorrected predictor effects. The red lines are the bias uncorrected estimates while the black ones are the bias corrected. The horizontal red and black lines are average predicted probability of improved water. The horizontal grey (overlaid by the black) dotted line is the observed average probability of improved water. The vertical dotted grey line is the average age while the grey points are the binned observations.}
 \label{fig:glme_plots}
 \end{figure}
 %
 
+\subsubsection{Multivariate binary outcomes}
+
+We now consider a bit more complicated model involving two outcome variables (services) -- status (improved or unimproved) of water and garbage services. In particular, we simulate an intercept only multivariate random effect model to, \emph{jointly}, predict probability of improved water and garbage services based on age and wealth index. Each household has its own correlated effect on the intercepts (random-intercept). In addition, we add latent variable to account for unobserved correlations.
+%
+\begin{align}\label{sim:lme_multi_outcome}
+\mathrm{services}_{{\mathrm{h}[i]\mathrm{s}}} &= \mathrm{Binomial}(P_{{\mathrm{h}[i]\mathrm{s}}}) \nonumber\\
+\mathrm{logit}(P_{{\mathrm{h}[i]\mathrm{s}}}) &= \beta_{0,s} + \alpha_{0,\mathrm{h}[i]\mathrm{s}} + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{Ls}}\mathrm{Latent}_{i\mathrm{s}} + \epsilon_{i\mathrm{s}} \nonumber\\
+\alpha_{0,\mathrm{h}\mathrm{s}} &\sim \mathrm{Normal}(0, 2),~~ h=1, \cdots, \mathrm{H} \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Latent}_{[i]\mathrm{s}} &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_{[i]\mathrm{\text{\tiny{water}}}} &\sim \mathrm{Normal}(0, 2) \nonumber\\
+\epsilon_{[i]\mathrm{\text{\tiny{garbage}}}} &\sim \mathrm{Normal}(0, 3) \nonumber\\
+\beta_0 &= 5 \nonumber\\
+\beta_{\mathrm{A}} &= 2 \nonumber\\
+\beta_{\mathrm{W}} &= -3 \nonumber\\
+\beta_{\mathrm{L\text{\tiny{water}}}} &= 1 \nonumber\\
+\beta_{\mathrm{L\text{\tiny{garbage}}}} &= -5 \nonumber\\
+i &= 1,\cdots, 100
+\end{align}
+%
+Where:
+\begin{itemize}
+\item $\beta_{0,s}$ \textbf{is the service specific effect???}, i.e., baseline log odds of a household having improved service
+\item $\alpha_{0,\mathrm{h}\mathrm{s}}$ household specific random intercepts, i.e., captures the offset from the overall baseline (mean)
+\end{itemize}
+
+%
+\begin{figure}[H]
+\begin{center}
+<<binom_outcomes_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(binom_outcomes_plots)
+@
+\end{center}
+\caption{TODO}
+\label{fig:binom_outcomes_plots}
+\end{figure}
+%
  
 \clearpage
 % References

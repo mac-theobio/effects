@@ -45,7 +45,7 @@ all_varpred_pop_df <- sapply(all_pred_vars, function(x){
 		, bias.adjust="population"
 		, zero_out_interaction=TRUE
 		, include.re=TRUE
-		, modelname="pop"
+		, modelname="bias corrected"
 	)
 	return(pred)
 }, simplify=FALSE)
