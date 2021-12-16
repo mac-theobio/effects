@@ -52,6 +52,7 @@ library(vareffects); varefftheme()
 
 set.seed(9991)
 load("variable_predictions_objs.rda")
+load("justify_preds.rda")
 load("cubic_predictors_preds.rda")
 load("cubic_predictors_preds_adjust.rda")
 load("glm_one_predictor_preds.rda")
@@ -72,6 +73,28 @@ When visually presented, predictor effects provide a unified and intuitive way o
 
 Most common way of dealing with the first challenge is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles (or bins) if continuous, and then calculating the predictions while holding non-focal predictors at their typical values (e.g., averages). This generates -- \emph{predictor effect} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} and \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as \emph{predictor effect} since it should, for example, tell us what we would expect the presponse to be at a particular value or level of the predictor. Formerly, predictor effects computes the expected outcome by meaningfully holding the non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the outcome expected prediction represents how the model responds to the changes in the focal predictor.
 
+The go to \proglang{R} packages (\pkg{emmeans} and \pkg{effects}) for generating predictor effects on the basic level, averages the non-focal predictors. However, there are a number of choices which needs to be made when averaging the non-focal predictors. For example, in the presence of interaction, averaging the interactions (averaging product of interacting predictors) or multiplying the averages of the interacting non-focal predictors (default for \pkg{emmeans} and \pkg{effects}). We claim that neither of these two approaches is the most appropriate but we show that averaging the interaction closely matches the observed ``truth''. To illustrate this, consider models~\ref{eq:simple_inter_higher_no_interaction} and \ref{eq:simple_inter_higher}  below, with $x_1$ as the focal predictor:
+%
+\begin{align}
+y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \epsilon \label{eq:simple_inter_higher_no_interaction}\\
+y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilon \label{eq:simple_inter_higher}
+\end{align}
+%
+We first simulate data with the two models, such that $x_{1,2,3} \sim \mathrm{Normal}(0, 1)$, $\beta_0 = 5$, $\beta_1 = -0.3$, $\beta_2 = 1$, $\beta_3 = 2$ and $\beta_{23} = 0.8$, and then compare the predictions from the \pkg{emmeans}, \pkg{effects} and our proposed alternative (\pkg{varpred}) to the known ``truth'' i.e., $\bar{y}$.
+
+In the absence of interaction (model~\ref{eq:simple_inter_higher_no_interaction}), the three approaches give the similar estimates, which match the observed ``truth'', Figure~\ref{fig:justify_plots}a. However, in the presence of interaction, even as simple as the one in model~\ref{eq:simple_inter_higher}, the estimates starts to differ. In particular, \pkg{emmeans} and \pkg{effects} give similar estimates ($\bar{\hat{y}}$) but different from the \pkg{varpred}'s which, however, is similar to the observed truth ($\bar{y}$), Figure~\ref{fig:justify_plots}a. To generate Figure~\ref{fig:justify_plots}a, all the three packages averages the non-focal predictors $x_2$ and $x_3$. On other hand, to generate Figure~\ref{fig:justify_plots}b, the difference in the estimates lies on how each of the packages average the interaction term ($x_2x_3$). In particular \pkg{emmeans} and \pkg{effects} computes $\bar{x_2}\bar{x_3}$ while \pkg{varpred} computes $\over{x_2x_3}$.
+%
+\begin{figure}[H]
+\begin{center}
+<<justify_plots, echo=FALSE, results=tex, fig=TRUE, message=FALSE>>=
+justify_plots
+@
+\end{center}
+\caption{A comparison of predictor effect of $x_1$ on predicted $y$ from \pkg{emmeans}, \pkg{effects} and \pkg{varpred} to the observed. The horizontal blue, green and black lines are the mean of the predictions, i.e., $\bar{\hat{y}}$ while the red one is the mean of the observed $y$, i.e., $\bar{y}$. The trend lines represents the corresponding $\hat{y}$ at various levels of $x_1$, while holding the other predictors at their mean. In the absence of interaction, Figure a, $\bar{\hat{y}}$ closely matches the observed in all the three packages. However, even with the simple interaction between the non-focal predictors, we start seeing larger deviation of $\bar{hat{y}}$ from $\bar{y}$ for the two commonly used packages (\pkg{emmeans} and \pkg{effects}), but not, the proposed \pkg{varpred}.
+}
+\label{fig:justify_plots}
+\end{figure}
+%
 
 An alternative to averaging the non-focal predictors, is the population-based approach which involves computing the prediction over the population of the non-focal predictors and then averaging across the values of the focal predictor. Dealing with second challenge is discussed in Section~\ref{sec:uncertainity_propagation}
 
@@ -136,13 +159,7 @@ An alternative, save for later, formulation of predictor effect involves, expres
 
 \subsection{Higher order interactions}
 
-Higher order terms such as interactions, splines, polynomials, etc., can be between the non-focal predictors or focal and non-focal predictor(s). In the former case, we treat the interactions as just another column in the variable space (of the model matrix). In the later case, the non-focal variables in the model matrix are averaged as before. However, for the interacting focal predictors, a combination of each unique levels (or quantiles) are first generated and then the interaction terms are generated by multiplying these combinations. For example, consider the model~\ref{eq:simple_inter_higher} below: 
-%
-\begin{align}
-y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilon \label{eq:simple_inter_higher}
-\end{align}
-%
-For the first case, if we consider $x_1$ as the focal predictor, the interaction ($x_2x_3$) is between the non-focal predictors, $x_2$ and $x_3$, the linear predictor is 
+Higher order terms such as interactions, splines, polynomials, etc., can be between the non-focal predictors or focal and non-focal predictor(s). In the former case, we treat the interactions as just another column in the variable space (of the model matrix). In the later case, the non-focal variables in the model matrix are averaged as before. However, for the interacting focal predictors, a combination of each unique levels (or quantiles) are first generated and then the interaction terms are generated by multiplying these combinations. For example, consider model~\ref{eq:simple_inter_higher} above. In the first case, if we consider $x_1$ as the focal predictor, the interaction ($x_2x_3$) is between the non-focal predictors, $x_2$ and $x_3$, the linear predictor is 
 %
 \begin{align*}
 \eta^\star(x_{1i}, \nset{{\bar{x}^\star}}) = \beta_0\mathbf{1} + \beta_1 x_{1i} + \beta_2\bar{x}_2 + \beta_3\bar{x}_3 + \beta_{23}\over{x_2x_3}
@@ -378,7 +395,7 @@ Suppose, in the simulation described in Section~\ref{sec:stats_background}, the 
 i &= 1,\cdots, 500
 \end{align}
 %
-We compare predictor effects generated without any bias correction to those corrected for the bias, and then compare the average predicted probability to the observed. The results are shown in Figure~\ref{fig:glme_plots}. The uncorrected approach overestimates the predicted probabilities as opposed to the bias corrected estimates which closely match the observations and the observed average probability. 
+We compare predictor effects generated without any bias correction to those corrected for the bias, and then compare the average predicted probability to the observed. The results are shown in Figure~\ref{fig:glme_plots}. The uncorrected approach overestimates the predicted probabilities as opposed to the bias corrected (population-based approach) estimates which closely match the observations and the observed average probability. In the latter approach, the random effects are incorporated (as additional non-focal predictor) in computation of $\nset{\eta}$ to take into account the bias induced by the random effect predictor.
 %
 \begin{figure}[H]
 \begin{center}
@@ -418,6 +435,7 @@ Where:
 \item $\alpha_{0,\mathrm{h}\mathrm{s}}$ household specific random intercepts, i.e., captures the offset from the overall baseline (mean)
 \end{itemize}
 
+Figure~\ref{fig:binom_outcomes_plots} compares bias uncorrected and bias corrected (population-based approach). The bias corrected estimates (black points and curves) closely match the observed proportions (grey points). The top figure shows the expected probability of improved service for an ``average'' household at the baseline. While the two bottom plots shows the predictor effect of age and wealth index on the predicted probability of improved service.
 %
 \begin{figure}[H]
 \begin{center}
@@ -425,7 +443,7 @@ Where:
 print(binom_outcomes_plots)
 @
 \end{center}
-\caption{TODO}
+\caption{Predictor effect plot for multivariate response model. The top plot shows the predicted probability of improved service at the baseline. The bottom plots compares the predictor effect of age and wealth index on the expected probability of improved service. The grey points are the observed proportions (or bins in bottom plots) of improved service. The red points and curves are the bias uncorrected estimates while the black points and curves are the population-based (bias corrected) estimates. Generally, without taking into account the potential bias, we risk overestimating the predicted probabilities.}
 \label{fig:binom_outcomes_plots}
 \end{figure}
 %

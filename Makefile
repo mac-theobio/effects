@@ -13,7 +13,7 @@ setssh:
 
 ######################################################################
 
-today: variable_predictions.tex.pdf binom_multiple_outcomes_preds_plots.Rout.pdf
+today: variable_predictions.tex.pdf 
 
 update_scripts:
 	perl -pi -e "s/makeGraphics/startGraphics/; s/commandEnvironments/loadEnvironments/;" *.R
@@ -181,10 +181,16 @@ glme_random_intercept.Rout: glme_random_intercept.R variable_predictions_funs.rd
 glme_random_intercept_model.Rout: glme_random_intercept_model.R glme_random_intercept.rda
 glme_random_intercept_preds.Rout: glme_random_intercept_preds.R glme_random_intercept_model.rda
 
+
+## justify: emmeans, effects, varpred
+justify.Rout: justify.R variable_predictions_funs.rda
+justify_model.Rout: justify_model.R justify.rda
+justify_preds.Rout: justify_preds.R justify_model.rda
+
 ## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: binom_multiple_outcomes_preds_plots.rda glm_one_predictor_preds.rda \
 	glme_random_intercept_preds.rda cubic_predictors_preds_adjust.rda cubic_predictors_preds.rda \
-	variable_predictions_objs.rda variable_predictions.Rnw
+	variable_predictions_objs.rda justify_preds.rda variable_predictions.Rnw
 
 ######################################################################
 

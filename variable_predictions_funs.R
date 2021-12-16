@@ -276,17 +276,15 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 	)
 	add_args <- list(...)
 	if (length(add_args)) args[names(add_args)] <- add_args
+	
+	if (!is.null(add_args$at) & ("Effect" %in% funs)) args$xlevels <- add_args$at
 
 	out <- sapply(funs, function(f){
 		est <- do.call(f, args)
 		if (inherits(est, c("emmeans", "emmGrid"))) {
-			type <- est@misc$predict.type
+			.nn <- est@misc$inv.lbl
+			if (is.null(.nn)) .nn <- est@misc$estName
 			est <- as.data.frame(est)
-			if (length(type) && type=="response") {
-				.nn <- "prob"
-			} else {
-				.nn <- "emmean"
-			}
 			oldn <- c(focal, .nn
 				, grep("\\.CL|\\.LCL|\\.UCL", colnames(est), value=TRUE)
 			)
