@@ -408,7 +408,7 @@ print(glme_plots)
 \end{figure}
 %
 
-\subsubsection{Multivariate binary outcomes}
+\subsection{Multivariate binary outcomes}
 
 We now consider a bit more complicated model involving two outcome variables (services) -- status (improved or unimproved) of water and garbage services. In particular, we simulate an intercept only multivariate random effect model to, \emph{jointly}, predict probability of improved water and garbage services based on age and wealth index. Each household has its own correlated effect on the intercepts (random-intercept). In addition, we add latent variable to account for unobserved correlations.
 %
