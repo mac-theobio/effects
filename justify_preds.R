@@ -35,6 +35,29 @@ justify_plots <- (combinepreds(justify_mod
 )
 justify_plots
 
+## Add CIs
+justify_ci_plots <- (combinepreds(justify_mod
+		, c("varpred", "emmeans", "Effect")
+		, focal="x1"
+		, x.var="x1"
+		, at=list(x1=x1_focal)
+		, type="response"
+		, nesting=NULL
+		, ci=TRUE
+	)
+	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="truth"), lty=4)
+	+ scale_colour_manual(breaks = c("truth", "emmeans", "Effect", "varpred")
+		, values=c("truth"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
+		, labels=c("truth", "emmeans", "effects", "varpred")
+	)
+	+ scale_linetype_manual(values=c("truth"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
+		, labels=c("truth", "emmeans", "effects", "varpred")
+	)
+	+ labs(title="a) Model 1", colour="Method", linetype="Method")
+	+ theme(legend.position="bottom")
+)
+justify_ci_plots
+
 ## With interactions
 quants <- seq(0,1,length.out=100)
 x1_focal <- quantile(justify_inter_sim_df$x1, quants, names=FALSE)
@@ -69,5 +92,5 @@ justify_plots <- ggarrange(justify_plots
 	, ncol=2
 )
 
-saveVars(justify_plots)
+saveVars(justify_plots, justify_ci_plots)
 
