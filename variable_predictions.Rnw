@@ -120,7 +120,7 @@ The outline of this article is as follows: Section \ref{sec:qoi} provides formal
 
 \section{Quantities of interest}\label{sec:qoi}
 
-Several quantities of interest may be derived from regression models. The first one is the coefficient estimates. Others are \emph{predictors}, \emph{model matrix}, \emph{predicted values} and \emph{marginal effects}. Predictors are model input variables and is associated with one or more \emph{variables} (in polynomials, splines and models with interaction). Model matrix refers to the design matrix whose rows include all combination of variables appearing in the interaction terms, along with the ``typical" values of the focal and non-focal predictors.
+Several quantities of interest may be derived from regression models. The first one is the coefficient estimates. Others are \emph{input variables},  \emph{predictors}, \emph{model matrix}, \emph{predicted values} and \emph{marginal effects}. Input variables are the variables that were measured (may be transformed), while predictors are the terms that are entered in the model. Hence, predictors encompass the main effects, but also polynomials of input variables and interaction terms (for example in polynomials and splines) \citep{schielzeth2010simple}. Model matrix refers to the design matrix whose rows include all combination of variables appearing in the interaction terms, along with the ``typical" values of the focal and non-focal predictors.
 
 To illustrate some of the concepts, consider results from, hypothetical  simulated example, regression of household size as function of household wealth index and age of household head, and the second model involving these predictors plus the interaction between them.
 
@@ -201,7 +201,7 @@ The computation of $\hat{\eta}^\star$ remains the same as described above. Howev
 
 \subsection{Centered model matrix}
 
-Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$. It follows that the non-focal terms in $\bX^{\star}_{c}$ are all zero in simple models without interactions but are isolated (narrower) around the model center. Consequently the uncertainty due to non-focal predictors are isolated in the computation of $\sigma^2 = \textrm{Diag}(\bX^\star_c \Sigma \bX^{\star\top}_c)$. In addition, the computation of $\bX^{\star}_c$ impacts only on the intercepts and the non-focal terms, i.e., the slopes and variance of the focal predictors are not affected. This means that we can still generate isolated CIs without necessarily centering the predictors prior to model fitting. 
+Consider centered model matrix $\bX^{\star}_{c} = \{\bX_f^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$. It follows that the non-focal terms in $\bX^{\star}_{c}$ are all zero in simple models without interactions but are isolated (narrower) around the model center in models involving complex interactions. Consequently the uncertainty due to non-focal predictors are isolated in the computation of $\sigma^2 = \textrm{Diag}(\bX^\star_c \Sigma \bX^{\star\top}_c)$. In addition, the computation of $\bX^{\star}_c$ impacts only on the intercepts and the non-focal terms, i.e., the slopes and variance of the focal predictors are not affected. This means that we can still generate isolated CIs without necessarily centering the predictors prior to model fitting. 
 
 
 \section{Bias correction}\label{sec:bias_correction}
