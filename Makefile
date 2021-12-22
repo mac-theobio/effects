@@ -181,6 +181,11 @@ glme_random_intercept.Rout: glme_random_intercept.R variable_predictions_funs.rd
 glme_random_intercept_model.Rout: glme_random_intercept_model.R glme_random_intercept.rda
 glme_random_intercept_preds.Rout: glme_random_intercept_preds.R glme_random_intercept_model.rda
 
+## rstanarm example
+rstanarm_example.Rout: rstanarm_example.R variable_predictions_funs.rda
+rstanarm_example_model.Rout: rstanarm_example_model.R rstanarm_example.rda
+rstanarm_example_preds.Rout: rstanarm_example_preds.R rstanarm_example_model.rda
+
 
 ## justify: emmeans, effects, varpred
 justify.Rout: justify.R variable_predictions_funs.rda

@@ -19,15 +19,25 @@ glme_pred_none <- varpred(glme_mod
 est_prop_none <- data.frame(fit=mean(glme_pred_none$preds$fit), model="none")
 est_focal_mean <- mean(glme_pred_none$preds$age)
 
-## pop
+## pop: not adjusted for re
 glme_pred_pop <- varpred(glme_mod
 	, "age"
 	, isolate=TRUE
 	, bias.adjust="population"
 	, modelname="bias corrected"
-	, include.re=TRUE
+	, include.re=FALSE
 )
 est_prop_pop <- data.frame(fit=mean(glme_pred_pop$preds$fit), model="bias corrected")
+
+## pop: include re
+glme_pred_pop_re <- varpred(glme_mod
+	, "age"
+	, isolate=TRUE
+	, bias.adjust="population"
+	, modelname="bias corrected (+re)"
+	, include.re=TRUE
+)
+est_prop_pop_re <- data.frame(fit=mean(glme_pred_pop_re$preds$fit), model="bias corrected")
 
 ## Bins 
 binned_df <- binfun(glme_mod, focal="age", bins=50, groups=NULL)
@@ -35,6 +45,7 @@ binned_df <- binfun(glme_mod, focal="age", bins=50, groups=NULL)
 ## Combine preds
 vlist <- list(glme_pred_none
 	, glme_pred_pop
+	, glme_pred_pop_re
 )
 
 glme_plots <- (comparevarpred(vlist=vlist
@@ -45,13 +56,14 @@ glme_plots <- (comparevarpred(vlist=vlist
 	)
 	+ geom_point(data=binned_df, aes(x=age, y=status), colour="grey")
 	+ geom_hline(data=true_prop_df, aes(yintercept=status), lty=1, col="grey")
-	+ geom_hline(data=est_prop_none, aes(yintercept=fit, colour=model), lty=2, col="red")
-	+ geom_hline(data=est_prop_pop, aes(yintercept=fit, colour=model), lty=2, col="black")
+	+ geom_hline(data=est_prop_none, aes(yintercept=fit, colour=model), lty=4, col="red")
+	+ geom_hline(data=est_prop_pop, aes(yintercept=fit, colour=model), lty=2, col="blue")
+	+ geom_hline(data=est_prop_pop_re, aes(yintercept=fit, colour=model), lty=2, col="black")
 	+ geom_vline(aes(xintercept=mean(age)), lty=2, col="grey")
-	+ scale_colour_manual(breaks = c("none", "bias corrected")
-		, values=c("none"="red", "bias corrected"="black")
+	+ scale_colour_manual(breaks = c("none", "bias corrected", "bias corrected (+re)")
+		, values=c("none"="red", "bias corrected"="blue", "bias corrected (+re)"="black")
 	)
-	+ scale_linetype_manual(values=c("none"="solid", "bias corrected"="solid"))
+	+ scale_linetype_manual(values=c("none"=4, "bias corrected"=2, "bias corrected (+re)"=1))
 	+ labs(y="Probability of\n improved water", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )

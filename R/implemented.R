@@ -17,8 +17,15 @@ get_model.mm.default <- function(mod, ...) {
 	return(mm)
 }
 
+get_contrasts.default <- function(mod, ...) {
+	contr <- attr(get_model.mm(mod, ...), "contrasts")
+	return(contr)
+}
+
 get_contrasts.lm <- function(mod, ...) {
-	mod$contrasts
+#	mod$contrasts
+	contr <- attr(get_model.mm(mod, ...), "contrasts")
+	return(contr)
 }
 
 get_xlevels.lm <- function(mod) {
@@ -28,6 +35,39 @@ get_xlevels.lm <- function(mod) {
 check_intercept.default <- function(mod, ...) {
 	any(names(coefficients(mod))=="(Intercept)")
 }
+
+## rstanarm
+
+vareffobj.stanreg <- function(mod, ...) {
+	out <- list()
+	out$coefficients <- fixef(mod)
+	out$variance_covariance <- vcov(mod)
+	out$formula <- formula(mod, fixed.only=TRUE)
+	out$link <- family(mod)
+	out$contrasts <- get_contrasts(mod, ...)
+	class(out) <- "vareffobj"
+	return(out)
+}
+
+get_model.mm.stanreg <- function(mod, ...) {
+	mm <- model.matrix(mod, ...)
+	return(mm)
+}
+
+get_contrasts.stanreg <- function(mod, ...) {
+	contr <- attr(get_model.mm(mod, ...), "contrasts")
+	return(contr)
+}
+
+get_xlevels.stanreg <- function(mod) {
+	xlevels <- .getXlevels(terms(mod), model.frame(mod))
+	return(xlevels)
+}
+
+check_intercept.stanreg <- function(mod, ...) {
+	any(names(fixef(mod))=="(Intercept)")	
+}
+
 
 ## glmmTMB
 
@@ -120,6 +160,11 @@ check_intercept.merMod <- function(mod, ...) {
 }
 
 ## Statistics
+get_stats.stanreg <- function(mod, level, dfspec, ...) {
+	mulz <- qnorm(1 - (1 - level)/2)
+	return(mulz)
+}
+
 get_stats.glmmTMB <- function(mod, level, dfspec, ...) {
 	mulz <- qnorm(1 - (1 - level)/2)
 	return(mulz)
@@ -151,6 +196,13 @@ get_stats.default <- function(mod, level, dfspec, ...) {
 ## sigma
 get_sigma.default <- function(mod, ...) {
 	stats::sigma(mod, ...)
+}
+
+get_sigma.stanreg <- function(mod, ...) {
+	rand_comp <- VarCorr(mod)
+	sigma <- unlist(lapply(names(rand_comp), function(x)attr(rand_comp[[x]], "stddev")))
+	total_sd <- sqrt(sum(sigma^2))
+	total_sd
 }
 
 get_sigma.glmmTMB <- function(mod, ...) {
@@ -198,5 +250,12 @@ includeRE.glmerMod <- function(mod, ...){
 	ran_eff <- as.data.frame(ranef(mod))
 	ran_eff <- ran_eff[, "condval", drop=FALSE]
 	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
+	return(re)	
+}
+
+includeRE.stanreg <- function(mod, ...){
+	ran_eff <- as.data.frame(ranef(mod))
+	ran_eff <- ran_eff[, "condval", drop=FALSE]
+	re <- as.vector(rstanarm:::get_z(mod) %*% as.matrix(ran_eff))
 	return(re)	
 }
