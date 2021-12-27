@@ -20,7 +20,7 @@ update_scripts:
 
 ######################################################################
 
-Makefile: varpred.stamp
+Makefile: makestuff/00.stamp varpred.stamp
 
 Ignore += *.stamp
 varpred.stamp: DESCRIPTION
@@ -307,10 +307,10 @@ Sources += Makefile
 Ignore += makestuff
 msrepo = https://github.com/dushoff
 
-Makefile: makestuff/Makefile
-makestuff/Makefile:
-	git clone $(msrepo)/makestuff
-	ls makestuff/Makefile
+makestuff/%.stamp:
+	- $(RM) makestuff/*.stamp
+	(cd makestuff && $(MAKE) pull) || git clone $(msrepo)/makestuff
+	touch $@
 
 -include makestuff/os.mk
 
