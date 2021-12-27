@@ -66,6 +66,8 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 
 	pred_list <- list()
 	offs <- NULL
+	
+	# TODO: eliminate loop if there is no x.excluded 
 	for (i in 1:NROW(x.focal)) {
 		focal_i <- x.focal[i, ,drop=FALSE]
 		focal_i[1:nM, ] <- focal_i
@@ -75,29 +77,6 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 
 		off <- get_offset(offset, mf_i)
 		offs[i] <- off
-		
-#		if (isolate) {
-#			# FIXME: assuming pop of non-focal -> no variance
-#			mm[, focal_terms] <- mm_i[, focal_terms]
-#		} else {
-#			mm <- mm_i
-#		}
-		
-#		pse_var <- mult*get_sderror(mod=mod
-#			, vcov.=vcov.
-#			, mm=mm
-#			, col_mean=col_mean
-#			, isolate=isolate
-#			, isolate.value=isolate.value
-#			, internal=internal
-#			, vareff_objects=vareff_objects
-#			, x.var=x.var
-#			, typical=typical
-#			, formula.rhs=formula.rhs
-#			, zero_out_interaction=zero_out_interaction
-#			, mf=mf_i
-#		)
-
 		pred_list[[i]] <- transform(
 			data.frame(pred=off + as.vector(mm_i %*% betahat) + re)
 			, lwr=pred - ifelse(isolate, pse_var[[i]], pse_var)

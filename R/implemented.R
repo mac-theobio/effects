@@ -1,6 +1,36 @@
 # Some of the implemented methods
 
-## default lm
+## Some models require prep
+prepmod.default <- function(mod, ...) {
+	return(mod)
+}
+
+## brms
+prepmod.brmsfit <- function(mod, ...) {
+	check_terms <- attr(mod, "terms")
+	if (is.null(check_terms)) {
+		bform <- formula(mod)
+		bform <- brms:::update_re_terms(bform, re_formula=NA)
+		bterms <- brms::brmsterms(bform, resp_rhs_all = FALSE)
+		bterms <- attr(model.frame(bterms$allvars, data = mod$data), "terms")
+		mod$terms <- bterms
+	}
+	return(mod)
+}
+
+## default
+vareffobj.default <- function(mod, ...){
+	out <- list()
+	out$coefficients <- coef(mod)
+	out$variance_covariance <- vcov(mod)
+	out$formula <- formula(mod)
+	out$link <- family(mod)
+	out$contrasts <- mod$contrasts
+	class(out) <- "vareffobj"
+	return(out)
+}
+
+## lm
 vareffobj.lm <- function(mod, ...){
 	out <- list()
 	out$coefficients <- coef(mod)
@@ -33,8 +63,40 @@ get_xlevels.lm <- function(mod) {
 }
 
 check_intercept.default <- function(mod, ...) {
-	any(names(coefficients(mod))=="(Intercept)")
+	any(grepl("Intercept", names(coefficients(mod)), ignore.case=TRUE))
 }
+
+## brms
+vareffobj.brmsfit <- function(mod, ...) {
+	out <- list()
+	out$coefficients <- fixef(mod)[,"Estimate"]
+	out$variance_covariance <- vcov(mod)
+	out$formula <- as.formula(brms:::update_re_terms(formula(mod), re_formula=NA))
+	out$link <- family(mod)
+	out$contrasts <- get_contrasts(mod, ...)
+	class(out) <- "vareffobj"
+	return(out)
+}
+
+get_model.mm.brmsfit <- function(mod, ...) {
+	mm <- model.matrix(terms(mod), mod$data)
+	return(mm)
+}
+
+get_contrasts.brmsfit <- function(mod, ...) {
+	contr <- attr(get_model.mm(mod, ...), "contrasts")
+	return(contr)
+}
+
+get_xlevels.brmsfit <- function(mod) {
+	xlevels <- .getXlevels(terms(mod), model.frame(mod))
+	return(xlevels)
+}
+
+check_intercept.brmsfit <- function(mod, ...) {
+	any(grepl("Intercept", names(fixef(mod)[,"Estimate"]), ignore.case=TRUE))
+}
+
 
 ## rstanarm
 
@@ -65,7 +127,7 @@ get_xlevels.stanreg <- function(mod) {
 }
 
 check_intercept.stanreg <- function(mod, ...) {
-	any(names(fixef(mod))=="(Intercept)")	
+	any(grepl("Intercept", names(fixef(mod)), ignore.case=TRUE))
 }
 
 
@@ -97,7 +159,7 @@ get_xlevels.glmmTMB <- function(mod) {
 }
 
 check_intercept.glmmTMB <- function(mod, ...) {
-	any(names(fixef(mod)$cond)=="(Intercept)")	
+	any(grepl("Intercept", names(fixef(mod)$cond), ignore.case=TRUE))
 }
 
 ## lme4
@@ -152,14 +214,19 @@ get_xlevels.merMod <- function(mod) {
 }
 
 check_intercept.glmerMod <- function(mod, ...) {
-	any(names(fixef(mod))=="(Intercept)")	
+	any(grepl("Intercept", names(fixef(mod)), ignore.case=TRUE))
 }
 
 check_intercept.merMod <- function(mod, ...) {
-	any(names(fixef(mod))=="(Intercept)")	
+	any(grepl("Intercept", names(fixef(mod)), ignore.case=TRUE))
 }
 
 ## Statistics
+get_stats.brmsfit <- function(mod, level, dfspec, ...) {
+	mulz <- qnorm(1 - (1 - level)/2)
+	return(mulz)
+}
+
 get_stats.stanreg <- function(mod, level, dfspec, ...) {
 	mulz <- qnorm(1 - (1 - level)/2)
 	return(mulz)

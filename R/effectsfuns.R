@@ -119,6 +119,7 @@ varpred <- function(mod
 		sigma <- match.arg(sigma)
 	}
 
+	mod <- prepmod(mod)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
@@ -494,7 +495,12 @@ zero_vcov <- function(m, focal_vars, complete) {
 
 recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), ...) {
 	f <- formula(mod)
-	data <- eval(getCall(mod)$data, envir)
+	## brms does not have call object
+	if (inherits(mod, "brmsfit")) {
+		data <- eval(mod$data, envir)
+	} else {
+		data <- eval(getCall(mod)$data, envir)
+	}
 	if (is.null(data)) {
       if (is.null(extras)) {
          ## df <- eval(bquote(model.frame(.(f))), envir)

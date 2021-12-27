@@ -5,7 +5,7 @@ loadEnvironments()
 startGraphics()
  
 #### Model
-glm_mod <- glm(status~age
+glm_mod <- glm(status~age#+x2
 	, data=glm_sim_df
 	, family = binomial
 )

@@ -374,8 +374,13 @@ print(pred_cubic_plots)
 Consider model described in \ref{sim:lm_no_interaction} with only \code{Age} as the predictor such that 
 %
 \begin{align}\label{sim:glm_one_pred}
-\mathrm{logit(status} = 1) &= \eta \nonumber\\
-\mathrm{\eta} &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \epsilon_i
+\mathrm{status}_i &\sim \mathrm{Binomial}(1, \mathrm{P(status}_i = 1)) \nonumber\\
+\mathrm{logit(P(status}_i = 1)) &= \eta_i \nonumber\\
+\mathrm{\eta}_i &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.8 \nonumber\\
+i &= 1,\cdots, 500
 \end{align}
 %
 where \code{status} is a binary outcome with 0 for unimproved and 1 for improved water quality in the slums. By having only a single predictor, we may be able to investigate the contribution of nonlinear link function on the predicted probability of improved water quality. 
@@ -400,11 +405,11 @@ Here we consider generalized linear models with random effects components. In th
 Suppose, in the simulation described in Section~\ref{sec:stats_background}, the observations are  recorded at least once per household and we are interested in the status improved water services (improved or unimproved). In particular, let $\mathrm{H}$ be the number of households indexed by the grouping factor, and $\mathrm{h}[i]$ be the household of the $i$th observation such that 
 %
 \begin{align}\label{sim:lme_one_pred}
-\mathrm{logit(status} = 1) &= \eta \nonumber\\
-\mathrm{\eta} &= \beta_0 + \alpha_{0,\mathrm{h}[i]} + \beta_{\mathrm{A}}\mathrm{Age}_i + \epsilon_i \nonumber\\
+\mathrm{status}_i &\sim \mathrm{Binomial}(1, \mathrm{P(status}_i = 1)) \nonumber\\
+\mathrm{logit(P(status}_i = 1)) &= \eta_i \nonumber\\
+\mathrm{\eta}_i &= \beta_0 + \alpha_{0,\mathrm{h}[i]} + \beta_{\mathrm{A}}\mathrm{Age}_i \nonumber\\
 \alpha_{0,\mathrm{h}} &\sim \mathrm{Normal}(0, 5),~~ h=1, \cdots, \mathrm{10} \nonumber\\
-\mathrm{Age}_i &\sim \mathrm{Normal}(0, 3) \nonumber\\
-\epsilon_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
 \beta_0 &= 5 \nonumber\\
 \beta_{\mathrm{A}} &= 0.8 \nonumber\\
 i &= 1,\cdots, 500
@@ -428,14 +433,12 @@ print(glme_plots)
 We now consider a bit more complicated model involving two outcome variables (services) -- status (improved or unimproved) of water and garbage services. In particular, we simulate an intercept only multivariate random effect model to, \emph{jointly}, predict probability of improved water and garbage services based on age and wealth index. Each household has its own correlated effect on the intercepts (random-intercept). In addition, we add latent variable to account for unobserved correlations.
 %
 \begin{align}\label{sim:lme_multi_outcome}
-\mathrm{services}_{{\mathrm{h}[i]\mathrm{s}}} &= \mathrm{Binomial}(P_{{\mathrm{h}[i]\mathrm{s}}}) \nonumber\\
-\mathrm{logit}(P_{{\mathrm{h}[i]\mathrm{s}}}) &= \beta_{0,s} + \alpha_{0,\mathrm{h}[i]\mathrm{s}} + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{Ls}}\mathrm{Latent}_{i\mathrm{s}} + \epsilon_{i\mathrm{s}} \nonumber\\
+\mathrm{status}_{{\mathrm{h}[i]\mathrm{s}}} &\sim \mathrm{Binomial}(1, P(\mathrm{status}_{{\mathrm{h}[i]\mathrm{s}}} = 1)) \nonumber\\
+\mathrm{logit}(P(\mathrm{status}_{{\mathrm{h}[i]\mathrm{s}}} = 1)) &= \beta_{0,s} + \alpha_{0,\mathrm{h}[i]\mathrm{s}} + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \beta_{\mathrm{Ls}}\mathrm{Latent}_{i\mathrm{s}} \nonumber\\
 \alpha_{0,\mathrm{h}\mathrm{s}} &\sim \mathrm{Normal}(0, 2),~~ h=1, \cdots, \mathrm{H} \nonumber\\
 \mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
 \mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
 \mathrm{Latent}_{[i]\mathrm{s}} &\sim \mathrm{Normal}(0, 1) \nonumber\\
-\epsilon_{[i]\mathrm{\text{\tiny{water}}}} &\sim \mathrm{Normal}(0, 2) \nonumber\\
-\epsilon_{[i]\mathrm{\text{\tiny{garbage}}}} &\sim \mathrm{Normal}(0, 3) \nonumber\\
 \beta_0 &= 5 \nonumber\\
 \beta_{\mathrm{A}} &= 2 \nonumber\\
 \beta_{\mathrm{W}} &= -3 \nonumber\\

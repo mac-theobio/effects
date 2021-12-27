@@ -11,7 +11,7 @@ set.seed(9991)
 
 ############################################################################################
 # Global variables
-nHH_obs <- 5000
+nHH_obs <- 500
 perHH <- 1
 
 ############################################################################################
@@ -23,8 +23,10 @@ perHH <- 1
 #### Simulation
 glm_sim_df <- linearsim(nHH=nHH_obs
 	, perHH=perHH
+	, addnoiseGLM=FALSE
+	, noiseSD=1 # ignored if addnoiseGLM=FALSE
 	, form=~1+x1
-	, betas = c(1, 1)
+	, betas = c(2, 1)
 	, pgausian=list(p=1,fun=rnorm, mean=0, sd=1)
 	, pcat=list(p=0)
 	, link_scale=FALSE

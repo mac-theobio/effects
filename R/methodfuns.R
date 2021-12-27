@@ -78,3 +78,7 @@ get_contrasts <- function(mod, ...)UseMethod("get_contrasts")
 #'
 #' @keywords internal
 get_model.mm <- function(mod, ...)UseMethod("get_model.mm")
+
+#'
+#' @keywords internal
+prepmod <- function(mod, ...)UseMethod("prepmod")

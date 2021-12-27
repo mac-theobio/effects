@@ -3,7 +3,8 @@
 ### form : specify model using formula
 
 linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
-	, hhSD=2, betas=NULL, pgausian=list(p=2, fun=rnorm, mean=0, sd=1)
+	, hhSD=2, noiseSD=1, addnoiseGLM=FALSE, betas=NULL
+	, pgausian=list(p=2, fun=rnorm, mean=0, sd=1)
 	, pcat=list(p=1, fun=sample, nlevels=2, labels=NULL, prob=NULL, replace=TRUE)
 	, noutcomes=1, separatelatent=FALSE, blatent=1, mulatent=0
 	, sdlatent=1, vnames=NULL, link_scale=FALSE) {
@@ -142,8 +143,11 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 		}
 		eta <- lp + hhRE
 		if (link_scale) {
-			df$y <- rnorm(N, mean=eta, sd=1) 
+			df$y <- rnorm(N, mean=eta, sd=noiseSD) 
 		} else {
+			if (addnoiseGLM) {
+				eta <- eta + rnorm(N, 0, noiseSD)
+			}
 			df$y <- rbinom(N, 1, plogis(eta))
 		}
 		ynames <- "y"
@@ -162,7 +166,7 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 			hhRE <- pull(hhRE, paste0("hhRE", i))
 			eta <- lp + hhRE + latentvar
 			if (link_scale) {
-				y <- rnorm(N, mean=eta, sd=1) 
+				y <- rnorm(N, mean=eta, sd=noiseSD) 
 			} else {
 				y <- rbinom(N, 1, plogis(eta))
 			}
