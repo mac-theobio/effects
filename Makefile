@@ -163,8 +163,6 @@ mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
 mediate_bin_preds.Rout: mediate_bin_preds.R mediate_model.rda
-mediate_bin_preds_adjust.Rout: mediate_bin_preds_adjust.R mediate_model.rda
-mediate_bin_bias.Rout: mediate_bin_bias.R mediate_model.rda
 
 ## Correlated predictor glm
 binom_correlated.Rout: binom_correlated.R variable_predictions_funs.rda
@@ -186,6 +184,9 @@ rstanarm_example.Rout: rstanarm_example.R variable_predictions_funs.rda
 rstanarm_example_model.Rout: rstanarm_example_model.R rstanarm_example.rda
 rstanarm_example_preds.Rout: rstanarm_example_preds.R rstanarm_example_model.rda
 
+## brms example
+brms_example_model.Rout: brms_example_model.R rstanarm_example.rda
+brms_example_preds.Rout: brms_example_preds.R brms_example_model.rda
 
 ## justify: emmeans, effects, varpred
 justify.Rout: justify.R variable_predictions_funs.rda
@@ -195,7 +196,8 @@ justify_preds.Rout: justify_preds.R justify_model.rda
 ## variable_predictions.pdf: variable_predictions.Rnw
 variable_predictions.tex: binom_multiple_outcomes_preds_plots.rda glm_one_predictor_preds.rda \
 	glme_random_intercept_preds.rda cubic_predictors_preds_adjust.rda cubic_predictors_preds.rda \
-	variable_predictions_objs.rda justify_preds.rda variable_predictions.Rnw
+	variable_predictions_objs.rda justify_preds.rda mediate_preds.rda mediate_bin_preds.rda \
+	variable_predictions.Rnw
 
 ######################################################################
 

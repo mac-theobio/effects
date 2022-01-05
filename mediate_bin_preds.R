@@ -8,79 +8,97 @@ loadEnvironments()
 startGraphics()
 
 ## Not mediated
-pred_x_trad_notmediated <- varpred(mod_notmediated_bin
-	, "x"
-	, isolate=FALSE
-	, modelname="everything"
-)
 
-pred_x_centered_notmediated <- varpred(mod_notmediated_bin
+### Not corrected
+pred_notmediated_none <- varpred(mod_notmediated_bin
 	, "x"
-	, isolate=TRUE
-	, modelname="centered mm"
+	, bias.adjust="none"
+	, modelname="none"
 )
-pred_prop_notmed <- mean(pred_x_centered_notmediated$preds$fit)
+pred_notmediated_none_mean <- getmeans(pred_notmediated_none, what="estimate")
+
+### Bias corrected
+pred_notmediated_pop <- varpred(mod_notmediated_bin
+	, "x"
+	, bias.adjust="population"
+	, modelname="bias corrected"
+)
+pred_notmediated_pop_mean <- getmeans(pred_notmediated_pop, what="estimate")
+
+### Binned obs
+binned_df <- binfun(mod_notmediated_bin, focal="x", bins=50, groups=NULL)
 
 ### Combine all predictions
-vlist <- list(pred_x_trad_notmediated, pred_x_centered_notmediated)
+vlist <- list(pred_notmediated_none, pred_notmediated_pop)
 
-pred_x_notmediated_plots <- (comparevarpred(vlist=vlist
+pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL
 		, plotit=TRUE
 		, addmarginals=FALSE
+		, ci=FALSE
 	)
-	+ scale_colour_manual(breaks = c("everything", "centered mm")
-		, values=c(everything="blue", "centered mm"="black")
+	+ geom_hline(data=pred_notmediated_none_mean, aes(yintercept=fit, colour=model, lty=model))
+	+ geom_hline(data=pred_notmediated_pop_mean, aes(yintercept=fit, colour=model, lty=model))
+	+ geom_hline(data=observed_df_med, aes(yintercept=zbin, colour="observed", lty="observed"))
+	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="grey")
+#	+ geom_point(data=binned_df, aes(x=x, y=zbin), colour="grey")
+	+ scale_colour_manual(breaks = c("observed", "none", "bias corrected")
+		, values=c("observed"="red", "none"="blue", "bias corrected"="black")
 	)
-	+ geom_hline(yintercept=pred_prop_notmed, lty=2, col="black")
-	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
-	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
-	+ labs(y="Predictions", colour="Method", title="Not mediated")
+	+ scale_linetype_manual(values=c("observed"=2, "none"=3, "bias corrected"=4))
+	+ labs(colour="model", linetype="model", title="Not mediated")
 	+ theme(legend.position="bottom")
 )
-print(pred_x_notmediated_plots)
 
 ## Mediated
-pred_x_trad_mediated <- varpred(mod_mediated_bin
-	, "x"
-	, isolate=FALSE
-	, modelname="everything"
-)
 
-pred_x_centered_mediated <- varpred(mod_mediated_bin
+### Not corrected
+pred_mediated_none <- varpred(mod_mediated_bin
 	, "x"
-	, isolate=TRUE
-	, modelname="centered mm"
+	, bias.adjust="none"
+	, modelname="none"
 )
-pred_prop_med <- mean(pred_x_centered_mediated$preds$fit)
+pred_mediated_none_mean <- getmeans(pred_mediated_none, what="estimate")
+
+### Bias corrected
+pred_mediated_pop <- varpred(mod_mediated_bin
+	, "x"
+	, bias.adjust="population"
+	, modelname="bias corrected"
+)
+pred_mediated_pop_mean <- getmeans(pred_mediated_pop, what="estimate")
+
+### Binned obs
+binned_df <- binfun(mod_mediated_bin, focal="x", bins=50, groups=NULL)
 
 ### Combine all predictions
-vlist <- list(pred_x_trad_mediated, pred_x_centered_mediated)
+vlist <- list(pred_mediated_none, pred_mediated_pop)
 
-pred_x_mediated_plots <- (comparevarpred(vlist=vlist
+pred_mediated_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL
 		, plotit=TRUE
 		, addmarginals=FALSE
+		, ci=FALSE
 	)
-	+ scale_colour_manual(breaks = c("everything", "centered mm")
-		, values=c(everything="blue", "centered mm"="black")
+	+ geom_hline(data=pred_mediated_none_mean, aes(yintercept=fit, colour=model, lty=model))
+	+ geom_hline(data=pred_mediated_pop_mean, aes(yintercept=fit, colour=model, lty=model))
+	+ geom_hline(data=observed_df_med, aes(yintercept=zbin, colour="observed", lty="observed"))
+	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="grey")
+#	+ geom_point(data=binned_df, aes(x=x, y=zbin), colour="grey")
+	+ scale_colour_manual(breaks = c("observed", "none", "bias corrected")
+		, values=c("observed"="red", "none"="blue", "bias corrected"="black")
 	)
-	+ geom_hline(yintercept=pred_prop_med, lty=2, col="black")
-	+ geom_hline(data=observed_df_med, aes(yintercept=zbin), lty=2, col="red")
-	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
-	+ labs(y="Predictions", colour="Method", title="Mediated")
+	+ scale_linetype_manual(values=c("observed"=2, "none"=3, "bias corrected"=4))
+	+ labs(colour="model", linetype="model", title="Mediated")
 	+ theme(legend.position="bottom")
 )
-print(pred_x_mediated_plots)
 
-
-pred_mediate_plots <- ggarrange(pred_x_notmediated_plots
-	, pred_x_mediated_plots + rremove("ylab")
+pred_mediate_bin_plots <- ggarrange(pred_notmediated_plots
+	, pred_mediated_plots + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
 )
-print(pred_mediate_plots)
+print(pred_mediate_bin_plots)
 
-saveEnvironment()
-
+saveVars(pred_mediate_bin_plots)

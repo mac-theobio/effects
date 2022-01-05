@@ -326,3 +326,18 @@ includeRE.stanreg <- function(mod, ...){
 	re <- as.vector(rstanarm:::get_z(mod) %*% as.matrix(ran_eff))
 	return(re)	
 }
+
+includeRE.brmsfit <- function(mod, ...){
+	Z <- prepare_predictions(mod, ...)$dpars$mu$re$Z
+	ran_eff <- ranef(mod)
+	out <- sapply(names(ran_eff), function(x){
+		z <- Z[[x]]
+		reff <- as.data.frame(ran_eff[[x]])
+		reff <-as.list( reff[, grep("Estimate\\.", colnames(reff), value=TRUE)])
+		reff <- as.matrix(do.call("c", reff))
+		re <- as.vector(z %*% reff)
+	}, simplify = FALSE)
+	out <- do.call("cbind", out)
+	out <- rowSums(out)
+	return(out)
+}

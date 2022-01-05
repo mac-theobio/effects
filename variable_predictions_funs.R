@@ -290,7 +290,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 			if (is.null(.nn)) .nn <- est@misc$estName
 			est <- as.data.frame(est)
 			oldn <- c(focal, .nn
-				, grep("\\.CL|\\.LCL|\\.UCL", colnames(est), value=TRUE)
+				, grep("\\.CL|\\.LCL|\\.UCL|lower\\.|upper\\.", colnames(est), value=TRUE)
 			)
 			newn <- c(focal_temp, "fit", "lwr", "upr")
 			colnames(est)[colnames(est) %in% oldn] <-  newn

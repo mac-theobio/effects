@@ -417,6 +417,7 @@ varpred <- function(mod
 	attr(result, "focal") <- unlist(focal.predictors)
 	attr(result, "response") <- out$response
 	attr(result, "x.var") <- out$x.var 
+	attr(result, "modelname") <- modelname
 	if (returnall) {
 		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw=out, factor.cols=factor.cols, mm2=mod.matrix)
 	} else {
@@ -576,4 +577,29 @@ combinevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE,
 	} else {
 		return(out)
 	}
+}
+
+#' Get focal and prediction means for a varpred object
+#'
+#' @export
+
+getmeans.varpred <- function(object, what=c("estimate", "focal"), focal=NULL) {
+	what <- match.arg(what)
+	preds <- object$preds
+	modelname <- attr(preds, "modelname")
+	if (is.null(modelname)) modelname <- class(object)[1]
+	if (what=="focal") {
+		if(is.null(focal)) {
+			focal <- attr(preds, "x.var")
+		}
+	} else {
+		focal <- "fit"
+	}
+	out <- preds[[focal]]
+	if (any(class(out) %in% c("factor", "character"))) {
+		out <- as.character(unique(out))
+	} else {
+		out <- data.frame(fit=mean(out, na.rm=TRUE), model=modelname)
+	}
+	return(out)
 }

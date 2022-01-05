@@ -14,6 +14,7 @@
 \newcommand{\pkg}[1]{\textbf{#1}}
 
 \newcommand{\bX}{{\mathbf X}}
+\newcommand{\bZ}{{\mathbf Z}}
 \newcommand{\bbeta}{{\boldsymbol \beta}}
 \newcommand{\boldeta}{{\boldsymbol \eta}}
 \newcommand{\boldmu}{{\boldsymbol \mu}}
@@ -52,6 +53,8 @@ library(vareffects); varefftheme()
 
 set.seed(9991)
 load("variable_predictions_objs.rda")
+load("mediate_bin_preds.rda")
+load("mediate_preds.rda")
 load("justify_preds.rda")
 load("cubic_predictors_preds.rda")
 load("cubic_predictors_preds_adjust.rda")
@@ -221,10 +224,12 @@ In population-based approach, $\eta^\star$ is constructed as a function of prope
 \item compute linear predictor associated with the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
 \item compute linear predictor associated with the focal predictors, $\eta_{jf} = \sum{\beta_f x_{jf}}$
 \item for every value of the focal predictor, $\eta_{jf}$:
-\begin{itemize}
-\item $\eta_j^\star  = \eta_{jf} + \nset{\eta}$
-\item $\hat{y}_j  = \textrm{mean} ~ g^{-1} \left(\eta_j^\star\right)$
-\end{itemize}
+%
+\begin{align}\label{eq:pop_eta} 
+\eta_j^\star  &= \eta_{jf} + \nset{\eta} \\
+\hat{y}_j  &= \textrm{mean} ~ g^{-1} \left(\eta_j^\star\right)
+\end{align}
+%
 \end{itemize}
 %
 We make similar adjustments to compute the variances of the predictions at every level of the focal predictor:
@@ -240,6 +245,14 @@ where $\bX^{\star}_{jc} = \{\bX_{jf}^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX
 \end{align}
 %
 
+For models with random effects components, another of adjustments can be made to correct for bias induced by the random effects terms. In the population approach, we treat the random effects terms as additional non-focal predictors and simply make adjustment to Equation~\ref{eq:pop_eta}. In particular
+%
+\begin{align}\label{eq:pop_eta_re} 
+\tau &= \bZ b \nonumber \\
+\eta_j^\star  &= \eta_{jf} + \nset{\eta} + \tau_j
+\end{align}
+%
+where $\bZ$ and $b$ are the design matrix and a vector of random effects, respectively.
 
 \section{Simulation examples}\label{sec:simulation_example}
 
@@ -465,7 +478,53 @@ print(binom_outcomes_plots)
 \label{fig:binom_outcomes_plots}
 \end{figure}
 %
- 
+
+\begin{appendix}
+
+\section{Appendix A: Additional simulations}
+
+\subsection{Mediated variables}
+
+We consider simple indirect mediation example such that $x$ has direct effect on $y$ which in turn has effect on $z$ but $x$ has no direct effect on $y$, i.e., $x \rightarrow y \rightarrow z$. In particular:
+%
+\begin{align}
+z &= \beta_0 + \beta_{yz} y + \epsilon_z \nonumber\\
+y &= \beta_{xy} x + \epsilon_y \nonumber\\
+x &\sim \mathrm{Normal(0, 1)} \nonumber\\
+\epsilon_y &\sim \mathrm{Normal(0, 1)} \nonumber\\
+\epsilon_z &\sim \mathrm{Normal(0, 1)} \nonumber\\
+\beta_0 &= 5 \nonumber\\
+\beta_{xy} &= 1 \nonumber\\
+\beta_{yz} &= 1.5
+\end{align}
+
+
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_mediate_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_mediate_plots)
+@
+\end{center}
+\caption{Predictor effect plot for multivariate response model. The top plot shows the predicted probability of improved service at the baseline. The bottom plots compares the predictor effect of age and wealth index on the expected probability of improved service. The grey points are the observed proportions (or bins in bottom plots) of improved service. The red points and curves are the bias uncorrected estimates while the black points and curves are the population-based (bias corrected) estimates. Generally, without taking into account the potential bias, we risk overestimating the predicted probabilities.}
+\label{fig:pred_mediate_plots}
+\end{figure}
+%
+
+%
+\begin{figure}[H]
+\begin{center}
+<<pred_mediate_bin_plots, echo=FALSE, fig=TRUE, message=FALSE>>=
+print(pred_mediate_bin_plots)
+@
+\end{center}
+\caption{Predictor effect plot for multivariate response model. The top plot shows the predicted probability of improved service at the baseline. The bottom plots compares the predictor effect of age and wealth index on the expected probability of improved service. The grey points are the observed proportions (or bins in bottom plots) of improved service. The red points and curves are the bias uncorrected estimates while the black points and curves are the population-based (bias corrected) estimates. Generally, without taking into account the potential bias, we risk overestimating the predicted probabilities.}
+\label{fig:pred_mediate_bin_plots}
+\end{figure}
+%
+
+\end{appendix}
+
 \clearpage
 % References
 \bibliographystyle{plainnat}

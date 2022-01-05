@@ -10,15 +10,16 @@ set.seed(991)
 ### x -> y -> z
 
 N <- 1e4
-beta_0 <- 2
-beta_xy <- 0
-beta_xz <- 1	# Set to 0 -> x: no direct of x on z
-beta_yz <- 0.8
+
+b0 <- 5
+bxz <- 0
+bxy <- 1
+byz <- 1.5
 
 df <- data.frame(x=rnorm(N))
 sim_df_mediate <- (df
-	%>% mutate(y = rnorm(N) + beta_xy*x
-		, z = rnorm(N) + beta_xz*x + beta_yz*y + beta_0
+	%>% mutate(y = rnorm(N) + bxy*x
+		, z = b0 + rnorm(N) + bxz*x + bxy*y
 		, zbin = rbinom(n(), 1, plogis(z))
 	)
 )

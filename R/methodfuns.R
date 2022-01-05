@@ -82,3 +82,8 @@ get_model.mm <- function(mod, ...)UseMethod("get_model.mm")
 #'
 #' @keywords internal
 prepmod <- function(mod, ...)UseMethod("prepmod")
+
+#' Get focal and prediction means for a varpred object
+#'
+#' @export
+getmeans <- function(object, what=c("estimate", "focal"), focal=NULL)UseMethod("getmeans")
