@@ -46,7 +46,7 @@ pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, values=c("observed"="red", "none"="blue", "bias corrected"="black")
 	)
 	+ scale_linetype_manual(values=c("observed"=2, "none"=3, "bias corrected"=4))
-	+ labs(colour="model", linetype="model", title="Not mediated")
+	+ labs(colour="model", linetype="model", title="Non-mediated")
 	+ theme(legend.position="bottom")
 )
 

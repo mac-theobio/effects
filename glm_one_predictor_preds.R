@@ -20,7 +20,6 @@ glm_pred_none_mean <- mean(glm_pred_none$preds$fit)
 ## Bias adjusted
 glm_pred_pop <- varpred(glm_mod
 	, "age"
-	, steps=nrow(glm_sim_df)
 	, isolate=TRUE
 	, bias.adjust="population"
 	, modelname="bias corrected"

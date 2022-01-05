@@ -487,7 +487,7 @@ print(binom_outcomes_plots)
 
 We consider simple indirect mediation example such that $x$ has direct effect on $y$ which in turn has effect on $z$ but $x$ has no direct effect on $y$, i.e., $x \rightarrow y \rightarrow z$. In particular:
 %
-\begin{align}
+\begin{align}\label{sim:simple_mediate}
 z &= \beta_0 + \beta_{yz} y + \epsilon_z \nonumber\\
 y &= \beta_{xy} x + \epsilon_y \nonumber\\
 x &\sim \mathrm{Normal(0, 1)} \nonumber\\
@@ -497,8 +497,8 @@ x &\sim \mathrm{Normal(0, 1)} \nonumber\\
 \beta_{xy} &= 1 \nonumber\\
 \beta_{yz} &= 1.5
 \end{align}
-
-
+%
+We fit two models -- \emph{non-mediated} which models \emph{z} as a function of \emph{x} and the \emph{mediated} which models \emph{z} as a function of \emph{x} and \emph{y}. In both cases, we compare predictions without bias correction (none) with those corrected for bias (bias corrected). Figure~\ref{fig:pred_mediate_plots} compares the predictor effect of \emph{x} on \emph{z} for the two models. For simple linear model, the predicted averages (model center estimates) are similar to the observed average ($\bar{z}$) and none bias corrected and bias corrected predictions are very similar. 
 %
 \begin{figure}[H]
 \begin{center}
@@ -506,11 +506,20 @@ x &\sim \mathrm{Normal(0, 1)} \nonumber\\
 print(pred_mediate_plots)
 @
 \end{center}
-\caption{Predictor effect plot for multivariate response model. The top plot shows the predicted probability of improved service at the baseline. The bottom plots compares the predictor effect of age and wealth index on the expected probability of improved service. The grey points are the observed proportions (or bins in bottom plots) of improved service. The red points and curves are the bias uncorrected estimates while the black points and curves are the population-based (bias corrected) estimates. Generally, without taking into account the potential bias, we risk overestimating the predicted probabilities.}
+\caption{The non-mediated models z as a function of x while the mediated models z as a function of both x and y. The horizontal dotted red, blue and black lines are the observed, none bias corrected and bias corrected prediction averages, respectively. The vertical dotted grey lines are the average of the focal predictor, x. The dotted blue and black dotted lines are predictor effects of x on z.}
 \label{fig:pred_mediate_plots}
 \end{figure}
 %
 
+We extend the model described in \ref{sim:simple_mediate} to generate binary outcome 
+%
+%
+\begin{align}\label{sim:simple_mediate_bin}
+\mathrm{zbin} &\sim \mathrm{Binomial(1, P(zbin = 1))} \nonumber\\
+\mathrm{logit(P(zbin = 1))} &= z
+\end{align}
+%
+and then fit two generalized linear models together with the comparisons similar to the ones described above. The results are shown in Figure~\ref{fig:pred_mediate_bin_plots}. For non-mediated model, the bias corrected and non-corrected  predictions are very similar and their averages are very similar to the observed average. However, for the mediated model, the two approaches give very different estimates but bias corrected predicted average is relatively close to the observed average.
 %
 \begin{figure}[H]
 \begin{center}
@@ -518,7 +527,7 @@ print(pred_mediate_plots)
 print(pred_mediate_bin_plots)
 @
 \end{center}
-\caption{Predictor effect plot for multivariate response model. The top plot shows the predicted probability of improved service at the baseline. The bottom plots compares the predictor effect of age and wealth index on the expected probability of improved service. The grey points are the observed proportions (or bins in bottom plots) of improved service. The red points and curves are the bias uncorrected estimates while the black points and curves are the population-based (bias corrected) estimates. Generally, without taking into account the potential bias, we risk overestimating the predicted probabilities.}
+\caption{The non-mediated models zbin as a function of x while the mediated models zbin as a function of both x and y. The horizontal dotted red, blue and black lines are the observed, none bias corrected and bias corrected prediction averages, respectively. The vertical dotted grey lines are the average of the focal predictor, x. The dotted blue and black dotted lines are predictor effects of x on zbin.}
 \label{fig:pred_mediate_bin_plots}
 \end{figure}
 %
