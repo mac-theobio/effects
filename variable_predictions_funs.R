@@ -6,19 +6,40 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 	, hhSD=2, noiseSD=1, addnoiseGLM=FALSE, betas=NULL
 	, pgausian=list(p=2, fun=rnorm, mean=0, sd=1)
 	, pcat=list(p=1, fun=sample, nlevels=2, labels=NULL, prob=NULL, replace=TRUE)
-	, noutcomes=1, separatelatent=FALSE, blatent=1, mulatent=0
-	, sdlatent=1, vnames=NULL, link_scale=FALSE) {
+	, noutcomes=1
+	, beta0=log(runif(noutcomes))
+	, separatelatent=FALSE
+	, blatent=1
+	, mulatent=0
+	, sdlatent=1
+	, vnames=NULL
+	, link_scale=FALSE) {
 	
 	Terms <- attr(terms(form), "term.labels")
 	nbetas <- length(Terms)
-	if (!is.null(betas) & length(betas) != (nbetas+1))
-		stop(paste0("betas should a vector of length ", nbetas+1))
+	if (noutcomes==1) {
+		if (!is.null(betas) & length(betas) != (nbetas+1))
+			stop(paste0("betas should a vector of length ", nbetas+1))
+	} else {
+		if (!is.null(betas) & length(betas) != (nbetas))
+			stop(paste0("betas should a vector of length ", nbetas+1))
+	}
 
 	p <- pgausian$p + pcat$p
 	nvars <- length(all.vars(form))
 
 	if (p != nvars) {
 		stop(paste0("\nNumber of predictors in form should be same as sum of p in pgausian and pcat: ", nvars, " != ", p))
+	}
+	
+	# TODO: warn users if there's intercept in the multiple outcome
+	check_intercept <- attr(terms(form), "intercept")
+	if (noutcomes>1) {
+		if (check_intercept>=1) {
+			form <- reformulate(c(all.vars(form), -1))
+			betas <- betas[-1]
+		}
+		if (length(beta0) != noutcomes) stop("length of beta0 should be the same as noutcomes")
 	}
 
 	if (noutcomes<1)stop("Number of outcome variables should be  >= 1")
@@ -157,14 +178,13 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 			if (length(sdlatent)==1) sdlatent <- rep(sdlatent, noutcomes)
 			if (length(blatent)==1) blatent <- rep(blatent, noutcomes)
 		}
+		latentvar <- blatent*rnorm(N, mulatent, sdlatent)
 		out <- lapply(1:noutcomes, function(i){
 			if (separatelatent) {
 				latentvar <- blatent[[i]]*rnorm(N, mulatent[[i]], sdlatent[[i]])
-			} else {
-				latentvar <- 0
-			}
+			} 
 			hhRE <- pull(hhRE, paste0("hhRE", i))
-			eta <- lp + hhRE + latentvar
+			eta <- beta0[[i]] + lp + hhRE + latentvar
 			if (link_scale) {
 				y <- rnorm(N, mean=eta, sd=noiseSD) 
 			} else {

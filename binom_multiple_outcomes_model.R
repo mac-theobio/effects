@@ -11,6 +11,8 @@ set.seed(9991)
 ## Joint model
 ############################################################################################
 
+#options(contrasts=c("contr.sum","contr.poly"))
+
 ## Observed averages
 ### Outcomes
 true_prop_df <- (sim_df_cont_joint_long

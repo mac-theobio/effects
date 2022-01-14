@@ -25,15 +25,16 @@ perHH <- 10
 #### Simulation
 sim_df_cont_joint <- linearsim(nHH=nHH_obs
 	, perHH=perHH
-	, form=~1+x1+x2
-	, betas = c(5, 2, -3)
+	, form=~-1+x1+x2
+	, betas = c(2, -3)
 	, hhSD = c(2, 3)
 	, pgausian=list(p=2,fun=rnorm, mean=0, sd=1)
 	, pcat=list(p=0)
 	, noutcomes=2
-	, separatelatent=TRUE
+	, separatelatent=FALSE
 	, link_scale=FALSE
-	, blatent=c(1, -5)
+#	, blatent=c(1, -5)
+	, blatent=0.8
 	, vnames=c("age", "wealthindex", "water", "garbage")
 )$data
 head(sim_df_cont_joint)

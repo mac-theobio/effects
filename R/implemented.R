@@ -71,7 +71,7 @@ vareffobj.brmsfit <- function(mod, ...) {
 	out <- list()
 	out$coefficients <- fixef(mod)[,"Estimate"]
 	out$variance_covariance <- vcov(mod)
-	out$formula <- as.formula(brms:::update_re_terms(formula(mod), re_formula=NA))
+	out$formula <- formula(terms(mod)) #as.formula(brms:::update_re_terms(formula(mod), re_formula=NA))
 	out$link <- family(mod)
 	out$contrasts <- get_contrasts(mod, ...)
 	class(out) <- "vareffobj"
