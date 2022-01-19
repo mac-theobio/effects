@@ -22,18 +22,18 @@ justify_plots <- (combinepreds(justify_mod
 		, nesting=NULL
 		, ci=FALSE
 	)
-	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="truth"), lty=4)
-	+ scale_colour_manual(breaks = c("truth", "emmeans", "Effect", "varpred")
-		, values=c("truth"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
-		, labels=c("truth", "emmeans", "effects", "varpred")
+	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
+	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
+	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
+		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
+		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
-	+ scale_linetype_manual(values=c("truth"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
-		, labels=c("truth", "emmeans", "effects", "varpred")
+	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
+		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
 	+ labs(title="a) Model 1", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
-justify_plots
 
 ## Add CIs
 justify_ci_plots <- (combinepreds(justify_mod
@@ -45,18 +45,17 @@ justify_ci_plots <- (combinepreds(justify_mod
 		, nesting=NULL
 		, ci=TRUE
 	)
-	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="truth"), lty=4)
-	+ scale_colour_manual(breaks = c("truth", "emmeans", "Effect", "varpred")
-		, values=c("truth"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
-		, labels=c("truth", "emmeans", "effects", "varpred")
+	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
+	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
+		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
+		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
-	+ scale_linetype_manual(values=c("truth"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
-		, labels=c("truth", "emmeans", "effects", "varpred")
+	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
+		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
 	+ labs(title="a) Model 1", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
-justify_ci_plots
 
 ## With interactions
 quants <- seq(0,1,length.out=100)
@@ -71,18 +70,18 @@ justify_inter_plots <- (combinepreds(justify_inter_mod
 		, nesting=NULL
 		, ci=FALSE
 	)
-	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="truth"), lty=4)
-	+ scale_colour_manual(breaks = c("truth", "emmeans", "Effect", "varpred")
-		, values=c("truth"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
-		, labels=c("truth", "emmeans", "effects", "varpred")
+	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="observed"), lty=4)
+	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
+	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
+		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
+		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
-	+ scale_linetype_manual(values=c("truth"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
-		, labels=c("truth", "emmeans", "effects", "varpred")
+	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
+		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
 	+ labs(title="b) Model 2", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
-justify_inter_plots
 
 
 justify_plots <- ggarrange(justify_plots
@@ -91,6 +90,8 @@ justify_plots <- ggarrange(justify_plots
 	, legend="bottom"
 	, ncol=2
 )
+justify_plots
+
 
 saveVars(justify_plots, justify_ci_plots)
 
