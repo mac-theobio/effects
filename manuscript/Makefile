@@ -32,10 +32,26 @@ justify_preds.Rout: justify_preds.R justify_model.rda
 ## Figure 3: Quantity of interest
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
 
+## Figure 4: Cubic polynomials
+cubic_predictors.Rout: cubic_predictors.R variable_predictions_funs.rda
+cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
+cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
+
+## Figure 5: Two predictors glm
+glm_two_predictor.Rout: glm_two_predictor.R variable_predictions_funs.rda
+glm_two_predictor_model.Rout: glm_two_predictor_model.R glm_two_predictor.rda
+glm_two_predictor_preds.Rout: glm_two_predictor_preds.R glm_two_predictor_model.rda
+
+## Figure 6: Mediated effect
+mediate.Rout: mediate.R variable_predictions_funs.rda
+mediate_model.Rout: mediate_model.R mediate.rda
+mediate_preds.Rout: mediate_preds.R mediate_model.rda
+
+
 ######################################################################
 
 # vareffects_plosone.bib: vareffects_plosone.bib;
-vareffects_plosone.pdf: quantity_of_interest.Rout justify_preds.Rout vareffects_plosone.bib vareffects_plosone.tex
+vareffects_plosone.pdf: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout justify_preds.Rout vareffects_plosone.bib vareffects_plosone.tex
 
 ######################################################################
 

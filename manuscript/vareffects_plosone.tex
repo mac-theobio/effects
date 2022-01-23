@@ -168,7 +168,7 @@
 
 \newcommand{\lorem}{{\bf LOREM}}
 \newcommand{\ipsum}{{\bf IPSUM}}
-\newcommand{\fix}{{\bf FIXME}}
+\newcommand{\fix}{{\bf \textcolor{red}{FIXME}}}
 \newcommand{\JD}[1]{{\color{blue} \emph{#1}}}
 \newcommand{\bmb}[1]{{\color{RubineRed!70!} \emph{#1}}}
 \newcommand{\pkg}[1]{\textbf{#1}}
@@ -206,54 +206,26 @@
 \newline
 % Insert author names, affiliations and corresponding author email (do not include titles, positions, or degrees).
 \\
-Name1 Surname\textsuperscript{1,2\Yinyang},
-Name2 Surname\textsuperscript{2\Yinyang},
-Name3 Surname\textsuperscript{2,3\textcurrency},
-Name4 Surname\textsuperscript{2},
-Name5 Surname\textsuperscript{2\ddag},
-Name6 Surname\textsuperscript{2\ddag},
-Name7 Surname\textsuperscript{1,2,3*},
-with the Lorem Ipsum Consortium\textsuperscript{\textpilcrow}
+Steve Cygu\textsuperscript{1},
+Benjamin M. Bolker\textsuperscript{1,2},
+Jonathan Dushoff\textsuperscript{1,2}
 \\
 \bigskip
-\textbf{1} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\textbf{1} School of Computational Science and Engineering, McMaster University, Hamilton, Ontario, Canada
 \\
-\textbf{2} Affiliation Dept/Program/Center, Institution Name, City, State, Country
-\\
-\textbf{3} Affiliation Dept/Program/Center, Institution Name, City, State, Country
+\textbf{2} Department of Biology, McMaster University, Hamilton, Ontario, Canada
 \\
 \bigskip
 
-% Insert additional author notes using the symbols described below. Insert symbol callouts after author names as necessary.
-% 
-% Remove or comment out the author notes below if they aren't used.
-%
-% Primary Equal Contribution Note
-\Yinyang These authors contributed equally to this work.
-
-% Additional Equal Contribution Note
-% Also use this double-dagger symbol for special authorship notes, such as senior authorship.
-\ddag These authors also contributed equally to this work.
-
-% Current address notes
-\textcurrency Current Address: Dept/Program/Center, Institution Name, City, State, Country % change symbol to "\textcurrency a" if more than one current address note
-% \textcurrency b Insert second current address 
-% \textcurrency c Insert third current address
-
-% Deceased author note
-\dag Deceased
-
-% Group/Consortium Author Note
-\textpilcrow Membership list can be found in the Acknowledgments section.
 
 % Use the asterisk to denote corresponding authorship and provide email address in note below.
-* correspondingauthor@institute.edu
+* cygu@aims.ac.za
 
 \end{flushleft}
 % Please keep the abstract below 300 words
 \section*{Abstract}
 
-\fix
+In many application, outcome predictions or predicted probabilities is of interest. For models that involve complex multiplicative interactions, additional non-focal predictors or nonlinear link functions, the estimated predictor effects are sensitive to how the predictions are generated. The most common approach is generating predictor effects at a ``typical value'', usually the mean, of non-focal predictor, i.e., mean-anchored which is the effect of an ``average case'' in the population. In the presence of sources of bias such as additional non-focal predictors, nonlinear link functions, random effect terms, etc., mean-anchored approach generate predictor effects that are biased and not consistent with the observed quantities. An alternative is the population-based approach which estimates the average effect in the population. Moreover, isolated confidence intervals provide an alternative and a more clear way to describe uncertainty associated with the focal predictor of interest. In addition to theoretical and methodical comparison, using simulation, we illustrate the two approaches and show that they can produce substantially different results and that population-based approach can not only produce estimates consistent with the observed values, but also appropriate for bias correction.
 
 
 % Please keep the Author Summary between 150 and 200 words
@@ -327,8 +299,7 @@ The main purpose of this article is to discuss and implement various approaches 
 
 Several quantities of interest may be derived from regression models. The first one is the coefficient estimates. Others are \emph{input variables},  \emph{predictors}, \emph{model matrix}, \emph{predicted values} and \emph{marginal effects}. Input variables are the variables that were measured (may be transformed), while predictors are the terms that are entered in the model. Hence, predictors encompass the main effects, but also polynomials of input variables and interaction terms (for example in polynomials and splines) \cite{schielzeth2010simple}. Model matrix refers to the design matrix whose rows include all combination of variables appearing in the interaction terms, along with the typical values of the focal and non-focal predictors.
 
-In simple linear models with no interaction terms, the default output for the coefficient estimates are simple and directly interpretable as the expected change in outcome for a unit change in focal predictor. This is the \emph{unconditional marginal effect} \cite{leeper2017interpreting} and it is constant across all the observations and levels of all other predictors. Consider models ~\ref{eq:simple_inter_higher_no_interaction} and \ref{eq:simple_inter_higher}. The marginal effect of $x_2$ in model~\ref{eq:simple_inter_higher_no_interaction} is $\frac{\partial y}{\partial x_2} = \beta_2$. On the other hand, the marginal effect of $x_2$ in model~\ref{eq:simple_inter_higher} is given by $\frac{\partial y}{\partial x_2} = \beta_2 + \beta_{23}x_3$. In other words, if there are no interactions, the marginal effect of $x_2$ on $y$ is constant, while, if there are interactions in the model, the marginal effect of a change in $x_2$ on $y$ depends on the value of the other \emph{conditioning} predictor $x_3$. As a result, the interpretation of interaction models differs in an important way from linear-additive regression models. 
-
+In simple linear models with no interaction terms, the default output for the coefficient estimates are simple and directly interpretable as the expected change in outcome for a unit change in focal predictor. This is the \emph{unconditional marginal effect} \cite{leeper2017interpreting} and it is constant across all the observations and levels of all other predictors. Consider models ~\ref{eq:simple_inter_higher_no_interaction} and \ref{eq:simple_inter_higher}. The marginal effect of $x_2$ in model~\ref{eq:simple_inter_higher_no_interaction} is $\frac{\partial y}{\partial x_2} = \beta_2$. On the other hand, the marginal effect of $x_2$ in model~\ref{eq:simple_inter_higher} is given by $\frac{\partial y}{\partial x_2} = \beta_2 + \beta_{23}x_3$. In other words, if there are no interactions, the marginal effect of $x_2$ on $y$ is constant, while, if there are interactions in the model, the marginal effect of a change in $x_2$ on $y$ depends on the value of the other \emph{conditioning} predictor $x_3$. In general, for a continuous variable, $x_k$, the marginal effect is $\frac{\partial y}{\partial x_k} = g(x\beta)\beta_k$, where $g()$ is the probability density function. This implies that, in addition to coefficient estimates, the marginal effect depends on the nature of $g()$ and the values of the other non-focal predictors. For nonlinear link functions, $g()$, the effect is not constant and instead depends on the function and the values over which the curve is evaluated.
 
 To distinguish between predictor effects and marginal effects, consider result from a hypothetical  simulated example -- regression of household size as function of household wealth index and age of household head, as shown in Fig~\ref{fig:qoi_age_pred_plot}. Since the model has no interactions, the relationship between the predicted household size and age is linear, hence the marginal effect of age is the slope ($\frac{\Delta \mathrm{hh size}}{\Delta \mathrm{age}}$) of the predictor effect line and can be calculated irrespective of the values of wealth index.
 
@@ -343,12 +314,18 @@ Predictor effect, on the other hand, is the expected household size for a partic
 
 \section*{Statistical background}
 
-To get an intuition of how conditioning on the mean values of the non-focal predictors work, suppose we are interested in predictor effects of a particular predictor, i.e., focal, $x_f$, from the set of predictors. To keep it simple, assume that the model has no interaction terms. The idea is to \emph{anchor} the values of non-focal predictors to some particular values. For example fixing the values of non-focal predictor(s) at some typical values -- typically determined by averaging (for now) in some meaningful way, for example, arithmetic mean  for continuous and average over the levels of the factors for categorical non-focal predictors. The easiest way to achieve this is by constructing $\bX^\star$ by averaging the columns of non-focal predictors in model matrix $\bX$, and together with appropriately chosen values of focal predictor(s).
+To get an intuition of how conditioning on the mean values of the non-focal predictors work, suppose we are interested in predictor effects of a particular predictor, i.e., focal, $x_f$, from the set of predictors. To keep it simple, assume that the model has no interaction terms. The idea is to \emph{anchor} the values of non-focal predictors to some particular values. For example fixing the values of non-focal predictor(s) at some typical values -- typically determined by averaging (for now) in some meaningful way, for example, arithmetic mean  for continuous and average over the levels of the factors for categorical non-focal predictors. We refer to this as mean-anchored approach. The most convenient way to achieve this is by constructing $\bX^\star$ by averaging the columns of non-focal predictors in model matrix $\bX$, and together with appropriately chosen values of focal predictor(s).
 
 
 Consider a simple linear model with linear predictor $\eta = \bX\bbeta$ and let $g(\boldmu) = \boldeta$ be an identity link function (in the case of simple linear model), where $\boldmu$ is the expected value of response variable $y$. Let $\hat{\bbeta}$ be the estimate of $\bbeta$, together with the estimated covariance matrix $\Sigma = V(\hat{\bbeta})$ of $\hat{\bbeta}$. Let $\mathbf{X^*}$ be the model matrix, inheriting most of its key properties, for example transformations on predictors and interactions from the model matrix, $\mathbf{X}$. Then the prediction $\hat{\boldeta}^\star = \bX^\star\hat{\bbeta}$ is the predictor effect for the focal predictor in question \cite{fox2009effect}.
 
-An alternative, save for later, formulation of predictor effect involves, expressing the linear predictor as the sum of the focal and non-focal predictor linear predictor. In particular, $\eta^\star(x_f, \nset{{\bar{x}}}) = \beta_f x_f + \sum \nset{\beta} \nset{{\bar{x}^\star}}$, where $\nset{{\bar{x}^\star}}$ are the appropriately averaged entries of non-focal predictors and $x_f$ is a vector of values of the focal predictors for a particular observation. 
+An alternative, save for later, formulation of predictor effect involves, expressing the linear predictor as the sum of the focal and non-focal predictor linear predictor. In particular, 
+
+\begin{align}\label{eq:eta_mean}
+\eta^\star(x_f, \nset{{\bar{x}}}) &= \beta_f x_f + \sum \nset{\beta} \nset{{\bar{x}^\star}} \\
+\hat{y}_f  &= g^{-1} \left(\eta^\star(x_f, \nset{{\bar{x}}})\right)
+\end{align}
+where $\nset{{\bar{x}^\star}}$ are the appropriately averaged entries of non-focal predictors and $x_f$ is a vector of values of the focal predictors for a particular observation.
 
 
 \subsection*{Dealing with higher order interactions}
@@ -390,11 +367,7 @@ In many applications, it usually important to report the estimates that reflect 
 
 \subsection*{Population-based approach for bias correction}
 
-The most precise (although not necessarily accurate!) way to predict is to condition on values of the focal predictor and make predictions for all observations (members of the population) \cite{hanmer2013behind}. A key point is that the nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population to a one-dimensional distribution of $\eta^\star$.
-
-Once we have got our vector of $\eta^\star$ (which is essentially a set of samples from the distribution over $\eta^\star(x_f, \nset{x})$ for the conditional set), we may want a mean and confidence intervals of the mean on the response (data) scale, i.e. after back-transforming. In other words we can use the observations themselves then we just compute the individual values of $g^{-1}(\eta^\star)$ and compute their mean.
-
-In population-based approach, $\eta^\star$ is constructed as a function of properly constituted levels of focal predictors, $x_f$, and entire population of the non-focal predictors, $\nset{x}$, as opposed to averaged non-focal predictors, $\nset{{\bar{x}}}$, described in the previous section. More specifically:
+The most precise (although not necessarily accurate!) way to predict is to condition on values of the focal predictor and make predictions for all observations (members of the population) \cite{hanmer2013behind}. A key point is that the nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population to a one-dimensional distribution of $\eta^\star(x_f, \nset{x})$, which is a function of focal predictor and the observed values of the non-focal predictors, as oposed to the definition in Equation~\ref{eq:eta_mean}. More specifically:
 
 \begin{itemize}
 \item compute linear predictor associated with the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
@@ -402,11 +375,17 @@ In population-based approach, $\eta^\star$ is constructed as a function of prope
 \item for every value of the focal predictor, $\eta_{jf}$:
 
 \begin{align}\label{eq:pop_eta} 
-\eta_j^\star  &= \eta_{jf} + \nset{\eta} \\
-\hat{y}_j  &= \textrm{mean} ~ g^{-1} \left(\eta_j^\star\right)
+\eta_j^\star(\eta_{jf}, \nset{\eta})  &= \eta_{jf} + \nset{\eta} \nonumber \\
+&= \eta_j^\star(x_f, \nset{x})
+\end{align}
+\end{itemize}
+
+Once Equation~\ref{eq:pop_eta} is computed, one can back-transform the estimates to the original scale and the average over the levels of the focal predictors, $j$:
+
+\begin{align}\label{eq:pop_response} 
+\hat{y}_f  &= \textrm{mean} ~ g^{-1} \left(\eta_j^\star(x_f, \nset{x})\right)
 \end{align}
 
-\end{itemize}
 We make similar adjustments to compute the variances of the predictions at every level of the focal predictor:
 
 \begin{align}
@@ -415,16 +394,146 @@ We make similar adjustments to compute the variances of the predictions at every
 where $\bX^{\star}_{jc} = \{\bX_{jf}^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX}}^\star}\}$ and 
 
 \begin{align}
-\mathrm{CI}_j = \mathrm{mean} ~ \eta_j^\star \pm q\sigma_{jf}
+\mathrm{CI}_f = \mathrm{mean} ~ g^{-1} \left(\eta_j^\star(x_f, \nset{x}) \pm q\sigma_{jf}\right)
 \end{align}
 
 For models with random effects components, we make further adjustment to correct for bias induced by the random effects terms. In the population approach, we treat the random effects terms as additional non-focal predictors and simply make adjustment to Equation~\ref{eq:pop_eta}. In particular
 
 \begin{align}\label{eq:pop_eta_re} 
 \tau &= \bZ b \nonumber \\
-\eta_j^\star  &= \eta_{jf} + \nset{\eta} + \tau_j
+\eta_j^\star(x_f, \nset{x}, \tau)  &= \eta_j^\star(x_f, \nset{x}) + \tau
 \end{align}
 where $\bZ$ and $b$ are the design matrix and a vector of random effects, respectively.
+
+\section*{Mean-anchored vs population-based}
+
+As mentioned above, the two common choices to generate predictor effects are: 1) setting the non-focal predictors to their mean -- mean-anchored; and 2) using the entire population of the non-focal predictors -- population-based. If the link function is nonlinear and/or the model has complex higher order interactions, the average of the predictions evaluated at the mean of the non-focal predictors and the average of predictions evaluated at the population level (and then averaged) of the non-focal predictor are not equivalent, i.e.,
+
+\begin{align}\label{eq:compare_anchored_pop_based}
+g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) \neq \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
+\end{align}
+
+If $g()$ is strictly concave or strictly convex, one can use Jensen's inequality to determine which side of Equation~\ref{eq:compare_anchored_pop_based} is smaller or larger. However, for non-fully convex or concave link function, one can use Taylor series expansion to approximate the range over which the two are smaller or smaller than the other \cite{hanmer2013behind}. 
+
+
+As stated above, in simple linear models without interactions, the effect is constant, so both approaches yield similar results. However, picking a single value, e.g., mean of the predictor, on which to draw conclusions about the effect can be problematic, unrealistic or not contained in or representative of the population. In addition, the mean-anchored approach fails to use the every values of the non-focal predictors hence not utilizing the full potential of the information contained in the data. This may limit the inferences we can make about the entire population. In general, the mean-anchored approach provides the predictor effect of an average case, whereas, the population-based approach, summarizes the predictor effect over the entire population -- and in some applications, the effect of an average case might not be generalizable to the entire population, especially, if the average does not represent the population. The population-based focuses on specific observations since the prediction is first obtained for each observation and then averaged across the levels of the focal predictor.
+
+Another potential concern with the mean-anchored approach arises in situations where direct naive use leads to rare or meaningless basis for generalization. For example, setting categorical dummy categorical variables in the model matrix to their means, which, by default, sets them to their sample means or observed proportions. For example, a dummy variable for christian household heads may be set to $0.2$, translating to prediction for an household head who is $20\%$ christian. This problem may extend to models with other complex interaction terms \cite{hanmer2013behind}.
+
+Population-based approach is not entirely foolproof. For instance, similar to the mean-anchored approach, in the case of continuous focal predictors, choosing the representative values of the focal predictors can be very challenging especially if the cases are not evenly distributed around the minimum and the maximum values or within some subgroups defined in the population. In addition, population-based approach can be very computationally intensive for large datasets.
+
+\section*{Simulation examples}
+
+We now illustrate the construction of predictor effects with isolated confidence intervals and also demonstrate that the mean-anchored and population approaches produce different results in models with nonlinear link functions and/or additional source of potential bias. In addition, we demonstrate that population-based approach can be used to correct bias in the predictions.
+
+\subsection*{Isolated confidence intervals}
+
+As mentioned above, in some applications, one may be interested in uncertainties associated with the focal predictor only. In that case, it is important to exclude all the uncertainties as a result of the non-focal predictors and only show confidence intervals describing the predictor of interest. To illustrate this, we consider the simulation model described in \nameref{S1_Appendix}. 
+
+We start by fitting two models from the simulated data, i.e., consider the polynomial predictor, age, as a focal predictor and also, consider the non-polynomial predictor, wealth index as the focal predictor. After fitting the model, we constructed predictor effects and then compared isolated vs non-isolated confidence intervals associated with these predictions (see Fig~\ref{fig:pred_cubic_plots}).
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.8\textwidth]{pred_cubic_plots-figure4.pdf}
+\caption{{\bf Isolated and non-isolated predictor effects $95\%$ confidence bands.} These figures compare the predictor effects together with their corresponding $95\%$ confidence bands. A: The focal predictor is a cubic polynomial. B: The focal predictor is not a polynomial function, implying that the complex interaction is in the non-focal predictor. In both cases, the confidence bands are narrower in the isolated case, and crosses at the mean of the focal predictor (model center) in the case of simple (non-polynomial) focal predictor -- B. In the case of cubic polynomial focal predictor, the model center is not a point in the predictor space, i.e., mean of the focal predictor, but a combination of all the terms in the cubic polynomial, consequently, the isolated bands do not cross at a point -- A. The horizontal black and red dotted lines are the observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively; the inner red dotted curves and crossing line are the isolated confidence bands for A and B, respectively, while the outer blue curves are the non-isolated confidence bands in both cases. The central curve and trend line, in A and B, respectively, are the predictor effect of age and wealth index on the predicted household size, respectively.}
+\label{fig:pred_cubic_plots}
+\end{figure}
+
+In the absence of complex higher order interaction terms or transformations on the focal predictor in simple linear models, we would expect, at the model center, the observed average, $\over{hh~size}$, and the average of the predictions, $\over{\widehat{hh~size}}$, to be identical and cross, in the case of isolated confidence bands, at the model center (see Fig~\ref{fig:pred_cubic_plots}B). On the other hand, if the focal predictor is characterized by interactions or any other form of transformation, the model center is not necessarily a point in the predictor space. In this case, the isolated confidence bands will be narrower then the non-isolated but not necessarily crossing (see Fig~\ref{fig:pred_cubic_plots}A).
+
+\subsection*{Bias correction}
+
+Mean-anchored and population-based approaches can produce very different results in models with nonlinear link functions with additional sources of potential bias such as additional non-focal predictor(s), random effect terms or complex interactions. To demonstrate this, we considered a two predictor binary outcome simulation described in \nameref{S2_Appendix}, such that the age effect is way smaller than that of the wealth index, and compared their predictor effect on the predicted probability of improved water quality as shown in Fig~\ref{fig:pred_bin_plots}. 
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.8\textwidth]{pred_bin_plots-figure5.pdf}
+\caption{{\bf Mean-anchored and population-based predictor effects.} The two approaches produce relatively different predictor effects for each of the predictors but the difference is more pronounced when the effect of the particular focal predictor has no strong effect -- \emph{on the left}. In both cases, age and wealth index effect, the average predicted probability of improved water based on population-based approach is very close to the observed proportion in the simulated data. The horizontal blue, black and the red dotted lines are the average mean-anchored, population-based predicted probability and observed proportion of improved water quality, respectively. The vertical dotted black line represents the mean of the focal predictor, and the point at which it crosses the red dotted line represents the expected ``perfect'' prediction at the model center. The dotted grey points are binned observations -- observed proportions of improved water quality in each bin. We would expect the all the curves, horizontal, and vertical lines to cross at the model center but due the nonlinear averaging (at least in the bias corrected population-based approach) of the predictions on the response scale, this may not always be case.} 
+\label{fig:pred_bin_plots}
+\end{figure}
+
+If there was no effect of nonlinear averaging, then we would expect the observed proportion and the average of the predicted probabilities to cross at the model center as we see in Fig~\ref{fig:pred_cubic_plots}B. However, the differences we see in Fig~\ref{fig:pred_bin_plots} are due to nonlinear averaging since both observed status and predicted probabilities are averaged on the response scale as opposed to link scale. In particular, if the range of values are bigger than $0.5$ (seemingly the case here), then we would expected the averages to be slightly higher than what we would expect at the model center, and vice versa.
+
+\subsection*{Mediated effect}
+
+Consider the simple indirect mediation simulation described in \nameref{S3_Appendix}. We then fitted two models -- \emph{non-mediated} which models \emph{z} as a function of \emph{x} and the \emph{mediated} which models \emph{z} as a function of both \emph{x} and \emph{y}. In both cases, we compared mean-anchored and the population-based predictions, as shown in Fig~\ref{fig:pred_mediated_plots}.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.8\textwidth]{pred_mediated_plots-figure6.pdf}
+\caption{{\bf Mean-anchored and population-based predictor effects for mediated effect.} These figures compare the mean-anchored and population-based predictor effect of $x$ from a mediated, $z \sim x + y$, and mediated, $z \sim x$, models. A: In the absence of mediator variable, both mean-anchored and population-based approaches predictors are identical since there is no any other additional (non-focal predictors) sources of bias. Similarly, in both approaches, the average predicted probability is very close to the observed proportion. B: When the mediator variable is included, there is no direct effect of $x$ on $z$ and as a result the predictor effect curve does not align with the observations. However, the population-based approach still closely approximates the average proportion in the simulated data. The simulated data. The horizontal blue, black and the red dotted lines are the average mean-anchored, population-based predicted probability and observed proportion, respectively. The vertical dotted black line represents the mean of the focal predictor, and the point at which it crosses the red dotted line represents the expected ``perfect'' prediction at the model center. The dotted grep points are the binned observations.}
+\label{fig:pred_mediated_plots}
+\end{figure}
+
+From Fig~\ref{fig:pred_mediated_plots}A, we see what we would expect in the absence of additional sources of bias, even though in the simulation, the effect of $x$ on $z$ is mediated through $y$. By ignoring $y$ in the model, we are still able to capture the effect of $x$ and closely match the observed values using both approaches. However, if there were additional non-focal predictors, we would expect to see the differences similar to those in Fig~\ref{fig:pred_bin_plots}. Including both $y$ and $x$ dilutes the direct effect of $x$ on $y$ and as a result, our prediction do not necessarily match the observed binned observations (see Fig~\ref{fig:pred_mediated_plots}B).
+
+\section*{Discussion}
+
+Our simulations examples majorly focused on simple linear and logistic models due their wide range of usage and application. In addition, these models act as a starting point for building other complex models, including mixed effect models and models with categorical predictors. However, the logic for extension of approaches to more complex models, including other forms of nonlinear link functions is very straightforward. In addition, our \proglang{R} package implementation already extends to and supports most of the nonlinear link functions and mixed model framework.
+
+Although commonly used \proglang{R} software packages, by default, implements mean-anchored approach, our simulation results demonstrated that the population-based approach has a potential of yielding results which are more consistent with the observed data. We would, therefore, argue that the use of mean-anchored approach should have some theoretical justification, especially in complex models. 
+
+\section*{Conclusion}
+
+Generating outcome predictions or predicted probabilities from simple and generalized linear (mixed) models is not only important but also, generating quantities which are consistent with the observed values should be of interest. However, many studies still report coefficient estimates from generalized models like probit, logistic, etc.,\cite{hanmer2013behind}, which are subject of less clarity due to lack of direct link to the outcome of interest.
+
+The argument and results we present in this paper supports a greater need for a shift on focus on what and how to present predictions from generalized models. For example, we believe that isolated confidence intervals could provide more clarity concerning the uncertainty due to the predictor of interests as opposed to the traditional way of incorporating everything. 
+
+From our theoretical, methodological and simulation results, researchers these kind of models should, in the absence of theoretical justification, report predictions based on population-based approach or at least attempt to do a comparison of the two approaches before settling on the most appropriate in answering their research question. Moreover, we provide \proglang{R} package, \pkg{vareffects}, which implements these methods and is available on github (\href{https://github.com/mac-theobio/effects}{https://github.com/mac-theobio/effects}).
+
+\section*{Supporting information}
+
+% Include only the SI item label in the paragraph heading. Use the \nameref{label} command to cite SI items in the text.
+\paragraph*{S1 Appendix.}
+\label{S1_Appendix}
+{\bf Cubic polynomial interaction simulation.} Consider an hypothetical simulation which simulates household size as a function of household wealth index and cubic function of the age of the household head, specified as follows:
+
+\begin{align}\label{sim:lm_cubic}
+\mathrm{hh~size}_i &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\epsilon_i &\sim \mathrm{Normal}(0, 10) \nonumber\\
+\beta_0 &= 20 \nonumber\\
+\beta_{\mathrm{A}_1} &= 0.1 \nonumber\\
+\beta_{\mathrm{A}_2} &= 0.8 \nonumber\\
+\beta_{\mathrm{A}_3} &= 0.3 \nonumber\\
+\beta_{\mathrm{W}} &= -0.5 \nonumber\\
+i &= 1,\cdots, 100
+\end{align}
+
+
+\paragraph*{S2 Appendix.}
+\label{S2_Appendix}
+{\bf Binary outcome simulation.} Consider a simple simulation for improved water quality in Nairobi slums, such that the status is $1$ for improved and $0$ for unimproved water quality. In additional to the focal predictor, age of the household head, we add wealth index. In particular:
+
+\begin{align}\label{sim:glm_two_pred}
+\mathrm{status}_i &\sim \mathrm{Binomial}(1, \mathrm{P(status}_i = 1)) \nonumber\\
+\mathrm{logit(P(status}_i = 1)) &= \eta_i \nonumber\\
+\mathrm{\eta}_i &= \beta_0 + \beta_{\mathrm{A}}\mathrm{Age}_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i \nonumber\\
+\mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\mathrm{Wealthindex}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
+\beta_0 &= 5 \nonumber\\
+\beta_{\mathrm{A}} &= 0.5 \nonumber\\
+\beta_{\mathrm{W}} &= 1.5 \nonumber\\
+i &= 1,\cdots, 10000
+\end{align}
+
+\paragraph*{S3 Appendix.}
+\label{S3_Appendix}
+{\bf Mediated effect simulation.} Next, we consider a simple indirect mediation simulation such that $x$ has direct effect on $y$ which in turn has effect on $z$ but $x$ has no direct effect on $y$, i.e., $x \rightarrow y \rightarrow z$. In particular:
+
+\begin{align}\label{sim:simple_mediate}
+z_i &\sim \mathrm{Binomial(1, P(z_i = 1))} \nonumber\\
+\mathrm{logit(P}(z_i = 1)) &= \eta_i \nonumber\\
+\eta_i &= \beta_0 + \beta_{yz} y_i \nonumber\\
+y_i &= \beta_{xy} x_i + \epsilon_y \nonumber\\
+x_i &\sim \mathrm{Normal(0, 1)} \nonumber\\
+\epsilon_y &\sim \mathrm{Normal(0, 1)} \nonumber\\
+\beta_0 &= 5 \nonumber\\
+\beta_{xy} &= 1 \nonumber\\
+\beta_{yz} &= 1.5 \nonumber\\
+i &= 1,\cdots, 10000
+\end{align}
 
 
 
