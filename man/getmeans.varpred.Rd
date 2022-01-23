@@ -4,7 +4,7 @@
 \alias{getmeans.varpred}
 \title{Get focal and prediction means for a varpred object}
 \usage{
-\method{getmeans}{varpred}(object, what = c("estimate", "focal"), focal = NULL)
+\method{getmeans}{varpred}(object, what = c("estimate", "focal"), focal = NULL, modelname = NULL)
 }
 \description{
 Get focal and prediction means for a varpred object

@@ -583,10 +583,10 @@ combinevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE,
 #'
 #' @export
 
-getmeans.varpred <- function(object, what=c("estimate", "focal"), focal=NULL) {
+getmeans.varpred <- function(object, what=c("estimate", "focal"), focal=NULL, modelname=NULL) {
 	what <- match.arg(what)
 	preds <- object$preds
-	modelname <- attr(preds, "modelname")
+	if (is.null(modelname)) modelname <- attr(preds, "modelname")
 	if (is.null(modelname)) modelname <- class(object)[1]
 	if (what=="focal") {
 		if(is.null(focal)) {

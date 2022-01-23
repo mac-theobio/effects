@@ -19,8 +19,9 @@ byz <- 1.5
 df <- data.frame(x=rnorm(N))
 sim_df_mediate <- (df
 	%>% mutate(y = rnorm(N) + bxy*x
-		, z = b0 + rnorm(N) + bxz*x + byz*y
+		, z = b0 + bxz*x + byz*y
 		, zbin = rbinom(N, 1, plogis(z))
+		, z = z + rnorm(N)
 	)
 )
 
