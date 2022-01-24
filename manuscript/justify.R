@@ -22,7 +22,7 @@ perHH <- 1
 justify_sim_df <- linearsim(nHH=nHH_obs
 	, perHH=perHH
 	, form=~1+x1+x2+x3
-	, betas=c(5, -0.2, 1, 2)
+	, betas=c(5, -3, 1, 2)
 	, pgausian=list(p=3)
 	, pcat=list(p=0)
 	, link_scale=TRUE
@@ -37,7 +37,7 @@ true_prop_df
 justify_inter_sim_df <- linearsim(nHH=nHH_obs
 	, perHH=perHH
 	, form=~1+x1+x2*x3
-	, betas=c(5, -0.2, 1, 2, 5)
+	, betas=c(5, -3, 1, 2, 5)
 	, pgausian=list(p=3)
 	, pcat=list(p=0)
 	, link_scale=TRUE

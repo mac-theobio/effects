@@ -12,6 +12,7 @@ startGraphics()
 ## No interactions
 quants <- seq(0,1,length.out=100)
 x1_focal <- quantile(justify_sim_df$x1, quants, names=FALSE)
+binned_df <- binfun(justify_mod, focal="x1", bins=20, groups=NULL)
 
 justify_plots <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
@@ -24,6 +25,7 @@ justify_plots <- (combinepreds(justify_mod
 	)
 	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
 	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
+	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
 	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
 		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
 		, labels=c("observed", "emmeans", "effects", "varpred")
@@ -36,17 +38,18 @@ justify_plots <- (combinepreds(justify_mod
 )
 
 ## Add CIs
+x2_focal <- quantile(justify_sim_df$x2, quants, names=FALSE)
 justify_ci_plots <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
-		, focal="x1"
-		, x.var="x1"
-		, at=list(x1=x1_focal)
+		, focal="x2"
+		, x.var="x2"
+		, at=list(x2=x2_focal)
 		, type="response"
 		, nesting=NULL
 		, ci=TRUE
 	)
 	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
-	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
+	+ geom_vline(xintercept=mean(x2_focal), lty=2, col="grey")
 	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
 		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
 		, labels=c("observed", "emmeans", "effects", "varpred")
@@ -66,6 +69,7 @@ dev.off()
 ## With interactions
 quants <- seq(0,1,length.out=100)
 x1_focal <- quantile(justify_inter_sim_df$x1, quants, names=FALSE)
+binned_df <- binfun(justify_inter_mod, focal="x1", bins=20, groups=NULL)
 
 justify_inter_plots <- (combinepreds(justify_inter_mod
 		, c("varpred", "emmeans", "Effect")
@@ -78,6 +82,7 @@ justify_inter_plots <- (combinepreds(justify_inter_mod
 	)
 	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="observed"), lty=4)
 	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
+	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
 	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
 		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
 		, labels=c("observed", "emmeans", "effects", "varpred")
