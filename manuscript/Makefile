@@ -9,7 +9,7 @@ vim_session:
 
 ######################################################################
 
-Sources += $(wildcard *.R *.bib *.tex)
+Sources += $(wildcard *.R *.bib *.tex *.bst)
 
 ## Make Sweave weird depencies chain
 %: %.pdf ;
