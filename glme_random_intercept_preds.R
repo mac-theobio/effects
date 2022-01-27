@@ -69,20 +69,20 @@ glme_plots <- (comparevarpred(vlist=vlist
 )
 glme_plots
 
-### Compare with emmeans
-#age_at <- quantile(glme_sim_df$age, seq(0,1,length.out=100))
-#glme_varpred_emmeans_plots <- combinepreds(glme_mod, c("emmeans", "varpred")
-#	, focal = "age"
-#	, x.var = "age"
-#	, at=list(age=age_at)
-#	, xlevel=list(age=age_at)
-#	, nesting=NULL
-#	, type="response"
-#	, weights="proportional"
-#	, plotit = TRUE
-#	, ci=FALSE
-#)
-#glme_varpred_emmeans_plots
+## Compare with emmeans
+age_at <- quantile(glme_sim_df$age, seq(0,1,length.out=100))
+glme_varpred_emmeans_plots <- combinepreds(glme_mod, c("emmeans", "varpred")
+	, focal = "age"
+	, x.var = "age"
+	, at=list(age=age_at)
+	, xlevel=list(age=age_at)
+	, nesting=NULL
+	, type="response"
+	, weights="proportional"
+	, plotit = TRUE
+	, ci=FALSE
+)
+glme_varpred_emmeans_plots
 
 saveVars(glme_plots)
 

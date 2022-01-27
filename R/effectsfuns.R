@@ -528,6 +528,7 @@ recoverdata <- function(mod, extras = NULL, envir = environment(formula(mod)), .
 #'
 
 combinevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE, margindex, ...) {
+	# TODO: Automatically check the model names, if missing add automatically
 	if (!is.list(vlist))stop("vlist should be a list of objects of class varpred")
 	nobjs <- length(vlist)
 	if (!is.null(lnames)) {
@@ -541,12 +542,14 @@ combinevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE,
 		return(pp)
 	})
 	preds <- do.call("rbind", preds)
+	## TODO: Use getmeans
 	if (addmarginals) {
-		if (missing(margindex))stop("Specify margindex of vlist objects to compute marginals")
+		if (missing(margindex)) margindex <- 1:nobjs
 		marg_df <- lapply(margindex, function(i){
 			pp <- vlist[[i]]$preds
 			df <- data.frame(muy=mean(pp$fit)
-				, mux=mean(pp[[attr(pp, "x.var")]])
+#				, mux=mean(pp[[attr(pp, "x.var")]])
+				, model=unique(pp$model)
 			)
 			if (!is.null(lnames)) {
 				df$.varpred <- lnames[[i]]
@@ -567,10 +570,10 @@ combinevarpred <- function(vlist, lnames=NULL, plotit=FALSE, addmarginals=FALSE,
 		} else {
 			p <- plot(out)
 		}
-		if (addmarginals) {
+		if (addmarginals && (class(preds[[attr(preds, "x.var")]]) %in% c("integer", "numeric", "logical"))) {
 			p <- (p
-				+ geom_hline(data=marg_df, aes(yintercept=muy), lty=2, colour="grey")
-				+ geom_vline(data=marg_df, aes(xintercept=mux), lty=2, colour="grey")
+				+ geom_hline(data=marg_df, aes(yintercept=muy, colour=model, linetype=model))
+#				+ geom_vline(data=marg_df, aes(xintercept=mux, colour=model, linetype=model))
 			)
 		}
 		return(p)

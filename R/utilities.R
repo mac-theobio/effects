@@ -507,7 +507,8 @@ clean_model <- function(focal.predictors, mod, xlevels
 			} else {
 				quant <- seq(0, 1, length.out=steps)
 			}
-			quantile(X[,name], quant, names=FALSE)
+			## 2022 Jan 26 (Wed): Make sure they are unique
+			unique(quantile(X[,name], quant, names=FALSE))
 		} else {
 		  if(length(xlevels[[name]]) == 1L) { 
 			# seq(min(X[, name]), max(X[,name]), length=xlevels[[name]])
@@ -545,7 +546,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 	 } else {
 	 	if (bias.adjust=="quantile") {
 			quant <- seq(0, 1, length.out=steps)
-			quantile(X[,name], quant, names=FALSE)
+			unique(quantile(X[,name], quant, names=FALSE))
 		} else if (bias.adjust %in% c("population", "population2")) {
 			as.vector(X[, name])
 		} else {
