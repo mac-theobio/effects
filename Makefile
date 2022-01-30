@@ -121,6 +121,10 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 ######################################################################
 
+alldirs += manuscript
+
+######################################################################
+
 ## Variable prediction manuscript
 
 Ignore += variable_predictions.tex
