@@ -124,18 +124,19 @@ varpred <- function(mod
 	betahat <- coef(vareff_objects)
 	mod_names <- get_vnames(mod)
 	vnames <- mod_names$vnames
+	vnames_all <- mod_names$vnames_all
 	termnames <- mod_names$termnames
 	Terms <- mod_names$Terms
 	focal.predictors <- NULL
 	rTerms <- delete.response(Terms)
 	for (focal in focal_predictors){
-		if (any(vnames %in% focal)) {
-			check_vars <- vnames %in% focal
+		if (any(vnames_all %in% focal)) {
+			check_vars <- vnames_all %in% focal
 		} else {
 			check_vars <- termnames %in% focal
 		}
 		if (!any(check_vars)) stop(paste0(focal, " not in the model"))
-		focal.predictors[[focal]] <- unique(vnames[check_vars])
+		focal.predictors[[focal]] <- unique(vnames_all[check_vars])
 	}
 	
 	if (!is.null(x.var) & !any(focal.predictors %in% x.var) & length(focal.predictors)>1L) 

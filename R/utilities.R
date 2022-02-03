@@ -25,7 +25,7 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 			formula.rhs_update <- formula.rhs
 			contr_update <- contr
 		}
-		focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
+		focal_mf <- model.frame(formula(rTerms_update), x.focal, xlev=factor.levels_update, na.action=NULL)
 		focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
 		focal_terms_update <- focal_terms #attr(terms(formula.rhs_update), "term.labels")
 	} else {
@@ -273,7 +273,11 @@ get_vnames <- function(mod){
 	mat <- get_model.mm(mod)
 	coefnames <- colnames(mat)
 	Terms <- terms(mod)
-	vnames <- all.vars(parse(text=delete.response(Terms)))
+	vnames_all <- all.vars(parse(text=delete.response(Terms)))
+	## FIX: 2022 Feb 01 (Tue) - Added order to pick only main effect
+	order <- attr(Terms, "order")
+	vnames <- vnames_all[order==1]
+
 	termnames <- attr(Terms, "term.labels") # Model based names
 	termnames <- gsub(" ", "", termnames)
 	assign <- attr(mat, "assign")
@@ -283,7 +287,7 @@ get_vnames <- function(mod){
 		assign <- assign + 1
 	}
 	
-	## assign doesn not group _I(_ terms
+	## FIXME: assign doesn't not group _I(_ terms
 	if (any(grepl("^I\\(", termnames))) {
 		assign2 <- unlist(lapply(1:length(termnames), function(x){
 			if(grepl(paste0(vnames, collapse="|"), termnames[[x]])){
@@ -299,7 +303,7 @@ get_vnames <- function(mod){
 	termnames <- setNames(termnames[assign], coefnames)
 	# In case there are interactions
 	vnames[is.na(vnames)] <- termnames[is.na(vnames)]
-	return(list(vnames = vnames, termnames = termnames, Terms = Terms))
+	return(list(vnames = vnames, termnames = termnames, Terms = Terms, vnames_all=vnames_all))
 }
 
 check_numeric <- function(xvar, mod) {
@@ -502,6 +506,7 @@ clean_model <- function(focal.predictors, mod, xlevels
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
+			steps <- min(c(steps, length(unique(X[,name]))))
 			if (x.var!=name){
 				quant <- seq(0, 1, length.out=5)
 			} else {
@@ -545,6 +550,7 @@ clean_model <- function(focal.predictors, mod, xlevels
 			}
 	 } else {
 	 	if (bias.adjust=="quantile") {
+			steps <- min(c(steps, length(unique(X[,name]))))
 			quant <- seq(0, 1, length.out=steps)
 			unique(quantile(X[,name], quant, names=FALSE))
 		} else if (bias.adjust %in% c("population", "population2")) {
