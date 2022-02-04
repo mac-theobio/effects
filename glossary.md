@@ -1,4 +1,17 @@
 
+scientific variables: "input variables"?
+
+statistical variables: "model variables"?
+
+**Anchor** The value of the focal variables (input or model) used to calculate CIs
+
+Background: how we average over non-focal variables
+* Reference point
+* Quantiles
+* Population average
+
+Model center
+
 ## Simple linear models and GLMs
 
 **Marginal effects** - Expected changes in the outcomes averaged across the population.
