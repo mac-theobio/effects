@@ -265,6 +265,7 @@ aprroximation_bias_correction.pdf: aprroximation_bias_correction.rmd
 	$(knitpdf)
 
 ## BB notes
+Ignore += logist_normal_bias.html
 logist_normal_bias.html: logist_normal_bias.rmd
 	$(knithtml)
 
@@ -274,7 +275,7 @@ Ignore += simple_pred_spec_plot1.pdf simple_pred_spec_plot2.pdf
 ######################################################################
 
 ## Package installation and checks
-Ignore += vareffects_1*
+Ignore += vareffects_1*.*
 
 build-package:
 	R CMD build .
