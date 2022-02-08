@@ -13,7 +13,7 @@ startGraphics()
 pred_age_none <- varpred(glm_mod
 	, "age"
 	, bias.adjust="none"
-	, modelname="Mean-anchored"
+	, modelname="Mean-based"
 )
 pred_age_none_mean <- getmeans(pred_age_none, what="estimate")
 
@@ -42,10 +42,10 @@ pred_age_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=pred_age_pop_mean, aes(yintercept=fit, colour=model, lty=model))
 	+ geom_hline(data=true_prop_df, aes(yintercept=status, colour=model,lty=model))
 	+ geom_point(data=binned_df, aes(x=age, y=status), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-anchored", "Population-based")
-		, values=c("Observed mean"="red", "Mean-anchored"="blue", "Population-based"="black")
+	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Population-based")
+		, values=c("Observed mean"="red", "Mean-based"="blue", "Population-based"="black")
 	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-anchored"=1, "Population-based"=1))
+	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Population-based"=1))
 	+ labs(y="Probability of improved water quality", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
@@ -56,7 +56,7 @@ pred_age_plots <- (comparevarpred(vlist=vlist
 pred_wealthindex_none <- varpred(glm_mod
 	, "wealthindex"
 	, bias.adjust="none"
-	, modelname="Mean-anchored"
+	, modelname="Mean-based"
 )
 pred_wealthindex_none_mean <- getmeans(pred_wealthindex_none, what="estimate")
 
@@ -85,10 +85,10 @@ pred_wealthindex_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=pred_wealthindex_pop_mean, aes(yintercept=fit, colour=model, lty=model))
 	+ geom_hline(data=true_prop_df, aes(yintercept=status, colour=model,lty=model))
 	+ geom_point(data=binned_df, aes(x=wealthindex, y=status), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-anchored", "Population-based")
-		, values=c("Observed mean"="red", "Mean-anchored"="blue", "Population-based"="black")
+	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Population-based")
+		, values=c("Observed mean"="red", "Mean-based"="blue", "Population-based"="black")
 	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-anchored"=1, "Population-based"=1))
+	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Population-based"=1))
 	+ labs(colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
