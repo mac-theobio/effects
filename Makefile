@@ -123,6 +123,8 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 alldirs += manuscript
 
+iGnore += manuscript
+
 ######################################################################
 
 ## Variable prediction manuscript
