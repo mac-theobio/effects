@@ -123,7 +123,7 @@ effects_writeup.tex: predict_plots.rda effects_writeup.Rnw
 
 alldirs += manuscript
 
-Ignore += manuscript
+iGnore += manuscript
 
 ######################################################################
 
