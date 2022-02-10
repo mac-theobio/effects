@@ -225,6 +225,15 @@ Jonathan Dushoff\textsuperscript{1,2}
 
 In many applications which use generalized linear (mixed) models, outcome predictions or predicted probabilities are often of interest. For models that involve complex multiplicative interactions, additional non-focal predictors or nonlinear link functions, the estimated coefficient are not readily interpretable. A general way to summarize these kind of models is through predictor effects, which are not only dependent on choice of representative values of focal predictor but also sensitive to which values of non-focal predictors are chosen. The most common approach is generating predictor effects at a ``reference point'', usually the mean, of non-focal predictor, i.e., mean-based which could be considered as the effect of an ``average case'' in the population. In the presence of sources of bias such as additional non-focal predictors, nonlinear link functions, random effect terms, etc., mean-based approach generate predictor effects that are biased and may not be consistent with the observed quantities. An alternative is the population-based approach which estimates the average effect in the population. Moreover, isolated confidence intervals provide an alternative and a more clear way to describe uncertainty associated with the focal predictor of interest. In addition to theoretical and methodical comparison, using simulation, we illustrate the two approaches and show that they can produce substantially different results and that population-based approach can not only produce estimates consistent with the observed values, but also appropriate for bias correction. We also present an alternative way, isolated confidence intervals, to describe uncertainties associated with these predictions.
 
+\section*{Glossary}
+
+\begin{itemize}
+\item \textbf{Input variables}: These are measured variables (and may be transformed)
+\item \textbf{Predictors}: These are statistical variables i.e., those terms which are entered into the model. They include the main effects and also polynomials of input variables
+\item \textbf{Anchor}: The value of the focal variable (input or predictor) used to calculate CIs. Common choice is the average of the focal predictor
+\item \textbf{Reference point}: Values chosen for the non-focal predictors, and can include population averages, quantiles or population values
+\end{itemize}
+
 
 % Please keep the Author Summary between 150 and 200 words
 % Use first person. PLOS ONE authors please skip this step. 
@@ -494,6 +503,7 @@ Generating outcome predictions or predicted probabilities from simple and genera
 The argument and results we present in this paper supports a greater need for a shift on focus on what and how to present predictions from generalized models. For example, we believe that isolated confidence intervals could provide more clarity concerning the uncertainty due to the predictor of interests as opposed to the traditional way of incorporating everything. 
 
 From our theoretical, methodological and simulation results, researchers using these kind of models should, in the absence of theoretical justification, report predictions based on population-based approach or at least attempt to do a comparison of the two approaches before settling on the most appropriate in answering their research question. Moreover, we provide \proglang{R} package, \pkg{vareffects}, which implements these methods and is available on github (\href{https://github.com/mac-theobio/effects}{https://github.com/mac-theobio/effects}).
+
 
 \section*{Supporting information}
 
