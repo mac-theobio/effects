@@ -454,7 +454,7 @@ zero_vcov <- function(m, focal_vars, complete) {
 		v <- m
 	} else {
 		assign <- get_vnames(m)$vnames
-		check_vars <- assign %in% focal_vars
+		check_vars <-  grepl(paste0(focal_vars, collapse="|"), assign) # assign %in% focal_vars
 		if (!any(check_vars)) stop(paste0(focal_vars, " not in the model formula"))
 		focal_vars <- names(assign)[check_vars]
 		v <- stats::vcov(m)

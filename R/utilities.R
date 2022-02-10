@@ -6,8 +6,8 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
 	, typical, zero_out_interaction, include.re) {
 
-	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
-	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
+#	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
+#	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
 	mm <- get_model.mm(mod)
 
 	if (isolate) {
@@ -27,7 +27,7 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		}
 		focal_mf <- model.frame(formula(rTerms_update), x.focal, xlev=factor.levels_update, na.action=NULL)
 		focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
-		focal_terms_update <- focal_terms #attr(terms(formula.rhs_update), "term.labels")
+		focal_terms_update <- colnames(focal_mm) #attr(terms(formula.rhs_update), "term.labels")
 	} else {
 		focal_mf <- model.frame(mod)
 		focal_mm <- mm
@@ -240,6 +240,8 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
   	
 	if (!is.null(focal_terms)) {
 		vc <- vc[focal_terms, focal_terms]
+#		print(focal_terms)
+#		print("See ...")
 		mm <- mm[, focal_terms, drop=FALSE]
 	}
 
@@ -252,8 +254,11 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
 		}
 		if (zero_out_interaction & any(grepl(":", get_termnames(mod)))){
 			vc <- zero_vcov(mod, focal_vars=x.var)
+#			print(vc)
 			if (!is.null(focal_terms)) {
 				vc <- vc[focal_terms, focal_terms]
+#				print("See ...")
+#				print(vc)
 			}
 		}
 		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
