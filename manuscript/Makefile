@@ -48,15 +48,49 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ######################################################################
 
-jonathan.Rout: jonathan.R mediate.rda
-	$(pipeR)
-
-######################################################################
 
 Ignore += *.pdf
 
 # vareffects_plosone.pdf: vareffects_plosone.tex
 vareffects_plosone.tex: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout justify_preds.Rout vareffects_plosone.bib
+
+######################################################################
+
+## JD thoughts and spinning
+
+## Testing
+jonathan.Rout: jonathan.R mediate.rda
+	$(pipeR)
+
+## Notes
+jd_notes.html: jd_notes.Rmd
+
+## Chained workflow
+
+## mediator.pars.Rout: mediator.R
+pipeRimplicit += pars
+%.pars.Rout: %.R
+	$(pipeR)
+
+pipeRimplicit += pars
+## mediator.sim.Rout: sim.R
+%.sim.Rout: sim.R %.pars.rda
+	$(pipeR)
+
+## Which model to fit?
+scriptStep += fit
+fit += uni bi
+fit_dep = %.sim.rda
+
+## mediator.uni.fit.Rout: uni.R
+## mediator.bi.fit.Rout: bi.R
+
+## Anchor plot shows the curves, a center anchor, and a zero anchor
+pipeRimplicit += anchorplot
+## mediator.uni.anchorplot.Rout: anchorplot.R
+## mediator.bi.anchorplot.Rout: anchorplot.R
+%.anchorplot.Rout: %.fit.rda anchorplot.R
+	$(pipeR)
 
 ######################################################################
 
@@ -84,6 +118,7 @@ makestuff/%.stamp:
 
 -include makestuff/texi.mk
 -include makestuff/pipeR.mk
+-include makestuff/chains.mk
 
 -include makestuff/git.mk
 -include makestuff/visual.mk
