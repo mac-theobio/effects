@@ -73,7 +73,8 @@ pipeRimplicit += pars
 	$(pipeR)
 
 pipeRimplicit += pars
-## mediator.sim.Rout: sim.R
+## distractor.sim.Rout: sim.R distractor.R
+## mediator.sim.Rout: sim.R mediator.R
 %.sim.Rout: sim.R %.pars.rda
 	$(pipeR)
 
