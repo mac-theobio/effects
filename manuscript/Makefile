@@ -46,15 +46,6 @@ mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
-
-## JD: Missing dependencies?
-anchorplot.Rout: anchorplot.R
-bi.Rout: bi.R
-distractor.Rout: distractor.R
-mediator.Rout: mediator.R
-sim.Rout: sim.R
-uni.Rout: uni.R
-
 ######################################################################
 
 
