@@ -67,14 +67,17 @@ jd_notes.html: jd_notes.Rmd
 
 ## Chained workflow
 
-## mediator.pars.Rout: mediator.R
+## Parameters
 pipeRimplicit += pars
 %.pars.Rout: %.R
 	$(pipeR)
 
-pipeRimplicit += pars
-## distractor.sim.Rout: sim.R distractor.R
-## mediator.sim.Rout: sim.R mediator.R
+## x and y are standard-width normals with an exactly fixed correlation ρ
+## x is a focal predictor and y a mediator
+## w is a standard-width normal that is exactly uncorrelated with x
+## meant as a distractor
+pipeRimplicit += sim
+## base.sim.Rout: sim.R base.R
 %.sim.Rout: sim.R %.pars.rda
 	$(pipeR)
 
