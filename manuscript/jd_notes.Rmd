@@ -1,0 +1,18 @@
+---
+title: JD notes on effects
+---
+
+## Language
+
+It might be better to say focal variable, or focal input variable, otherwise we are conflating predictor with something we use to make a prediction. I'm also thinking it might be good to just say "variable" for input variable, but in this case we need yet another name for the statistical variables. 
+
+I'm worried right now about "predictor" for "statistical variable", since we then say "focal predictor" to refer to an input variable instead. How about "variable" (sometimes "input variable") for the science and "vector" (sometimes "input vector") for the stats – an input variable may correspond to more than one input vector
+
+## Predictions vs. effects
+
+I'd like to start by talking about predictions vs. effects. Predictions are the standard curves; they tell us what we expect to see if we know the value of the focal predictor.
+
+The lines inside (effects) are a little different: they are a good way to visualize the effect of the focal predictor. Unlike predictions, where the uncertainty captures the uncertainty in the whole model, the effects plot focuses on uncertainty in the effect of the focal predictor only -- thus, for example, if an effect is barely significant (P exactly 0.05), one end of the CI will be exactly a straight line for the effects plot, but not for the prediction plot. Also, the uncertainty curves for the effect, but not for the prediction, depend on the "anchor".
+
+It is interesting, I think, that all of this comes down to choosing a reference, point, an anchor, and then whether or not to include uncertainty in the intercept (so that all of the uncertainty from all of the other variables in the model is somehow channeled through the intercept).
+
