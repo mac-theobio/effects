@@ -487,7 +487,7 @@ clean_model <- function(focal.predictors, mod, xlevels
       xlevels[[name]] <- levels(X[, name]) 
     }
   }
-  bad <- sapply(X[, all.predictors, drop=FALSE], function(x) !(is.factor(x) || is.numeric(x)))
+  bad <- sapply(X[, all.predictors, drop=FALSE], function(x) !(is.factor(as.vector(x)) || is.numeric(as.vector(x))))
   if (any(bad)){
     message <- if (sum(bad) == 1) paste("the following predictor isn't a factor, logical, character, or numeric:", 
                                         all.predictors[bad])

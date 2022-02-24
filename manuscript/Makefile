@@ -48,7 +48,6 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ######################################################################
 
-
 Ignore += *.pdf
 
 # vareffects_plosone.pdf: vareffects_plosone.tex
