@@ -38,4 +38,9 @@ sim_df_cubic <- (
 )
 head(sim_df_cubic)
 
-saveVars(sim_df_cubic, comparevarpred)
+true_betas_cubic <- c(b0, age_b11, age_b12, age_b13, b2)
+
+saveVars(sim_df_cubic
+	, comparevarpred
+	, true_betas_cubic
+)

@@ -34,7 +34,7 @@ pred_age_cubic_plots <- (comparevarpred(vlist=vlist
 		, plotit=TRUE
 		, addmarginals=FALSE
 	)
-	+ geom_hline(data=pred_fit_mean, aes(yintercept=fit, colour=model), lty=1)
+#	+ geom_hline(data=pred_fit_mean, aes(yintercept=fit, colour=model), lty=1)
 	+ geom_hline(data=true_prop_df, aes(yintercept=fit, colour=model), lty=2)
 	+ scale_colour_manual(breaks = c("Observed mean", "Predicted mean", "Isolated", "Non-isolated")
 		, values=c("Observed mean"="black", "Predicted mean"="red", "Isolated"="red", "Non-isolated"="blue")
@@ -43,6 +43,8 @@ pred_age_cubic_plots <- (comparevarpred(vlist=vlist
 	+ labs(title="A) Focal polynomial", y="Predicted household size", linetype="Method", colour="Method")
 	+ theme(legend.position="bottom")
 )
+print(pred_age_cubic_plots)
+
 
 ## Non-focal polynomial
 
