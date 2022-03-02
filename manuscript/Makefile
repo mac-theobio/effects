@@ -100,6 +100,10 @@ pipeRimplicit += anchorplot
 %.anchorplot.Rout: %.fit.rda anchorplot.R
 	$(pipeR)
 
+## Test grouping
+
+hhgroup.Rout: hhgroup.R
+
 ######################################################################
 
 ### Makestuff
