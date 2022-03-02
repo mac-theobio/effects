@@ -65,6 +65,7 @@ jonathan.Rout: jonathan.R mediate.rda
 	$(pipeR)
 
 ## Notes
+Ignore += jd_notes.html
 jd_notes.html: jd_notes.Rmd
 	$(knithtml)
 
