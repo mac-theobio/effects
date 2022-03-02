@@ -66,6 +66,7 @@ jonathan.Rout: jonathan.R mediate.rda
 
 ## Notes
 jd_notes.html: jd_notes.Rmd
+	$(knithtml)
 
 ## Chained workflow
 
@@ -88,13 +89,13 @@ scriptStep += fit
 fit += uni bi
 fit_dep = %.sim.rda
 
-## mediator.uni.fit.Rout: uni.R
-## mediator.bi.fit.Rout: bi.R
+## base.uni.fit.Rout: uni.R
+## base.bi.fit.Rout: bi.R
 
 ## Anchor plot shows the curves, a center anchor, and a zero anchor
 pipeRimplicit += anchorplot
-## mediator.uni.anchorplot.Rout: anchorplot.R
-## mediator.bi.anchorplot.Rout: anchorplot.R
+## base.uni.anchorplot.Rout: anchorplot.R
+## base.bi.anchorplot.Rout: anchorplot.R
 %.anchorplot.Rout: %.fit.rda anchorplot.R
 	$(pipeR)
 

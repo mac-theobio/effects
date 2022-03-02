@@ -5,6 +5,7 @@ loadEnvironments()
 
 ## Load all (including internal) functions of vareffects
 
+## What is this about? JD 2022 Mar 02 (Wed)
 hidden <- setdiff(p_funs("vareffects", TRUE), p_funs("vareffects"))
 invisible(lapply(hidden, function(x) {
 
