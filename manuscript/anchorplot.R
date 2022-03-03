@@ -1,6 +1,7 @@
 library(vareffects)
 library(dplyr)
 library(ggplot2); theme_set(theme_bw())
+library(ggpubfigs)
 
 library(shellpipes)
 loadEnvironments()
@@ -23,15 +24,11 @@ pred <- varpred(m, "x", isolate=FALSE, modelname="pred")
 eff <- varpred(m , "x", modelname="eff")
 zero <- varpred(m, "x", isolate.value=0, modelname="zero")
 
-all <- list(pred, eff, zero) %>% combinevarpred
+all <- list(pred, eff, zero) %>% combinevarpred %>% plot
 
-colfun <- function(n){return(hcl.colors(n))}
-
-## Why can't I add a colour scale? I have tried many things
-## I can't even add a regular scale thing
-print(plot(all)
-	## + scale_colour_viridis_d(option="magma")
-	## + scale_color_manual(palette=colfun)
-	## + scale_color_manual(values = hcl.colors(6, "Harmonic")) 
+print(all
+ 	## + scale_color_discrete_qualitative(palette="Dynamic")
+ 	## + scale_color_discrete_qualitative(palette="Dynamic")
+	+ scale_color_manual(values = friendly_pal("contrast_three"))
 )
 
