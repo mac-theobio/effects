@@ -29,8 +29,15 @@ colfun <- function(n){return(hcl.colors(n))}
 
 ## Why can't I add a colour scale? I have tried many things
 ## I can't even add a regular scale thing
-plot(all
-	## + scale_x_log10()
-	## + scale_colour_viridis_d()
+print(plot(all)
+ + scale_color_brewer(palette="Dark2")
+ + scale_linetype_discrete()
 )
 
+## Manually set linetypes and colours
+print(plot(all)
+	+ scale_colour_manual(breaks = c("pred", "eff", "zero")
+		, values=c("pred"="red", "eff"="blue", "zero"="black")
+	)
+	+ scale_linetype_manual(values=c("pred"=2, "eff"=1, "zero"=1))
+)
