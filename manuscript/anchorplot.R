@@ -29,8 +29,9 @@ colfun <- function(n){return(hcl.colors(n))}
 
 ## Why can't I add a colour scale? I have tried many things
 ## I can't even add a regular scale thing
-plot(all
-	## + scale_x_log10()
-	## + scale_colour_viridis_d()
+print(plot(all)
+	## + scale_colour_viridis_d(option="magma")
+	## + scale_color_manual(palette=colfun)
+	## + scale_color_manual(values = hcl.colors(6, "Harmonic")) 
 )
 
