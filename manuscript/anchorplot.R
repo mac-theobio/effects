@@ -25,5 +25,12 @@ zero <- varpred(m, "x", isolate.value=0, modelname="zero")
 
 all <- list(pred, eff, zero) %>% combinevarpred
 
-plot(all)
+colfun <- function(n){return(hcl.colors(n))}
+
+## Why can't I add a colour scale? I have tried many things
+## I can't even add a regular scale thing
+plot(all
+	## + scale_x_log10()
+	## + scale_colour_viridis_d()
+)
 
