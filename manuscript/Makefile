@@ -22,6 +22,10 @@ autopipeR = defined
 variable_predictions_funs.Rout: variable_predictions_funs.R
 	$(wrapR)
 
+## Example: varpred workflow + binned observations
+### binfun: For binning from variable_predictions_funs.R 
+workflow_example.Rout: workflow_example.R variable_predictions_funs.rda
+
 ## Function to compute 'true' predictions based on true betas and sim data
 truepredfun.Rout: truepredfun.R justify_model.rda
 

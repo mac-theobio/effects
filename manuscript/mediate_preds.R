@@ -5,7 +5,7 @@ library(ggplot2)
 library(dplyr)
 
 loadEnvironments()
-startGraphics(height = 5.3)
+startGraphics()
 
 ## Not mediated
 
@@ -105,3 +105,9 @@ pred_mediate_plots <- ggarrange(pred_notmediated_plots
 	, ncol=2
 )
 print(pred_mediate_plots)
+
+## Figure 6
+pdf("pred_mediated_plots-figure6.pdf", height = 5.3)
+print(pred_mediated_plots)
+dev.off()
+
