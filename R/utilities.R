@@ -88,78 +88,6 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	return(list(pred_df=pred_df, off=mean(offs), dim=nM))
 }
 
-## Population-based adjustment (better computational speed?)
-pop2.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
-	, rTerms, factor.levels, contr, offset, mult, vnames, ...
-	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
-	, typical, zero_out_interaction, include.re) {
-
-	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
-	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
-
-	mm <- get_model.mm(mod)
-	col_mean <- colMeans(mm)
-	
-	non_focal_mm <- mm[, non_focal_terms, drop=FALSE]
-	non_focal_betahat <- betahat[non_focal_terms]
-	pred_non_focal <- as.vector(non_focal_mm %*% non_focal_betahat)
-
-	factor.levels_update <- factor.levels
-	factor.levels_update[!names(factor.levels_update) %in% names(x.focal)] <- NULL
-	drop_index <- grep(paste(colnames(x.excluded), collapse = "|"), attr(rTerms, "term.labels"))
-	rTerms_update <- drop.terms(rTerms, drop_index)
-	formula.rhs_update <- drop.terms(terms(formula.rhs), drop_index)
-	contr_update <- contr
-	contr_update[!names(contr_update) %in% names(x.focal)] <- NULL
-	
-	focal_mf <- model.frame(rTerms_update, x.focal, xlev=factor.levels_update, na.action=NULL)
-	focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
-	focal_mm <- focal_mm[, focal_terms, drop=FALSE]
-#	assign <- attr(focal_mm, "assign")
-#	if(any(assign==0)) {
-#		focal_mm <- focal_mm[, -1, drop=FALSE]
-#	}
-#	focal_terms <- attr(terms(formula.rhs_update), "term.labels")
-	
-	off <- get_offset(offset, model.frame(focal_mf)) # FIXME: or model.frame(mod)?
-	
-	focal_betahat <- betahat[focal_terms]
-	pred_focal <- off + as.vector(focal_mm %*% focal_betahat)
-
-	pse_var <- mult*get_sderror(mod=mod
-		, vcov.=vcov.
-		, mm=focal_mm
-		, col_mean=col_mean
-		, isolate=isolate
-		, isolate.value=isolate.value
-		, internal=internal
-		, vareff_objects=vareff_objects
-		, x.var=x.var
-		, typical=typical
-		, formula.rhs=formula.rhs
-		, zero_out_interaction=zero_out_interaction
-		, mf=focal_mf
-		, focal_terms=focal_terms
-	)
-
-	if (include.re) {
-		re <- includeRE(mod)	
-	} else {
-		re <- 0
-	}
-
-	pred_list <- list()
-	for (i in 1:length(pred_focal)) {
-		pred_list[[i]] <- transform(
-			data.frame(pred=pred_focal[[i]] + pred_non_focal + re)
-			, lwr=pred-pse_var[[i]]
-			, upr=pred+pse_var[[i]]
-		)	
-	}
-	pred_df <- do.call("rbind", pred_list)
-	return(list(pred_df=pred_df, off=off, pse_var=pse_var))
-}
-
 
 ## Logistic normal approximation
 logitnorm.bias.adjust <- function(pred, sigma, abs.tol=0, ...) {
@@ -404,7 +332,7 @@ matrix.to.df <- function(matrix, colclasses){
 
 clean_model <- function(focal.predictors, mod, xlevels
 	, default.levels, formula.rhs, steps, x.var, typical
-	, vnames, bias.adjust){
+	, vnames, bias.adjust, isolate.value){
   
   ## FIXME: How to assign NA to a lme4 object 
   if (!isS4(mod)) {
@@ -518,13 +446,13 @@ clean_model <- function(focal.predictors, mod, xlevels
 				quant <- seq(0, 1, length.out=steps)
 			}
 			## 2022 Jan 26 (Wed): Make sure they are unique
-			unique(quantile(X[,name], quant, names=FALSE))
+			.x <- unique(quantile(X[,name], quant, names=FALSE))
 		} else {
 		  if(length(xlevels[[name]]) == 1L) { 
 			# seq(min(X[, name]), max(X[,name]), length=xlevels[[name]])
-			  xlevels[[name]]
+			  .x <- xlevels[[name]]
 			} else {
-				xlevels[[name]]
+			  .x <- xlevels[[name]]
 			}
 		}
 	 } else {
@@ -534,6 +462,11 @@ clean_model <- function(focal.predictors, mod, xlevels
 		factor.weights[[name]] <- list(name=name, equal=equal.weight
 			, proportional=proportional.weight, level.prop=c(prop.table(table(X[,name])))
 		)
+	 }
+    if (!fac) {
+	 	if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))) {
+			levels <- c(levels, isolate.value)
+		}
 	 }
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
   }
@@ -610,7 +543,6 @@ clean_model <- function(focal.predictors, mod, xlevels
 											sapply(x.excluded, function(x) x$name))
 	  predict.data <-  matrix.to.df(predict.data, colclasses=colclasses)
   }
-
   factor.type <- c(sapply(x, function(x)x$is.factor, simplify = FALSE)
 	, sapply(x.excluded, function(x)x$is.factor, simplify = FALSE)
   )

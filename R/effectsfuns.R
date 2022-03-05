@@ -107,7 +107,7 @@ varpred <- function(mod
 	, zero_out_interaction = FALSE
 	, avefun = mean
 	, offset = NULL
-	, bias.adjust = c("none", "delta", "mcculloch", "diggle", "quantile", "population", "population2", "logitnorm")
+	, bias.adjust = c("none", "delta", "quantile", "population")
 	, sigma = c("mod", "lp", "total")
 	, include.re = FALSE
 	, modelname = NULL
@@ -162,6 +162,7 @@ varpred <- function(mod
 		, typical=avefun
 		, vnames=vnames
 		, bias.adjust = bias.adjust
+		, isolate.value=isolate.value
 	)
 
 	formula.rhs <- formula(vareff_objects)[c(1,3)]
@@ -283,69 +284,40 @@ varpred <- function(mod
 			.link <- .make.bias.adj.link(.link, sigma)
 		}
 		
-	} else if (bias.adjust %in% c("population", "population2", "quantile")) {
+	} else if (bias.adjust %in% c("population", "quantile")) {
 		x.focal <- predict.data$focal
 		x.excluded <- predict.data$excluded
-
-		if (bias.adjust %in% c("population", "quantile")) {
-			pred_obj_all <- pop.bias.adjust(x.focal=x.focal
-				, x.excluded=x.excluded
-				, betahat=betahat
-				, formula.rhs=formula.rhs
-				, rTerms=rTerms
-				, factor.levels=factor.levels
-				, contr=.contr
-				, mult=mult
-				, vnames=vnames
-				, offset=offset
-				, mod=mod
-				, vcov.=vcov.
-				, isolate=isolate
-				, isolate.value=isolate.value
-				, internal=internal
-				, vareff_objects=vareff_objects
-				, x.var=x.var
-				, typical=typical
-				, zero_out_interaction=zero_out_interaction
-				, include.re=include.re
-			)
-			pred_obj <- pred_obj_all$pred_df
-			predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
-			pse_var <- pred_obj$pse_var
-			off <- pred_obj_all$off
-		} else if (bias.adjust=="population2") {
-			pred_obj <- pop2.bias.adjust(x.focal=x.focal
-				, x.excluded=x.excluded
-				, betahat=betahat
-				, formula.rhs=formula.rhs
-				, rTerms=rTerms
-				, factor.levels=factor.levels
-				, contr=.contr
-				, mult=mult
-				, vnames=vnames
-				, offset=offset
-				, mod=mod
-				, vcov.=vcov.
-				, isolate=isolate
-				, isolate.value=isolate.value
-				, internal=internal
-				, vareff_objects=vareff_objects
-				, x.var=x.var
-				, typical=typical
-				, zero_out_interaction=zero_out_interaction
-				, include.re=include.re
-			)
-#			pred_obj <- pred_obj_all$pred_df
-			predict.data <- x.focal[rep(1:NROW(x.focal), each=NROW(X.mod)), 1:n.focal, drop=FALSE]
-#			pse_var <- unname(pred_obj_all$pse_var)[rep(1:NROW(x.focal), each=NROW(x.excluded))]
-			pse_var <- pred_obj$pse_var
-			off <- pred_obj$off
-		}
+		pred_obj_all <- pop.bias.adjust(x.focal=x.focal
+			, x.excluded=x.excluded
+			, betahat=betahat
+			, formula.rhs=formula.rhs
+			, rTerms=rTerms
+			, factor.levels=factor.levels
+			, contr=.contr
+			, mult=mult
+			, vnames=vnames
+			, offset=offset
+			, mod=mod
+			, vcov.=vcov.
+			, isolate=isolate
+			, isolate.value=isolate.value
+			, internal=internal
+			, vareff_objects=vareff_objects
+			, x.var=x.var
+			, typical=typical
+			, zero_out_interaction=zero_out_interaction
+			, include.re=include.re
+		)
+		pred_obj <- pred_obj_all$pred_df
+		predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
+		pse_var <- pred_obj$pse_var
+		off <- pred_obj_all$off
 		pred <- pred_obj$pred
 		lwr <- pred_obj$lwr
 		upr <- pred_obj$upr
 		mm <- NULL
-	}
+	} 
+
 	
 	attr(mm,"contrasts") <- NULL
 	attr(mm, "assign") <- NULL
@@ -364,7 +336,7 @@ varpred <- function(mod
 		, family = .family
 		, link = .link
 		, offset=off
-		, bias.adjust.sigma = if (bias.adjust %in% c("none", "population", "population2")) NULL else sigma
+		, bias.adjust.sigma = if (bias.adjust %in% c("none", "population", "quantile")) NULL else sigma
 	)
 
 	## Organize
@@ -406,7 +378,7 @@ varpred <- function(mod
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if ((bias.adjust %in% c("quantile", "population", "population2"))||include.re){
+	if ((bias.adjust %in% c("quantile", "population"))||include.re){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
 	} 
@@ -420,7 +392,7 @@ varpred <- function(mod
 	attr(result, "x.var") <- out$x.var 
 	attr(result, "modelname") <- modelname
 	if (returnall) {
-		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw=out, factor.cols=factor.cols, mm2=mod.matrix)
+		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw=out)
 	} else {
 		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma)
 	}

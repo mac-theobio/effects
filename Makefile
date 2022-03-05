@@ -287,7 +287,7 @@ install:
 
 Ignore += vareffects_1*
 install-tarball:
-	R CMD INSTALL vareffects_1.0.10.*
+	R CMD INSTALL vareffects_1.0.11.*
 
 check-package:
 	echo "devtools::check('.')" | R --slave
