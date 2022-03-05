@@ -7,7 +7,7 @@ library(shellpipes)
 loadEnvironments()
 startGraphics()
 
-objects()
+tau = 360
 
 print(pipeStar())
 
@@ -28,8 +28,7 @@ zero
 all <- list(pred, eff, zero) %>% combinevarpred %>% plot
 
 print(all
- 	## + scale_color_discrete_qualitative(palette="Dynamic")
- 	## + scale_color_discrete_qualitative(palette="Dynamic")
+	+ scale_color_manual(values = hcl(c(240, 330, 60), l=60, c=60))
 	+ scale_color_manual(values = friendly_pal("contrast_three"))
 )
 
