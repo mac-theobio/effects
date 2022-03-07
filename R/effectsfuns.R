@@ -102,6 +102,7 @@ varpred <- function(mod
 	, steps = 100
 	, at = list()
 	, dfspec = 100
+	, true.beta=NULL
 	, vcov. = NULL
 	, internal = FALSE
 	, zero_out_interaction = FALSE
@@ -122,6 +123,13 @@ varpred <- function(mod
 	mod <- prepmod(mod)
 	vareff_objects <- vareffobj(mod)
 	betahat <- coef(vareff_objects)
+	if (!is.null(true.beta)) {
+		if (length(betahat) != length(true.beta)) {
+			stop("true.beta must of the same length and order as the model coefficients")
+		} else {
+			betahat <- true.beta
+		}
+	}
 	mod_names <- get_vnames(mod)
 	vnames <- mod_names$vnames
 	vnames_all <- mod_names$vnames_all

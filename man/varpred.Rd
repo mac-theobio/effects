@@ -15,6 +15,7 @@ varpred(
   steps = 100,
   at = list(),
   dfspec = 100,
+  true.beta = NULL,
   vcov. = NULL,
   internal = FALSE,
   zero_out_interaction = FALSE,
