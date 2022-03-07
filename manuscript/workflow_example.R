@@ -11,6 +11,7 @@ N <- 100
 b0 <- 10
 b1 <- 0.6
 b2 <- -0.8
+true_beta <- c(b0, b1, b2)
 df <- (data.frame(x1=rnorm(N), x2=rnorm(N))
 	%>% mutate(NULL
 		, y=b0 + b1*x1 + b2*x2 + rnorm(N)
@@ -24,6 +25,10 @@ mod <- lm(y ~ x1 + x2, df)
 binned_df <- binfun(mod, focal="x1")
 head(binned_df)
 
+## True pred
+true_pred <- varpred(mod, "x1", true.beta=true_beta, bias.adjust="population", modelname="truth")
+plot(true_pred)
+
 ## basic varpred
 v1 <- varpred(mod, "x1")
 names(v1) # use v1$preds to extract df containing the predictions
@@ -31,6 +36,7 @@ names(v1) # use v1$preds to extract df containing the predictions
 ## basic plot: ggplot object and add binned observations
 p1 <- (plot(v1)
 	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
+	+ geom_line(data=true_pred$preds, aes(colour=model))
 )
 print(p1)
 
