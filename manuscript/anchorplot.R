@@ -25,9 +25,10 @@ eff <- varpred(m , "x", modelname="eff")
 zero <- varpred(m, "x", isolate.value=0, modelname="zero")
 zero
 
-all <- list(pred, eff, zero) %>% combinevarpred %>% plot
+all <- list(pred, eff, zero) %>% combinevarpred
+summary(all)
 
-print(all
+print(plot(all)
 	+ scale_color_manual(values = hcl(c(240, 330, 60), l=60, c=60))
 	+ scale_color_manual(values = friendly_pal("contrast_three"))
 )
