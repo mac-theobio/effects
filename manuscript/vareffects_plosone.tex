@@ -225,11 +225,11 @@ In many applications which use generalized linear (mixed) models, outcome predic
 \section*{Definitions}
 
 \begin{itemize}
-\item \textbf{Input variables}: Scientific variables underlying an inference or exploration.
+\item \textbf{Input variables}: Scientific variables underlying an inference or exploration. The focal predictor we use for effects or predictions is an input variable.
 \item \textbf{Model variables}: Variables that represent columns in the model matrix. Each input variable will correspond to one or more model variables. In particular, variables with more than two categories, or variables modeled with a spline or polynomial response, will correspond to more than one input variable.
 \item\textbf{Center:} A point corresponding to a column-wise mean of the model matrix (the mean of one or more model variables). The center point for a set of model variables corresponding to an input variable may not represent a possible value of the input variable.
 \item \textbf{Reference point}: Value or values chosen for \emph{non-focal predictors}, when estimating effects. Typically the center point, but can instead be a population of quantiles or observations. 
-\item \textbf{Anchor}: The value chosen for the \emph{focal predictor}. Typically chosen as the center point.
+\item \textbf{Anchor}: The value chosen for the \emph{focal predictor} when estimating effect confidence intervals (anchor choice does not affect the estimate). Typically chosen as the center point of the model variables corresponding to the focal input variable.
 \end{itemize}
 
 % Please keep the Author Summary between 150 and 200 words

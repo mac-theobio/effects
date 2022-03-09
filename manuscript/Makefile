@@ -62,7 +62,7 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 Ignore += *.pdf
 
 # vareffects_plosone.pdf: vareffects_plosone.tex
-vareffects_plosone.tex: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout justify_preds.Rout vareffects_plosone.bib
+vareffects_plosone.tex: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout vareffects_plosone.bib
 
 ######################################################################
 

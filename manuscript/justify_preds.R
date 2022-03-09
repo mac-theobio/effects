@@ -54,7 +54,8 @@ justify_ci_plots <- (combinepreds(justify_mod
 	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
 	+ geom_vline(xintercept=mean(x2_focal), lty=2, col="grey")
 	+ geom_line(data=x2_truepred_df, aes(x=x2, y=fit), lty=4, colour="red")
-	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
+	+ scale_colour_manual(NULL
+		, breaks = c("observed", "emmeans", "Effect", "varpred")
 		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
 		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
@@ -64,6 +65,8 @@ justify_ci_plots <- (combinepreds(justify_mod
 	+ labs(colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 ) %>% teeGG(desc="isolate", height=5.3)
+
+quit()
 
 ## With interactions
 quants <- seq(0,1,length.out=100)
