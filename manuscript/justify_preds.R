@@ -15,7 +15,7 @@ x1_focal <- quantile(justify_sim_df$x1, quants, names=FALSE)
 binned_df <- binfun(justify_mod, focal="x1", bins=20, groups=NULL)
 x1_truepred_df <- truepredfun(justify_mod, "x1", true_betas=justify_sim_betas, modelname="observed")
 
-justify_plots <- (combinepreds(justify_mod
+simple_plot <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
 		, focal="x1"
 		, x.var="x1"
@@ -63,12 +63,7 @@ justify_ci_plots <- (combinepreds(justify_mod
 	)
 	+ labs(colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
-)
-
-### Figure 2
-pdf("justify_ci_plots-figure2.pdf", height = 5.3)
-print(justify_ci_plots)
-dev.off()
+) %>% teeGG(desc="isolate", height=5.3)
 
 ## With interactions
 quants <- seq(0,1,length.out=100)
@@ -76,7 +71,7 @@ x1_focal <- quantile(justify_inter_sim_df$x1, quants, names=FALSE)
 binned_df <- binfun(justify_inter_mod, focal="x1", bins=20, groups=NULL)
 x1_truepred_df <- truepredfun(justify_inter_mod, "x1", true_betas=justify_inter_sim_betas, modelname="observed")
 
-justify_inter_plots <- (combinepreds(justify_inter_mod
+inter_plot <- (combinepreds(justify_inter_mod
 		, c("varpred", "emmeans", "Effect")
 		, focal="x1"
 		, x.var="x1"
@@ -99,18 +94,11 @@ justify_inter_plots <- (combinepreds(justify_inter_mod
 	+ labs(title="B) Model 2", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
-print(justify_inter_plots)
+print(inter_plot)
 
-justify_plots <- ggarrange(justify_plots
-	, justify_inter_plots + rremove("ylab")
+ggarrange(simple_plot
+	, inter_plot + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
-)
-justify_plots
-
-## Figure 1
-pdf("justify_plots-figure1.pdf", height = 5.3)
-print(justify_plots)
-dev.off()
-
+) %>% teeGG(desc="inter", height=4.0)

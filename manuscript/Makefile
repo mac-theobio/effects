@@ -33,7 +33,11 @@ truepredfun.Rout: truepredfun.R justify_model.rda
 ### compare: emmeans, effects, varpred
 justify.Rout: justify.R variable_predictions_funs.rda
 justify_model.Rout: justify_model.R justify.rda
+
+pipeRdesc += justify_preds
 justify_preds.Rout: justify_preds.R justify_model.rda truepredfun.rda
+## justify_preds.isolate.pdf: justify_preds.R justify_model.rda truepredfun.rda
+## justify_preds.inter.pdf: justify_preds.R justify_model.rda truepredfun.rda
 
 ## Figure 3: Quantity of interest
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
