@@ -303,23 +303,26 @@ includeRE.glmmTMB <- function(mod, ...) {
 	# ee <- mod1$obj$env
 	# vv <- ee$last.par.best
 	# vv[names(vv) == "b"]
-	ran_eff <- as.data.frame(ranef(mod))
-	ran_eff <- ran_eff[, "condval", drop=FALSE]
-	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
+#	ran_eff <- as.data.frame(ranef(mod))
+#	ran_eff <- ran_eff[, "condval", drop=FALSE]
+	ran_eff <- mod$obj$env$last.par.best
+	ran_eff <- ran_eff[names(ran_eff)=="b"]
+	re <- as.vector(getME(mod, "Z") %*% ran_eff)
 	return(re)	
 }
 
 includeRE.merMod <- function(mod, ...){
-	ran_eff <- as.data.frame(ranef(mod))
-	ran_eff <- ran_eff[, "condval", drop=FALSE]
+#	ran_eff <- as.data.frame(ranef(mod))
+#	ran_eff <- ran_eff[, "condval", drop=FALSE]
+	ran_eff <- getME(mod, "b") 
 	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
 	return(re)	
 }
 		
 includeRE.glmerMod <- function(mod, ...){
 	# getME(mod, "b")
-	ran_eff <- as.data.frame(ranef(mod))
-	ran_eff <- ran_eff[, "condval", drop=FALSE]
+#	ran_eff <- as.data.frame(ranef(mod))
+	ran_eff <- getME(mod, "b") #ran_eff[, "condval", drop=FALSE]
 	re <- as.vector(getME(mod, "Z") %*% as.matrix(ran_eff))
 	return(re)	
 }

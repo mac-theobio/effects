@@ -4,7 +4,7 @@
 pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	, rTerms, factor.levels, contr, offset, mult, vnames, ...
 	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
-	, typical, zero_out_interaction, include.re) {
+	, typical, zero_out_interaction, include.re, joint.var) {
 
 #	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
 #	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
@@ -67,9 +67,28 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	pred_list <- list()
 	offs <- NULL
 	
+	## FIXME: better way to match the order of R with the x.focal?
+	if (!is.null(joint.var)) {
+		if (length(re)>1) {
+			levs <- unique(x.focal[[joint.var]])
+			nn <- length(levs)
+			vals <- recoverdata(mod)[[joint.var]]
+		}
+	}
+	
 	# TODO: eliminate loop if there is no x.excluded 
 	for (i in 1:NROW(x.focal)) {
 		focal_i <- x.focal[i, ,drop=FALSE]
+		if (!is.null(joint.var)) {
+			if (length(re)>1) {
+				index <- vals==focal_i[[joint.var]]
+				re2 <- rep(re[index], times=nn)
+			} else {
+				re2 <- re
+			}
+		} else {
+			re2 <- re
+		}
 		focal_i[1:nM, ] <- focal_i
 		mf_i <- if(!is.null(x.excluded)) cbind.data.frame(focal_i, x.excluded) else focal_i
 		mf_i <- model.frame(rTerms, mf_i, xlev=factor.levels, na.action=NULL)
@@ -78,7 +97,7 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		off <- get_offset(offset, mf_i)
 		offs[i] <- off
 		pred_list[[i]] <- transform(
-			data.frame(pred=off + as.vector(mm_i %*% betahat) + re)
+			data.frame(pred=off + as.vector(mm_i %*% betahat) + re2)
 			, lwr=pred - ifelse(isolate, pse_var[[i]], pse_var)
 			, upr=pred + ifelse(isolate, pse_var[[i]], pse_var)
 			, pse_var=ifelse(isolate, pse_var[[i]], pse_var)

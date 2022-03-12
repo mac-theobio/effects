@@ -28,3 +28,4 @@ by making sure the anchor is on the grid, I think.
 You will need to install https://github.com/JLSteenwyk/ggpubfigs to
 use the current anchorplot.
 
+When do we expect joint model work well

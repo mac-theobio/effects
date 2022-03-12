@@ -95,6 +95,7 @@
 varpred <- function(mod
 	, focal_predictors
 	, x.var = NULL
+	, joint.var=NULL
 	, type = c("response", "link")
 	, isolate = TRUE
 	, isolate.value = NULL
@@ -150,12 +151,18 @@ varpred <- function(mod
 	if (!is.null(x.var) & !any(focal.predictors %in% x.var) & length(focal.predictors)>1L) 
 		stop(paste0(x.var, " not in ", focal.predictors))
 
+
 	n.focal <- length(focal.predictors)
 	if (is.null(x.var) & n.focal>1L) {
 		x.var <- focal.predictors[[2]]
 		message(paste0("x.var was not specified, ", x.var, " is used instead."))
 	} else if (is.null(x.var)) {
 		x.var <- focal.predictors[[1]]
+	}
+	
+	if (!is.null(joint.var)) {
+		if (joint.var==x.var) stop("joint.var should not be the same as x.var")
+		if (any(!joint.var %in% focal.predictors)) stop("joint.var should be specified as one of the focal_predictors")
 	}
 	
 	.contr <- vareff_objects$contrasts
@@ -315,12 +322,13 @@ varpred <- function(mod
 			, typical=typical
 			, zero_out_interaction=zero_out_interaction
 			, include.re=include.re
+			, joint.var=joint.var
 		)
 		pred_obj <- pred_obj_all$pred_df
 		predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
 		pse_var <- pred_obj$pse_var
 		off <- pred_obj_all$off
-		pred <- pred_obj$pred
+		pred <- pred_obj$pred 
 		lwr <- pred_obj$lwr
 		upr <- pred_obj$upr
 		mm <- NULL

@@ -8,6 +8,7 @@ varpred(
   mod,
   focal_predictors,
   x.var = NULL,
+  joint.var = NULL,
   type = c("response", "link"),
   isolate = TRUE,
   isolate.value = NULL,
