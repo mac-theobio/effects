@@ -549,12 +549,13 @@ i &= 1,\cdots, 10000
 \begin{align}\label{sim:simple_mediate}
 z_i &\sim \mathrm{Binomial(1, P(z_i = 1))} \nonumber\\
 \mathrm{logit(P}(z_i = 1)) &= \eta_i \nonumber\\
-\eta_i &= \beta_0 + \beta_{yz} y_i \nonumber\\
-y_i &= \beta_{xy} x_i + \epsilon_y \nonumber\\
+\eta_i &= \beta_0 + \beta_{xz} x_i + \beta_{yz} y_i \nonumber\\
+y_i &= \rho x_i + \sqrt{1-\rho^2} y_y \nonumber\\
 x_i &\sim \mathrm{Normal(0, 1)} \nonumber\\
-\epsilon_y &\sim \mathrm{Normal(0, 1)} \nonumber\\
+y_y &\sim \mathrm{Normal(0, 1)} \nonumber\\
+\rho &= 0.8 \nonumber\\
 \beta_0 &= 5 \nonumber\\
-\beta_{xy} &= 1 \nonumber\\
+\beta_{xz} &= 0.2 \nonumber\\
 \beta_{yz} &= 1.5 \nonumber\\
 i &= 1,\cdots, 10000
 \end{align}

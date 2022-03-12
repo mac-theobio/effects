@@ -11,14 +11,20 @@ set.seed(991)
 
 N <- 1e4
 
+rho <- 0.8
 b0 <- 5
-bxz <- 0
-bxy <- 1
+bxz <- 0.2
 byz <- 1.5
 
 df <- data.frame(x=rnorm(N))
+#sim_df_mediate <- (df
+#	%>% mutate(y = rnorm(N) + bxy*x
+#		, z = b0 + bxz*x + byz*y
+#		, z = rbinom(N, 1, plogis(z))
+#	)
+#)
 sim_df_mediate <- (df
-	%>% mutate(y = rnorm(N) + bxy*x
+	%>% mutate(y = rho*x + sqrt(1-rho^2)*rnorm(N)
 		, z = b0 + bxz*x + byz*y
 		, z = rbinom(N, 1, plogis(z))
 	)

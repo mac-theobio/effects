@@ -27,13 +27,14 @@ variable_predictions_funs.Rout: variable_predictions_funs.R
 workflow_example.Rout: workflow_example.R variable_predictions_funs.rda
 
 ## Function to compute 'true' predictions based on true betas and sim data
-truepredfun.Rout: truepredfun.R justify_model.rda
+## Implemented in varpred to take in true.beta as arg
+# truepredfun.Rout: truepredfun.R
 
 ## Figure 1 and Figure 2: Justification
 ### compare: emmeans, effects, varpred
 justify.Rout: justify.R variable_predictions_funs.rda
 justify_model.Rout: justify_model.R justify.rda
-justify_preds.Rout: justify_preds.R justify_model.rda truepredfun.rda
+justify_preds.Rout: justify_preds.R justify_model.rda
 
 ## Figure 3: Quantity of interest
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda

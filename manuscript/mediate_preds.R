@@ -98,13 +98,13 @@ pred_mediated_plots <- (comparevarpred(vlist=vlist
 	+ theme(legend.position="bottom")
 )
 
-pred_mediate_plots <- ggarrange(pred_notmediated_plots
+pred_mediated_plots <- ggarrange(pred_notmediated_plots
 	, pred_mediated_plots + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
 )
-print(pred_mediate_plots)
+print(pred_mediated_plots)
 
 ## Figure 6
 pdf("pred_mediated_plots-figure6.pdf", height = 5.3)

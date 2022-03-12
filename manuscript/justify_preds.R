@@ -13,7 +13,8 @@ startGraphics()
 quants <- seq(0,1,length.out=100)
 x1_focal <- quantile(justify_sim_df$x1, quants, names=FALSE)
 binned_df <- binfun(justify_mod, focal="x1", bins=20, groups=NULL)
-x1_truepred_df <- truepredfun(justify_mod, "x1", true_betas=justify_sim_betas, modelname="observed")
+## Preds based on true parameter values
+x1_truepred_df <- varpred(justify_mod, "x1", true.bata=justify_sim_betas, bias.adjust="population", modelname="observed")$preds
 
 justify_plots <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
@@ -40,8 +41,9 @@ justify_plots <- (combinepreds(justify_mod
 )
 
 ## Add CIs
+### Preds based on true parameter values
+x2_truepred_df <- varpred(justify_mod, "x2", true.beta=justify_sim_betas, bias.adjust="population", modelname="observed")$preds
 x2_focal <- quantile(justify_sim_df$x2, quants, names=FALSE)
-x2_truepred_df <- truepredfun(justify_mod, "x2", true_betas=justify_sim_betas, modelname="observed")
 justify_ci_plots <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
 		, focal="x2"
@@ -74,7 +76,7 @@ dev.off()
 quants <- seq(0,1,length.out=100)
 x1_focal <- quantile(justify_inter_sim_df$x1, quants, names=FALSE)
 binned_df <- binfun(justify_inter_mod, focal="x1", bins=20, groups=NULL)
-x1_truepred_df <- truepredfun(justify_inter_mod, "x1", true_betas=justify_inter_sim_betas, modelname="observed")
+x1_truepred_df <- varpred(justify_inter_mod, "x1", true.beta=justify_inter_sim_betas, bias.adjust="population", modelname="observed")$preds
 
 justify_inter_plots <- (combinepreds(justify_inter_mod
 		, c("varpred", "emmeans", "Effect")
