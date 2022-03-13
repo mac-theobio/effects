@@ -34,7 +34,11 @@ workflow_example.Rout: workflow_example.R variable_predictions_funs.rda
 ### compare: emmeans, effects, varpred
 justify.Rout: justify.R variable_predictions_funs.rda
 justify_model.Rout: justify_model.R justify.rda
+
+pipeRdesc += justify_preds
 justify_preds.Rout: justify_preds.R justify_model.rda
+## justify_preds.isolate.pdf: justify_preds.R justify_model.rda
+## justify_preds.inter.pdf: justify_preds.R justify_model.rda
 
 ## Figure 3: Quantity of interest
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
@@ -59,7 +63,7 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 Ignore += *.pdf
 
 # vareffects_plosone.pdf: vareffects_plosone.tex
-vareffects_plosone.tex: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout justify_preds.Rout vareffects_plosone.bib
+vareffects_plosone.tex: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout vareffects_plosone.bib
 
 ######################################################################
 

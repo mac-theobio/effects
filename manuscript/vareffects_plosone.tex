@@ -147,11 +147,8 @@
 \renewcommand{\@biblabel}[1]{\quad#1.}
 \makeatother
 
-
-
 % Header and Footer with logo
-\usepackage{lastpage,fancyhdr,graphicx}
-\usepackage{epstopdf}
+\usepackage{lastpage,fancyhdr,graphicx,grffile}
 %\pagestyle{myheadings}
 \pagestyle{fancy}
 \fancyhf{}
@@ -225,15 +222,15 @@ Jonathan Dushoff\textsuperscript{1,2}
 
 In many applications which use generalized linear (mixed) models, outcome predictions or predicted probabilities are often of interest. For models that involve complex multiplicative interactions, additional non-focal predictors or nonlinear link functions, the estimated coefficient are not readily interpretable. A general way to summarize these kind of models is through predictor effects, which are not only dependent on choice of representative values of focal predictor but also sensitive to which values of non-focal predictors are chosen. The most common approach is generating predictor effects at a ``reference point'', usually the mean, of non-focal predictor, i.e., mean-based which could be considered as the effect of an ``average case'' in the population. In the presence of sources of bias such as additional non-focal predictors, nonlinear link functions, random effect terms, etc., mean-based approach generate predictor effects that are biased and may not be consistent with the observed quantities. An alternative is the population-based approach which estimates the average effect in the population. Moreover, isolated confidence intervals provide an alternative and a more clear way to describe uncertainty associated with the focal predictor of interest. In addition to theoretical and methodical comparison, using simulation, we illustrate the two approaches and show that they can produce substantially different results and that population-based approach can not only produce estimates consistent with the observed values, but also appropriate for bias correction. We also present an alternative way, isolated confidence intervals, to describe uncertainties associated with these predictions.
 
-\section*{Glossary}
+\section*{Definitions}
 
 \begin{itemize}
-\item \textbf{Input variables}: These are measured variables (and may be transformed)
-\item \textbf{Predictors}: These are statistical variables i.e., those terms which are entered into the model. They include the main effects and also polynomials of input variables
-\item \textbf{Anchor}: The value of the focal variable (input or predictor) used to calculate CIs. Common choice is the average of the focal predictor
-\item \textbf{Reference point}: Values chosen for the non-focal predictors, and can include population averages, quantiles or population values
+\item \textbf{Input variables}: Scientific variables underlying an inference or exploration. The focal predictor we use for effects or predictions is an input variable.
+\item \textbf{Model variables}: Variables that represent columns in the model matrix. Each input variable will correspond to one or more model variables. In particular, variables with more than two categories, or variables modeled with a spline or polynomial response, will correspond to more than one input variable.
+\item\textbf{Center:} A point corresponding to a column-wise mean of the model matrix (the mean of one or more model variables). The center point for a set of model variables corresponding to an input variable may not represent a possible value of the input variable.
+\item \textbf{Reference point}: Value or values chosen for \emph{non-focal predictors}, when estimating effects. Typically the center point, but can instead be a population of quantiles or observations. 
+\item \textbf{Anchor}: The value chosen for the \emph{focal predictor} when estimating effect confidence intervals (anchor choice does not affect the estimate). Typically chosen as the center point of the model variables corresponding to the focal input variable.
 \end{itemize}
-
 
 % Please keep the Author Summary between 150 and 200 words
 % Use first person. PLOS ONE authors please skip this step. 
@@ -274,7 +271,7 @@ We first simulate data with the two models, such that $x_{1,2,3} \sim \mathrm{No
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.8\textwidth]{justify_plots-figure1.pdf}
+\includegraphics[width=0.9\textwidth]{justify_preds.inter.pdf}
 \caption{{\bf A comparison of \pkg{emmeans}, \pkg{effects} and \pkg{varpred} predictor effects for $x_1$ on $y$ for models with and without interactions.}
 The horizontal blue, green and black lines are the mean predictions, i.e., $\bar{\hat{y}}$, the red ones are the means of the simulated $y$, i.e., $\bar{y}$, while the vertical dotted grey lines are the means of the corresponding focal predictors. The grey points are the binned simulated $y$. The trend lines represents the corresponding $\hat{y}$ at various levels of $x_1$, while holding the other predictors at their average. A: In the absence of interaction, the predicted mean, $\bar{\hat{y}}$, closely matches the simulated in all the three approaches, i.e., $\bar{y} \approx \bar{\hat{y}}$. B: Even with the simple interaction between the non-focal predictors, we start seeing deviation of the predicted mean, $\bar{\hat{y}}$, from the simulated, $\bar{y}$, in two commonly used packages (\pkg{emmeans} and \pkg{effects}), but not, the proposed \pkg{varpred}.}
 \label{fig:justify_plots}
@@ -286,7 +283,7 @@ Sometimes, one may be interested in the uncertainties associated with the focal 
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.8\textwidth]{justify_ci_plots-figure2.pdf}
+\includegraphics[width=0.9\textwidth]{justify_preds.isolate.pdf}
 \caption{{\bf A comparison of traditional and isolated $95\%$ confidence bands.} The description of horizontal, vertical and trend lines remain the same as above. The wider dotted blue curves overlaying the green curves are the traditional confidence bands from \pkg{emmeans} and \pkg{effects}, while the narrower black curves crossing at the mean of the focal predictor, i.e., the model center, are the isolated confidence bands from \pkg{varpred}. For simple models, the isolated confidence bands crosses at the model center.}
 \label{fig:justify_ci_plots}
 \end{figure}
