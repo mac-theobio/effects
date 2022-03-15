@@ -58,6 +58,7 @@ pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 		, focal_terms=focal_terms_update
 		, rTerms=rTerms_update
 		, factor.levels=factor.levels_update
+		, bias.adjust="population"
 	)
 
 	if (include.re) {
@@ -175,7 +176,7 @@ get_offset <- function(offset, mf) {
 	 link
 }
 
-get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, focal_terms=NULL, rTerms, factor.levels, ...) {
+get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, focal_terms=NULL, rTerms, factor.levels, bias.adjust, ..., X.mod, factor.cols, cnames, focal.predictors, excluded.predictors, apply.typical.to.factors, factor.type, factor.weights, vnames) {
 	
 	if (is.null(vcov.)){
 		vc <- vcov(vareff_objects)
@@ -213,9 +214,27 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
 		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
 #			mf[x.var] <- 0*mf[x.var]+isolate.value
 			mf[x.var] <- isolate.value
-		mf <- model.frame(rTerms, mf, xlev = factor.levels, na.action=NULL)
+			mf <- model.frame(rTerms, mf, xlev = factor.levels, na.action=NULL)
 			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
-			col_mean <- apply(mod.matrix, 2, typical)
+			if (bias.adjust %in% c("none", "delta", "mcculloch", "diggle", "logitnorm")) {
+				mm2 <- get_model_matrix(mod
+					, mod.matrix
+					, X.mod
+					, factor.cols
+					, cnames
+					, focal.predictors
+					, excluded.predictors
+					, typical
+					, apply.typical.to.factors=TRUE
+					, factor.type=factor.type
+					, x.var=x.var
+					, factor.weights=factor.weights
+					, vnames=vnames
+				)
+				col_mean <- apply(mm2, 2, typical)
+			} else {
+				col_mean <- apply(mod.matrix, 2, typical)
+			}
 			mm_mean <- t(replicate(NROW(mm), col_mean))
 		}
 		mm <- mm - mm_mean
