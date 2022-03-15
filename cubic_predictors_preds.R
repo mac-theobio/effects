@@ -14,7 +14,7 @@ startGraphics()
 ### All uncertainties 
 pred_age_trad_cubic <- varpred(mod_cubic
 	, "age"
-	, isolate=FALSE
+	, isolate=TRUE
 	, modelname="everything"
 )
 
@@ -22,6 +22,7 @@ pred_age_trad_cubic <- varpred(mod_cubic
 pred_age_centered_cubic <- varpred(mod_cubic
 	, "age"
 	, isolate=TRUE
+	, isolate.value=0
 	, modelname="isolated (mm)"
 )
 pred_age_mean <- mean(pred_age_centered_cubic$preds$fit)
@@ -58,6 +59,7 @@ pred_wealthindex_trad_cubic <- varpred(mod_cubic
 pred_wealthindex_centered_cubic <- varpred(mod_cubic
 	, "wealthindex"
 	, isolate=TRUE
+	, isolate.value=0
 	, modelname="isolated (mm)"
 )
 pred_wealthindex_mean <- mean(pred_wealthindex_centered_cubic$preds$fit)

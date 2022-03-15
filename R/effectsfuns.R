@@ -228,7 +228,20 @@ varpred <- function(mod
 		col_mean <- apply(mm, 2, typical)
 		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
 			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
-			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
+			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
+			, mf=predict.data # 2022 Mar 15 (Tue): re-evaluate within the isolate.value
+			, rTerms=rTerms
+			, factor.levels=factor.levels
+			, bias.adjust=bias.adjust
+			, X.mod=X.mod
+			, factor.cols=factor.cols
+			, cnames=cnames
+			, focal.predictors=focal.predictors
+			, excluded.predictors=excluded.predictors
+			, apply.typical.to.factors=TRUE
+			, factor.type=factor.type
+			, factor.weights=factor.weights
+			, vnames=vnames
 		)
 		off <- get_offset(offset, mf)
 		pred <- off + as.vector(mm %*% betahat)
