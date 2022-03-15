@@ -113,6 +113,10 @@ pipeRimplicit += anchorplot
 
 hhgroup.Rout: hhgroup.R
 
+## Range of possibilities
+
+anchorRange.Rout: anchorRange.R
+
 ######################################################################
 
 ### Makestuff
