@@ -120,9 +120,37 @@ anchorRange.Rout: anchorRange.R
 ######################################################################
 
 ## Seminar presentation pix
+## 2022 Mar 15 (Tue)
 
 alcohol_data.Rout: alcohol_data.R
 
+## First try (no branching)
+alcohol_plots.Rout: alcohol_plots.R alcohol_data.rds
+
+## Branch the model fits
+## alcohol.eduQuad.eduFit.Rout: eduQuad.R
+## alcohol.eduUni.eduFit.Rout: eduUni.R
+## alcohol.eduUni.eduFit.rtmp: eduUni.R
+scriptStep += eduFit
+eduFit += eduUni eduFull eduQuad
+eduFit_dep = %_data.rds
+
+## pipeRdesc works with _plain_ stems
+pipeRdesc += eduPlot
+## alcohol.eduUni.eduPlot.Rout: eduPlot.R
+## alcohol.eduQuad.eduPlot.Rout: eduPlot.R
+## alcohol.eduFull.eduPlot.Rout: eduFull.R
+%.eduPlot.Rout: eduPlot.R %.eduFit.rda
+	$(pipeR)
+
+pipeRdesc += eduzPlot
+## zeroPlots are fragile so do them separately
+## alcohol.eduUni.eduzPlot.Rout: eduzPlot.R
+%.eduzPlot.Rout: eduzPlot.R %.eduPlot.rda
+	$(pipeR)
+
+glm_calcs.Rout: glm_calcs.R glm_two_predictor_model.rda
+glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ######################################################################
 
