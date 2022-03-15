@@ -113,6 +113,17 @@ pipeRimplicit += anchorplot
 
 hhgroup.Rout: hhgroup.R
 
+## Range of possibilities for a splash plot
+## It's quite confusing: how do I get different ratios of intercept and slope variance? Is it even possible?
+anchorRange.Rout: anchorRange.R
+
+######################################################################
+
+## Seminar presentation pix
+
+alcohol_data.Rout: alcohol_data.R
+
+
 ######################################################################
 
 ### Makestuff
