@@ -229,6 +229,8 @@ varpred <- function(mod
 		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
 			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
 			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction, mf=mf
+			, rTerms=rTerms
+			, factor.levels=factor.levels
 		)
 		off <- get_offset(offset, mf)
 		pred <- off + as.vector(mm %*% betahat)
