@@ -146,6 +146,7 @@ pipeRdesc += eduPlot
 pipeRdesc += eduzPlot
 ## zeroPlots are fragile so do them separately
 ## alcohol.eduUni.eduzPlot.Rout: eduzPlot.R
+## alcohol.eduQuad.eduzPlot.Rout: eduzPlot.R
 %.eduzPlot.Rout: eduzPlot.R %.eduPlot.rda
 	$(pipeR)
 
