@@ -155,6 +155,14 @@ glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ######################################################################
 
+## Higher order interactions (cubic polynomial)
+cubic_sim.Rout: cubic_sim.R
+cubic_model.Rout: cubic_model.R cubic_sim.rda
+cubic_preds.Rout: cubic_preds.R cubic_model.rda variable_predictions_funs.rda
+
+
+######################################################################
+
 ### Makestuff
 
 Sources += Makefile

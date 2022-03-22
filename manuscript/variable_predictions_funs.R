@@ -210,13 +210,18 @@ linearsim <- function(nHH=1000, perHH=1, form=~1+x1+x2+x3
 
 
 ## Generate binned observations
+## mod: df or mod (df preferable)
 binfun <- function(mod, focal, bins=50, groups=NULL, ...) {
 	if (!is.null(groups)) {
 		bins_all <- c(groups, "bin")
 	} else {
 		bins_all <- "bin"
 	}
-	mf <- model.frame(mod)
+	if (!inherits(mod, "data.frame")) {
+		mf <- model.frame(mod)
+	} else {
+		mf <- mod
+	}
 	check_df <- (mf
 		%>% arrange_at(focal)
 		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
@@ -302,6 +307,7 @@ combinepreds <- function(mod, funs, focal, x.var, x.var.factor=FALSE, plotit=TRU
 	if (length(add_args)) args[names(add_args)] <- add_args
 	
 	if (!is.null(add_args$at) & ("Effect" %in% funs)) args$xlevels <- add_args$at
+	if ("emmip" %in% funs) args$plotit <- FALSE
 
 	out <- sapply(funs, function(f){
 		est <- do.call(f, args)
