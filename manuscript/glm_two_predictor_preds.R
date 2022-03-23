@@ -21,7 +21,7 @@ pred_age_none_mean <- getmeans(pred_age_none, what="estimate")
 pred_age_pop <- varpred(glm_mod
 	, "age"
 	, bias.adjust="population"
-	, modelname="Population-based"
+	, modelname="Whole-sample-based"
 )
 pred_age_pop_mean <- getmeans(pred_age_pop, what="estimate")
 
@@ -42,10 +42,10 @@ pred_age_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=pred_age_pop_mean, aes(yintercept=fit, colour=model, lty=model))
 	+ geom_hline(data=true_prop_df, aes(yintercept=status, colour=model,lty=model))
 	+ geom_point(data=binned_df, aes(x=age, y=status), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Population-based")
-		, values=c("Observed mean"="red", "Mean-based"="blue", "Population-based"="black")
+	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Whole-sample-based")
+		, values=c("Observed mean"="red", "Mean-based"="blue", "Whole-sample-based"="black")
 	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Population-based"=1))
+	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Whole-sample-based"=1))
 	+ labs(y="Probability of improved water quality", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
@@ -64,7 +64,7 @@ pred_wealthindex_none_mean <- getmeans(pred_wealthindex_none, what="estimate")
 pred_wealthindex_pop <- varpred(glm_mod
 	, "wealthindex"
 	, bias.adjust="population"
-	, modelname="Population-based"
+	, modelname="Whole-sample-based"
 )
 pred_wealthindex_pop_mean <- getmeans(pred_wealthindex_pop, what="estimate")
 
@@ -85,10 +85,10 @@ pred_wealthindex_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=pred_wealthindex_pop_mean, aes(yintercept=fit, colour=model, lty=model))
 	+ geom_hline(data=true_prop_df, aes(yintercept=status, colour=model,lty=model))
 	+ geom_point(data=binned_df, aes(x=wealthindex, y=status), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Population-based")
-		, values=c("Observed mean"="red", "Mean-based"="blue", "Population-based"="black")
+	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Whole-sample-based")
+		, values=c("Observed mean"="red", "Mean-based"="blue", "Whole-sample-based"="black")
 	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Population-based"=1))
+	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Whole-sample-based"=1))
 	+ labs(colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )

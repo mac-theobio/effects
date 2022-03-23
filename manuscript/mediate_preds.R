@@ -21,7 +21,7 @@ pred_notmediated_none_mean <- getmeans(pred_notmediated_none, what="estimate")
 pred_notmediated_pop <- varpred(mod_notmediated
 	, "x"
 	, bias.adjust="population"
-	, modelname="Population-based"
+	, modelname="Whole-sample-based"
 )
 pred_notmediated_pop_mean <- getmeans(pred_notmediated_pop, what="estimate")
 
@@ -47,10 +47,10 @@ pred_notmediated_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ geom_point(data=binned_df, aes(x=x, y=z), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Population-based")
-		, values=c("Observed mean"="red", "Mean-based"="blue", "Population-based"="black")
+	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Whole-sample-based")
+		, values=c("Observed mean"="red", "Mean-based"="blue", "Whole-sample-based"="black")
 	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Population-based"=1))
+	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Whole-sample-based"=1))
 	+ labs(colour="Method", linetype="Method", title="A) Non-mediated", y="Predicted probability")
 	+ theme(legend.position="bottom")
 )
@@ -69,7 +69,7 @@ pred_mediated_none_mean <- getmeans(pred_mediated_none, what="estimate")
 pred_mediated_pop <- varpred(mod_mediated
 	, "x"
 	, bias.adjust="population"
-	, modelname="Population-based"
+	, modelname="Whole-sample-based"
 )
 pred_mediated_pop_mean <- getmeans(pred_mediated_pop, what="estimate")
 
@@ -90,10 +90,10 @@ pred_mediated_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ geom_point(data=binned_df, aes(x=x, y=z), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Population-based")
-		, values=c("Observed mean"="red", "Mean-based"="blue", "Population-based"="black")
+	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Whole-sample-based")
+		, values=c("Observed mean"="red", "Mean-based"="blue", "Whole-sample-based"="black")
 	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Population-based"=1))
+	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Whole-sample-based"=1))
 	+ labs(colour="Method", linetype="Method", title="B) Mediated", y="Predicted probability")
 	+ theme(legend.position="bottom")
 )
