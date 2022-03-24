@@ -354,12 +354,11 @@ In the second case, with $Wealthindex$ as the focal predictor, the higher order 
 	& + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i
 \end{align*}
 
-Lastly, consider model~\ref{eq:simple_inter_higher}, with the interactions between the focal predictor, $x_2$, and the non-focal predictor, $x_3$. In this case, the non-interacting predictors are treated as non-focal predictors, with appropriate reference points. However, for the interacting predictors, we first choose representative values for the focal predictor and some particular values of the interacting predictor similar to the way we choose values for the focal predictor or predetermined. The compute the possible combination of all the chosen levels of the focal predictor with chose or predetermined levels of the interacting predictor. In our example, suppose we pick $k$ unique values of the focal predictor, $x_2$, then
+Lastly, consider model~\ref{eq:simple_inter_higher}, with the interactions between the focal predictor, $x_2$, and the non-focal predictor, $x_3$. In this case, the non-interacting predictors are treated as non-focal predictors, with appropriate reference points. However, for the interacting predictors, we first choose representative values for the focal predictor and some particular values of the interacting predictor similar to the way we choose values for the focal predictor or predetermined. In our example, suppose we pick $i$ and $j$ unique values of the focal predictor, $x_2$ and interacting predictor $x_3$, respectively, then the prediction on linear scale is given by
 
 \begin{align*}
-\eta^\star(x_{2[1:k,j]}, \nset{{\bar{x}^\star}}) = \beta_0 + \beta_1 \bar{x}_1 + \beta_2x_{2[1:k,j]} + \beta_3x_{3[j,1:k]} + \beta_{23}x_{2[1:k,j]}x_{3[1:k,j]}
+\eta^\star(x_{2i}, x_{3j}, \nset{{\bar{x}^\star}}) = \beta_0 + \beta_1 \bar{x}_1 + \beta_2x_{2i} + \beta_3x_{3j} + \beta_{23}x_{2i}x_{3j}.
 \end{align*}
-where $j = 1, 2, \cdots$ are the indices of the unique values of the interacting predictor, $x_3$, $x_{2[1:k,j]}$, for example, are the values of the focal predictor corresponding to the $j$th interacting predictor.
 
 In general, our formulation, even for more complicated interactions, follow these three basic principles -- interaction within focal predictor, interaction between non-focal predictors and interaction between focal and non-focal predictors.
 
