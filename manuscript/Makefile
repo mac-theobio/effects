@@ -155,6 +155,11 @@ glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ######################################################################
 
+## Algebra
+Ignore += algebra.html
+algebra.html: algebra.Rmd
+	$(knithtml)
+
 ## Higher order interactions (cubic polynomial)
 cubic_sim.Rout: cubic_sim.R
 cubic_model.Rout: cubic_model.R cubic_sim.rda

@@ -1,0 +1,70 @@
+---
+title: Is anchoring better?
+---
+
+
+\newcommand{\yH}{\hat{y}_0}
+\newcommand{\yHStarl}{\hat{y}_{0l}^\star}
+\newcommand{\yHStarr}{\hat{y}_{0r}^\star}
+\newcommand{\xHS}{\bar{x}^\star}
+\newcommand{\bH}{\hat{\beta}_1}
+\newcommand{\bh}{\hat{\beta}_0}
+\newcommand{\sxxb}{\sum{(x_i - \bar{x})^2}}
+\newcommand{\sxxbsl}{\sum{(x_i - \xHS_l)^2}}
+\newcommand{\sxxbsr}{\sum{(x_i - \xHS_r)^2}}
+\newcommand{\var}[1]{\mathrm{var(#1)}}
+\newcommand{\ss}{\sigma^2}
+\newcommand{\varbH}{\frac{\ss}{\sxxb}}
+\newcommand{\varbh}{\ss\left(\frac{1}{n} + \frac{\bar{x}^2}{\sxxb} \right)}
+
+
+Maybe we can start with simple linear model:
+
+
+
+\[
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+\]
+
+so that
+
+\[
+\hat{\beta_0} = \bar{y} - \bH\bar{x} 
+\]
+with a variance of 
+\[
+\varbh
+\]
+
+
+and 
+
+\[
+\bH = \frac{\sum{(x_i - \bar{x})}(y_i - \bar{y})}{\sxxb}
+\]
+with a variance of 
+\[
+\varbH
+\]
+where $\ss$ is the residual variance.
+
+## Prediction
+
+We want to describe the uncertainties associated with the new data point, $x_0$, based on the fitted model, i.e., 
+
+\begin{align}
+\var{\yH} &= \var{\bh + \bH x_0}\\
+&= \varbh + \varbH - 2\ss\frac{x_0\bar{x}}{\sxxb}\\
+&= \ss \left(\frac{1}{n} + \frac{(x_0 - \bar{x})^2}{\sxxb}\right).
+\end{align}
+
+The default anchor for prediction is the $\bar{x}$. However, we want to investigate what happens to the $\var{\yH}$ for various choices of anchor, $\xHS_l < \bar{x}$ and $\xHS_r > \bar{x}$. In particular, we want to compare
+
+\begin{align}
+\var{\yHStarl} = \ss \left(\frac{1}{n} + \frac{(x_0 - \xHS_l)^2}{\sxxbsl}\right)
+\end{align}
+and 
+\begin{align}
+\var{\yHStarr} = \ss \left(\frac{1}{n} + \frac{(x_0 - \xHS_r)^2}{\sxxbsr}\right)
+\end{align}
+with $\var{\yH}$.
