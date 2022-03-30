@@ -14,5 +14,38 @@ I'd like to start by talking about predictions vs. effects. Predictions are the 
 
 The lines inside (effects) are a little different: they are a good way to visualize the effect of the focal predictor. Unlike predictions, where the uncertainty captures the uncertainty in the whole model, the effects plot focuses on uncertainty in the effect of the focal predictor only -- thus, for example, if an effect is barely significant (P exactly 0.05), one end of the CI will be exactly a horizontal line for the effects plot, but not for the prediction plot. Also, the uncertainty curves for the effect, but not for the prediction, depend on the "anchor".
 
+Also talk about the fact that what _we_ call prediction plots can have either confidence intervals (for the predicted mean) or ``prediction intervals'' for points (we should not show the latter). 
+
 It is interesting, I think, that all of this comes down to choosing a reference, point, an anchor, and then whether or not to include uncertainty in the intercept (so that all of the uncertainty from all of the other variables in the model is somehow channeled through the intercept).
 
+FIGURE showing a splash plot. 
+
+## Model center
+
+A linear model naturally centers around the model center. This is the average point of the columns of the model matrix. The prediction at the model center is always the average value of the response variable.
+
+Note that the model center does not always correspond to logically possible values of the input variables, since there can be more vectors than variables. 
+
+## Anchor
+
+If we are trying to focus on effects, the anchor from which we calculate CIs becomes important. This is not true for the more conventional prediction plots: we can choose any anchor, and the linear algebra sorts out to the same answer. The model center seems like a a natural, stable choice.
+
+FIGURE showing a center-anchored and a zero-anchored isolated effects plot.
+
+If we have more than one input vector for our focal variable, however, the model center does not correspond to any given value of the variable, and we don't get the nice crossing we get in simpler cases.
+
+FIGURE showing a multi-parameter focal variable, and a failure to cross. Compare with using the variable center?
+
+## Reference point ##
+
+In simple models, the reference point affects only the intercept. We can always get this exactly right by using the model center. 
+
+FIGURE showing a model-centered reference point and a variable-centered reference point (and showing clearly how the former works better). We should make the latter ourselves, but also mention that it is the default for competing packages.
+
+If we have focal interactions, then the reference point also affects our slope. _I feel like we should know about how this part actually works!_ What do the competitors do about focal interactions??
+
+## Confounding
+
+If we are looking to disentangle direct and indirect effects, effects plots seem to make more sense than prediction plots. How well can we explain this? In the case of a linear model, we expect a univariate fit (or a fit involving covariates orthogonal to the focal predictor) to visually match the data. This is not true for the general confounding case, which will help guide us when we get to generalized models.
+
+FIGURE showing an unconfounded fit going through the data and a confounded fit not going through the data. The “good” confounded fit still goes through the center, not sure if we need to talk abou tthat.
