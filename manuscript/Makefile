@@ -144,6 +144,8 @@ pipeRimplicit += eduPlot
 %.eduPlot.Rout: eduPlot.R %.eduFit.rda
 	$(pipeR)
 
+## alcohol.eduQuad.eduPlot.pred.pdf:
+
 pipeRdesc += eduzPlot
 pipeRimplicit += eduzPlot
 ## zeroPlots are fragile so do them separately
