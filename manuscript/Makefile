@@ -137,6 +137,7 @@ eduFit_dep = %_data.rds
 
 ## pipeRdesc works with _plain_ stems
 pipeRdesc += eduPlot
+pipeRimplicit += eduPlot
 ## alcohol.eduUni.eduPlot.Rout: eduPlot.R
 ## alcohol.eduQuad.eduPlot.Rout: eduPlot.R
 ## alcohol.eduFull.eduPlot.Rout: eduFull.R
@@ -144,6 +145,7 @@ pipeRdesc += eduPlot
 	$(pipeR)
 
 pipeRdesc += eduzPlot
+pipeRimplicit += eduzPlot
 ## zeroPlots are fragile so do them separately
 ## alcohol.eduUni.eduzPlot.Rout: eduzPlot.R
 ## alcohol.eduQuad.eduzPlot.Rout: eduzPlot.R

@@ -8,4 +8,4 @@ mod <- lm(con~edu, data=dat)
 
 summary(mod)
 
-rdsSave(mod)
+saveVars(mod, dat)
