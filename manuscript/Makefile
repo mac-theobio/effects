@@ -152,6 +152,7 @@ pipeRimplicit += eduzPlot
 %.eduzPlot.Rout: eduzPlot.R %.eduPlot.rda
 	$(pipeR)
 
+pipeRdesc += glm_talk
 glm_calcs.Rout: glm_calcs.R glm_two_predictor_model.rda
 glm_talk.Rout: glm_talk.R glm_calcs.rda
 
