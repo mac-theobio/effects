@@ -4,7 +4,7 @@
 \alias{varefftheme}
 \title{Customized theme for vareffects plots}
 \usage{
-varefftheme()
+varefftheme(type = c("minimal", "complete"))
 }
 \description{
 Sets a theme for vareffects and other ggplot objects

@@ -508,6 +508,8 @@ clean_model <- function(focal.predictors, mod, xlevels
     if (!fac) {
 	 	if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))) {
 			levels <- c(levels, isolate.value)
+		} else {
+			levels <- c(levels, typical(levels))
 		}
 	 }
 	 x[[name]] <- list(name=name, is.factor=is.factor(X[, name]), levels=levels)
