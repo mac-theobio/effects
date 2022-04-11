@@ -143,8 +143,8 @@ varefftheme <- function(type=c("minimal", "complete")){
 				, axis.text.y = element_text(size = 12)
 				, axis.title.x = element_text(size = 12)
 				, axis.title.y = element_text(size = 12)
-				, legend.title = element_text(size = 13, hjust = 0.5)
-				, legend.text = element_text(size = 13)
+				, legend.title = element_text(size = 12, hjust = 0.5)
+				, legend.text = element_text(size = 12)
 				, panel.grid.major = element_blank()
 				, legend.key.size = unit(0.8, "cm")
 				, legend.key = element_rect(fill = "white")
@@ -166,6 +166,8 @@ varefftheme <- function(type=c("minimal", "complete")){
 			theme_bw(base_size=12)
 			+ theme(
 				strip.background = element_blank()
+				, plot.title = element_text(hjust = 0.5)
+				, legend.position = "bottom"
 				, panel.border = element_rect(colour = "grey"
 					, fill = NA
 					, size = 0.8
