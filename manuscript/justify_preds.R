@@ -36,7 +36,8 @@ simple_plot <- (combinepreds(justify_mod
 	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
 		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
-	+ labs(title="A) Model 1", colour="Method", linetype="Method")
+	+ labs(title="No interaction", colour="Method", linetype="Method")
+#	+ labs(title="A) Model 1", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 
@@ -66,7 +67,8 @@ inter_plot <- (combinepreds(justify_inter_mod
 	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
 		, labels=c("observed", "emmeans", "effects", "varpred")
 	)
-	+ labs(title="B) Model 2", colour="Method", linetype="Method")
+	+ labs(title="Interaction", colour="Method", linetype="Method")
+#	+ labs(title="B) Model 2", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 
