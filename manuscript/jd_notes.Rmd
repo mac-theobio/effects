@@ -2,6 +2,15 @@
 title: JD notes on effects
 ---
 
+
+We should talk about estimates before we get to confidence intervals.
+The main thing about estimates is the reference point.
+We should talk specifically about how taking the average as a reference point makes clear sense in a linear model.
+
+We should talk about effect-style plots and prediction-style plots. A prediction-style plot is about predicting observations (or the ensemble mean of observations) for a given value of the focal predictor. For this, we want to use the classic curved confidence intervals (or prediction intervals). A prediction-style plot will generally focus on _total_ effects, and so will often be based on a univariate fit.
+
+An effect-style plot is an attempt to visualize the effect of a focal predictor. In this case, we suggest the narrower confidence intervals. Here, it makes equal sense to think about the total effect of our focal predictor, from a univariate model, or the direct effects – after controlling for whatever – from a multivariate model.
+
 ## Language
 
 It might be better to say focal variable, or focal input variable, otherwise we are conflating predictor with something we use to make a prediction. I'm also thinking it might be good to just say "variable" for input variable, but in this case we need yet another name for the statistical variables. 
