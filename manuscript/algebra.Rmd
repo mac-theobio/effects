@@ -3,68 +3,110 @@ title: Is anchoring better?
 ---
 
 
-\newcommand{\yH}{\hat{y}_0}
-\newcommand{\yHStarl}{\hat{y}_{0l}^\star}
-\newcommand{\yHStarr}{\hat{y}_{0r}^\star}
-\newcommand{\xHS}{\bar{x}^\star}
-\newcommand{\bH}{\hat{\beta}_1}
-\newcommand{\bh}{\hat{\beta}_0}
-\newcommand{\sxxb}{\sum{(x_i - \bar{x})^2}}
-\newcommand{\sxxbsl}{\sum{(x_i - \xHS_l)^2}}
-\newcommand{\sxxbsr}{\sum{(x_i - \xHS_r)^2}}
-\newcommand{\var}[1]{\mathrm{var(#1)}}
-\newcommand{\ss}{\sigma^2}
-\newcommand{\varbH}{\frac{\ss}{\sxxb}}
-\newcommand{\varbh}{\ss\left(\frac{1}{n} + \frac{\bar{x}^2}{\sxxb} \right)}
+\newcommand{\yH}{\hat{y}}
+\newcommand{\x}{\mathbf{X}}
+\newcommand{\xt}{\x^\top}
+\newcommand{\xtx}{\xt\x}
+\newcommand{\xtxI}{(\xtx)^{-1}}
+\newcommand{\b}{\beta}
+\newcommand{\bt}{\b^\top}
+\newcommand{\xb}{\mathbf{\x\b}}
+\newcommand{\ep}{\epsilon}
+\newcommand{\bH}{\hat{\b}}
+\newcommand{\bHt}{\bH^\top}
+\newcommand{\xbH}{\x\bH}
+\newcommand{\xtxBH}{(\xtx)\bH}
+\newcommand{\xty}{\xt y}
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\s}{\sigma}
+\newcommand{\ss}{\s^2}
+\newcommand{\ssH}{\hat{\ss}}
+\newcommand{\xo}{\x_0}
+\newcommand{\xof}{\x_{0,f}}
+\newcommand{\xot}{\xo^\top}
+\newcommand{\v}{\mathrm{var}}
+\newcommand{\a}{\mathbf{A}}
+\newcommand{\xoma}{(\xo - \a)}
+\newcommand{\xomat}{\xoma^\top}
 
+## OLS estimator
 
-Maybe we can start with simple linear model:
-
-
+Consider linear model
 
 \[
-y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+y = \xb + \ep
 \]
 
-so that
+Let $\bH$ be the estimate of the population parameter $\b$, we want to minimize the sum of squared residuals $\sum \ep_i^2$, with
+
+\begin{align*}
+\ep &= y - \xbH \\
+\ep^\top\ep &= (y - \xbH) (y - \xbH) \\
+&=y^\top y - 2\bHt\xt y + \bHt \xtx \bH
+\end{align*}
+
+Minimizing above, i.e, taking derivative w.r.t $\bH$ and equating to $0$, we have
 
 \[
-\hat{\beta_0} = \bar{y} - \bH\bar{x} 
-\]
-with a variance of 
-\[
-\varbh
+\xtxBH = \xty
 \]
 
+Provided $\xtxI$ exists:
+
+\begin{align*}
+\xtxI \xtxBH &= \xtxI \xty\\
+\implies \bH &= \xtxI \xty
+\end{align*}
+
+From the result above
+
+\begin{align*}
+\bH &= \xtxI \xty\\
+&= \xtxI \xt (\xb + \ep) \\
+&= \b + \xtxI \xt \ep
+\end{align*}
+
+## Variance-covariance matrix
+
+\begin{align*}
+\E[(\bH - \b)(\bH - \b)^\top] &= \E[(\xtxI \xt \ep) (\xtxI \xt \ep)^T] \\
+&= \E[\xtxI \xt \ep\ep^\top \x \xtxI] \\
+&= \xtxI \xt \E[\ep\ep^\top] \x \xtxI \\
+&= \ss \xtxI
+\end{align*}
 
 and 
 
 \[
-\bH = \frac{\sum{(x_i - \bar{x})}(y_i - \bar{y})}{\sxxb}
+\ssH = \frac{\ep^\top\ep}{n - k}
 \]
-with a variance of 
-\[
-\varbH
-\]
-where $\ss$ is the residual variance.
 
-## Prediction
+## Predicting new data points
 
-We want to describe the uncertainties associated with the new data point, $x_0$, based on the fitted model, i.e., 
+Let $\xo$ be the design matrix containing values of the predictors, from which we want to make predictions, then 
 
-\begin{align}
-\var{\yH} &= \var{\bh + \bH x_0}\\
-&= \varbh + \varbH - 2\ss\frac{x_0\bar{x}}{\sxxb}\\
-&= \ss \left(\frac{1}{n} + \frac{(x_0 - \bar{x})^2}{\sxxb}\right).
-\end{align}
+\begin{align*}
+\hat{y} &= \xo\bH\\
+&= \xo\xtxI \xty
+\end{align*}
 
-The default anchor for prediction is the $\bar{x}$. However, we want to investigate what happens to the $\var{\yH}$ for various choices of anchor, $\xHS_l < \bar{x}$ and $\xHS_r > \bar{x}$. In particular, we want to compare
-
-\begin{align}
-\var{\yHStarl} = \ss \left(\frac{1}{n} + \frac{(x_0 - \xHS_l)^2}{\sxxbsl}\right)
-\end{align}
 and 
-\begin{align}
-\var{\yHStarr} = \ss \left(\frac{1}{n} + \frac{(x_0 - \xHS_r)^2}{\sxxbsr}\right)
-\end{align}
-with $\var{\yH}$.
+
+\begin{align*}
+\v{(\hat{y})} &= \v[\xo\xtxI \xty]\\
+&= \xo\xtxI \xt \v(y) [\xo\xtxI \xt]^\top \\
+&= \ss \xo\xtxI \xt \x \xtxI \xot\\
+&= \ss \xo \xtxI \xot
+\end{align*}
+
+## Anchoring and effects
+
+Let $\xo$ be a centered model matrix containing appropriately chosen values of focal predictors and non-focal predictors as the average of the corresponding columns in the model matrix, and let $\a$ be the anchor matrix, with same dimensions as $\xo$ and values in each columns repeated $n$ times. Also, let $\a_f$ be the anchor column corresponding to the focal predictor, the rest of the columns corresponds the non-focal predictors with same values as in $\xo$. Any appropriate value (within the range of focal values) can be chosen for $\a_f$ but by default center point is chosen. Then
+
+\begin{align*}
+\v{(\hat{y})} &= \ss \xoma \xtxI \xomat
+\end{align*}
+
+We can see that, for any values $\a_f=\xof$, $\v(\hat{y}) = \boldsymbol{0}$. If $\a_f = \overline{\xof}$, then the anchor is the center point at this observation will still hold. 
+
+We need to figure out how to quantify and compare all the variances resulting from choosing other anchors, i.e., $\a_f < \overline{\xof}$ and $\a_f > \overline{\xof}$.
