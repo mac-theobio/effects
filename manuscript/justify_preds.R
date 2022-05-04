@@ -94,7 +94,7 @@ justify_ci_plots <- (combinepreds(justify_mod
 	)
 	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
 	+ geom_vline(xintercept=mean(x2_focal), lty=2, col="grey")
-	+ geom_line(data=x2_truepred_df, aes(x=x2, y=fit), lty=4, colour="red")
+#	+ geom_line(data=x2_truepred_df, aes(x=x2, y=fit), lty=4, colour="red")
 	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
 		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
 		, labels=c("observed", "emmeans", "effects", "varpred")
@@ -107,3 +107,7 @@ justify_ci_plots <- (combinepreds(justify_mod
 ) %>% teeGG(desc="isolate", height=5.3)
 
 print(justify_ci_plots)
+
+## Isolated with CIs (zero-anchored)
+justify_center_anchored <- varpred(justify_mod, "x2", modelname="center-anchored")
+justify_zero_anchored <- varpred(justify_mod, "x2", isolate.value=0, modelname="zero-anchored")

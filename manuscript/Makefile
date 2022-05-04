@@ -40,6 +40,9 @@ justify_preds.Rout: justify_preds.R justify_model.rda
 ## justify_preds.isolate.pdf: justify_preds.R justify_model.rda
 ## justify_preds.inter.pdf: justify_preds.R justify_model.rda
 
+justify_anchors.Rout: justify_anchors.R justify_model.rda
+
+
 ## Figure 3: Quantity of interest
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
 
