@@ -96,6 +96,7 @@ varpred <- function(mod
 	, focal_predictors
 	, x.var = NULL
 	, joint.var=NULL
+	, use.new=FALSE
 	, type = c("response", "link")
 	, isolate = TRUE
 	, isolate.value = NULL
@@ -164,10 +165,17 @@ varpred <- function(mod
 		if (joint.var==x.var) stop("joint.var should not be the same as x.var")
 		if (any(!joint.var %in% focal.predictors)) stop("joint.var should be specified as one of the focal_predictors")
 	}
+	..focal.predictors <- focal.predictors
+	if (use.new & n.focal>1) {
+		x.joint <- unlist(focal.predictors)[!unlist(focal.predictors) %in% x.var]
+		..focal.predictors <- x.var
+	} else {
+		use.new <- FALSE
+	}
 	
 	.contr <- vareff_objects$contrasts
 #	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
-	model_frame_objs <- clean_model(focal.predictors=focal.predictors
+	model_frame_objs <- clean_model(focal.predictors=..focal.predictors
 		, mod = mod
 		, xlevels=at
 		, default.levels=NULL
@@ -185,7 +193,7 @@ varpred <- function(mod
 	predict.data <- model_frame_objs$predict.data
 	factor.levels <- model_frame_objs$factor.levels
 	factor.cols <- model_frame_objs$factor.cols
-	n.focal <- model_frame_objs$n.focal
+	n.focal <- if(use.new) n.focal else model_frame_objs$n.focal
 	x <- model_frame_objs$x
 	X.mod <- model_frame_objs$X.mod
 	cnames <- model_frame_objs$cnames
@@ -313,32 +321,60 @@ varpred <- function(mod
 		}
 		
 	} else if (bias.adjust %in% c("population", "quantile")) {
+		
 		x.focal <- predict.data$focal
 		x.excluded <- predict.data$excluded
-		pred_obj_all <- pop.bias.adjust(x.focal=x.focal
-			, x.excluded=x.excluded
-			, betahat=betahat
-			, formula.rhs=formula.rhs
-			, rTerms=rTerms
-			, factor.levels=factor.levels
-			, contr=.contr
-			, mult=mult
-			, vnames=vnames
-			, offset=offset
-			, mod=mod
-			, vcov.=vcov.
-			, isolate=isolate
-			, isolate.value=isolate.value
-			, internal=internal
-			, vareff_objects=vareff_objects
-			, x.var=x.var
-			, typical=typical
-			, zero_out_interaction=zero_out_interaction
-			, include.re=include.re
-			, joint.var=joint.var
-		)
-		pred_obj <- pred_obj_all$pred_df
-		predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
+		if (use.new) {
+			pred_obj_all <- pop.bias.adjust2(x.focal=x.focal
+				, x.excluded=x.excluded
+				, betahat=betahat
+				, formula.rhs=formula.rhs
+				, rTerms=rTerms
+				, factor.levels=factor.levels
+				, contr=.contr
+				, mult=mult
+				, vnames=vnames
+				, offset=offset
+				, mod=mod
+				, vcov.=vcov.
+				, isolate=isolate
+				, isolate.value=isolate.value
+				, internal=internal
+				, vareff_objects=vareff_objects
+				, x.var=x.var
+				, typical=typical
+				, zero_out_interaction=zero_out_interaction
+				, include.re=include.re
+				, x.joint=x.joint
+			)
+			pred_obj <- pred_obj_all$pred_df
+			predict.data <- pred_obj[, colnames(pred_obj)[!colnames(pred_obj) %in% c("pred", "pse_var", "lwr", "upr")], drop=FALSE]
+		} else {
+			pred_obj_all <- pop.bias.adjust(x.focal=x.focal
+				, x.excluded=x.excluded
+				, betahat=betahat
+				, formula.rhs=formula.rhs
+				, rTerms=rTerms
+				, factor.levels=factor.levels
+				, contr=.contr
+				, mult=mult
+				, vnames=vnames
+				, offset=offset
+				, mod=mod
+				, vcov.=vcov.
+				, isolate=isolate
+				, isolate.value=isolate.value
+				, internal=internal
+				, vareff_objects=vareff_objects
+				, x.var=x.var
+				, typical=typical
+				, zero_out_interaction=zero_out_interaction
+				, include.re=include.re
+				, joint.var=joint.var
+			)
+			pred_obj <- pred_obj_all$pred_df
+			predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
+		}
 		pse_var <- pred_obj$pse_var
 		off <- pred_obj_all$off
 		pred <- pred_obj$pred 

@@ -9,6 +9,7 @@ varpred(
   focal_predictors,
   x.var = NULL,
   joint.var = NULL,
+  use.new = FALSE,
   type = c("response", "link"),
   isolate = TRUE,
   isolate.value = NULL,
