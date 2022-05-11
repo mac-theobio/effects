@@ -95,8 +95,6 @@
 varpred <- function(mod
 	, focal_predictors
 	, x.var = NULL
-	, joint.var=NULL
-	, use.new=FALSE
 	, type = c("response", "link")
 	, isolate = TRUE
 	, isolate.value = NULL
@@ -161,18 +159,18 @@ varpred <- function(mod
 		x.var <- focal.predictors[[1]]
 	}
 	
-	if (!is.null(joint.var)) {
-		if (joint.var==x.var) stop("joint.var should not be the same as x.var")
-		if (any(!joint.var %in% focal.predictors)) stop("joint.var should be specified as one of the focal_predictors")
-	}
 	..focal.predictors <- focal.predictors
-	if (use.new & n.focal>1) {
-		x.joint <- unlist(focal.predictors)[!unlist(focal.predictors) %in% x.var]
-		..focal.predictors <- x.var
-	} else {
-		use.new <- FALSE
+	use.new <- FALSE
+	if (bias.adjust=="population") {
+		if (n.focal>1) {
+			x.joint <- unlist(focal.predictors)[!unlist(focal.predictors) %in% x.var]
+			..focal.predictors <- x.var
+		} else {
+			x.joint <- NULL
+		}
+		use.new <- TRUE
 	}
-	
+
 	.contr <- vareff_objects$contrasts
 #	formula.rhs <- insight::find_formula(mod)$conditional #formula(mod)[c(1, 3)]
 	model_frame_objs <- clean_model(focal.predictors=..focal.predictors
