@@ -21,7 +21,6 @@
 #' @param dfspec default \code{100}. Specified degrees of freedom for model which do not return \code{df}. This is used in computation of confidence intervals.
 #' @param vcov. a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} is important when "anchored" CIs are required. However, with this approach, the predictors should be properly scaled, for example, scaled. {isolate=TRUE} centers at the mean of the model matrix without requiring the scaled input predictors. See examples.
 #' @param internal logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.
-#' @param zero_out_interaction logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.
 #' @param avefun the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.
 #' @param offset a function or a value (FIXME:).
 #' @param bias.adjust specifies the bias correction method. If "none" (default), no bias correction method is applied; if "delta", delta method is used; if "population", all the values of non-focal predictors are used; otherwise, if "quantile", quantiles of non-focal numerical predictors are use. The options "quantile" and "population" (both EXPERIMENTAL) are used for bias correction in GL(M)M models involving non-linear link functions.
@@ -83,7 +82,7 @@
 #' all.equal(pred2c$pred[,-1], pred3c$pred[,-1], check.attributes = FALSE)
 #'
 #' # Compare across groups
-#' pred4c <- varpred(m1c, c("x1c", "x2u"), x.var = "x1c", isolate = TRUE, zero_out_interaction = TRUE)
+#' pred4c <- varpred(m1c, c("x1c", "x2u"), x.var = "x1c", isolate = TRUE)
 #' plot(pred4c)
 #' 
 #' @importFrom stats model.frame model.matrix vcov .getXlevels as.formula coef coefficients delete.response formula qt setNames terms
@@ -105,7 +104,6 @@ varpred <- function(mod
 	, true.beta=NULL
 	, vcov. = NULL
 	, internal = FALSE
-	, zero_out_interaction = FALSE
 	, avefun = mean
 	, offset = NULL
 	, bias.adjust = c("none", "delta", "quantile", "population")
@@ -206,8 +204,7 @@ varpred <- function(mod
 	# Stats
 	mult <- get_stats(mod, level, dfspec)
 			
-	
-	## No or delta bias adjustment
+	## None or delta bias adjustment
 	if (bias.adjust %in% c("none", "delta", "mcculloch", "diggle", "logitnorm")) {
 		mf <- model.frame(rTerms, predict.data, xlev = factor.levels, na.action=NULL)
 		mod.matrix <- model.matrix(formula.rhs
@@ -230,11 +227,10 @@ varpred <- function(mod
 		)
 		
 		# Predictions
-		# col_mean <- apply(X.mod, 2, typical)
 		col_mean <- apply(mm, 2, typical)
 		pse_var <- mult*get_sderror(mod=mod, vcov.=vcov., mm=mm, col_mean=col_mean, isolate=isolate
 			, isolate.value=isolate.value, internal=internal, vareff_objects=vareff_objects, x.var=x.var
-			, typical=typical, formula.rhs=formula.rhs, zero_out_interaction=zero_out_interaction
+			, typical=typical, formula.rhs=formula.rhs
 			, mf=predict.data # 2022 Mar 15 (Tue): re-evaluate within the isolate.value
 			, rTerms=rTerms
 			, factor.levels=factor.levels
@@ -248,25 +244,19 @@ varpred <- function(mod
 			, factor.type=factor.type
 			, factor.weights=factor.weights
 			, vnames=vnames
+			, .contr=.contr
 		)
 		off <- get_offset(offset, mf)
 		pred <- off + as.vector(mm %*% betahat)
 		if (include.re) {
 			re <- includeRE(mod)
 		}
-		if (include.re && any(re!=0) && bias.adjust=="none") {
+		if (include.re && all(re!=0) && bias.adjust=="none") {
 			predict.data <- predict.data[rep(1:length(pred), each=length(re)), 1:n.focal, drop=FALSE]
-			lwr <- list()
-			upr <- list()
-			pred_temp <- list()
-			for (p in 1:length(pred)) {
-				pred_temp[[p]] <- pred[[p]] + re
-				lwr[[p]] <- pred_temp[[p]] - pse_var[[p]]
-				upr[[p]] <- pred_temp[[p]] + pse_var[[p]]
-			}
-			pred <- do.call("c", pred_temp)
-			upr <- do.call("c", upr)
-			lwr <- do.call("c", lwr)
+			pred <- pred[rep(1:length(pred), each=length(re))]
+			pred <- pred + re
+			lwr <- pred - pse_var
+			upr <- pred + pse_var
 		} else if (bias.adjust=="logitnorm" && type=="response") {
 			## FIXME: result is in probability scale, should I 
 			## transform it back to logit scale for type=="link"?
@@ -322,57 +312,29 @@ varpred <- function(mod
 		
 		x.focal <- predict.data$focal
 		x.excluded <- predict.data$excluded
-		if (use.new) {
-			pred_obj_all <- pop.bias.adjust2(x.focal=x.focal
-				, x.excluded=x.excluded
-				, betahat=betahat
-				, formula.rhs=formula.rhs
-				, rTerms=rTerms
-				, factor.levels=factor.levels
-				, contr=.contr
-				, mult=mult
-				, vnames=vnames
-				, offset=offset
-				, mod=mod
-				, vcov.=vcov.
-				, isolate=isolate
-				, isolate.value=isolate.value
-				, internal=internal
-				, vareff_objects=vareff_objects
-				, x.var=x.var
-				, typical=typical
-				, zero_out_interaction=zero_out_interaction
-				, include.re=include.re
-				, x.joint=x.joint
-			)
-			pred_obj <- pred_obj_all$pred_df
-			predict.data <- pred_obj[, colnames(pred_obj)[!colnames(pred_obj) %in% c("pred", "pse_var", "lwr", "upr")], drop=FALSE]
-		} else {
-			pred_obj_all <- pop.bias.adjust(x.focal=x.focal
-				, x.excluded=x.excluded
-				, betahat=betahat
-				, formula.rhs=formula.rhs
-				, rTerms=rTerms
-				, factor.levels=factor.levels
-				, contr=.contr
-				, mult=mult
-				, vnames=vnames
-				, offset=offset
-				, mod=mod
-				, vcov.=vcov.
-				, isolate=isolate
-				, isolate.value=isolate.value
-				, internal=internal
-				, vareff_objects=vareff_objects
-				, x.var=x.var
-				, typical=typical
-				, zero_out_interaction=zero_out_interaction
-				, include.re=include.re
-				, joint.var=joint.var
-			)
-			pred_obj <- pred_obj_all$pred_df
-			predict.data <- x.focal[rep(1:NROW(x.focal), each=pred_obj_all$dim), 1:n.focal, drop=FALSE]
-		}
+		pred_obj_all <- pop.bias.adjust(x.focal=x.focal
+			, x.excluded=x.excluded
+			, betahat=betahat
+			, formula.rhs=formula.rhs
+			, rTerms=rTerms
+			, factor.levels=factor.levels
+			, contr=.contr
+			, mult=mult
+			, vnames=vnames
+			, offset=offset
+			, mod=mod
+			, vcov.=vcov.
+			, isolate=isolate
+			, isolate.value=isolate.value
+			, internal=internal
+			, vareff_objects=vareff_objects
+			, x.var=x.var
+			, typical=typical
+			, include.re=include.re
+			, x.joint=x.joint
+		)
+		pred_obj <- pred_obj_all$pred_df
+		predict.data <- pred_obj[, colnames(pred_obj)[!colnames(pred_obj) %in% c("pred", "pse_var", "lwr", "upr")], drop=FALSE]
 		pse_var <- pred_obj$pse_var
 		off <- pred_obj_all$off
 		pred <- pred_obj$pred 
@@ -441,7 +403,7 @@ varpred <- function(mod
 					, lwr=as.vector(out$lwr), upr= as.vector(out$upr))}
 	)
 
-	if ((bias.adjust %in% c("quantile", "population"))||include.re){
+	if ((bias.adjust %in% c("quantile", "population"))||include.re||(include.re && all(re!=0) && bias.adjust=="none")){
 		form <- as.formula(paste0(".~", paste0(colnames(out$x), collapse = "+")))
 		result <- aggregate(form, result, FUN=function(x)mean(x, na.rm=TRUE))
 	} 

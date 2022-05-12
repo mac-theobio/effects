@@ -18,7 +18,6 @@ varpred(
   true.beta = NULL,
   vcov. = NULL,
   internal = FALSE,
-  zero_out_interaction = FALSE,
   avefun = mean,
   offset = NULL,
   bias.adjust = c("none", "delta", "quantile", "population"),
@@ -53,8 +52,6 @@ varpred(
 \item{vcov.}{a function or a matrix. If a function, it is used to compute the variance-covariance matrix of the model coefficients. The function should take model as it's first (or maybe only) argument. A matrix of variance-covariance matrix of the estimated coefficient can also be used. Otherwise \code{vcov(mod)} is used internally. Specifying \code{vcov.} is important when "anchored" CIs are required. However, with this approach, the predictors should be properly scaled, for example, scaled. {isolate=TRUE} centers at the mean of the model matrix without requiring the scaled input predictors. See examples.}
 
 \item{internal}{logical. If \code{TRUE}, the entries of the non-focal predictor (see x.var) in the variance-covariance matrix are internally zeroed-out using \code{\link[vareffects]{zero_vcov}}. Default is \code{FALSE}.}
-
-\item{zero_out_interaction}{logical [EXPERIMENTAL]. If \code{TRUE} the uncertainty as a result of interaction terms are removed (set to zero) when \code{ignored if isolate = FALSE}. Only main effect SEs are computed. To obtain centered CIs, the numerical predictors in the interaction terms should be scaled (centered); and sum to zero contrast used in case of categorical predictor.}
 
 \item{avefun}{the averaging scheme (function) to be used in conditioning non-focal predictors. Default is \code{mean}.}
 
@@ -130,7 +127,7 @@ plot(pred3c)
 all.equal(pred2c$pred[,-1], pred3c$pred[,-1], check.attributes = FALSE)
 
 # Compare across groups
-pred4c <- varpred(m1c, c("x1c", "x2u"), x.var = "x1c", isolate = TRUE, zero_out_interaction = TRUE)
+pred4c <- varpred(m1c, c("x1c", "x2u"), x.var = "x1c", isolate = TRUE)
 plot(pred4c)
 
 }

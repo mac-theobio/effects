@@ -4,116 +4,7 @@
 pop.bias.adjust <- function(x.focal, x.excluded, betahat, formula.rhs
 	, rTerms, factor.levels, contr, offset, mult, vnames, ...
 	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
-	, typical, zero_out_interaction, include.re, joint.var) {
-
-#	non_focal_terms <- names(vnames)[!vnames %in% colnames(x.focal)]
-#	focal_terms <- names(vnames)[vnames %in% colnames(x.focal)]
-	mm <- get_model.mm(mod)
-
-	if (isolate) {
-		if (!is.null(x.excluded)) {
-			factor.levels_update <- factor.levels
-			factor.levels_update[!names(factor.levels_update) %in% names(x.focal)] <- NULL
-			drop_index <- grep(paste(colnames(x.excluded), collapse = "|"), attr(rTerms, "term.labels"))
-			rTerms_update <- drop.terms(rTerms, drop_index)
-			formula.rhs_update <- drop.terms(terms(formula.rhs), drop_index)
-			contr_update <- contr
-			contr_update[!names(contr_update) %in% names(x.focal)] <- NULL
-		} else {
-			rTerms_update <- rTerms
-			factor.levels_update <- factor.levels
-			formula.rhs_update <- formula.rhs
-			contr_update <- contr
-		}
-		focal_mf <- model.frame(formula(rTerms_update), x.focal, xlev=factor.levels_update, na.action=NULL)
-		focal_mm <- model.matrix(formula.rhs_update, data = focal_mf, contrasts.arg = contr_update)
-		focal_terms_update <- colnames(focal_mm) #attr(terms(formula.rhs_update), "term.labels")
-	} else {
-		focal_mf <- model.frame(mod)
-		focal_mm <- mm
-		focal_terms_update <- NULL
-	}
-	col_mean <- colMeans(focal_mm)
-	
-	if (!is.null(x.excluded)) {
-		nM <- NROW(x.excluded)
-	} else {
-		nM <- NROW(mm)
-	}
-	
-	
-	pse_var <- mult*get_sderror(mod=mod
-		, vcov.=vcov.
-		, mm=focal_mm
-		, col_mean=col_mean
-		, isolate=isolate
-		, isolate.value=isolate.value
-		, internal=internal
-		, vareff_objects=vareff_objects
-		, x.var=x.var
-		, typical=typical
-		, formula.rhs=formula.rhs
-		, zero_out_interaction=zero_out_interaction
-		, mf=focal_mf
-		, focal_terms=focal_terms_update
-		, rTerms=rTerms_update
-		, factor.levels=factor.levels_update
-		, bias.adjust="population"
-	)
-
-	if (include.re) {
-		re <- includeRE(mod)	
-	} else {
-		re <- 0
-	}
-
-	pred_list <- list()
-	offs <- NULL
-	
-	## FIXME: better way to match the order of R with the x.focal?
-	if (!is.null(joint.var)) {
-		if (length(re)>1) {
-			levs <- unique(x.focal[[joint.var]])
-			nn <- length(levs)
-			vals <- recoverdata(mod)[[joint.var]]
-		}
-	}
-	
-	# TODO: eliminate loop if there is no x.excluded 
-	for (i in 1:NROW(x.focal)) {
-		focal_i <- x.focal[i, ,drop=FALSE]
-		if (!is.null(joint.var)) {
-			if (length(re)>1) {
-				index <- vals==focal_i[[joint.var]]
-				re2 <- rep(re[index], times=nn)
-			} else {
-				re2 <- re
-			}
-		} else {
-			re2 <- re
-		}
-		focal_i[1:nM, ] <- focal_i
-		mf_i <- if(!is.null(x.excluded)) cbind.data.frame(focal_i, x.excluded) else focal_i
-		mf_i <- model.frame(rTerms, mf_i, xlev=factor.levels, na.action=NULL)
-		mm_i <- model.matrix(formula.rhs, data = mf_i, contrasts.arg = contr)
-
-		off <- get_offset(offset, mf_i)
-		offs[i] <- off
-		pred_list[[i]] <- transform(
-			data.frame(pred=off + as.vector(mm_i %*% betahat) + re2)
-			, lwr=pred - ifelse(isolate, pse_var[[i]], pse_var)
-			, upr=pred + ifelse(isolate, pse_var[[i]], pse_var)
-			, pse_var=ifelse(isolate, pse_var[[i]], pse_var)
-		)
-	}
-	pred_df <- do.call("rbind", pred_list)
-	return(list(pred_df=pred_df, off=mean(offs), dim=nM))
-}
-
-pop.bias.adjust2 <- function(x.focal, x.excluded, betahat, formula.rhs
-	, rTerms, factor.levels, contr, offset, mult, vnames, ...
-	, mod, vcov., isolate, isolate.value, internal, vareff_objects, x.var
-	, typical, zero_out_interaction, include.re, x.joint) {
+	, typical, include.re, x.joint) {
 
 	mm <- get_model.mm(mod)
 	if (!is.null(x.excluded)) {
@@ -130,6 +21,9 @@ pop.bias.adjust2 <- function(x.focal, x.excluded, betahat, formula.rhs
 			if (!is.null(x.joint)) {
 				x.focal.names <- c(colnames(x.focal), x.joint)
 				x.excluded.names <- colnames(x.excluded)[!colnames(x.excluded) %in% x.joint]
+			} else {
+				x.focal.names <- colnames(x.focal)
+				x.excluded.names <- colnames(x.excluded)
 			}
 			factor.levels_update[!names(factor.levels_update) %in% x.focal.names] <- NULL
 			drop_index <- grep(paste(x.excluded.names, collapse = "|"), attr(rTerms, "term.labels"))
@@ -151,6 +45,7 @@ pop.bias.adjust2 <- function(x.focal, x.excluded, betahat, formula.rhs
 		focal_mf <- model.frame(mod)
 		focal_mm <- mm
 		focal_terms_update <- NULL
+		contr_update <- contr
 	}
 	col_mean <- colMeans(focal_mm)
 	
@@ -165,12 +60,12 @@ pop.bias.adjust2 <- function(x.focal, x.excluded, betahat, formula.rhs
 		, x.var=x.var
 		, typical=typical
 		, formula.rhs=formula.rhs_update
-		, zero_out_interaction=zero_out_interaction
 		, mf=focal_mf
 		, focal_terms=focal_terms_update
 		, rTerms=rTerms_update
 		, factor.levels=factor.levels_update
 		, bias.adjust="population"
+		, .contr=contr_update
 	)
 
 	if (include.re) {
@@ -283,7 +178,7 @@ get_offset <- function(offset, mf) {
 	 link
 }
 
-get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, zero_out_interaction, mf, focal_terms=NULL, rTerms, factor.levels, bias.adjust, ..., X.mod, factor.cols, cnames, focal.predictors, excluded.predictors, apply.typical.to.factors, factor.type, factor.weights, vnames) {
+get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, internal, vareff_objects, x.var, typical, formula.rhs, mf, focal_terms=NULL, rTerms, factor.levels, bias.adjust, ..., X.mod, factor.cols, cnames, focal.predictors, excluded.predictors, apply.typical.to.factors, factor.type, factor.weights, vnames, .contr) {
 	
 	if (is.null(vcov.)){
 		vc <- vcov(vareff_objects)
@@ -297,32 +192,33 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
   	
 	if (!is.null(focal_terms)) {
 		vc <- vc[focal_terms, focal_terms]
-#		print(focal_terms)
-#		print("See ...")
 		mm <- mm[, focal_terms, drop=FALSE]
 	}
 
 	# (Centered) predictions for SEs
 	## Center model matrix
 	if (isolate) {
-		mm_mean <- t(replicate(NROW(mm), col_mean))
-		if (!is.null(focal_terms)) {
-			mm_mean <- mm_mean[, focal_terms, drop=FALSE]
-		}
-		if (zero_out_interaction & any(grepl(":", get_termnames(mod)))){
-			vc <- zero_vcov(mod, focal_vars=x.var)
-#			print(vc)
-			if (!is.null(focal_terms)) {
-				vc <- vc[focal_terms, focal_terms]
-#				print("See ...")
-#				print(vc)
+		if (bias.adjust %in% c("none", "delta", "mcculloch", "diggle", "logitnorm")) {
+			mm_mean <- t(replicate(NROW(mm), col_mean))
+		} else {
+			.xx <- mf[[x.var]]
+			if (is.factor(.xx)) {
+				assign <- get_vnames(mod)$vnames
+				check_vars <-  grepl(paste0(x.var, collapse="|"), assign)
+				focal_vars <- names(assign)[check_vars]
+				mm_mean <- mm
+				mm_mean[, focal_vars] <- col_mean[focal_vars]
+			} else {
+				mf[x.var] <- mean(.xx)
+				mf <- model.frame(rTerms, mf, xlev = factor.levels, na.action=NULL)
+				mm_mean <- model.matrix(formula.rhs, data = mf, contrasts.arg = .contr)
 			}
 		}
+		
 		if (!is.null(isolate.value) & (is.numeric(isolate.value)|is.integer(isolate.value))){
-#			mf[x.var] <- 0*mf[x.var]+isolate.value
 			mf[x.var] <- isolate.value
 			mf <- model.frame(rTerms, mf, xlev = factor.levels, na.action=NULL)
-			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = vareff_objects$contrasts)
+			mod.matrix <- model.matrix(formula.rhs, data = mf, contrasts.arg = .contr)
 			if (bias.adjust %in% c("none", "delta", "mcculloch", "diggle", "logitnorm")) {
 				mm2 <- get_model_matrix(mod
 					, mod.matrix
