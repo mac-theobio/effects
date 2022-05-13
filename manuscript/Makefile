@@ -10,9 +10,6 @@ vim_session:
 
 Sources += $(wildcard *.R *.bib *.tex *.bst *.Rmd)
 
-## Make Sweave weird depencies chain
-## %: %.pdf ;
-
 ######################################################################
 
 autopipeR = defined
@@ -62,6 +59,21 @@ glm_two_predictor_preds.Rout: glm_two_predictor_preds.R glm_two_predictor_model.
 mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
+
+######################################################################
+
+# DO NOT edit draft.tex, created automatically, instead edit body.tex
+Ignore += draft.pdf
+draft.pdf: draft.tex # body.tex
+
+## Files to edit
+# draft.pdf: body.tex drafthead.tex mscommands.tex;
+
+Sources += drafthead.tex mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
+
+Ignore += draft.tex
+draft.tex: drafthead.tex mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
+	$(cat)
 
 ######################################################################
 
