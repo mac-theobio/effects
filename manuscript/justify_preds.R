@@ -72,12 +72,13 @@ inter_plot <- (combinepreds(justify_inter_mod
 	+ theme(legend.position="bottom")
 )
 
-ggarrange(simple_plot
+simple_plot <- ggarrange(simple_plot
 	, inter_plot + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
-) %>% teeGG(desc="inter", height=4.0)
+)
+teeGG(simple_plot, desc="inter")
 
 ## Isolated with CIs
 ### Preds based on true parameter values
@@ -104,9 +105,9 @@ justify_ci_plots <- (combinepreds(justify_mod
 	)
 	+ labs(colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
-) %>% teeGG(desc="isolate", height=5.3)
+)
+teeGG(justify_ci_plots, desc="isolate")
 
-print(justify_ci_plots)
 
 ## Isolated with CIs (zero-anchored)
 justify_center_anchored <- varpred(justify_mod, "x2", modelname="center-anchored")
