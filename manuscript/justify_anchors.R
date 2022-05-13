@@ -20,5 +20,6 @@ veff_combined_plot <- (combinevarpred(list(justify_center_anchored, justify_zero
 	+ scale_linetype_manual(values=c(1,1))
 	+ theme(legend.position="bottom")
 )
+
 teeGG(veff_combined_plot, desc="combined")
 
