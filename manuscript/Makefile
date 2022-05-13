@@ -41,7 +41,7 @@ pipeRdesc += justify_anchors
 # justify_anchors.combined.pdf: justify_anchors.R justify_model.rda
 justify_anchors.Rout: justify_anchors.R justify_model.rda
 
-
+# Omitted  
 ## Figure 3: Quantity of interest
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
 
