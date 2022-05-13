@@ -40,6 +40,8 @@ justify_preds.Rout: justify_preds.R justify_model.rda
 ## justify_preds.isolate.pdf: justify_preds.R justify_model.rda
 ## justify_preds.inter.pdf: justify_preds.R justify_model.rda
 
+pipeRdesc += justify_anchors
+# justify_anchors.combined.pdf: justify_anchors.R justify_model.rda
 justify_anchors.Rout: justify_anchors.R justify_model.rda
 
 
@@ -66,7 +68,7 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 Ignore += *.pdf
 
 # vareffects_plosone.pdf: vareffects_plosone.tex
-vareffects_plosone.tex: mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout vareffects_plosone.bib
+vareffects_plosone.tex: justify_anchors.Rout mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout vareffects_plosone.bib
 
 ######################################################################
 
