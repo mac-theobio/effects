@@ -70,7 +70,7 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ######################################################################
 
-## Manuscript
+# Manuscript
 
 # DO NOT edit draft.tex, created automatically, instead edit body.tex
 Ignore += draft.pdf
