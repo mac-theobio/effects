@@ -92,9 +92,6 @@ pred_cubic_plots <- ggarrange(pred_age_cubic_plots
 )
 print(pred_cubic_plots)
 
-## Figure 4
-pdf("pred_cubic_plots-figure4.pdf", height = 5.3)
-print(pred_cubic_plots)
-dev.off()
+teeGG(pred_cubic_plots)
 
 

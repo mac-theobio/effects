@@ -101,8 +101,4 @@ pred_bin_plots <- ggarrange(pred_age_plots
 )
 print(pred_bin_plots)
 
-## Figure 5
-pdf("pred_bin_plots-figure5.pdf", height = 5.3)
-print(pred_bin_plots)
-dev.off()
-
+teeGG(pred_bin_plots)

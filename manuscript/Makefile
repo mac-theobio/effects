@@ -48,16 +48,24 @@ quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
 ## Figure 4: Cubic polynomials
 cubic_predictors.Rout: cubic_predictors.R variable_predictions_funs.rda
 cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
+
+pipeRdesc += cubic_predictors_preds
+# cubic_predictors_preds.ggp.pdf: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
 cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
 
 ## Figure 5: Two predictors glm
 glm_two_predictor.Rout: glm_two_predictor.R variable_predictions_funs.rda
 glm_two_predictor_model.Rout: glm_two_predictor_model.R glm_two_predictor.rda
+
+pipeRdesc += glm_two_predictor_preds
+# glm_two_predictor_preds.ggp.pdf: glm_two_predictor_preds.R glm_two_predictor_model.rda
 glm_two_predictor_preds.Rout: glm_two_predictor_preds.R glm_two_predictor_model.rda
 
 ## Figure 6: Mediated effect
 mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
+pipeRdesc += mediate_preds
+# mediate_preds.ggp.pdf: mediate_preds.R mediate_model.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ######################################################################

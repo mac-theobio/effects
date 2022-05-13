@@ -106,8 +106,4 @@ pred_mediated_plots <- ggarrange(pred_notmediated_plots
 )
 print(pred_mediated_plots)
 
-## Figure 6
-pdf("pred_mediated_plots-figure6.pdf", height = 5.3)
-print(pred_mediated_plots)
-dev.off()
-
+teeGG(pred_mediated_plots)
