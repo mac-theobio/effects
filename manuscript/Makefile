@@ -87,14 +87,6 @@ draft.tex: drafthead.tex mscommands.tex begindoc.tex abstract.tex body.tex msbib
 
 ######################################################################
 
-Ignore += *.pdf
-Sources += vareffects_plosone.tex
-
-# vareffects_plosone.pdf: vareffects_plosone.tex
-vareffects_plosone.tex: justify_anchors.Rout mediate_preds.Rout glm_two_predictor_preds.Rout cubic_predictors_preds.Rout quantity_of_interest.Rout vareffects_plosone.bib
-
-######################################################################
-
 ## JD thoughts and spinning
 
 ## Testing
