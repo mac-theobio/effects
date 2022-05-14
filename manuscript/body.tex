@@ -29,8 +29,9 @@ y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilo
 We first simulate data with the two models, such that $x_{1,2,3} \sim \mathrm{Normal}(0, 1)$, $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$ and $\beta_{23} = 5$, and then compare the predictions from the \pkg{emmeans}, \pkg{effects} and our proposed alternative (\pkg{varpred}) to the ``true'' predictions and observed average i.e., $\bar{y}$, as shown in Fig~\ref{fig:justify_plots}.
 
 \begin{figure}[!h]
-\centering
-\includegraphics[width=0.9\textwidth]{justify_preds.inter.pdf}
+\begin{center}
+\includegraphics{justify_preds.inter.pdf}
+\end{center}
 \caption{{\bf A comparison of \pkg{emmeans}, \pkg{effects} and \pkg{varpred} predictions for $x_1$ on $y$ for models with and without interactions.}
 The horizontal blue, green and black lines are the mean predictions, i.e., $\bar{\hat{y}}$, the red ones are the means of the simulated $y$, i.e., $\bar{y}$, while the vertical dotted grey lines are the means of the corresponding focal predictors. The grey points are the binned simulated $y$. The trend lines represents the corresponding $\hat{y}$ at various levels of $x_1$, while holding the other predictors at their average for the three mthods and the ``true'' predictions based on the simulation parameters. A: In the absence of interaction, the predicted mean, $\bar{\hat{y}}$, closely matches the simulated in all the three approaches, i.e., $\bar{y} \approx \bar{\hat{y}}$. Similarly, the predictions based on the three approaches closely matches the ``true'' predictions. B: Even with the simple interaction between non-focal predictors, we start seeing deviation in both predicted mean, $\bar{\hat{y}}$, and overall predictions from the simulated, $\bar{y}$, and ``true'' predictions, respectively, in two commonly used packages (\pkg{emmeans} and \pkg{effects}), but not, the proposed \pkg{varpred}.}
 \label{fig:justify_plots}
@@ -41,8 +42,9 @@ In the absence of interaction (model~\ref{eq:simple_inter_higher_no_interaction}
 Sometimes, one may be interested in the uncertainties associated with the focal predictor of interest only, excluding other uncertainties due to other non-focal predictors -- effects. However, currently, the two packages do not provide straightforward way do achieve this. To illustrate this, we generate predictions of $x_2$ from model~\ref{eq:simple_inter_higher_no_interaction} together with the associated $95\%$ confidence bands, as shown in Fig~\ref{fig:justify_ci_plots}. 
 
 \begin{figure}[!h]
-\centering
-\includegraphics[width=0.9\textwidth]{justify_preds.isolate.pdf}
+\begin{center}
+\includegraphics{justify_preds.isolate.pdf}
+\end{center}
 \caption{{\bf A comparison of conventional $95\%$ confidence bands and effects.} The description of horizontal, vertical and trend lines remain the same as above. The wider dotted blue curves overlaying the green curves corresponds to the conventional confidence bands around the predcitions from \pkg{emmeans} and \pkg{effects}, while the narrower black curves crossing at the mean of the focal predictor, i.e., the model center, corresponds to the effects of the focal predictor from \pkg{varpred}. For simple models, the isolated confidence bands crosses at the model center. The wider curves incorporates not only the uncertainties due to intercept term but also other non-focal predictors. On the other hand, effects (narrower crossing lines) only take into account the main effect uncertainty of the focal predictor.}
 \label{fig:justify_ci_plots}
 \end{figure}
@@ -88,8 +90,9 @@ The value chosen for the focal predictor when estimating effect confidence inter
 If we are trying to focus on effects, the anchor from which we calculate CIs becomes important. This is not true for the more conventional prediction plots: we can choose any anchor, e.g., zero-anchored, but model center seems like a natural, stable choice, i.e., center-anchored. In Fig~\ref{fig:justify_anchors}, we compare effects plots anchored at the minimum and center (mean) of the focal predictor.
 
 \begin{figure}[!h]
-\centering
-\includegraphics[width=0.7\textwidth]{justify_anchors.combined.pdf}
+\begin{center}
+\includegraphics{justify_anchors.combined.pdf}
+\end{center}
 \caption{{\bf A comparison of min-based and center- (mean-) based anchors.} The center-based effects are based on the mean of the focal predictor while the min-anchored effects are based on the minimum of the focal predictor. As we mentioned earlier, the choice of the anchor do not affect the main estimates (central trend lines).} 
 \label{fig:justify_anchors}
 \end{figure}
@@ -249,8 +252,9 @@ As mentioned above, in some applications, one may be interested in uncertainties
 We start by generating two predictions from the fitted model \nameref{S1_Appendix}: 1) one with cubic polynomial of \code{age} as a focal predictor; and 2) one with a simple focal predictor (non-polynomial) of \code{Wealthindex}. Then we compared non-anchored (more of predictions) and mean-anchored (effects) confidence intervals around the predicted values (see Fig~\ref{fig:pred_cubic_plots}).
 
 \begin{figure}[!h]
-\centering
-\includegraphics[width=0.8\textwidth]{cubic_predictors_preds.ggp.pdf}
+\begin{center}
+\includegraphics{cubic_predictors_preds.ggp.pdf}
+\end{center}
 \caption{{\bf Prediction-styled and effect-styled plots for cubic polynomial and simple focal predictors.} A: The focal predictor is a cubic polynomial. B: The focal predictor is not a polynomial function, implying that the complex interaction is in non-focal predictor. In both cases, the mean-anchored effects are narrower than the non-anchored (predictions), but crosses at the mean of the focal predictor (model center) only in the case of simple (non-polynomial) focal predictor -- B. In the case of cubic polynomial focal predictor, the model center is not a point in the predictor space, i.e., mean of the focal predictor, but a combination of all the model variables in the cubic polynomial, consequently, mean-anchored curves do not cross at a point -- A. The horizontal black and red dotted lines are the observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively; the inner red dotted curves and crossing lines are the anchored confidence bands for A and B, respectively, while the outer blue curves are the non-anchored confidence bands in both cases. The central curve and trend line, in A and B, respectively, are the predicted household size based on age and wealth index, respectively.}
 \label{fig:pred_cubic_plots}
 \end{figure}
@@ -262,8 +266,9 @@ In the absence of complex higher order interaction terms or transformations on t
 Mean-based and whole-sample-based approaches can produce very different results in models with nonlinear link functions with additional sources of potential bias such as additional non-focal predictor(s), random effect terms or complex interactions. To demonstrate this, we considered a two predictor binary outcome simulation described in \nameref{S2_Appendix}, such that the age effect is way smaller than that of the wealth index, and compared their effects on the predicted probability of improved water quality as shown in Fig~\ref{fig:pred_bin_plots}. 
 
 \begin{figure}[!h]
-\centering
-\includegraphics[width=0.8\textwidth]{glm_two_predictor_preds.ggp.pdf}
+\begin{center}
+\includegraphics{glm_two_predictor_preds.ggp.pdf}
+\end{center}
 \caption{{\bf Mean-based and whole-sample-based predictions.} The two approaches produce relatively different estimates in each of the predictors but the difference is more pronounced when the effect of the particular focal predictor has no strong effect -- \emph{on the left}. In both cases, \emph{right} and \emph{left}, the average predicted probability of improved water based on whole-sample-based approach is very close to the observed proportion in the simulated data. The horizontal blue, black and the red dotted lines are the average mean-based, whole-sample-based predicted probability and observed proportion of improved water quality, respectively. The vertical dotted black line represents the mean of the focal predictor, and the point at which it crosses the red dotted line represents the expected ``perfect'' prediction at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin. We would expect all the curves, horizontal, and vertical lines to cross at the model center but due the nonlinear averaging (at least in the bias corrected whole-sample-based approach) of the predictions on the response scale, this may not always be the case.} 
 \label{fig:pred_bin_plots}
 \end{figure}
@@ -275,8 +280,9 @@ If there was no effect of nonlinear averaging, then we would expect the observed
 Using simple indirect mediation simulation model described in \nameref{S3_Appendix}, fitted two models -- \emph{non-mediated} which models \emph{z} as a function of \emph{x} (univariate model) and the \emph{mediated} which models \emph{z} as a function of both \emph{x} and \emph{y} (multivariate model). In both cases, we compared mean-based and the whole-sample-based predictions, as shown in Fig~\ref{fig:pred_mediated_plots}.
 
 \begin{figure}[!h]
-\centering
-\includegraphics[width=0.8\textwidth]{mediate_preds.ggp.pdf}
+\begin{center}
+\includegraphics{mediate_preds.ggp.pdf}
+\end{center}
 \caption{{\bf Mean-based and whole-sample-based predictions for mediated effects.} These figures compare the mean-based and whole-sample-based predictions for the mediated (multivariate) and non-mediated (univariate) models. A: In the absence of mediator variable, both mean-based and whole-sample-based approaches predictors are identical since there is no any other additional (non-focal predictors) sources of bias. Consequently, for both approaches, the average predicted probability is very close to the observed proportion. B: When the mediator variable is included, there is no direct effect of $x$ on $z$ and as a result the predictions do not necessarily align with the observations. However, the whole-sample-based approach still closely approximates the average proportion in the simulated data. The horizontal blue, black and the red dotted lines are the average mean-based, whole-sample-based predicted probability and observed proportion, respectively. The vertical dotted black line represents the mean of the focal predictor, and the point at which it crosses the red dotted line represents the expected ``perfect'' prediction at the model center. The grey points are the binned observations.}
 \label{fig:pred_mediated_plots}
 \end{figure}
