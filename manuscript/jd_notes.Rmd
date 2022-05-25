@@ -2,6 +2,11 @@
 title: JD notes on effects
 ---
 
+**Bicko**:
+
+- It seems distinguishing between prediction and effects is a bit hard. How about prediction and prediction effects.
+	- Predictions: the central line
+	- Prediction (predictor?) effects: the curves which describe our uncertainty around the predictions and can be non-isolated (non-anchored) or isolated (anchored)?
 
 We should talk about estimates before we get to confidence intervals.
 The main thing about estimates is the reference point.
