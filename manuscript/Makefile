@@ -76,13 +76,15 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 Ignore += draft.pdf
 
 ## Files to edit
-# draft.pdf: body.tex drafthead.tex mscommands.tex;
+# draft.pdf: body.tex drafthead.tex mscommands.tex
+# plos.pdf: body.tex ploshead.tex mscommands.tex
 
 Ignore += draft.tex
 msfiles = mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
 draft.tex: drafthead.tex $(msfiles)
 	$(catro)
 
+Ignore += plos.tex
 plos.tex: ploshead.tex $(msfiles)
 	$(catro)
 
