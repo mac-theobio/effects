@@ -7,29 +7,25 @@
 % Use "Eq" instead of "Equation" for equation citations.
 \section*{Introduction}
 
-<<<<<<< HEAD
 \jd{Can we stake out early what we mean by predictions vs.~effects? It still seems muddled together. I guess it's complicated because in many cases the estimate is the same (only CIs differ). But I think we should do it anyway.}
-In many applications which use simple or generalized linear (mixed) models, outcome predictions or probabilities, are often of interest. Predictions provide a great way to summarize what the regression model is telling us and very useful for interpreting and visualizing model estimates. For example, in logistic regression models, the coefficient estimates are usually not easy to interpret and less informative. Since logistic models are nonlinear (due to the nonlinear link function), in multivariate models with interactions, the magnitude of the effect of change in the outcome depends on the values of the predictor of interest and other predictors. Hence, the conclusions one can make about the estimated effects greatly depends on how well we choose the values of the other predictors, i.e., \emph{non-focal} predictors.  
 
-Both simple and generalized linear (mixed) models (GL(M)Ms) can examine very complex relationships, including nonlinear relationships between response and predictors, interactions between predictors (and via splines for example), and nonlinear transformations via link functions due to their flexibility. This flexibility comes at a cost, for example, complex multivariate models may risk misinterpretation, and miscalculation of quantities of interest. Also, coefficient estimates of models involving nonlinear link functions or interactions lose their direct interpretation \citep{leeper2017interpreting}, meaning that interpretation of derived quantities from these estimates requires some understanding of the specified model. An alternative is to explore the \emph{effects} of predictors on the predictions or probabilities of the outcome at various level of the predictor of interest -- \emph{prediction and effects} \citep{fox2009effect, leeper2017package, lenth2018package}. 
-\jd{Are we still saying these (prediction and effects) are the same? Or are we now saying they're different, with the same citations?} For example, as a way to plan, public health officials may want to know the effects of household income, wealth index, etc, on the predicted probability of having improved water services among slum dwellers.
 
 In applications that use regression models, outcome predictions are often of interest. Predictions provide a great way to summarize what the regression model is telling us and very useful for interpreting and visualizing model estimates. For example, in logistic regression models, the coefficient estimates, when reported as log odds, are not easy to interpret and less informative. Since logistic models are nonlinear (due to the nonlinear link function), in multivariate models with\bmb{?only}\BC{clarify with BMB} interactions, the magnitude of the effect of change in the outcome depends on the values of the predictor of interest and other predictors. Hence, the conclusions one can make about the estimated effects greatly depends on how well we choose the values of the other predictors, i.e., \emph{non-focal} predictors.  
 
 Ordinary least squares (OLS) regression provides an easy way to express multivariate relationships as an additive linear combination of many predictors with the outcome. The coefficient estimates from OLS regression models are generally easy to interpret as the expected change in the outcome with a unit change in the continuous predictor or as the expected outcome difference between the levels of the categorical predictor with the baseline category. However, with additional complexities such interaction between predictors, the resulting coefficients risk misinterpretation or interpretation complexity \citep{brambor_understanding_2006, berry_improving_2012}. 
 
-Simple OLS regression models are flexible and can easily be generalized, as generalized linear (mixed) models (GL(M)Ms), to examine more complex relationships, including \bmb{nonlinear relationships -- need to clarify}\BC{clarity with BMB} between response and predictors e.g., log transformed response or predictors, interactions between predictors (and via splines for example), and nonlinear transformations via link functions \bmb{due to their flexibility}\BC{clarify why BMB circled it}. This flexibility comes with additional complications, for example, complex multivariate models may risk misinterpretation, and miscalculation of quantities of interest \citep{berry_improving_2012, leeper2017interpreting}. Further, coefficient estimates of GLM models involving nonlinear link functions lack direct interpretation\citep{leeper2017interpreting}, meaning that interpretation of derived quantities from these estimates requires some understanding of the specified model. An alternative is to explore the \emph{effects} of predictors on the predictions of the outcome at various levels of the predictor of interest -- \emph{predictions and effects} \citep{fox2009effect, leeper2017package, lenth2018package}. For example, as a way to plan, public health officials may want to know the effects of household income, wealthindex, etc, on the predicted probability that slum dwellers will have improved water services.
+Simple OLS regression models are flexible and can easily be generalized, as generalized linear (mixed) models (GL(M)Ms), to examine more complex relationships, including \bmb{nonlinear relationships -- need to clarify}\BC{clarity with BMB} between response and predictors e.g., log transformed response or predictors, interactions between predictors (and via splines for example), and nonlinear transformations via link functions \bmb{due to their flexibility}\BC{clarify why BMB circled it}. This flexibility comes with additional complications, for example, complex multivariate models may risk misinterpretation, and miscalculation of quantities of interest \citep{berry_improving_2012, leeper2017interpreting}. Further, coefficient estimates of GLM models involving nonlinear link functions lack direct interpretation\citep{leeper2017interpreting}, meaning that interpretation of derived quantities from these estimates requires some understanding of the specified model. An alternative is to explore the \emph{effects} of predictors on the predictions of the outcome at various levels of the predictor of interest -- \emph{predictions and effects}\jd{Are we still saying these (prediction and effects) are the same? Or are we now saying they're different, with the same citations?} \citep{fox2009effect, leeper2017package, lenth2018package}. For example, as a way to plan, public health officials may want to know the effects of household income, wealthindex, etc, on the predicted probability that slum dwellers will have improved water services.
 
 
 When visually presented, prediction and effects provide a unified and intuitive way of describing relationships from a fitted model, especially complex models involving interaction terms or some kind of transformations on the predictors whose estimates are usually, but not always, harder to interpret. Generating predictions and effects plots together with the associated confidence intervals for regression models has a number of challenges. In particular:
 \begin{enumerate}
-\item choice of representative values of \emph{focal} predictor and the \emph{reference point} for non-focal predictors especially in multivariate models
+\item choice of representative values of \emph{focal} predictor and the \emph{reference point} for non-focal predictors, especially in multivariate models
 \item  propagation of uncertainty -- appropriate choice of \emph{anchor} for computing confidence intervals; and how to incorporate the uncertainty due to non-focal predictors 
 \item bias in the expected mean prediction induced by the nonlinear transformation of the response variable (especially in GL(M)Ms)
 \end{enumerate}
 
-The most common way of dealing with the first challenge is taking unique levels of the focal (predictor of interest) predictor if discrete or taking appropriately sized quantiles (or bins) \jd{Don't understand what the bins are doing here (when we are holding the reference point constant); it's not what we do, is it?} if continuous, and then calculating the predictions while holding non-focal (other predictors other than the focal predictor) predictors at their reference point (e.g., means) \citep{hanmer2013behind}. This generates \jd{Are predictions and predictor effects really used for the same thing?} -- \emph{predictions}, \emph{predictor effects} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} or \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to this quantity as predictions since it should, for example, tell us what we would expect the response to be at a particular value or level of the predictor, for an ``average case''. 
-\bmb{More specifically, we compute the expected outcome by holding non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the predictions represents how the model responds to the changes in the focal predictor. On the other hand, effects differ with predictions in the sense that the former is about how we describe the uncertainty around the latter and depends on the anchor. -- see next/unclear}\BC{clarify with BMB} 
+The most common way of choosing the representative values is taking unique levels of the focal predictor if discrete or taking appropriately sized quantiles \jd{Don't understand what the bins are doing here (when we are holding the reference point constant); it's not what we do, is it?} if continuous, and then calculating the predictions while holding non-focal (other predictors other than the focal predictor) predictors at their reference point (e.g., means) \citep{hanmer2013behind}. This procedure generates \jd{Are predictions and predictor effects really used for the same thing?} -- \emph{predictions}, \emph{predictor effects} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} or \emph{estimated marginal means} \citep{lenth2018package}. In this article, we refer to these quantities as predictions since they should, for example, tell us what we would expect the response to be at a particular value or level of the predictor, for an ``average case''. \bmb{More specifically, we compute the expected outcome by holding non-focal predictors constant (or averaged in some meaningful way) while varying the focal predictor, with the goal that the predictions represents how the model responds to the changes in the focal predictor. On the other hand, effects differ with predictions in the sense that the former is about how we describe the uncertainty around the latter and depends on the anchor. -- see next/unclear}\BC{clarify with BMB} 
+
 
 The most \bmb{commonly used \proglang{R} software packages (\pkg{emmeans} and \pkg{effects})}\BC{not sure the underline} for generating predictions, by default, use the average of non-focal predictors as the reference point. 
 \jd{This is ambiguous; we need to be talking about input variables and model variables by now. Also: what do the packages do about categorical non-focal predictors? Do we know?}
@@ -45,7 +41,7 @@ y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilo
 We first simulate data with the two models, such that $x_{1,2,3} \sim \mathrm{Normal}(0, 1)$, $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$ $\beta_{23} = 5$, $\epsilon \sim \mathrm{Normal}(0, \sigma^2)$ and $\sigma^2 = 1$, and then compare the predictions from the \pkg{emmeans}, \pkg{effects} and our proposed alternative (\pkg{varpred}) to the ``true'' predictions and observed average i.e., $\bar{y}$, as shown in Fig~\ref{fig:justify_plots}.
 \jd{What are true predictions? Why does it look like effects matches varpred, but it sounds like we're saying it matches emmeans?}
 
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{justify_preds.inter.pdf}
 \end{center}
@@ -59,7 +55,7 @@ In the absence of interaction (model~\ref{eq:simple_inter_higher_no_interaction}
 
 One may be interested in the uncertainties associated with the focal predictor of interest only, excluding other uncertainties due to other non-focal predictors -- effects. However, currently, the two packages do not provide straightforward way do achieve this. To illustrate this, we generate predictions of $x_2$ from model~\ref{eq:simple_inter_higher_no_interaction} together with the associated $95\%$ confidence bands, as shown in Fig~\ref{fig:justify_ci_plots}. 
 
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{justify_preds.isolate.pdf}
 \end{center}
@@ -69,12 +65,9 @@ One may be interested in the uncertainties associated with the focal predictor o
 
 For \pkg{emmeans} and \pkg{effects}, the confidence bands are much wider because they include uncertainties associated with the intercept and non-focal predictors, but narrower and crosses at the mean of the focal predictor, i.e., \emph{center point or mean-based}, in \pkg{varpred}. In other words, with \pkg{varpred}, we are able to generate effects indicating zero uncertainty at the value of the focal predictor we are more certain about, i.e., mean of the model variable corresponding to the focal predictor (center point or mean-based). For simple models, the point where the confidence bands crosses is the model center; it corresponds to anchor we choose, in this case, the mean of the focal predictor.
 
-<<<<<<< HEAD
 \jd{Hard to parse. Why ``for example''? The key here is that the lm case works out well because it's all about linear averaging (the mean prediction is the prediction from the mean point), whereas the glm case is non-linear averaging. There should be a link also to why we use the ``model center'' (we're using the correct center point for the linear averaging to work out.}
-When dealing with nonlinear link functions or models with multiple non-focal predictors, the correct predictions, for example, are even much harder to estimate. One approach is to make predictions on the transformed scale (linear predictor scale), and then back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation. In particular, bias in expected mean prediction induced by nonlinear transformation of the response variable can lead inaccurate predictions. An alternative to mean-based reference point, i.e., averaging non-focal predictors, is the \emph{whole-sample-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
 
 When dealing with nonlinear link functions or models with multiple non-focal predictors, the correct predictions are much harder to estimate. One approach is to make predictions on the transformed scale (linear predictor scale), and then back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation. In particular, bias in expected mean prediction induced by nonlinear transformation of the response variable can lead inaccurate predictions. An alternative to mean-based reference point, i.e., averaging non-focal predictors, is the \emph{whole-sample-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
->>>>>>> 61de13fca6919525a502ace3ee9721b471d6834b
 
 The main purpose of this article is to discuss and implement various approaches for computing predictions and provide an alternative method for computing the associated confidence intervals, i.e., effects. We further explore and demonstrate, using simulated data, approaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions.
 
@@ -111,7 +104,7 @@ The value chosen for the focal predictor when estimating effect confidence inter
 
 If we are trying to focus on effects, the anchor from which we calculate CIs becomes important. This is not true for the more conventional prediction plots: we can choose any anchor, e.g., zero-anchored, but model center seems like a natural, stable choice, i.e., center-anchored. In Fig~\ref{fig:justify_anchors}, we compare effects plots anchored at the minimum and center (mean) of the focal predictor.
 
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{justify_anchors.combined.pdf}
 \end{center}
@@ -280,7 +273,7 @@ As mentioned above, in some applications, one may be interested in uncertainties
 
 We start by generating two predictions from the fitted model \nameref{S1_Appendix}: 1) one with cubic polynomial of \code{age} as a focal predictor; and 2) one with a simple focal predictor (non-polynomial) of \code{Wealthindex}. Then we compared non-anchored (more of predictions) and mean-anchored (effects) confidence intervals around the predicted values (see Fig~\ref{fig:pred_cubic_plots}).
 
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{cubic_predictors_preds.ggp.pdf}
 \end{center}
@@ -294,7 +287,7 @@ In the absence of complex higher order interaction terms or transformations on t
 
 Mean-based and whole-sample-based approaches can produce very different results in models with nonlinear link functions with additional sources of potential bias such as additional non-focal predictor(s), random effect terms or complex interactions. To demonstrate this, we considered a two predictor binary outcome simulation described in \nameref{S2_Appendix}, such that the age effect is way smaller than that of the wealth index, and compared their effects on the predicted probability of improved water quality as shown in Fig~\ref{fig:pred_bin_plots}. 
 
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{glm_two_predictor_preds.ggp.pdf}
 \end{center}
@@ -308,7 +301,7 @@ If there was no effect of nonlinear averaging, then we would expect the observed
 
 Using simple indirect mediation simulation model described in \nameref{S3_Appendix}, fitted two models -- \emph{non-mediated} which models \emph{z} as a function of \emph{x} (univariate model) and the \emph{mediated} which models \emph{z} as a function of both \emph{x} and \emph{y} (multivariate model). In both cases, we compared mean-based and the whole-sample-based predictions, as shown in Fig~\ref{fig:pred_mediated_plots}.
 
-\begin{figure}[!h]
+\begin{figure}[h]
 \begin{center}
 \includegraphics{mediate_preds.ggp.pdf}
 \end{center}
