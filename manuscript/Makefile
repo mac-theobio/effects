@@ -74,16 +74,19 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 # DO NOT edit draft.tex, created automatically, instead edit body.tex
 Ignore += draft.pdf
-draft.pdf: draft.tex # body.tex
 
 ## Files to edit
 # draft.pdf: body.tex drafthead.tex mscommands.tex;
 
-Sources += drafthead.tex mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
-
 Ignore += draft.tex
-draft.tex: drafthead.tex mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
-	$(cat)
+msfiles = mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
+draft.tex: drafthead.tex $(msfiles)
+	$(catro)
+
+plos.tex: ploshead.tex $(msfiles)
+	$(catro)
+
+Sources += *head.tex $(msfiles)
 
 ######################################################################
 
