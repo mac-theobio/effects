@@ -206,6 +206,7 @@ get_sderror <- function(mod, vcov., mm, col_mean, isolate, isolate.value, intern
 				assign <- get_vnames(mod)$vnames
 				check_vars <-  grepl(paste0(x.var, collapse="|"), assign)
 				focal_vars <- names(assign)[check_vars]
+				focal_vars <- focal_vars[focal_vars %in% names(col_mean)]
 				mm_mean <- mm
 				mm_mean[, focal_vars] <- col_mean[focal_vars]
 			} else {
