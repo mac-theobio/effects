@@ -77,7 +77,6 @@ Ignore += draft.pdf
 
 ## Files to edit
 # draft.pdf: body.tex drafthead.tex mscommands.tex
-draft.pdf:
 # plos.pdf: body.tex ploshead.tex mscommands.tex
 
 Ignore += draft.tex
