@@ -76,6 +76,7 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 Ignore += draft.pdf
 
 ## Files to edit
+.PHONY: draft.pdf
 # draft.pdf: body.tex drafthead.tex mscommands.tex
 # plos.pdf: body.tex ploshead.tex mscommands.tex
 
