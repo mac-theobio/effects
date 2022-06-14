@@ -2,13 +2,11 @@
 
 \linenumbers
 
-\jd{How did all the figures wind up in back?}
-
 % Use "Eq" instead of "Equation" for equation citations.
 \section{Introduction}
 
 
-In applications that use regression models, outcome predictions are often of interest. Predictions provide a great way to summarize what the regression model is telling us and very useful for interpreting and visualizing model estimates. For example, in logistic regression models, the coefficient estimates, when reported as log odds, are not easy to interpret and are less informative. Since logistic models are nonlinear (due to the nonlinear link function), in multivariate models interactions or other nonlinear transformations, the magnitude of the effect of change in the outcome depends on the values of the predictor of interest and other predictors. Hence, the conclusions one can make about the estimated effects greatly depends on how well we choose the values of the other predictors, i.e., \emph{non-focal} predictors.  
+In applications that use regression models, outcome predictions are often of interest. Predictions provide a great way to summarize what the regression model is telling us and very useful for interpreting and visualizing model estimates. For example, in logistic regression models, the coefficient estimates, when reported as log odds, are not easy to interpret and are less informative. Since logistic models are nonlinear (due to the nonlinear link function), in multivariate models interactions or other nonlinear transformations, the magnitude of the effect of change in the outcome depends on the values of the input variable of interest and the other remaining input variables. Hence, the conclusions one can make about the estimated predictions greatly depends on how well we choose the values of the other input variables, i.e., \emph{non-focal} input variables.  
 
 Ordinary least squares (OLS) regression provides an easy way to express multivariate relationships as an additive linear combination of many predictors with the outcome. The coefficient estimates from OLS regression models are generally easy to interpret as the expected change in the outcome with a unit change in the continuous predictor or as the expected outcome difference between the levels of the categorical predictor with the baseline category. However, with additional complexities such as interactions between predictors, the resulting coefficients risk misinterpretation or interpretation complexity \citep{brambor_understanding_2006, berry_improving_2012}. 
 
@@ -63,38 +61,27 @@ For linear models (including models with complex interactions), the averaging is
 
 The main purpose of this article is to discuss and implement various approaches for computing predictions and provide an alternative method for computing the associated confidence intervals, i.e., effects. We further explore and demonstrate, using simulated data, approaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions.
 
-\section{Quantities of interest}
+\section{Definitions}
 
-\jd{Is this borrowed from me? I'm not really following the structure of the MS right now. Maybe I'll be clearer in the morning.}
+In order to discuss more general statistical background and mathematical formulation, we need to understand and formally define a number of terms, some of which have been introduced in the previous section.
 
-Several quantities of interest may be derived from regression models. The first one is the coefficient estimates. Others are \emph{input and model variables}, \emph{model matrix}, \emph{model center}, \emph{reference point} and \emph{anchor}.
+\begin{itemize}
+\item \textbf{Predictors}: Refer to the X-variables which go into the regression model. For example, consider the model the includes the interaction in Equation~\ref{eq:simple_inter_higher}. This regression model has $5$ predictors -- $x_1, x_2, x_3, x_2x_3$ and the intercept term.
+\item \textbf{Focal and non-focal predictors}: Focal predictor refers to the predictor we are interested in generating its effects on the predictions. For multivariate models, all other remaining predictors are non-focal predictors. For example, consider model described by Equation~\ref{eq:simple_inter_higher_no_interaction}. Suppose we are interested in the effect of $x_1$ on the predicted $y$, then $x_1$ is the focal predictor while $x_2$ and $x_3$ are non-focal predictors.
+\item \textbf{Input variables}: Refers to the observed (or scientific) variables underlying an inference or exploration, and forms the X-variables. For example, the regression model described by Equation~\ref{eq:simple_inter_higher} has only $4$ input variables -- $x_1, x_2, x_3$.
+\item \textbf{Model matrix}: Refers to the design matrix whose rows include all combination of variables appearing in the interaction terms. Consider an example for three hypothetical households -- the first household head is a Christian with an income of $\$ 50$, the second household head is Muslim with an income of $\$ 100$ while the third household head is a Jew with an income of $\$ 77$. Suppose we want to model the household size (\code{hhsize}) as function of these household characteristics, i.e., $$\mathrm{hhsize} = \beta_0 + \beta_1\times\mathrm{income} + \beta_{2[r]}\times\mathrm{religion} + \mathrm{error}.$$ The model matrix corresponding to this model is given by
+$$\begin{bmatrix}{}
+ Intercept & income & religionJew & religionMuslim \\
+ 1 & 50 & 0 & 0 \\
+  1 & 100 & 0 & 1 \\
+  1 & 77 & 1 & 0 \\
+\end{bmatrix}.$$ The first column represents the constant term in our model, $\beta_0$. For continuous variables, the representation in the model matrix is the same as the correspond input variables (for example second column representing income). For categorical variables, however, by default, the model matrix  creates additional dummy variables using the reference cell parameterization. This means that, if an input variable has $L$ factor levels, then there will be $L-1$ dummy columns representing all but the first level created in the model matrix. In our example, the column \code{religion} is missing and instead we have \code{religionJew} and \code{religionMuslim}; the missing category \code{religionChristian} is treated as the reference category.
+\item \textbf{Model variables:} It is easy to interchangeably refer to predictors as input variables, and vice versa. To avoid this issue, we adopt the term model variables which are variables that represent columns in the model matrix. Each input variable may correspond to one or more model variables. In particular, variables with more than two categories (for instance religion in our previous example), or variables modeled with a spline or polynomial term, will correspond to more than one model variables.
+\item \textbf{Model center:} A point corresponding to a column-wise mean of the model matrix (the mean of one or more model variables). Also referred to as center point. We refer to the prediction approach which uses model center as mean-based. The center point for a set of model variables corresponding to an input variable may not represent a possible value of the input variable -- the case in Fig~\ref{fig:justify_plots}. In simple linear models (without) interaction, the mean of the input variable can be used as a proxy for center point.
+\item \textbf{Reference point:} Corresponds to the value or values chosen for non-focal predictors, when estimating the predictions. Typically the center point (mean-based), but can instead be a whole-sample of quantiles or observations. Appropriately choosing the reference point is very crucial in generating correct predictions especially when dealing with non-linear link functions.
+\item \textbf{Anchor:} The value chosen for the focal predictor when estimating effect confidence intervals (anchor choice does not affect the main prediction estimates). Typically chosen as the center point of the model variables corresponding to the focal input variable but other sensible values can be chosen too. If we are trying to focus on effects, the anchor from which we calculate CIs becomes important. This is not true for the more conventional prediction plots: we can choose any anchor, e.g., zero-anchored, but model center seems like a natural, stable choice, i.e., center-anchored. In Fig~\ref{fig:justify_anchors}, we compare effects plots anchored at the minimum and center (mean) of the focal predictor.
+\end{itemize}
 
-\subsection{Input variables}
-
-These are scientific variables underlying an inference or exploration. The focal and non-focal predictors we use for effects or predictions are an input variables.
-
-\subsection{Model matrix}
-
-Model matrix refers to the design matrix whose rows include all combination of variables appearing in the interaction terms, along with the typical values of the focal and non-focal predictors. 
-
-\subsection{Model variables}
-
-These are variables that represent columns in the model matrix. Each input variable may correspond to one or more model variables. In particular, variables with more than two categories, or variables modeled with a spline or polynomial response, will correspond to more than one model variables.
-
-\subsection{Model center} 
-
-A point corresponding to a column-wise mean of the model matrix (the mean of one or more model variables). We also refer to this as mean-based approach. The center point for a set of model variables corresponding to an input variable may not represent a possible value of the input variable -- the case in Fig~\ref{fig:justify_plots}. In simple linear models (without) interaction, the input variable can be used as a proxy.
-
-\subsection{Reference point}
-
-Corresponds to the value or values chosen for non-focal predictors, when estimating the predictions. Typically the center point (mean-based), but can instead be a whole-sample of quantiles or observations. Appropriately choosing the reference point is very crucial in generating ``correct'' predictions especially when dealing with non-linear link functions.
-
-
-\subsection{Anchor}
-
-The value chosen for the focal predictor when estimating effect confidence intervals (anchor choice does not affect the main prediction estimates). Typically chosen as the center point of the model variables corresponding to the focal input variable but other sensible values can be chosen too.
-
-If we are trying to focus on effects, the anchor from which we calculate CIs becomes important. This is not true for the more conventional prediction plots: we can choose any anchor, e.g., zero-anchored, but model center seems like a natural, stable choice, i.e., center-anchored. In Fig~\ref{fig:justify_anchors}, we compare effects plots anchored at the minimum and center (mean) of the focal predictor.
 
 \begin{figure}[h]
 \begin{center}
