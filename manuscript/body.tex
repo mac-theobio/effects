@@ -55,7 +55,7 @@ One may be interested in the uncertainties associated with the focal input varia
 
 For \pkg{emmeans} and \pkg{effects}, the confidence bands are much wider because they include uncertainties associated with the intercept and non-focal input variables, but narrower and crosses at the mean of the focal input variable in \pkg{varpred}. We refer to this point as the \emph{center point} and the approach as \emph{mean-based}. In other words, with \pkg{varpred}, we are able to generate effects indicating zero uncertainty at the value of the focal input variable we are more certain about, i.e., mean of the predictor variable corresponding to the focal input variable. For simple models, the point where the confidence bands crosses is the model center; it corresponds to anchor we choose, in this case, the mean of the focal input variable, but we generally choose the mean of the focal predictor (predictors corresponding to the focal input variable).
 
-For linear models (including models with complex interactions), the averaging is done on the linear scale, i.e., linear averaging. As a result the bias in the expected (mean) predictions can easily be corrected by performing predictions from the \emph{model center} (average of the predictor variables). The mean prediction is the prediction at the model center. On the other hand, when dealing with GL(M)Ms with nonlinear link functions, the averaging is done on the nonlinear scale, i.e., nonlinear averaging which makes estimating correct predictions much harder. In particular, bias in expected mean prediction induced by nonlinear transformation of the response variable can lead to inaccurate predictions. One way to deal with this is to make predictions on the transformed scale (linear predictor scale), and then back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation, for example, second order Taylor approximation implemented in \pkg{emmeans} \citep{lenth2018package}. In linear models, mean-based gives estimates consistent with the observed values, however, in models with nonlinear link functions, this is not always the case. An alternative to mean-based reference point, i.e., averaging non-focal predictor variables, is the \emph{whole-sample-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictor variables and then averaging across the values of the focal predictor variable \citep{hanmer2013behind}. 
+For linear models (including models with complex interactions), the averaging is done on the linear scale, i.e., linear averaging. As a result the bias in the expected (mean) predictions can easily be corrected by performing predictions from the \emph{model center} (average of the predictor variables). The mean prediction is the prediction at the model center. On the other hand, when dealing with GL(M)Ms with nonlinear link functions, the averaging is done on the nonlinear scale, i.e., nonlinear averaging which makes estimating correct predictions much harder. In particular, bias in expected mean prediction induced by nonlinear transformation of the response variable can lead to inaccurate predictions. One way to deal with this is to make predictions on the transformed scale (linear predictor scale), and then back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation, for example, second-order Taylor approximation implemented in \pkg{emmeans} \citep{lenth2018package}. In linear models, mean-based gives estimates consistent with the observed values, however, in models with nonlinear link functions, this is not always the case. An alternative to mean-based reference point, i.e., averaging non-focal predictor variables, is the \emph{whole-sample-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictor variables and then averaging across the values of the focal predictor variable \citep{hanmer2013behind}. 
 
 Predictions are the standard curves; they tell us what we expect to see if we know the value of the focal predictor. The lines inside (effects) are a little different: they are a good way to visualize the effect of the focal predictor. Unlike predictions, where the uncertainty captures the uncertainty in the whole model, the effects plot focuses on uncertainty in the effect of the focal predictor only and depend on the anchor.
 
@@ -118,7 +118,7 @@ where $\nset{{\bar{x}^\star}}$ and $x^\star_f$ are columns of $\bX^\star$ corres
 
 Higher order terms such as interactions, splines, polynomials, etc., can be within the focal input variable, within (between) non-focal input variable(s) or between the focal and non-focal input variable(s). To distinguish the three, suppose the model which describes the hypothetical simulated household size simulation based on a number of socio-demographic factors such as age and wealthindex is
 
-\begin{align}\label{sim:lm_cubic}
+\begin{align}\label{eq:lm_cubic}
 \mathrm{hh~size}_i &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
 \end{align}
 
@@ -174,17 +174,16 @@ The computation of $\bxo - \bafc$ impacts only on the intercepts and non-focal p
 
 \section{Bias correction}
 
-It is usually important to report the estimates that reflect the expected values of the untransformed response. This is not a major issue in simple linear models. However, when dealing with nonlinear link functions,  generated predictions may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable. In such cases, bias correction is needed when back-transforming the predictions to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{lenth2018package, duursma2003bias}. Another potential source of bias comes from additional non-focal predictors, especially in models with nonlinear link functions. Here, we describe and implement a different approach; whole-sample-based approach for bias correction.
+It is usually important to report the estimates that reflect the expected values of the untransformed response. This is not a major issue in simple linear models. However, when dealing with nonlinear link functions,  generated predictions may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable. In such cases, bias correction is needed when back-transforming the predictions to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{lenth2018package, duursma2003bias}. Another potential source of bias comes from the non-focal input variables in a multivariate model, especially in models with nonlinear link functions. Here, we describe and implement a different approach; whole-sample-based approach for bias correction.
 
 
 \subsection{Whole-sample-based approach for bias correction}
 
-One way to predict is to condition on values of the focal predictor and make predictions for all observations (members of the population) \citep{hanmer2013behind}. The nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population to a one-dimensional distribution of $\eta^\star(x_f, \nset{x})$, which is a function of focal predictor and the observed values of non-focal predictors, as opposed to the definition in Equation~\ref{eq:eta_mean}. More specifically:
-
+An alternative approach to choosing a reference point is to make predictions over all observations of the non-focal input variables (members of the population) \citep{hanmer2013behind}. The nonlinear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population to a one-dimensional distribution of $\eta^\star(x_f, \nset{x})$, which is a function of the chosen values of the focal predictor and the whole sample of non-focal predictors, as opposed to the definition in Equation~\ref{eq:eta_mean}. More specifically:
 \begin{itemize}
-\item compute linear predictor associated with non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
-\item compute linear predictor associated with the focal predictors, $\eta_{jf} = \sum{\beta_f x_{jf}}$
-\item for every value of the focal predictor, $\eta_{jf}$:
+\item compute linear predictor associated with whole sample of the non-focal predictors, $\nset{\eta} = \sum \nset{\beta} \nset{x}$
+\item compute linear predictor associated with the chosen values focal input variable, $\eta_{jf} = \sum{\beta_f x_{jf}}$
+\item for every value of the focal linear predictor, $\eta_{jf}$, compute
 
 \begin{align}\label{eq:pop_eta} 
 \eta_j^\star(\eta_{jf}, \nset{\eta})  &= \eta_{jf} + \nset{\eta} \nonumber \\
@@ -192,13 +191,13 @@ One way to predict is to condition on values of the focal predictor and make pre
 \end{align}
 \end{itemize}
 
-Once Equation~\ref{eq:pop_eta} is computed, one can back-transform the estimates to the original scale and the average over the levels of the focal predictors, $j$:
+Once Equation~\ref{eq:pop_eta} is computed, we back-transform the estimates to the original scale and average over the levels of the focal predictors, $j$:
 
 \begin{align}\label{eq:pop_response} 
 \hat{y}_f  &= \textrm{mean} ~ g^{-1} \left(\eta_j^\star(x_f, \nset{x})\right)
 \end{align}
 
-We make similar adjustments to compute the variances of the predictions at every level of the focal predictor:
+We make similar adjustments to compute the variances of the predictions at every level of the focal input variable:
 
 \begin{align}
 \sigma_{jf}^2 = \textrm{Diag}(\bX^\star_{jc} \boldsymbol{\Sigma} \bX^{\star\top}_{jc})
@@ -209,9 +208,7 @@ where $\bX^{\star}_{jc} = \{\bX_{jf}^\star, \nset{{\bX}^\star} - \nset{{\bar{\bX
 \mathrm{CI}_f = \mathrm{mean} ~ g^{-1} \left(\eta_j^\star(x_f, \nset{x}) \pm q\sigma_{jf}\right)
 \end{align}
 
-\bmb{does averaging the CI ...}\BC{Theoretical proof or just a statement?}
-
-For models with random effects components, we make further adjustment to correct for bias induced by the random effects terms. In the population approach, we treat the random effects terms as additional non-focal predictors and simply make adjustment to Equation~\ref{eq:pop_eta}. In particular
+For models with random effects components, we make further adjustment to correct for bias induced by the random effects terms. In whole-sample approach, we treat the random effects terms as additional non-focal predictors and simply make adjustment to Equation~\ref{eq:pop_eta}. In particular
 
 \begin{align}\label{eq:pop_eta_re} 
 \tau &= \bZ b \nonumber \\
@@ -221,25 +218,26 @@ where $\bZ$ and $b$ are the design matrix and a vector of random effects, respec
 
 \section{Mean-based vs. whole-sample-based}
 
-As mentioned above, the two common choices to generate predictions are: 1) setting non-focal predictors to their mean -- mean-based; and 2) using the entire population of non-focal predictors -- whole-sample-based. If the link function is nonlinear and/or the model has complex higher order interactions, the average of the predictions evaluated at the mean of non-focal predictors and the average of predictions evaluated at the population level (and then averaged) of non-focal predictor are not equivalent, i.e.,
+As mentioned above, the two common choices to generate predictions are: 1) using mean of the non-focal predictors as the reference point -- mean-based; and 2) using the entire observed values of non-focal predictors -- whole-sample-based. If the link function is nonlinear and/or the model has complex higher order interactions, the average of the predictions evaluated at the mean of non-focal predictors and the average of predictions evaluated at the population level (and then averaged) of non-focal predictor are not equivalent, i.e.,
 
 \begin{align}\label{eq:compare_anchored_pop_based}
 g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) \neq \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
 \end{align}
 
-If $g()$ is strictly concave or strictly convex, one can use Jensen's inequality to determine which side of Equation~\ref{eq:compare_anchored_pop_based} is decelerating or accelerating. For accelerating functions, the Jensen’s inequality describes how the changes in input values elevate the predictions and otherwise describes how these changes depress the predictions. For a non-fully convex or concave link function, one can use Taylor series expansion to approximate the range over which the two are smaller or smaller than the other \citep{hanmer2013behind}. 
-\bmb{Just knowing is not enough and discuss much earlier}\BC{Clarify with BMB the current version and appropriate section to move to}
+If $g()$ is strictly concave or strictly convex, one can use Jensen's inequality to determine which side of Equation~\ref{eq:compare_anchored_pop_based} is decelerating or accelerating. For accelerating functions, the Jensen’s inequality describes how the changes in input values elevate the predictions and otherwise describes how these changes depress the predictions. For a non-fully convex or concave link function, one can use Taylor series expansion to approximate the range over which the two are smaller or smaller than the other and then apply second-order approximation \citep{hanmer2013behind}.
+
+In whole-sample-based approach, the ensemble of predictions and CIs are back-transformed before averaging, see Equation~\ref{eq:pop_response}, so we do not need to worry about the nonlinear averaging. In other words, the averaging is no longer on the link scale and are likely to be bounded by the original data scale.
+
+As stated above, in simple linear models without interactions, the effect is constant, so both approaches yield similar results. However, picking a single value, e.g., mean of the predictor, on which to draw conclusions about the effect can be problematic, unrealistic or not contained in or representative of the population. In addition, the mean-based approach fails to use every values of non-focal predictors hence not utilizing the full potential of the information contained in the data. This may limit the inferences we can make about the entire population. In general, the mean-based approach provides the predictions of an average case, whereas the whole-sample-based approach, summarizes the predictions over the entire population. In some applications, the effect of an average case might not be generalizable to the entire population, especially, if the average does not represent the population. This is might not be a problem in whole-sample-based approach since it focuses on specific observations because the prediction is first obtained for each observation and then averaged across the levels of the focal input variable.
 
 
-As stated above, in simple linear models without interactions, the effect is constant, so both approaches yield similar results. However, picking a single value, e.g., mean of the predictor, on which to draw conclusions about the effect can be problematic, unrealistic or not contained in or representative of the population. In addition, the mean-based approach fails to use every values of non-focal predictors hence not utilizing the full potential of the information contained in the data. This may limit the inferences we can make about the entire population. In general, the mean-based approach provides the predictions of an average case, whereas the whole-sample-based approach, summarizes the predictions over the entire population -- and in some applications, the effect of an average case might not be generalizable to the entire population, especially, if the average does not represent the population. In particular the whole-sample-based approach focuses on specific observations since the prediction is first obtained for each observation and then averaged across the levels of the focal predictor.
-
-Another potential concern with the mean-based approach arises in situations where direct naive use leads to rare or meaningless basis for generalization. For example, setting dummy categorical variables in the model matrix to their means, which, by default, sets them to their sample means or observed proportions. For example, a dummy variable for christian household heads may be set to $0.2$, translating to prediction for an household head who is $20\%$ christian. This may be problematic in models with complex interaction terms in which the values may not be converge to population mean\citep{hanmer2013behind}.
+Another potential concern with the mean-based approach arises in situations where direct naive use leads to rare or meaningless basis for generalization. For example, setting dummy categorical variables in the model matrix to their means, which, by default, sets them to their sample means or observed proportions. For example, a dummy variable for christian household heads may be set to $0.2$, translating to prediction for an household head who is $20\%$ christian \citep{hanmer2013behind}.
 
 Whole-sample-based approach is not entirely foolproof. For instance, similar to the mean-based approach, in the case of continuous focal predictors, choosing the representative values of the focal predictors can be very challenging especially if the cases are not evenly distributed around the minimum and the maximum values or within some subgroups defined in the population. In addition, whole-sample-based approach can be computationally intensive for large datasets.
 
 \section{Simulation examples}
 
-We now illustrate the construction of prediction-styled and effect-styled plots and also demonstrate that the mean-based and whole-sample-based approaches produce different results in models with nonlinear link functions and/or additional source(s) of potential bias. In addition, we demonstrate that whole-sample-based approach can be used for bias correction.
+We now illustrate the construction of prediction and effect plots and also demonstrate that the mean-based and whole-sample-based approaches produce different results in models with nonlinear link functions and/or additional source(s) of potential bias. In addition, we demonstrate that whole-sample-based approach can be used for bias correction.
 
 \subsection{Predictions-styled and effects-styled plots}
 
