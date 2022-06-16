@@ -32,7 +32,7 @@ y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilo
 %
 We first simulate data with the two models, such that $x_{1,2,3} \sim \mathrm{Normal}(0, 1)$, $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$ $\beta_{23} = 5$, $\epsilon \sim \mathrm{Normal}(0, \sigma^2)$ and $\sigma^2 = 1$, and then compare the predictions from the \pkg{emmeans}, \pkg{effects} and our proposed alternative (\pkg{varpred}) to the ``true'' predictions (predictions based on the true simulation parameters) and observed average i.e., $\bar{y}$, as shown in Fig~\ref{fig:justify_plots}.
 %
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \includegraphics{justify_preds.inter.pdf}
 \end{center}
@@ -45,7 +45,7 @@ In the absence of interaction (model~\ref{eq:simple_inter_higher_no_interaction}
 
 One may be interested in the uncertainties associated with the focal input variable of interest only, excluding other uncertainties due to other non-focal input variables -- effects. However, currently, the two packages do not provide straightforward way do achieve this. To illustrate this, we generate predictions of $x_2$ from model~\ref{eq:simple_inter_higher_no_interaction} together with the associated $95\%$ confidence bands, as shown in Fig~\ref{fig:justify_ci_plots}. 
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \includegraphics{justify_preds.isolate.pdf}
 \end{center}
@@ -84,7 +84,7 @@ $$\begin{bmatrix}{}
 \end{itemize}
 
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \includegraphics{justify_anchors.combined.pdf}
 \end{center}
@@ -239,13 +239,13 @@ Whole-sample-based approach is not entirely foolproof. For instance, similar to 
 
 We now illustrate the construction of prediction and effect plots and also demonstrate that the mean-based and whole-sample-based approaches produce different results in models with nonlinear link functions and/or additional source(s) of potential bias. In addition, we demonstrate that whole-sample-based approach can be used for bias correction.
 
-\subsection{Predictions-styled and effects-styled plots}
+\subsection{Prediction and effect styled plots}
 
-As mentioned above, in some applications, one may be interested in uncertainties associated with the focal predictor only. In that case, it is important to exclude all the uncertainties as a result of non-focal predictors and only show confidence intervals describing the predictor of interest. To illustrate this, we consider the simulation model described in \nameref{S1_Appendix}. 
+In multivariate models, we may want to visualize the effect of a particular focal input variable. In this case, effects styled plots are preferable over the conventional prediction plots which generally focus on the \emph{total} effects. To illustrate this, we simulate a multivariate model described in \nameref{S1_Appendix}. We also use the same model to illustrate how predictions and effects differ in the presence of higher order interactions in focal or non-focal input variables.
 
-We start by generating two predictions from the fitted model \nameref{S1_Appendix}: 1) one with cubic polynomial of \code{age} as a focal predictor; and 2) one with a simple focal predictor (non-polynomial) of \code{Wealthindex}. Then we compared non-anchored and mean-anchored (effects) confidence intervals around the predicted values (see Fig~\ref{fig:pred_cubic_plots}).
+We generated two sets of predictions and effects: 1) one with \code{age} as the focal input variable (a cubic polynomial polynomial focal predictor); and 2) one with \code{Wealthindex} as the focal in put variable (linear focal input variable). Then compared the predictions and effects as shown in Fig~\ref{fig:pred_cubic_plots}.
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \includegraphics{cubic_predictors_preds.ggp.pdf}
 \end{center}
@@ -259,7 +259,7 @@ In the absence of complex higher order interaction terms or transformations on t
 
 Mean-based and whole-sample-based approaches can produce very different results in models with nonlinear link functions with additional sources of potential bias such as additional non-focal predictor(s), random effect terms or complex interactions. To demonstrate this, we considered a two predictor binary outcome simulation described in \nameref{S2_Appendix}, such that the age effect is way smaller than that of the wealth index, and compared their effects on the predicted probability of improved water quality as shown in Fig~\ref{fig:pred_bin_plots}. 
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \includegraphics{glm_two_predictor_preds.ggp.pdf}
 \end{center}
@@ -273,7 +273,7 @@ If there was no effect of nonlinear averaging, then we would expect the observed
 
 Using simple indirect mediation simulation model described in \nameref{S3_Appendix}, fitted two models -- \emph{non-mediated} which models \emph{z} as a function of \emph{x} (univariate model) and the \emph{mediated} which models \emph{z} as a function of both \emph{x} and \emph{y} (multivariate model). In both cases, we compared mean-based and the whole-sample-based predictions, as shown in Fig~\ref{fig:pred_mediated_plots}.
 
-\begin{figure}[h]
+\begin{figure}
 \begin{center}
 \includegraphics{mediate_preds.ggp.pdf}
 \end{center}

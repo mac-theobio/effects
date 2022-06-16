@@ -36,3 +36,11 @@
 \bibliographystyle{plain}
 
 \usepackage{graphicx,grffile}
+
+\usepackage{float}
+
+\makeatletter
+  \providecommand*\floatlocation[2]{\@namedef{fps@#1}{#2}}
+\makeatother
+\floatlocation{figure}{H} % for figures
+\floatlocation{table}{H}  % for tables

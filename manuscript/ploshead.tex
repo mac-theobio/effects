@@ -161,3 +161,10 @@
 \fancyfootoffset[L]{2.25in}
 \lfoot{\today}
 
+%% Added macros
+\makeatletter
+  \providecommand*\floatlocation[2]{\@namedef{fps@#1}{#2}}
+\makeatother
+\floatlocation{figure}{h} % for figures
+\floatlocation{table}{h}  % for tables
+

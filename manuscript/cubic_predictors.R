@@ -13,7 +13,7 @@ N <- 100
 b0 <- 20
 age_b11 <- 0.1
 age_b12 <- 0.8
-age_b13 <- 0.3
+age_b13 <- 0.1
 b2 <- -0.5
 age_sd <- 1
 wealthindex_sd <- 1
