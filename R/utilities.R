@@ -486,7 +486,9 @@ clean_model <- function(focal.predictors, mod, xlevels
     fac <- !is.null(levels)
 	 if (!fac) {
 		levels <- if (is.null(xlevels[[name]])){
-			steps <- min(c(steps, length(unique(X[,name]))))
+			if (steps==100) {
+				steps <- min(c(steps, length(unique(X[,name]))))
+			}
 			if (x.var!=name){
 				quant <- seq(0, 1, length.out=5)
 			} else {

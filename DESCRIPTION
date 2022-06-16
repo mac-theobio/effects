@@ -1,7 +1,7 @@
 Package: vareffects
 Type: Package
 Title: isolated confidence intervals and bias-corrected predictor effects
-Version: 1.0.12
+Version: 1.0.13
 Author: Bicko Cygu
 Maintainer: Bicko Cygu <cygubicko@gmail.com>
 Description: Implements an alternative method for computing the associated confidence intervals for predictor effects. It also provides various methods for correcting bias in predictions for GL(M)Ms involving nonlinear link functions or complicated interactions.
