@@ -1,6 +1,7 @@
 library(shellpipes)
 library(vareffects); varefftheme()
 library(ggpubr)
+library(ggthemes)
 library(ggplot2)
 library(dplyr)
 
@@ -35,6 +36,7 @@ summary(binned_df)
 
 ### Combine all predictions
 vlist <- list(pred_notmediated_none, pred_notmediated_pop)
+col_limits <- c("Observed mean", "Mean-based", "Whole-sample-based")
 
 pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL
@@ -47,10 +49,8 @@ pred_notmediated_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ geom_point(data=binned_df, aes(x=x, y=z), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Whole-sample-based")
-		, values=c("Observed mean"="red", "Mean-based"="blue", "Whole-sample-based"="black")
-	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Whole-sample-based"=1))
+	+ scale_color_colorblind(limits=col_limits)
+ 	+ scale_linetype_discrete(limits=col_limits)
 	+ labs(colour="Method", linetype="Method", title="A) Non-mediated", y="Predicted probability")
 	+ theme(legend.position="bottom")
 )
@@ -90,10 +90,8 @@ pred_mediated_plots <- (comparevarpred(vlist=vlist
 	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ geom_point(data=binned_df, aes(x=x, y=z), colour="grey")
-	+ scale_colour_manual(breaks = c("Observed mean", "Mean-based", "Whole-sample-based")
-		, values=c("Observed mean"="red", "Mean-based"="blue", "Whole-sample-based"="black")
-	)
-	+ scale_linetype_manual(values=c("Observed mean"=2, "Mean-based"=1, "Whole-sample-based"=1))
+	+ scale_color_colorblind(limits=col_limits)
+ 	+ scale_linetype_discrete(limits=col_limits)
 	+ labs(colour="Method", linetype="Method", title="B) Mediated", y="Predicted probability")
 	+ theme(legend.position="bottom")
 )

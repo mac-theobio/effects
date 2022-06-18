@@ -32,6 +32,8 @@ sim_df_mediate <- (df
 
 head(sim_df_mediate)
 
+sim_mediate_betas <- c(b0, bxz, byz)
+
 ## Observed marginals
 observed_df_med <- (sim_df_mediate
 	%>% summarise_all(mean)
@@ -39,4 +41,9 @@ observed_df_med <- (sim_df_mediate
 )
 observed_df_med
 
-saveVars(sim_df_mediate, observed_df_med, comparevarpred, binfun)
+saveVars(sim_df_mediate
+	, observed_df_med
+	, sim_mediate_betas
+	, comparevarpred
+	, binfun
+)
