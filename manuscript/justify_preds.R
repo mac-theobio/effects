@@ -1,5 +1,6 @@
 library(shellpipes)
 library(vareffects); varefftheme()
+library(ggthemes)
 library(ggplot2)
 library(dplyr)
 library(ggpubr)
@@ -16,6 +17,8 @@ binned_df <- binfun(justify_mod, focal="x1", bins=20, groups=NULL)
 ## Preds based on true parameter values
 x1_truepred_df <- varpred(justify_mod, "x1", true.bata=justify_sim_betas, bias.adjust="population", modelname="observed")$preds
 
+col_limits <- c("observed", "emmeans", "Effect", "varpred")
+col_labels <- c("observed", "emmeans", "effects", "varpred")
 simple_plot <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
 		, focal="x1"
@@ -25,19 +28,17 @@ simple_plot <- (combinepreds(justify_mod
 		, nesting=NULL
 		, ci=FALSE
 	)
-	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
+	+ geom_line(data=x1_truepred_df, aes(x=x1, y=fit, colour=model, linetype=model), linetype=2)
+	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed", linetype="observed"))
 	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
 	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
-	+ geom_line(data=x1_truepred_df, aes(x=x1, y=fit), lty=4, colour="red")
-	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
-		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
-		, labels=c("observed", "emmeans", "effects", "varpred")
+	+ scale_color_colorblind(limits=col_limits 
+		, labels=col_labels
 	)
-	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
-		, labels=c("observed", "emmeans", "effects", "varpred")
+	+ scale_linetype_discrete(limits=col_limits 
+		, labels=col_labels
 	)
-	+ labs(title="No interaction", colour="Method", linetype="Method")
-#	+ labs(title="A) Model 1", colour="Method", linetype="Method")
+	+ labs(title="B) No interaction", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 
@@ -56,19 +57,17 @@ inter_plot <- (combinepreds(justify_inter_mod
 		, nesting=NULL
 		, ci=FALSE
 	)
-	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="observed"), lty=4)
+	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="observed", linetype="observed"))
 	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
 	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
-	+ geom_line(data=x1_truepred_df, aes(x=x1, y=fit), lty=4, colour="red")
-	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
-		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
-		, labels=c("observed", "emmeans", "effects", "varpred")
+	+ geom_line(data=x1_truepred_df, aes(x=x1, y=fit, colour=model, linetype=model), lty=2)
+	+ scale_color_colorblind(limits=col_limits 
+		, labels=col_labels
 	)
-	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
-		, labels=c("observed", "emmeans", "effects", "varpred")
+	+ scale_linetype_discrete(limits=col_limits 
+		, labels=col_labels
 	)
-	+ labs(title="Interaction", colour="Method", linetype="Method")
-#	+ labs(title="B) Model 2", colour="Method", linetype="Method")
+	+ labs(title="B) Interaction", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 
@@ -95,20 +94,14 @@ justify_ci_plots <- (combinepreds(justify_mod
 	)
 	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
 	+ geom_vline(xintercept=mean(x2_focal), lty=2, col="grey")
+	+ scale_color_colorblind(limits=col_limits 
+		, labels=col_labels
+	)
 #	+ geom_line(data=x2_truepred_df, aes(x=x2, y=fit), lty=4, colour="red")
-	+ scale_colour_manual(breaks = c("observed", "emmeans", "Effect", "varpred")
-		, values=c("observed"="red", "emmeans"="blue", "Effect"="green", "varpred"="black")
-		, labels=c("observed", "emmeans", "effects", "varpred")
-	)
-	+ scale_linetype_manual(values=c("observed"=4, "emmeans"=2, "Effect"=3, "varpred"=1)
-		, labels=c("observed", "emmeans", "effects", "varpred")
-	)
+	+ guides(linetype="none")
 	+ labs(colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 teeGG(justify_ci_plots, desc="isolate")
 
 
-## Isolated with CIs (zero-anchored)
-justify_center_anchored <- varpred(justify_mod, "x2", modelname="center-anchored")
-justify_zero_anchored <- varpred(justify_mod, "x2", isolate.value=0, modelname="zero-anchored")
