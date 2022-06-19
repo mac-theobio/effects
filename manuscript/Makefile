@@ -61,6 +61,12 @@ pipeRdesc += glm_two_predictor_preds
 # glm_two_predictor_preds.ggp.pdf: glm_two_predictor_preds.R glm_two_predictor_model.rda
 glm_two_predictor_preds.Rout: glm_two_predictor_preds.R glm_two_predictor_model.rda
 
+### Add confidence intervals (predictions vs effects)
+pipeRdesc += glm_two_predictor_preds_effects
+# glm_two_predictor_preds_effects.ggp.pdf: glm_two_predictor_preds_effects.R glm_two_predictor_model.rda
+glm_two_predictor_preds_effects.Rout: glm_two_predictor_preds_effects.R glm_two_predictor_model.rda
+
+
 ## Figure 6: Mediated effect
 mediate.Rout: mediate.R variable_predictions_funs.rda
 mediate_model.Rout: mediate_model.R mediate.rda
