@@ -83,7 +83,7 @@ teeGG(simple_plot, desc="inter")
 ### Preds based on true parameter values
 x2_truepred_df <- varpred(justify_mod, "x2", true.beta=justify_sim_betas, bias.adjust="population", modelname="observed")$preds
 x2_focal <- quantile(justify_sim_df$x2, quants, names=FALSE)
-justify_ci_plots <- (combinepreds(justify_mod
+justify_ci_df <- (combinepreds(justify_mod
 		, c("varpred", "emmeans", "Effect")
 		, focal="x2"
 		, x.var="x2"
@@ -91,17 +91,31 @@ justify_ci_plots <- (combinepreds(justify_mod
 		, type="response"
 		, nesting=NULL
 		, ci=TRUE
+		, plotit=FALSE
 	)
-	+ geom_hline(data=true_prop_df, aes(yintercept=y, colour="observed"), lty=4)
-	+ geom_vline(xintercept=mean(x2_focal), lty=2, col="grey")
-	+ scale_color_colorblind(limits=col_limits 
-		, labels=col_labels
-	)
-#	+ geom_line(data=x2_truepred_df, aes(x=x2, y=fit), lty=4, colour="red")
-	+ guides(linetype="none")
-	+ labs(colour="Method", linetype="Method")
-	+ theme(legend.position="bottom")
 )
+pred_means_df <- (justify_ci_df
+	%>% group_by(model)
+	%>% mutate(fit=mean(fit))
+)
+
+justify_ci_plots <- (ggplot(justify_ci_df, aes(x=xvar, colour=model, linetype=model))
+	+ geom_line(aes(y=fit))
+	+ geom_line(aes(y=lwr))
+	+ geom_line(aes(y=upr))
+ 	+ geom_hline(data=true_prop_df, aes(yintercept=y, linetype="observed", colour="observed"))
+ 	+ geom_hline(data=pred_means_df, aes(yintercept=fit, linetype=model, colour=model))
+	+ geom_vline(xintercept=mean(x2_focal), lty=2, col="grey")
+ 	+ scale_linetype_discrete(limits=col_limits#[4:2]
+ 		, labels=col_labels#[4:2]
+ 	)
+ 	+ scale_color_colorblind(limits=col_limits#[4:2] 
+ 		, labels=col_labels#[4:2]
+ 	)
+	+ labs(colour="Method", linetype="Method")
+)
+
+
 teeGG(justify_ci_plots, desc="isolate")
 
 

@@ -41,8 +41,9 @@ pipeRdesc += justify_anchors
 # justify_anchors.combined.pdf: justify_anchors.R justify_model.rda
 justify_anchors.Rout: justify_anchors.R justify_model.rda
 
-# Omitted  
 ## Figure 3: Quantity of interest
+pipeRdesc += quantity_of_interest 
+# quantity_of_interest.ggp.pdf: quantity_of_interest.R variable_predictions_funs.rda
 quantity_of_interest.Rout: quantity_of_interest.R variable_predictions_funs.rda
 
 ## Figure 4: Cubic polynomials

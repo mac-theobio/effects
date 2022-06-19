@@ -2,6 +2,7 @@ library(shellpipes)
 library(vareffects); varefftheme()
 library(ggpubr)
 library(ggplot2)
+library(margins)
 library(dplyr)
 
 loadEnvironments()
@@ -43,10 +44,28 @@ qoi_age_pred_plot <- (plot(qoi_age_pred, ci=FALSE)
 	+ annotate('text', x = -1, y = 5.5, label = paste0("Delta(hhsize)==", round(coef(qoi_mod1)[[2]],3)),parse = TRUE,size=5, colour="red") 
 	+ annotate('text', x = 0, y = 6.5, label = paste0("Marginal~effect(age)==", round(coef(qoi_mod1)[[2]],3)),parse = TRUE,size=5, colour="blue") 
 	+ coord_cartesian(expand=FALSE)
-	+ labs(y="Predicted household size")
+	+ labs(y="Predicted household size", title="A) Prediction, effect and ME")
 )
 
-## Figure 3
-pdf("qoi_age_pred_plot-figure3.pdf", height = 5.3)
-print(qoi_age_pred_plot)
-dev.off()
+
+## marginal effect
+meffect_df <- cplot(qoi_mod1, "age", what = "effect", draw=FALSE)
+
+meffect_plot <- (ggplot(meffect_df, aes(x=xvals))
+	+ geom_line(aes(y=yvals))
+	+ geom_line(aes(y=lower), lty=2)
+	+ geom_line(aes(y=upper), lty=2)
+	+ labs(x="age", y="Predicted ME", title="B) Marginal effect")
+)
+
+## Combine all prediction for faceting
+pred_plots <- ggarrange(qoi_age_pred_plot
+	, meffect_plot + rremove("ylab")
+	, common.legend=TRUE
+	, legend="bottom"
+	, ncol=2
+)
+
+teeGG(pred_plots)
+
+
