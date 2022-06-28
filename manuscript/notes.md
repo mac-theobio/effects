@@ -1,6 +1,12 @@
-What have we decided? It would be great to be able to save predictor for the logical sense. Maybe use model variable for the columns of the model matrix?
+What have we decided? 
+
+- I think we chose to go with the conventional definition by Gelman until we convince Ben otherwise
+
+It would be great to be able to save predictor for the logical sense. Maybe use model variable for the columns of the model matrix?
 
 I sort of think that "input" and "model" variable is a distinction that could in theory be applied to an outcome variable, or to a variable we are ordinating, which could be another reason to avoid "predictor" to mean the column-associated variable
+
+- I agree with you that associating predictor with columns of model matrix is confusing but maybe it is not confusing for others. The challenge would be having to convince people like Ben and Gelman why we want to introduce a new terminology, I think.
 
 I am rewriting the intro because I was unable to completely follow the logic. For example, the previous draft says that non-focal choices are needed _because_ glms can be non-linear. In fact non-focal choices are always needed. It then talks unnecessarily (and confusingly, I think, or at least prematurely) about "conclusions" depending on non-focal choices.
 
