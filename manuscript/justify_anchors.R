@@ -11,7 +11,7 @@ startGraphics()
 quants <- seq(0,1,length.out=100)
 x2_focal <- quantile(justify_sim_df$x2, quants, names=FALSE)
 justify_center_anchored <- varpred(justify_mod, "x2", at=list(x2=x2_focal), modelname="center-anchored")
-justify_zero_anchored <- varpred(justify_mod, "x2", at=list(x2=x2_focal), isolate.value=min(x2_focal), modelname="min-anchored")
+justify_zero_anchored <- varpred(justify_mod, "x2", at=list(x2=x2_focal), isolate.value=0, modelname="zero-anchored")
 
 ## Combined
 veff_combined_plot <- (combinevarpred(list(justify_center_anchored, justify_zero_anchored), plotit=TRUE)

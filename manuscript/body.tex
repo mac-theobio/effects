@@ -87,6 +87,7 @@ For linear models (including models with complex interactions), the averaging is
 The main purpose of this article is to discuss and implement various approaches for computing predictions and provide an alternative method for computing the associated confidence intervals, i.e., effects. We further explore and demonstrate, using simulated data, approaches for correcting bias in predictions for GL(M)Ms involving nonlinear link functions. The proposed method and \proglang{R} software package will complement the existing ones by providing: 1) a straightforward way to generate effects, and 2) an alternative and a more robust way to correct for prediction bias in GL(M)Ms.
 
 \jd{This seems like too much about the other packages. Maybe we could: 1) stake things out a bit better by closing off our overview with the "splash plot" (make that the first figure); 2) write the other-package stuff specifically as a comparison, and make it a bit shorter.}
+\BC{By ``splash plot'' you mean Fig 1? I am suggesting we move all the package comparison stuff to/after statistical background section or maybe to simulation example section ...}
 
 \section{Definitions}
 
@@ -114,7 +115,7 @@ $$\begin{bmatrix}{}
 \begin{center}
 \includegraphics{justify_anchors.combined.pdf}
 \end{center}
-\caption{{\bf A comparison of min- and center- anchored effects.} The center-anchored effects are based on the mean of the focal predictor while the min-anchored effects are based on the minimum of the focal predictor. As we mentioned earlier, the choice of the anchor do not affect the main estimates (central trend lines). \jd{Can we use zero anchor instead of min?}} 
+\caption{{\bf A comparison of zero- and center- anchored effects.} The center-anchored effects are based on the mean of the focal predictor while the zero-anchored effects are based on the minimum of the focal predictor. As we mentioned earlier, the choice of the anchor do not affect the main estimates (central trend lines).} 
 \label{fig:justify_anchors}
 \end{figure}
 %

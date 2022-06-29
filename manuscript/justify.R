@@ -27,7 +27,8 @@ justify_sim <- linearsim(nHH=nHH_obs
 	, pcat=list(p=0)
 	, link_scale=TRUE
 )
-justify_sim_df <- justify_sim$data 
+justify_sim_df <- justify_sim$data
+justify_sim_df$x2 <- justify_sim_df$x2 - min(justify_sim_df$x2)
 justify_sim_betas <- justify_sim$betas
 justify_sim_betas
 head(justify_sim_df)
