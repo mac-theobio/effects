@@ -276,7 +276,6 @@ get_vnames <- function(mod){
 				return(gsub(".*I\\(|\\^.*", "", termnames[[x]]))
 			}
 		}))
-		assign2 <- match(assign2, assign2)
 		vnames <- setNames(vnames[assign2], coefnames)
 	} else {
 		vnames <- setNames(vnames[assign], coefnames)
@@ -424,6 +423,8 @@ clean_model <- function(focal.predictors, mod, xlevels
     } else if (ff_check && (!any(name %in% components))) {
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
 	 }
+
+	 ## Handling model center for *((
 	 if (!ff_check) {
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- TRUE # FALSE for product of means as opposed to mean of products
       ## FIXME: Best way to identify all polynomial/function terms in a model
