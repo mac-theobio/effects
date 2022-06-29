@@ -2,31 +2,34 @@ library(shellpipes)
 library(vareffects); varefftheme()
 library(ggpubr)
 library(ggplot2)
-library(ggthemes)
-library(dplyr)
 library(margins)
-library(emmeans)
-library(effects)
 
 loadEnvironments()
 startGraphics()
 
-
 ## marginal effect
-m <- lm(hhsize ~I(age)+I(age^2)+I(age^3)+wealthindex, data=sim_df_cubic)
-d1 <- cplot(m, "age", what="effect")
-d2 <- data.frame(d1)
-d2
-ggplot(d2, aes(x=xvals, y=yvals)) +  geom_line() + geom_point(data=sim_df_cubic, aes(x=age, y=hhsize))
-p1 <- varpred(m, "age", isolate=FALSE, at=list(age=d2$xvals), bias.adjust="none", returnall=TRUE)
-plot(p1) + geom_point(data=sim_df_cubic, aes(x=age, y=hhsize))
-m1 <- emmeans(m, specs=~age, at=list(age=d2$xvals), nesting=NULL)
-as.data.frame(m1)
-ef <- Effect("age", m, xlevels=list(age=d2$xvals))
-p1
-as.data.frame(ef)
-head(p1$raw$model.matrix)
-head(ef$model.matrix)
-quit()
-meffect_df <- cplot(mod_cubic, "age", what = "effect", draw=FALSE)
-meffect_df
+meffect_df <- cplot(mod_cubic, "age", what="effect", draw=FALSE)
+meffect_df <- data.frame(meffect_df)
+meffect_df$model <- "B) Marginal effect"
+meffect_plot <- (ggplot(meffect_df, aes(x=xvals))
+	+ geom_line(aes(y=yvals))
+	+ geom_line(aes(y=lower), lty=2)
+	+ geom_line(aes(y=upper), lty=2)
+	+ labs(x="age", y="ME of age", title="B) Marginal effect")
+)
+
+## varpred
+varpred_df <- varpred(mod_cubic, "age", steps=500, modelname="A) Prediction and effects")
+varpred_plot <- (plot(varpred_df)
+	+ labs(y="Predicted household size", title="A) Prediction and effects")
+)
+
+## Combine all prediction for faceting
+pred_plots <- ggarrange(varpred_plot
+	, meffect_plot
+	, common.legend=TRUE
+	, legend="bottom"
+	, ncol=2
+)
+
+teeGG(pred_plots)

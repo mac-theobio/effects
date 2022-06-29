@@ -55,6 +55,8 @@ cubic_predictors_model.Rout: cubic_predictors_model.R cubic_predictors.rda
 pipeRdesc += cubic_predictors_preds
 # cubic_predictors_preds.ggp.pdf: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
 cubic_predictors_preds.Rout: cubic_predictors_preds.R cubic_predictors_model.rda variable_predictions_funs.rda
+pipeRdesc += cubic_varpred_margins_pred
+# cubic_varpred_margins_pred.ggp.pdf: cubic_varpred_margins_pred.R cubic_predictors_model.rda variable_predictions_funs.rda
 cubic_varpred_margins_pred.Rout: cubic_varpred_margins_pred.R cubic_predictors_model.rda variable_predictions_funs.rda
 
 ## Figure 5: Two predictors glm
