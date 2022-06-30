@@ -1,20 +1,22 @@
+library(vareffects)
 
-n <- 100
-r <- 0.8
-s <- 0.8
+N <- 100
+x1 <- sample(1:10, size=N, replace=TRUE)
+x2 <- rnorm(N, 2, 1)
+y <- 5 + 2*x1 + 1.5*x2 + rnorm(N)
+df <- data.frame(y=y, x1=x1, x2=x2, x1s=drop(scale(x1)))
+m1 <- lm(y ~ x1 + x2, data=df)
+v1 <- varpred(m1, "x1", modelname="main")
+plot(v1, ci=FALSE)
 
-bx <- 0.5
-by <- 1
+m1s <- lm(y ~ x1s + x2, data=df)
+v1s <- varpred(m1s, "x1s", modelname="scaled")
+plot(v1s, ci=FALSE)
 
-a <- rnorm(n)
-b <- rnorm(n)
-c <- rnorm(n)
+s1 <- scale(df$x1)
+mm <- attr(s1, "scaled:center")
+ss <- attr(s1, "scaled:scale")
 
-x <- a
-y <- r*a + s*b
+v1s$preds$x1s <- mm + v1s$preds$x1s*ss
+plot(v1s)
 
-z <- bx*x + by*y + c
-
-m <- lm(z ~ x+y)
-
-summary(m)
