@@ -218,9 +218,19 @@ The computation of $\bxo - \bafc$ impacts only on the intercepts and non-focal p
 
 \section{Bias correction}
 
-\jd{We need to explain why we think this is a problem, not just state that it is “usually important".}
-It is usually important to report the estimates that reflect the expected values of the untransformed response. This is not a major issue in simple linear models. However, when dealing with nonlinear link functions,  generated predictions may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable. In such cases, bias correction is needed when back-transforming the predictions to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{lenth2018package, duursma2003bias}. Another potential source of bias comes from the non-focal input variables in a multivariate model, especially in models with nonlinear link functions. Here, we describe and implement a different approach -- whole-sample-based approach for bias correction.
-\jd{I don't understand how this \P\ describes two separate problems. What source of bias is being described in the first case? Are you sure it exists? What does Lenth say about the bias they correct for?}
+\jd{Why is whole-sample common? Does anyone do it at all except us?}
+
+We can directly compare the outcome estimate at the model center (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (sample-based estimate):
+
+\begin{align}\label{eq:compare_anchored_pop_based}
+g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
+\end{align}
+
+In an ordinary linear model, the link function $g$ is the identity function, so the two means are the same. For non-trivial link functions, we expect them to be different in general -- \NEW{a consequent of Jensen inequality \citep{duursma_bias_2003, denny_performance_2019, ye_generalized_2021}. In GL(M)Ms the assumed link function, predetermines the curvature of the response surface and also the sign of the Jensen effect. For example, logistic model has a positive curvature if the predicted probabilities are low and negative curvature if the predicted probabilities are high. In other words, logistic model may be concave or convex depending on the predicted probabilities, hence the sign of the Jensen effect is not readily available. However, in log link functions, the inverse of the link (exponential) function is strictly convex, i.e., an accelerating function. For accelerating functions, the Jensen’s inequality describes how the changes in input values elevate the predictions and otherwise describes how these changes depress the predictions. Further, our models may include input variables and/or random effects terms other than the focal one. In non-trivial link functions, the Jensen effect may depend on the additional input variables \citep{ye_generalized_2021}}.
+
+\jd{We need to explain why we think this is a problem, not just state that it is “usually important".} \BC{See previous \P}
+
+\NEW{It is usually important to report the estimates that reflect the expected values of the untransformed response. This is not a major issue in simple linear models. However, when dealing with nonlinear link functions,  generated predictions may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable -- a consequent of Jensen effect mentioned above. In such cases, bias correction is needed to back-transform the predictions to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{duursma2003bias, hanmer2013behind}; already implemented in \pkg{emmeans} \citep{lenth2018package}. Here, we describe and implement a different approach -- whole-sample-based approach for bias correction.} 
 
 \subsection{Whole-sample-based approach for bias correction}
 
@@ -265,18 +275,6 @@ For models with random effects components, we make further adjustment to correct
 where $\bZ$ and $b$ are the design matrix and a vector of random effects, respectively.
 
 \section{Mean-based vs. whole-sample-based}
-
-\jd{Why is whole-sample common? Does anyone do it at all except us?}
-
-We can directly compare the outcome estimate at the model center (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (sample-based estimate):
-
-\begin{align}\label{eq:compare_anchored_pop_based}
-g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
-\end{align}
-
-In an ordinary linear model, the link function $g$ is the identity function, so the two means are the same. For non-trivial links, we expect them to be different in general. 
-\jd{What are the key ideas if any from the rest of this \P?. I would like to clearly describe what happens with the log link, and also what happens near each end in a logit link. Why is this a place to talk about the explicit Taylor?}
-strictly concave or strictly convex, one can use Jensen's inequality to determine which side of Equation~\ref{eq:compare_anchored_pop_based} is decelerating or accelerating. For accelerating functions, the Jensen’s inequality describes how the changes in input values elevate the predictions and otherwise describes how these changes depress the predictions. For a non-fully convex or concave link function, one can use Taylor series expansion to approximate the range over which the two are smaller or smaller than the other and then apply second-order approximation \citep{hanmer2013behind}.
 
 In whole-sample-based approach, the ensemble of predictions and CIs are back-transformed before averaging, see Equation~\ref{eq:pop_response}, so we do not need to worry about the nonlinear averaging. In other words, the averaging is no longer on the link scale and are likely to be bounded by the original data scale.
 
