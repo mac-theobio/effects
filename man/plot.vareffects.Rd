@@ -9,6 +9,7 @@
   ...,
   xlabs = NULL,
   ylabs = NULL,
+  xtrans_fun = NULL,
   pos = 0.5,
   ci = TRUE,
   facet_scales = "fixed",
@@ -23,6 +24,8 @@
 \item{xlabs}{x-axis label. If \code{NULL}, default, \code{x.var} is used.}
 
 \item{ylabs}{y-axis label. If \code{NULL}, default, the response label is used.}
+
+\item{xtrans_fun}{function to transform x values to the original or other scales. Useful when x was transformed prior to model fitting.}
 
 \item{pos}{spacing between labels of categorical variable on the plot.}
 }

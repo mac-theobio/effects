@@ -5,6 +5,7 @@
 #' @param ... for future implementations
 #' @param xlabs x-axis label. If \code{NULL}, default, \code{x.var} is used.
 #' @param ylabs y-axis label. If \code{NULL}, default, the response label is used.
+#' @param xtrans_fun function to transform x values to the original or other scales. Useful when x was transformed prior to model fitting.
 #' @param pos spacing between labels of categorical variable on the plot. 
 #'
 #' @return a \code{\link[ggplot2]{ggplot}} object.
@@ -25,7 +26,7 @@
 #' @import ggplot2
 #' @export
 
-plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = TRUE, facet_scales = "fixed", facet_ncol = NULL){
+plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, xtrans_fun=NULL, pos = 0.5, ci = TRUE, facet_scales = "fixed", facet_ncol = NULL){
 
 	lwr <- upr <- NULL
 	df <- x$preds
@@ -34,6 +35,11 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, pos = 0.5, ci = 
 	if (!is.null(focal))	n.focal <- length(focal) else {n.focal <- 1L; focal <- "xvar"}
 	x.var <- attr(df, "x.var")
 	if (is.null(x.var)) x.var <- focal[[1]]
+	
+	if (!is.null(xtrans_fun) & is.function(xtrans_fun)) {
+		df[[x.var]] <- xtrans_fun(df[[x.var]])
+	}
+	
 	add_col <- df$.varpred
 	if (n.focal>1L) {
 		non.focal <- focal[!focal %in% x.var]
