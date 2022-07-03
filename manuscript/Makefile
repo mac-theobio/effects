@@ -90,6 +90,7 @@ Ignore += draft.pdf
 ## Files to edit
 # draft.tex.pdf: body.tex drafthead.tex mscommands.tex
 # draft.pdf: body.tex drafthead.tex mscommands.tex
+# tab.ms.pdf: body.tex tabhead.tex mscommands.tex
 # plos.pdf: body.tex ploshead.tex mscommands.tex
 
 Ignore += draft.tex
@@ -100,6 +101,12 @@ draft.tex: drafthead.tex $(msfiles)
 Ignore += plos.tex
 plos.tex: ploshead.tex $(msfiles)
 	$(catro)
+
+%.ms.tex: %head.tex $(msfiles)
+	$(catro)
+
+tab.adj.pdf: tab.ms.pdf Makefile
+	pdfjam -o $@ --scale 1.25 $<
 
 Sources += *head.tex $(msfiles)
 
