@@ -2,11 +2,11 @@
 =================
 
 - We should (or a attempt to) provide a clear definition of the following:
-	- input variables
-	- predictor variables
-	- an anchor
-	- reference point
-	- model center
+	- Input variables: Scientific variables underlying an inference or exploration. The focal predictor we use for effects or predictions is an input variable.
+	- Model variables: Variables that represent columns in the model matrix. Each input variable will correspond to one or more model variables. In particular, variables with more than two categories, or variables modeled with a spline or polynomial response, will correspond to more than one model variables.
+	- Model center: A point corresponding to a column-wise mean of the model matrix (the mean of one or more model variables). The center point for a set of model variables corresponding to an input variable may not represent a possible value of the input variable.
+	- Reference point: Value or values chosen for _non-focal_ predictors}, when estimating effects. Typically the center point, but can instead be a population of quantiles or observations.
+	- Anchor: The value chosen for the _focal predictor_ when estimating effect confidence intervals (anchor choice does not affect the estimate). Typically chosen as the center point of the model variables corresponding to the focal input variable.
 - We can possible define macro in the text for future changes in the choice of terminology. We can edit **structure.md** for the definitions or maybe add them directly to the **variable_predictions.Rmd**
 
 - We should document what the central line, the outer curves and the cross (or isolated) curves means.
