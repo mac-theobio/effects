@@ -102,9 +102,11 @@ Ignore += plos.tex
 plos.tex: ploshead.tex $(msfiles)
 	$(catro)
 
+Ignore += *.ms.tex
 %.ms.tex: %head.tex $(msfiles)
 	$(catro)
 
+Ignore += tab.adj.pdf
 tab.adj.pdf: tab.ms.pdf Makefile
 	pdfjam -o $@ --scale 1.25 $<
 
