@@ -16,4 +16,32 @@ MS says: If the link function is nonlinear and/or the model has complex higher o
 
 Do we have an uncertainty method for the whole-sample based estimate?
 
-I think it's very common to choose a non-focal reference point as the average of values across levels, rather than observations, for a categorical variable. In other words, to use a focal point of 1/3 Jews, 1/3 Muslims, 1/3 Christian. The model-center approach would use the observed proportions.
+I think it's very common to choose a non-focal reference point as the average of values across levels, rather than observations, for a categorical variable. In other words, to use a focal point of 1/3 Jews, 1/3 Muslims, 1/3 Christian (the "sum-to-zero" approach). The model-center approach would use the observed proportions.
+
+focal predictors
+
+multi-parameter variables?
+
+higher-order (interactions vs. MPVs)
+
+----------------------------------------------------------------------
+
+2022 Jul 04 (Mon)
+=================
+
+We will use "input variable" sensu Gelman, and "model variable" for a variable that corresponds to a column of a model matrix. We will use predictor loosely and carefully avoid use of the term "predictor variable".
+
+We need to worry about justifying our whole-population CIs (empirically, theoretically, or through a Gaussian conceptualization).
+
+We need a word to talk generically about the plots (outcome plots), and one to talk about the central estimate (central estimate).
+
+Bicko is in fact using a range of quantiles, not a range of values -- is it better? Let's use the quantiles for now; maybe later we could add equal spacing. Bicko will take a look at ppoints (but it may not be necessary to exclude min and max in this case).
+* See also https://cran.r-project.org/web/packages/emmeans/vignettes/messy-data.html#weights
+
+Avoid "higher order"
+* interactions are interactions
+* multi-parameter variables are multi-parameter variables
+
+Talk about MPVs first
+* non-focal interactions are then similar to non-focal MPVs
+* interactions that involve the focal predictor are hard (maybe deal with them later).
