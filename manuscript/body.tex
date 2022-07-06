@@ -12,7 +12,7 @@ To make an outcome plot, we use a \emph{focal} predictor on the x-axis. The resu
 
 The outcome plots described above are often called prediction plots or effects plots. We endeavor here to make a conceptual distinction. If our goal is to \emph{predict} what we learn about the outcome variable by measuring the focal predictor, \NEW{then we would focus on the central estimate, which is the same for both prediction and effects plots. However, the distinction between the two lies in how we describe the uncertainties around the central estimate. In particular, we may want to capture the uncertainty in the whole model (these include uncertainty due to intercept, focal and non-focal predictors, and random effects), or we may be interested in showing the uncertainty associated with the focal predictor only. In the former case, we use the prediction plots, which generally focus on the \emph{total} effect and will often be suited for a univariate model. In the latter case, we use effect plots that focus on the direct effect of the focal predictor -- after controlling for other non-focal predictors -- from a multivariate model, which will be preferable for multivariate models. Since effects plots focus on focal-specific uncertainty, they are usually narrower than prediction plots. Shi et al. \citep{shi_evidence_2017} used effects plots to compare the difference in sexual risk behaviors between circumcised and uncircumcised men.}
 
-Generating quantities, i.e., central estimate, together with the corresponding confidence intervals, i.e.,  prediction and effects plots, has some challenges. In particular:
+Generating quantities, i.e., central estimate together with the corresponding confidence intervals has some challenges. In particular:
 \begin{enumerate}
 \item choice of representative values of focal predictor and the \emph{reference point} for non-focal predictors, especially in multivariate models
 \item uncertainty estimation -- appropriate choice of \emph{anchor} for computing confidence intervals; and how to incorporate the uncertainty due to non-focal predictors 
@@ -60,7 +60,7 @@ An alternative formulation of $\boldetah^\star$ involves expressing the linear p
 where $\nset{{\bar{x}^\star}}$ and $x^\star_f$ are columns of $\bX^\star$ corresponding to the non-focal predictors and the focal predictor, respectively.
 
 
-\subsection{Dealing with multi-parameter predictors}
+\subsection{Dealing with multi-parameter variables}
 
 Muli-parameter variables (MPVs) such as splines, polynomials, etc., can be within the focal predictor, or within (between) non-focal predictor(s). To distinguish the two, suppose the model which describes the hypothetical simulation of household size based on a number of socio-demographic factors such as age and wealth index is
 %
@@ -69,31 +69,27 @@ Muli-parameter variables (MPVs) such as splines, polynomials, etc., can be withi
 &+ \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i.
 \end{align}
 %
-\BC{Got to this point \dots}
-In the first case, with \code{Age} as the focal input variable, is a cubic polynomial (with $3$ model variables). In this case, each model variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) is evaluated separately across the chosen levels of the focal input variable, $Age_i$. Specifically, the higher order terms are treated as additional columns of the model matrix evaluated with the same values chosen for the focal input variable, while non-focal predictors are fixed at their reference point as discussed in the previous section. In this case, the predictions associated with \code{Age} on the linear predictor scale become
+In the first case, with \code{Age} as the focal input variable, is a cubic polynomial with three model variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$). In this case, each model variable is evaluated separately across the chosen levels of the focal input variable, $Age_i$. Specifically, the model variables are treated as additional columns of the model matrix evaluated with the same values chosen for the focal input variable, while non-focal predictors are fixed at their reference point as discussed in the previous section. The central estimates associated with \code{Age} on the linear predictor scale become
 %
 \begin{align}
 \eta^\star(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\
 	& + \beta_{\mathrm{W}}\over{\mathrm{Wealthindex}}.
 \end{align}
 %
-In the second case, with \code{Wealthindex} as the focal input variable, the non-focal variable, \code{Age}, is a cubic polynomial. In this case, the non-focal predictors ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) are simply treated as additional columns in the predictor space and an appropriate choice of reference point applies just like in the models without higher non-focal variable interactions. For instance, in mean-based approach, we average all non-focal predictors. Thus
+In the second case, with \code{Wealthindex} as the focal predictor, the non-focal predictor, \code{Age}, is a cubic polynomial. In this case, the non-focal model variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) are all treated as separate non-focal model variables and an appropriate choice of reference point applies just like in the models without MPVs. For instance, in mean-based approach, we average all non-focal MPVs. Thus
 %
 \begin{align}
 \eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\over{\mathrm{Age\mathop{\vphantom{^2}}}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^2}\}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\over{\mathrm{Age\mathop{\vphantom{^2}}}} + \beta_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \beta_{\mathrm{A_3}}\over{\mathrm{Age}^3}\nonumber\\
 	& + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i.
 \end{align}
 %
-Lastly, consider model described by Equation~\ref{eq:simple_inter_higher}, previously used to demonstrate how to handle interactions in non-focal input variables. Here, we use the same model to demonstrate how to handle interactions between the focal input variable, $x_2$, and non-focal input variable, $x_3$. In this case, the non-interacting predictors are treated as non-focal predictors, with appropriate reference points. However, for the interacting predictors, we first choose representative values for the focal input variable and then some particular values of the interacting non-focal input variable in a similar way we chose the values for the focal input variable or use predetermined values. In our example, suppose we pick $i$ and $j$ unique values of the focal input variable, $x_2$ and interacting input variable $x_3$, respectively. The prediction on linear predictor scale is given by
+
+We could also have interactions between focal and non-focal predictors. To illustrate, we consider simple input variables but the logic extends to more complex ones like MPVs. Consider model described by Equation~\ref{eq:simple_inter_higher}, used to demonstrate how to handle interactions in non-focal predictors. Here, we use it to demonstrate how to handle interactions between the focal, $x_2$, and non-focal, $x_3$, predictors. In this case, the non-interacting predictors are treated as non-focal model variables, with appropriate choice of reference points. However, for the interacting model variables, we first choose representative values for the focal predictor and then some particular values of the interacting non-focal predictors in a similar way we choose the values of the focal predictor or use predetermined values. In our example, suppose we pick $i$ and $j$ unique values of the focal predictor, $x_2$ and interacting non-focal predictor, $x_3$, respectively. The central estimate on linear predictor scale is given by
 %
 \begin{align*}
 \eta^\star(x_{2i}, x_{3j}, {\bar{x}^\star_1}) = \beta_0 + \beta_1 \bar{x}^\star_1 + \beta_2x_{2i} + \beta_3x_{3j} + \beta_{23}x_{2i}x_{3j}.
 \end{align*}
 %
-
-In general, our formulation, even for more complicated interactions, follow these three basic principles -- interaction within focal input variables, interaction between non-focal input variables and interaction between focal and non-focal input variables.
-\jd{We should talk about what this s. means. What are the principles?}
-\BC{DISCUSS with JD}
 
 \section{Uncertainty estimation}
 
@@ -104,7 +100,7 @@ We describe the uncertainty around the estimates using confidence intervals (CIs
 \end{align}
 so that the confidence intervals are $\boldeta \pm q\boldsymbol\sigma$, where $q$ is an appropriate quantile of Normal or t distribution \citep{lenth2018package, fox2009effect}. This generates conventional CIs which incorporate all the uncertainties -- including the uncertainties due to the intercept and non-focal input variables.  But what if we are interested in the uncertainty as a result of the focal input variable only, so that the CIs are $\boldeta \pm q \boldsymbol \sigma_f$, i.e., effects? 
 
-\NEW{We may be interested in the uncertainties associated with the focal input variable only, excluding other uncertainties due to other non-focal input variables -- effects. However, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from non focal input variables when computing the CIs.} \jd{We should first explain what we want to do, and then do our comparisons with existing packages.} Currently obscure way to exclude uncertainties associated with non-focal input variables in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal predictors set to $0$. We refer to this procedure as \emph{zeroing-out} variance-covariance matrix; and only works when the input variables are \emph{centered} prior to model fitting, in case of numerical variables, and more complicated when the input variables are categorical. An alternative is our proposed approach which uses the model center and does not require the input variables to be centered prior to model fitting.
+\NEW{We may be interested in the uncertainties associated with the focal input variable only, excluding other uncertainties due to other non-focal input variables -- effects. However, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from non focal input variables when computing the CIs.} Currently obscure way to exclude uncertainties associated with non-focal input variables in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal predictors set to $0$. We refer to this procedure as \emph{zeroing-out} variance-covariance matrix; and only works when the input variables are \emph{centered} prior to model fitting, in case of numerical variables, and more complicated when the input variables are categorical. An alternative is our proposed approach which uses the model center and does not require the input variables to be centered prior to model fitting.
 
 Let $\bxo$ be a centered model matrix previously defined, and let $\ba$ be an anchor matrix, with the same dimensions and entries in all non-focal predictors as $\bxo$. Let $\baf$ be the column of $\ba$ corresponding to focal predictor(s) defined in $\bxo$. Any appropriate values can be chosen for $\baf$ but for model center (center-anchored), we use $\bafc$ which is the mean of the focal predictor(s). Thus 
 %
@@ -131,8 +127,6 @@ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{
 \end{align}
 
 In an ordinary linear model, the link function $g$ is the identity function, so the two means are the same. For non-trivial link functions, we expect them to be different in general -- \NEW{a consequent of Jensen inequality \citep{duursma_bias_2003, denny_performance_2019, ye_generalized_2021}. In GL(M)Ms the assumed link function, predetermines the curvature of the response surface and also the sign of the Jensen effect. For example, logistic model has a positive curvature if the predicted probabilities are low and negative curvature if the predicted probabilities are high. In other words, logistic model may be concave or convex depending on the predicted probabilities, hence the sign of the Jensen effect is not readily available. However, in log link functions, the inverse of the link (exponential) function is strictly convex, i.e., an accelerating function. For accelerating functions, the Jensen’s inequality describes how the changes in input values elevate the predictions and otherwise describes how these changes depress the predictions. Further, our models may include input variables and/or random effects terms other than the focal one. In non-trivial link functions, the Jensen effect may depend on the additional input variables \citep{ye_generalized_2021}}.
-
-\jd{We need to explain why we think this is a problem, not just state that it is “usually important".} \BC{See previous \P}
 
 \NEW{It is usually important to report the estimates that reflect the expected values of the untransformed response. This is not a major issue in simple linear models. However, when dealing with nonlinear link functions,  generated predictions may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable -- a consequent of Jensen effect mentioned above. In such cases, bias correction is needed to back-transform the predictions to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{duursma2003bias, hanmer2013behind}; already implemented in \pkg{emmeans} \citep{lenth2018package}. Here, we describe and implement a different approach -- whole-sample-based approach for bias correction. Hammer and Kalkan \citep{hanmer2013behind} introduced mean- and whole-sample- based approaches but limited their discussion to binary response models only.} 
 
