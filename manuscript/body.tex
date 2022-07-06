@@ -60,21 +60,17 @@ An alternative formulation of $\boldetah^\star$ involves expressing the linear p
 where $\nset{{\bar{x}^\star}}$ and $x^\star_f$ are columns of $\bX^\star$ corresponding to the non-focal predictors and the focal predictor, respectively.
 
 
-\subsection{Dealing with higher-order terms}
+\subsection{Dealing with multi-parameter predictors}
 
-\jd{I'm having trouble staking out higher-order terms as a thing. Yes, many times some or all of the terms in a multi-parameter predictor can be described as higher order, but not always (e.g., categorical predictors). Also, why are we interested in things that don't involve the focal predictor (and why only interactions?). I know that we have to average properly, but we should do that once. Does it make sense to talk separately about interactions, and multi-parameter focal predictors?}
-
-\BC{Should we just be more specific and say "Dealing with polynomial input variables"?}
-\BC{JD to explain second part ...}
-
-Higher order input variables such as interactions, splines, polynomials, etc., can be within the focal input variable, within (between) non-focal input variable(s) or between the focal and non-focal input variable(s). To distinguish the three \jd{Right? Why are there three? There should be two or four.} \BC{Three: 1) on the focal, 2) on the non-focal, and 3) between focal and non-focal. Which one is redundant or missing?}, suppose the model which describes the hypothetical simulation of household size based on a number of socio-demographic factors such as age and wealth index is
+Muli-parameter variables (MPVs) such as splines, polynomials, etc., can be within the focal predictor, or within (between) non-focal predictor(s). To distinguish the two, suppose the model which describes the hypothetical simulation of household size based on a number of socio-demographic factors such as age and wealth index is
 %
 \begin{align}\label{eq:lm_cubic}
 \mathrm{hh~size}_i &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i\nonumber \\
 &+ \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i.
 \end{align}
 %
-In the first case, with \code{Age} as the focal input variable, with cubic polynomial interaction ($3$ focal predictors associated with it). In this case, each of the focal predictors ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) are evaluated independently across the chosen levels of the focal input variable, $Age_i$. Specifically, the higher order terms are treated as additional columns of the model matrix evaluated with the same values chosen for the focal input variable, while non-focal predictors are fixed at their reference point as discussed in the previous section. In this case, the predictions associated with \code{Age} on the linear predictor scale become
+\BC{Got to this point \dots}
+In the first case, with \code{Age} as the focal input variable, is a cubic polynomial (with $3$ model variables). In this case, each model variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) is evaluated separately across the chosen levels of the focal input variable, $Age_i$. Specifically, the higher order terms are treated as additional columns of the model matrix evaluated with the same values chosen for the focal input variable, while non-focal predictors are fixed at their reference point as discussed in the previous section. In this case, the predictions associated with \code{Age} on the linear predictor scale become
 %
 \begin{align}
 \eta^\star(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\
