@@ -21,7 +21,7 @@ meffect_plot <- (ggplot(meffect_df, aes(x=xvals))
 ## varpred
 varpred_df <- varpred(mod_cubic, "age", steps=500, modelname="A) Prediction and effects")
 varpred_plot <- (plot(varpred_df)
-	+ labs(y="Predicted household size", title="A) Prediction and effects")
+	+ labs(y="Household size", title="A) Prediction and effects")
 )
 
 ## Combine all prediction for faceting

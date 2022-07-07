@@ -15,11 +15,13 @@ justify_zero_anchored <- varpred(justify_mod, "x2", at=list(x2=x2_focal), isolat
 
 ## Combined
 veff_combined_plot <- (combinevarpred(list(justify_center_anchored, justify_zero_anchored), plotit=TRUE)
-	+ labs(x="x2", y="Predicted y")
+	+ labs(x="x2", y="y")
 	+ scale_colour_colorblind()
 	+ scale_linetype_manual(values=c(1,1))
 	+ theme(legend.position="bottom")
+	+ labs(colour="Method", linetype="Method")
 )
 
 teeGG(veff_combined_plot, desc="combined")
 
+saveVars(veff_combined_plot)

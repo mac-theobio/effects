@@ -38,7 +38,7 @@ simple_plot <- (combinepreds(justify_mod
 	+ scale_linetype_discrete(limits=col_limits 
 		, labels=col_labels
 	)
-	+ labs(title="B) No interaction", colour="Method", linetype="Method")
+	+ labs(y="y", title="B) No interaction", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 
@@ -112,10 +112,10 @@ justify_ci_plots <- (ggplot(justify_ci_df, aes(x=xvar, colour=model, linetype=mo
  	+ scale_color_colorblind(limits=col_limits#[4:2] 
  		, labels=col_labels#[4:2]
  	)
-	+ labs(colour="Method", linetype="Method")
+	+ labs(colour="Method", linetype="Method", x="x1", y="y")
 )
 
 
 teeGG(justify_ci_plots, desc="isolate")
 
-
+saveVars(justify_ci_plots)
