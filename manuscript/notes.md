@@ -45,3 +45,9 @@ Avoid "higher order"
 Talk about MPVs first
 * non-focal interactions are then similar to non-focal MPVs
 * interactions that involve the focal predictor are hard (maybe deal with them later).
+
+----------------------------------------------------------------------
+
+What about using linear predictor variables instead of model variables?
+
+We need terminology for the ways of calculating the CIs: maybe focal uncertainty and total uncertainty.
