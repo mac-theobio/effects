@@ -43,6 +43,11 @@ pipeRdesc += justify_anchors
 # justify_anchors.combined.pdf: justify_anchors.R justify_model.rda
 justify_anchors.Rout: justify_anchors.R justify_model.rda
 
+## One plot for all the justify plots
+pipeRdesc += justify_anchors_all
+## justify_anchors_all.ggp.pdf: justify_anchors_all.R justify_preds.rda justify_anchors.rda
+justify_anchors_all.Rout: justify_anchors_all.R justify_preds.rda justify_anchors.rda
+
 ## Figure 3: Quantity of interest
 pipeRdesc += quantity_of_interest 
 # quantity_of_interest.ggp.pdf: quantity_of_interest.R variable_predictions_funs.rda
