@@ -49,7 +49,7 @@ pred_age_cubic_plots <- (ggplot(pred_age_cubic_df$preds, aes(x=age, y=fit))
  	+ scale_color_colorblind(limits=col_limits)
  	+ scale_fill_colorblind(limits=col_limits)
  	+ scale_linetype_discrete(limits=col_limits)
- 	+ labs(title="A) Polynomial", y="Predicted household size", linetype="Method", colour="Method", fill="Method")
+ 	+ labs(title="A) Polynomial", y="Household size", linetype="Method", colour="Method", fill="Method")
 )
 print(pred_age_cubic_plots)
 
@@ -90,7 +90,7 @@ pred_wealthindex_cubic_plots <- (ggplot(pred_wealthindex_cubic_df$preds, aes(x=w
  	+ scale_color_colorblind(limits=col_limits)
  	+ scale_fill_colorblind(limits=col_limits)
  	+ scale_linetype_discrete(limits=col_limits)
- 	+ labs(title="B) Simple (linear)", y="Predicted household size", linetype="Method", colour="Method", fill="Method")
+ 	+ labs(title="B) Simple (linear)", y="Household size", linetype="Method", colour="Method", fill="Method")
 )
 print(pred_wealthindex_cubic_plots)
 
