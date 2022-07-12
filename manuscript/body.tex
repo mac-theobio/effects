@@ -78,16 +78,41 @@ $$\begin{bmatrix}{}
 \section{Statistical background}
 
 \jd{This should be more general. The natural way to do the comparison is to first write out the two ways of averaging, and then point out that they're the same when $g$ is the identity. In other words, do the general derivation before making the assumption. It doesn't ever seem good to write $g$ and then \emph{define} it as the identity.}
-To illustrate mean-based approach, consider a simple linear model with linear predictor $\eta = \bX\bbeta$ and let $g(\boldmu) = \boldeta$ be an identity link function, where $\boldmuh$ is the expected value of response variable $\hat{y}$. Let $\bbetah$ be the estimate of $\bbeta$, together with the estimated covariance matrix $\Sigma = V(\bbetah)$ of $\bbetah$. Then the quantity $\hat{\boldeta}^\star = \bX^\star\bbetah$ is the central estimate with respect to the focal predictor in question \citep{fox2009effect}; where $\bX^\star$ is the centered model matrix constructed by averaging the columns of non-focal predictors in model matrix $\bX$, and together with appropriately chosen values of focal predictor.
 
-An alternative formulation of $\boldetah^\star$ involves expressing the linear predictor as the sum of the focal and non-focal predictors' linear predictors. In particular, 
+\BC{Trying to adopt new notation style, is this better?}
 
-\begin{align}\label{eq:eta_mean}
-\eta^\star(x^\star_f, \nset{{\bar{x}^\star}}) &= \hat{\beta}_f x^\star_f + \sum \nset{\hat{\beta}} \nset{{\bar{x}^\star}} \\
-\hat{y}_f  &= g^{-1} \left(\eta^\star(x^\star_f, \nset{{\bar{x}^\star}})\right)
+To estimate the central estimate of an outcome plot on the response scale, we need a link function $g$ and appropriate values of the focal predictor $\bX^{f}$ and reference point for the non-focal predictors $\uset{{\bX}}$. As previously mentioned, we can either use mean-based or whole-sample-based reference point. 
+
+Using mean-based reference point, the central estimate is
+%
+\begin{align}\label{eq:eta_linear_mean}
+\hat{\boldeta}^\star &= \bbetah \bX^{f}_c \nonumber\\
+\hat{y}_f &= g^{-1}(\hat{\boldeta}^\star)
 \end{align}
-where $\nset{{\bar{x}^\star}}$ and $x^\star_f$ are columns of $\bX^\star$ corresponding to the non-focal predictors and the focal predictor, respectively.
+%
+where $\bX^{f}_c = \{\bX^{f}, \uset{{\bX}}_c\}$ is a centered model matrix and $\uset{{\bX}}_c$ is a matrix constructed by averaging the linear predictor variables. 
 
+On the other hand, using whole-sample-based reference point, \EREF{eta_linear_mean}
+becomes
+%
+\begin{align}\label{eq:eta_linear_sample}
+\hat{\boldeta}^\star_j &= \bbetah \bX^{f}_j \nonumber\\
+\hat{y}_f  &= \underset{f}{\textrm{mean}} ~ g^{-1} (\hat{\boldeta}^\star_j)
+\end{align}
+%
+where $\bX^{f}_j = \{\bX^{f}_j, \uset{{\bX}}\}$ is the model matrix of the $j$th
+observation and $\uset{{\bX}}$ is the entire population of the non-focal linear
+predictors. Here, we generate $J \times N$ values and then average over the value of the focal predictor; $J$ and $N$ represents the number of focal values and population of non-focal predictors, respectively.
+
+For identity link function, e.g., in a simple linear model, \EREF{eta_linear_mean} and \EREF{eta_linear_sample} are equivalent. We start by discussing mean-based approach. An alternative formulation of \EREF{eta_linear_mean} involves expressing the linear predictor as the sum of the focal and non-focal predictors' linear predictors. In particular, 
+%
+\begin{align}\label{eq:eta_mean}
+\eta^\star(x^f, \uset{{\bar{x}}}) &= \hat{\beta}^f x^f + \sum \uset{\hat{\beta}} \uset{{\bar{x}}} \\
+\hat{y}_f  &= g^{-1} \left(\eta^\star(x^f, \uset{{\bar{x}}})\right)
+\end{align}
+where $x^f$ and $\uset{{\bar{x}}}$ are columns of $\bX^{f}_c$ focal predictor and non-focal predictors, respectively.
+
+%%$\Sigma = V(\bbetah)$
 
 \subsection{Dealing with multi-parameter variables}
 
@@ -257,11 +282,7 @@ One may be interested in the uncertainties associated with the focal predictor o
 %
 For \pkg{emmeans} and \pkg{effects}, the confidence intervals are much wider because they include uncertainties associated with the intercept and non-focal predictors, but narrower and crosses at the mean of the focal predictor in \pkg{varpred}. In other words, with \pkg{varpred}, we are able to generate effects indicating zero uncertainty at the value of the focal predictor we are more certain about, i.e., the anchor. For simple OLS models, the point where the curves cross is the model center or simply center point; it corresponds to anchor we choose, in this case, the center point (which is generally an appropriate and stable choice). 
 
-\BC{To clean%
-\textbf{Marginal effects:} \jd{This isn't really one of our definitions; maybe some of this belongs in the text part.} In simple linear models with no interaction terms, the coefficient estimates are simple and directly interpretable as the expected change in outcome for a unit change in focal input variable. This is the \emph{unconditional marginal effect} and it is constant across all the observations and levels of all other input variables. Consider models described by \EREF{simple_inter_higher_no_interaction} and \EREF{simple_inter_higher}. The marginal effect of $x_2$ in model~\ref{eq:simple_inter_higher_no_interaction} is $\frac{\partial y}{\partial x_2} = \beta_2$. On the other hand, the marginal effect of $x_2$ in model~\ref{eq:simple_inter_higher} is given by $\frac{\partial y}{\partial x_2} = \beta_2 + \beta_{23}x_3$. In other words, if there are no interactions, the marginal effect of $x_2$ on $y$ is constant, while, if there are interactions in the model, the marginal effect of a change in $x_2$ on $y$ depends on the value of the other \emph{conditioning} predictor, $x_3$. In essence, computation of marginal effects requires the use of partial derivatives and can be considered as the slope of a multi-dimensional surface with respect to the surface of interest \cite{leeper2017interpreting}.%
-}
-
-The \proglang{R} software package \pkg{margins} \citep{lenth2018package} generates marginal effects. To illustrate the distinction between effects and marginal effects, we use the simulated data described in \nameref{S1_Appendix}. 
+Lastly, we compare effect plots and the marginal effects \citep{leeper2017interpreting} plots implemented in package \pkg{margins} \citep{lenth2018package}. To illustrate this, we use the simulated data described in \nameref{S1_Appendix}. The results are shown in \FREF{qoi_age_pred_plot}.
 %
 \begin{figure}
 \centering
