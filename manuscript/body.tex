@@ -75,48 +75,55 @@ $$\begin{bmatrix}{}
 
 \end{itemize}
 
-\section{Statistical background}
+\section{Statistical formulation}
 
 \jd{This should be more general. The natural way to do the comparison is to first write out the two ways of averaging, and then point out that they're the same when $g$ is the identity. In other words, do the general derivation before making the assumption. It doesn't ever seem good to write $g$ and then \emph{define} it as the identity.}
 
 \BC{Trying to adopt new notation style, is this better?}
 
-To estimate the central estimate of an outcome plot on the response scale, we need a link function $g$ and appropriate values of the focal predictor $\bX^{f}$ and reference point for the non-focal predictors $\uset{{\bX}}$. As previously mentioned, we can either use mean-based or whole-sample-based reference point. 
+To estimate the central estimate of an outcome plot on the response scale, we need a link function $g$ and appropriate values of the focal predictor $X^{f}$ and reference point for the non-focal predictors $\uset{{\bX}}$. As previously mentioned, we can either use mean-based or whole-sample-based reference point. 
 
 Using mean-based reference point, the central estimate is
 %
 \begin{align}\label{eq:eta_linear_mean}
-\hat{\boldeta}^\star &= \bbetah \bX^{f}_c \nonumber\\
-\hat{y}_f &= g^{-1}(\hat{\boldeta}^\star)
+\etahfi &= \bbetah \bX^{f}_c \nonumber\\
+\yfi &= g^{-1}(\etahfi),
 \end{align}
 %
-where $\bX^{f}_c = \{\bX^{f}, \uset{{\bX}}_c\}$ is a centered model matrix and $\uset{{\bX}}_c$ is a matrix constructed by averaging the linear predictor variables. 
+where $\bX^{f}_c = \{X^{f}, \uset{{\bX}}_c\}$ is a centered model matrix with appropriately chosen values of the focal predictor $X^{f}$ and centered non-focal linear variables $\uset{{\bX}}_c$ constructed by replacing the entries in the corresponding columns with their averages. 
 
 On the other hand, using whole-sample-based reference point, \EREF{eta_linear_mean}
 becomes
 %
 \begin{align}\label{eq:eta_linear_sample}
-\hat{\boldeta}^\star_j &= \bbetah \bX^{f}_j \nonumber\\
-\hat{y}_f  &= \underset{f}{\textrm{mean}} ~ g^{-1} (\hat{\boldeta}^\star_j)
+\etahfj &= \bbetah \bX^{f}_j \nonumber\\
+\yfi  &= \underset{f}{\textrm{mean}} ~ g^{-1} (\hat{\eta}^\star_j),
 \end{align}
 %
-where $\bX^{f}_j = \{\bX^{f}_j, \uset{{\bX}}\}$ is the model matrix of the $j$th
+where $\bX^{f}_j = \{X^{f}_j, \uset{{\bX}}\}$ is the model matrix of the $j$th
 observation and $\uset{{\bX}}$ is the entire population of the non-focal linear
-predictors. Here, we generate $J \times N$ values and then average over the value of the focal predictor; $J$ and $N$ represents the number of focal values and population of non-focal predictors, respectively.
+predictors. Here, we generate a vector of size $J \times N$ and then average over the values of the focal predictor; $J$ and $N$ represents the number of focal values and population of non-focal predictors, respectively.
 
-For identity link function, e.g., in a simple linear model, \EREF{eta_linear_mean} and \EREF{eta_linear_sample} are equivalent. We start by discussing mean-based approach. An alternative formulation of \EREF{eta_linear_mean} involves expressing the linear predictor as the sum of the focal and non-focal predictors' linear predictors. In particular, 
+For identity link function, e.g., in a simple linear model, \EREF{eta_linear_mean} and \EREF{eta_linear_sample} are equivalent. In the subsequent sections, we will first discuss general formulation of mean-based approach and how to generate associated confidence intervals. Thereafter, we will discuss the second approach, who-sample-based, and its application to bias correction.
+
+
+\subsection{Mean-based approach}
+
+An alternative formulation of \EREF{eta_linear_mean} involves expressing the linear predictor as the sum of the focal and non-focal predictors' linear predictors. In particular, 
 %
 \begin{align}\label{eq:eta_mean}
-\eta^\star(x^f, \uset{{\bar{x}}}) &= \hat{\beta}^f x^f + \sum \uset{\hat{\beta}} \uset{{\bar{x}}} \\
-\hat{y}_f  &= g^{-1} \left(\eta^\star(x^f, \uset{{\bar{x}}})\right)
+\etahfi(x^f, \uset{{\bar{x}}}) &= \hat{\beta}^f x^f + \sum \uset{\hat{\beta}} \uset{{\bar{x}}} \\
+\yfi  &= g^{-1} \left(\eta_i(x^f, \uset{{\bar{x}}})\right)
 \end{align}
 where $x^f$ and $\uset{{\bar{x}}}$ are columns of $\bX^{f}_c$ focal predictor and non-focal predictors, respectively.
 
-%%$\Sigma = V(\bbetah)$
+In a model with a multi-parameter variable or input variables with complex interactions, construction of $\etahfi(x^f, \uset{{\bar{x}}})$ is not usually straightforward since we want $\uset{{\bar{x}}}$ to be or represent the ``true'' model center. We therefore illustrate some of these cases.
 
-\subsection{Dealing with multi-parameter variables}
+\subsubsection{Dealing with multi-parameter variables}
 
 \jd{I feel the first s.~is perfectly clear, and I don't know why it needs any explanation at all.}
+\BC{I suggest we keep the illustrations.}
+
 Multi-parameter variables (MPVs) such as splines, polynomials, etc., can be within the focal predictor, or within non-focal predictor(s). To distinguish the two, suppose the model which describes the hypothetical simulation of household size based on a number of socio-demographic factors such as age and wealth index is
 %
 \begin{align}\label{eq:lm_cubic}
@@ -127,35 +134,39 @@ Multi-parameter variables (MPVs) such as splines, polynomials, etc., can be with
 In the first case, with \code{Age} as the focal predictor, is a cubic polynomial with three linear predictor variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$). In this case, each linear predictor variable is evaluated separately across the chosen levels of the focal predictor, $Age_i$. Specifically, the linear predictor variables are treated as additional columns of the model matrix evaluated with the same values chosen for the focal predictor, while non-focal predictors are fixed at their reference point as discussed in the previous section. The central estimates associated with \code{Age} on the linear predictor scale become
 %
 \begin{align}
-\eta^\star(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\
+\etahfi(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\
 	& + \beta_{\mathrm{W}}\over{\mathrm{Wealthindex}}.
 \end{align}
 %
 In the second case, with \code{Wealthindex} as the focal predictor, the non-focal predictor, \code{Age}, is a cubic polynomial. In this case, the non-focal linear predictor variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) are all treated as separate non-focal linear predictor variables and an appropriate choice of reference point applies just like in the models without MPVs. For instance, in mean-based approach, we average all non-focal MPVs. Thus
 %
-\begin{align}
-\eta^\star(\mathrm{Wealthindex}_i, \nset{{\{\over{\mathrm{Age\mathop{\vphantom{^2}}}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^2}\}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\over{\mathrm{Age\mathop{\vphantom{^2}}}} + \beta_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \beta_{\mathrm{A_3}}\over{\mathrm{Age}^3}\nonumber\\
+\begin{align}\label{eq:mpv_second}
+\etahfi(\mathrm{Wealthindex}_i, \nset{{\{\over{\mathrm{Age\mathop{\vphantom{^2}}}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^2}\}}}) &= \beta_0 + \beta_{\mathrm{A_1}}\over{\mathrm{Age\mathop{\vphantom{^2}}}} + \beta_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \beta_{\mathrm{A_3}}\over{\mathrm{Age}^3}\nonumber\\
 	& + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i.
 \end{align}
 %
 
-\jd{Why is this under MPV as a subhead? Why “also”? Do we discuss non-focal interaction?} We could also have interactions between focal and non-focal predictors. To illustrate, we consider simple input variables but the logic extends to more complex ones like MPVs. Consider model described by \EREF{simple_inter_higher}, \jd{This is referring back to the definition list, which is a strange place to put examples} used to demonstrate how to handle interactions in non-focal predictors. Here, we use it to demonstrate how to handle interactions between the focal, $x_2$, and non-focal, $x_3$, predictors. In this case, the non-interacting predictors are treated as non-focal linear predictor variables, with appropriate choice of reference points \jd{What is the point of saying this again? AFAICT this s.~says if we have a non-interacting predictor we treat it as a non-interacting predictor as already described Can we delete?}. However, for the interacting linear predictor variables, we first choose representative values for the focal predictor and then some particular values of the interacting non-focal predictors in a similar way we choose the values of the focal predictor or use predetermined values. In our example, suppose we pick $i$ and $j$ unique values of the focal predictor, $x_2$ and interacting non-focal predictor, $x_3$, respectively. The central estimate on linear predictor scale is given by
+\subsubsection{Dealing with interactions in input variables}
+
+Interactions can be between non-focal predictor or between focal and non-focal
+predictors. Handling former case is similar to that of the second case
+in MPVs (\EREF{mpv_second}). In the latter case, consider model described by \EREF{simple_inter_higher}. The interaction is between the focal, $x_2$, and non-focal, $x_3$, predictors. In this case, we chose the values of the focal predictors as previously described and the reference point for the interacting non-focal predictor is predetermined or appropriately chosen set of values. In our example, suppose we pick $i$ and $j$ unique values of the focal predictor, $x_2$, and interacting non-focal predictor, $x_3$, respectively. The central estimate on linear predictor scale is given by
 %
 \begin{align*}
-\eta^\star(x_{2i}, x_{3j}, {\bar{x}^\star_1}) = \beta_0 + \beta_1 \bar{x}^\star_1 + \beta_2x_{2i} + \beta_3x_{3j} + \beta_{23}x_{2i}x_{3j}.
+\etahfi(x_{2i}, x_{3j}, {\uset{\bar{x}}_1}) = \beta_0 + \beta_1 \uset{\bar{x}}_1 + \beta_2x_{2i} + \beta_3x_{3j} + \beta_{23}x_{2i}x_{3j}.
 \end{align*}
 %
-\jd{I don't understand how this part fits in at all. Obviously in theory we could pick values of any non-focal predictor, but what's actually going on here? What's the actual difference between how we pick reference values for interacting vs.~non-interacting non-focal predictors?}
+The main point is that, in the case of non-interacting non-focal predictors, the reference point is a center point while in the case of interacting non-focal predictors, the choice of the reference point is not necessarily a center point but can be any appropriate value or set of values.
 
-\section{Uncertainty estimation}
+\subsection{Uncertainty estimation}
 
 We describe the uncertainty around the estimates using confidence intervals (CIs). In principle, every prediction has a different CI. The conventional way to compute variances for predictions is 
 %
 \begin{align}\label{eq:conventional_variance}
-\boldsymbol\sigma^2 = \mathrm{Diag}(\bX^\star \boldsymbol{\Sigma} \bX^{\star\top}), 
+\sigma^2_i = \mathrm{Diag}(\bXstar \boldsymbol{\Sigma} {\bXstar}^\top), 
 \end{align}
-\jd{I don't understand how a scalar ($\sigma^2$) is equal to a vector (the $\mathrm{Diag}$). Is there a citation for this formula?}
-so that the confidence intervals are $\boldeta \pm q\boldsymbol\sigma$, where $q$ is an appropriate quantile of Normal or t distribution \citep{lenth2018package, fox2009effect}. This generates conventional CIs which incorporate all the uncertainties -- including the uncertainties due to the intercept and non-focal predictor.  But what if we are interested in the uncertainty as a result of the focal predictor only, so that the CIs are $\boldeta \pm q \boldsymbol \sigma_f$, i.e., effects? 
+%
+so that the confidence intervals are $\etahfi \pm q\sigma_i$, where $\boldsymbol\Sigma$ is the variance matrix of $\bbetah$ and $q$ is an appropriate quantile of Normal or t distribution \citep{fox2009effect}. This generates conventional CIs which incorporate all the uncertainties -- including the uncertainties due to the intercept and non-focal predictor.  But what if we are interested in the uncertainty as a result of the focal predictor only, so that the CIs are $\etahfi \pm q\sigma^f_i$, i.e., effects? 
 
 \jd{Haven't we already discussed this idea? The new sentence reads like we didn't. We should start by saying what we want, then continue by explaining that there is an equivalent calculation (is it always equivalent?) that can be done in the packages.}
 \NEW{We may be interested in the uncertainties associated with the focal predictor only, excluding other uncertainties due to other non-focal predictors -- effects. However, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from non focal predictors when computing the CIs.} Currently obscure way to exclude uncertainties associated with non-focal predictors in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal predictors set to $0$. We refer to this procedure as \emph{zeroing-out} variance-covariance matrix; and only works when the input variables are \emph{centered} prior to model fitting, in case of numerical variables, and more complicated when the input variables are categorical. An alternative is our proposed approach which uses the model center and does not require the input variables to be centered prior to model fitting.
