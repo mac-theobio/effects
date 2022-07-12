@@ -181,8 +181,8 @@ Let $\bxo$ be a centered model matrix previously defined, and let $\ba$ be an an
 %
 We can see that $\forall ~\bxof=\baf$, $\bxo - \baf = \boldsymbol 0$, hence $\boldsymbol\sigma_f^2 = \boldsymbol{0}$. Similarly, for all values of $\bxof$ close to anchor point $\bafc$, the term $(\bxo - \bafc)$ and $\boldsymbol\sigma_f^2$ goes to $\boldsymbol 0$ and $\boldsymbol\sigma_f^2 = \boldsymbol 0$ if $\bxof=\bafc$. This means that $\boldsymbol\sigma_f^2$ close to the anchor point are smaller than those away from the anchor point; and results to confidence intervals which are narrower around the anchor or crosses at the anchor point for simple models. This is the effect of the particular focal predictor. By setting $\baf = \boldsymbol 0$, we get the variances for the conventional CIs in \EREF{conventional_variance}.
 
-
-The computation of $\bxo - \bafc$ impacts only on the intercepts and non-focal predictors, i.e., the slopes and variance corresponding to the focal predictors are not affected. This means that we can still generate effects without necessarily centering the predictors prior to model fitting. \jd{What is the point of this s.? What does it mean “impacts only on”?}
+\jd{We don't need so much emphasis on the technical details (e.g., our package does something with one less step. Not clear if we need anything from this \P.}
+The computation of $\bxo - \bafc$ affects only the intercepts and non-focal predictors -- the slopes and variance corresponding to the focal predictors are not affected. This means that we can still generate effects without necessarily centering the predictors prior to model fitting. 
 
 %% \subsection{Is center-anchored better?}
 %% 
@@ -191,8 +191,7 @@ The computation of $\bxo - \bafc$ impacts only on the intercepts and non-focal p
 
 \section{Bias correction}
 
-\jd{Why at the model center? Aren't we interested in comparisons at the reference point for any value of the focal variable?}
-We can directly compare the outcome estimate at the model center (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (sample-based estimate):
+We can directly compare the outcome estimate at the model center for non-focal parameters (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (sample-based estimate, the colon below indicates that we are comparing two quantities):
 
 \begin{align}\label{eq:compare_anchored_pop_based}
 g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
