@@ -35,7 +35,6 @@ Generating quantities, i.e., central estimate together with the corresponding co
 Representative values for a focal predictor are generally chosen using quantiles, or equally spaced values, for a continuous predictor; or an exhaustive set of levels for a categorical predictor.
 The central estimates are then calculated by holding the non-focal predictors at a reference point (a value chosen for a non-focal predictor) while varying the focal predictor, with the goal that the estimates represent how the model responds to the changes in the focal predictor \citep{fox2009effect, hanmer2013behind}. These values have been called: \emph{predictor effects} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} or \emph{estimated marginal means} \citep{lenth2018package} \jd{Is this also the same as least-squares means?} \BC{Yes. But was later renamed to emmeans}. In this article, we refer to these quantities as the \emph{central estimates} of the outcome. 
 
-<<<<<<< HEAD
 In models with non-focal predictors such as multivariate models, reference point can be chosen as the average of the non-focal \emph{model variables} -- we call this approach \emph{mean-based} reference point and is currently not implemented in commonly used \proglang{R} software packages. The mean of the central estimates is the prediction at the \emph{model center}. We introduce an alternative choice for the reference point below.
 
 For linear models, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. However, in models with non-linear link functions, this is not always the true. In particular, when dealing with generalized models with non-linear link functions, the averaging is done on the non-linear scale, i.e., non-linear averaging, making generating correct predictions much harder. This is the bias in the expected mean prediction induced by the non-linear transformation of the response variable. One way to address this is to make predictions on the linear predictor scale and back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation, for example, second-order Taylor approximation implemented in \pkg{emmeans} \citep{lenth2018package}. An alternative to the mean-based reference point is the \emph{whole-sample-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
@@ -180,13 +179,16 @@ Let $\bxo$ be a centered model matrix previously defined, and let $\ba$ be an an
 %
 We can see that $\forall ~\bxof=\baf$, $\bxo - \baf = \boldsymbol 0$, hence $\boldsymbol\sigma_i^2 = \boldsymbol{0}$. Similarly, for all values of $\bxof$ close to anchor point $\bafc$, the term $(\bxo - \bafc)$ and $\boldsymbol\sigma_i^2$ goes to $\boldsymbol 0$ and $\boldsymbol\sigma_i^2 = \boldsymbol 0$ if $\bxof=\bafc$. This means that $\boldsymbol\sigma_i^2$ close to the anchor point are smaller than those away from the anchor point; and results to confidence intervals which are narrower around the anchor or crosses at the anchor point for simple models. In other words, this shows the effect of changing the focal value from the anchor value. By setting $\baf = \boldsymbol 0$, we get the variances for the prediction-style CIs in \EREF{conventional_variance}.
 
-
-
-\jd{Haven't we already discussed this idea? The new sentence reads like we didn't. We should start by saying what we want, then continue by explaining that there is an equivalent calculation (is it always equivalent?) that can be done in the packages.}
-\NEW{We may be interested in the uncertainties associated with the focal predictor only, excluding other uncertainties due to other non-focal predictors -- effects. However, commonly used \proglang{R} packages for constructing predictions do not exclude the uncertainties resulting from non focal predictors when computing the CIs.} Currently obscure way to exclude uncertainties associated with non-focal predictors in some of these packages is to provide a user defined variance-covariance matrix with the covariances of non-focal predictors set to $0$. We refer to this procedure as \emph{zeroing-out} variance-covariance matrix; and only works when the input variables are \emph{centered} prior to model fitting, in case of numerical variables, and more complicated when the input variables are categorical. An alternative is our proposed approach which uses the model center and does not require the input variables to be centered prior to model fitting.
-
-\jd{We don't need so much emphasis on the technical details (e.g., our package does something with one less step. Not clear if we need anything from this \P.}
-The computation of $\bxo - \bafc$ affects only the intercepts and non-focal predictors -- the slopes and variance corresponding to the focal predictors are not affected. This means that we can still generate effects without necessarily centering the predictors prior to model fitting. 
+An alternative way to compute $\boldsymbol\sigma^2_i$ in \EREF{centered_variance} is
+by \emph{zeroing-out} the covariance matrix, which involves setting all the non-focal
+linear predictor variables in $\Sigma$ to $0$. This procedure can be implemented 
+in commonly used \proglang{R} packages for effect plots and prediction plots, but only
+works when the input variables are \emph{centered} prior to model fitting, in case of
+numerical variables, and more complicated when the input variables are categorical. 
+The anchor approach, however, does not require the input variables to be centered
+prior to model fitting since the computation of $\bxo - \bafc$ affects only the 
+intercepts and non-focal predictor linear variables -- the slopes and variance
+corresponding to the focal predictor linear variables are not affected. 
 
 %% \subsection{Is center-anchored better?}
 %% 
