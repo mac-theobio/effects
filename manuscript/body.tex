@@ -10,7 +10,7 @@
 
 Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots) are often a useful way to summarize the results of a regression model. These can be used to illustrate model uncertainty or to give a more explicit quantitative sense of how the outcome is expected to change. In generalized models with a non-linear link function, or models with a spline or polynomial response to a predictor variable, they can also aid in understanding difficult-to-interpret coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
 
-To make an outcome plot, we use a \emph{focal} predictor on the x-axis and central estimate (predicted values) on the y-axis. The resulting plot will depend on choices we make about other (non-focal) predictor(s). In ordinary (Gaussian) linear regression, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or a non-linear link function, non-focal choices can also affect the slope of the estimate. Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
+To make an outcome plot, we use a \emph{focal} predictor on the x-axis and \emph{central estimate} (predicted values) on the y-axis. The resulting plot will depend on choices we make about other (non-focal) predictor(s). In ordinary (Gaussian) linear regression, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
 
 As noted, the outcome plots described above are often called prediction plots or effects plots. We endeavor here to make a conceptual distinction. 
 The primary distinction between the two lies in how we describe the uncertainties around the central estimate. 
@@ -29,15 +29,14 @@ Generating quantities, i.e., central estimate together with the corresponding co
 \item uncertainty estimation -- appropriate choice of \emph{anchor} for computing confidence intervals in effects plots
 \item \jd{When is this a challenge? Doesn't it just work like magic with the lm machinery? and how to incorporate the uncertainty due to non-focal predictors} \BC{Clarify with JD. Another challenge or a continuation  of the above?} 
 \item biases induced by non-linear transformations of the response variable in generalized models (especially generalized mixed models).
-\item choice of representative values of the focal predictor \jd{I still don't see this as much of a challenge.} \dya{We needed to mention somewhere that we also have to choose focal values. I think \P~ below is suffecient.}
 \end{enumerate}
 
 Representative values for a focal predictor are generally chosen using quantiles, or equally spaced values, for a continuous predictor; or an exhaustive set of levels for a categorical predictor.
 The central estimates are then calculated by holding the non-focal predictors at a reference point (a value chosen for a non-focal predictor) while varying the focal predictor, with the goal that the estimates represent how the model responds to the changes in the focal predictor \citep{fox2009effect, hanmer2013behind}. These values have been called: \emph{predictor effects} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} or \emph{estimated marginal means} \citep{lenth2018package} \jd{Is this also the same as least-squares means?} \BC{Yes. But was later renamed to emmeans}. In this article, we refer to these quantities as the \emph{central estimates} of the outcome. 
 
-In models with non-focal predictors such as multivariate models, reference point can be chosen as the average of the non-focal \emph{model variables} -- we call this approach \emph{mean-based} reference point and is currently not implemented in commonly used \proglang{R} software packages. The mean of the central estimates is the prediction at the \emph{model center}. We introduce an alternative choice for the reference point below.
+In a model with non-focal predictors such as multivariate models, reference points can be chosen as the average of the non-focal \emph{linear predictor variables} -- we call this approach \emph{mean-based} reference point and is currently not implemented in commonly used \proglang{R} software packages. The mean of the central estimates is the prediction at the \emph{model center}. We introduce an alternative choice for the reference point below.
 
-For linear models, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. However, in models with non-linear link functions, this is not always the true. In particular, when dealing with generalized models with non-linear link functions, the averaging is done on the non-linear scale, i.e., non-linear averaging, making generating correct predictions much harder. This is the bias in the expected mean prediction induced by the non-linear transformation of the response variable. One way to address this is to make predictions on the linear predictor scale and back-transform to the original scale. However, the back-transformation may either result in biased predictions or requires some approximation, for example, second-order Taylor approximation implemented in \pkg{emmeans} \citep{lenth2018package}. An alternative to the mean-based reference point is the \emph{observed-value-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
+For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. However, in a model with non-linear link function, this is not usually true. In particular, when dealing with a generalized model with non-linear link function, the averaging is done on the non-linear scale, i.e., non-linear averaging, making generating correct predictions much harder. This is the bias in the expected mean prediction induced by the non-linear transformation of the response variable. An alternative to the mean-based reference point is the \emph{observed-value-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
 
 This article aims to discuss and implement various approaches for computing predictions and effects, together with the associated plots. We further explore and demonstrate, using simulated data, approaches for correcting bias in central estimates for generalized (mixed) models involving non-linear link functions. The proposed method and \proglang{R} software package will complement the existing ones by providing: 1) a straightforward way to generate effects, and 2) an alternative and a more robust way to correct for prediction bias in generalized (mixed) models.
 
@@ -61,9 +60,9 @@ $$\begin{bmatrix}{}
   1 & 77 & 1 & 0 \\
 \end{bmatrix}.$$ The first column represents the constant term in our model, $\beta_0$. For continuous input variables, the representation in the model matrix is the same as the corresponding input variables (for example second column representing income). For categorical variables, however, by default, the model matrix  creates additional dummy variables using the reference cell parameterization. This means that, if an input variable has $L$ factor levels, then there will be $L-1$ dummy columns representing all but the first level created in the model matrix. In our example, the column \code{religion} is missing and instead we have \code{religionJew} and \code{religionMuslim}; the missing category \code{religionChristian} is treated as the reference category.
 
-\item \textbf{Linear predictor variables}: Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more model variable. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such variables “multi-parameter variables”.
+\item \textbf{Linear predictor variables}: Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such variables “multi-parameter variables”.
 
-\item \textbf{Model center:} A point corresponding to a column-wise mean of the model matrix (the mean of one or more model variables). Also referred to as center point. The center point for a set of model variables corresponding to an input variable may not represent a possible value of the input variable -- the case in \FREF{justify_plots}B. In simple linear models with no interactions, the mean of the input variable can be used is a center point. If there are more than one model variables associated with the focal input variable, however, the model center does not correspond to a single value of the focal predictor, see \FREF{pred_cubic_plots}.
+\item \textbf{Model center:} A point corresponding to a column-wise mean of the model matrix (the mean of one or more linear predictor variables). Also referred to as center point. The center point for a set of linear predictor variables corresponding to an input variable may not represent a possible value of the input variable -- the case in \FREF{justify_plots}B. In a simple linear model with no interactions, the mean of the input variable can be used as a center point. If there are more than one linear predictor variables associated with the focal input variable, however, the model center does not correspond to a single value of the focal predictor, see \FREF{pred_cubic_plots}.
 
 
 \item \textbf{Reference point:} The values (or sets of values) chosen for non-focal predictors, when estimating the predictions and effects. Typically the center point, but can also be chosen as a baseline value or as a mean across categories. We will also discuss using a set of quantiles or observations as a reference.
@@ -76,11 +75,7 @@ $$\begin{bmatrix}{}
 
 \section{Statistical formulation}
 
-\jd{This should be more general. The natural way to do the comparison is to first write out the two ways of averaging, and then point out that they're the same when $g$ is the identity. In other words, do the general derivation before making the assumption. It doesn't ever seem good to write $g$ and then \emph{define} it as the identity.}
-
-\BC{Trying to adopt new notation style, is this better?}
-
-To estimate the central estimate of an outcome plot on the response scale, we need a link function $g$ and appropriate values of the focal predictor $X^{f}$ and reference point for the non-focal predictors $\uset{{\bX}}$. As previously mentioned, we can either use mean-based or observed-value-based reference point. 
+To estimate the central estimate of an outcome plot on the response scale, we need a link function $g$ and appropriate values of the focal predictor $\bX^{f}$ and reference point for the non-focal predictors $\uset{{\bX}}$. As previously mentioned, we can either use mean-based or observed-value-based reference point. 
 
 Using mean-based reference point, the central estimate is
 %
@@ -89,7 +84,7 @@ Using mean-based reference point, the central estimate is
 \yfi &= g^{-1}(\etahfi),
 \end{align}
 %
-where $\bX^{f}_c = \{X^{f}, \uset{{\bX}}_c\}$ is a centered model matrix with appropriately chosen values of the focal predictor $X^{f}$ and centered non-focal linear variables $\uset{{\bX}}_c$ constructed by replacing the entries in the corresponding columns with their averages. 
+where $\bX^{f}_c = \{\bX^{f}, \uset{{\bX}}_c\}$ is a centered model matrix with appropriately chosen values of the focal predictor $\bX^{f}$ and centered non-focal linear predictor variables $\uset{{\bX}}_c$ constructed by replacing the corresponding values in the model matrix with their averages. 
 
 On the other hand, using observed-value-based reference point, \EREF{eta_linear_mean}
 becomes
@@ -101,9 +96,9 @@ becomes
 %
 where $\bX^{f}_j = \{X^{f}_j, \uset{{\bX}}\}$ is the model matrix of the $j$th
 observation and $\uset{{\bX}}$ is the entire population of the non-focal linear
-predictors. Here, we generate a vector of size $J \times N$ and then average over the values of the focal predictor; $J$ and $N$ represents the number of focal values and population of non-focal predictors, respectively.
+predictor variables. Here, we generate a vector of size $J \times N$ and then average over the values of the focal predictor; $J$ and $N$ represents the number of focal values and population of non-focal predictors, respectively.
 
-For identity link function, e.g., in a simple linear model, \EREF{eta_linear_mean} and \EREF{eta_linear_sample} are equivalent. In the subsequent sections, we will first discuss general formulation of mean-based approach and how to generate associated confidence intervals. Thereafter, we will discuss the second approach, who-sample-based, and its application to bias correction.
+For identity link function, e.g., in a simple linear model, \EREF{eta_linear_mean} and \EREF{eta_linear_sample} are equivalent. In the subsequent sections, we will first discuss general formulation of mean-based approach and how to generate associated confidence intervals. Thereafter, we will discuss the second approach, observed-value-based, and its application to bias correction.
 
 
 \subsection{Mean-based approach}
@@ -147,9 +142,9 @@ In the second case, with \code{Wealthindex} as the focal predictor, the non-foca
 
 \subsubsection{Dealing with interactions in input variables}
 
-Interactions can be between non-focal predictor or between focal and non-focal
+Interactions can be between non-focal predictors or between focal and non-focal
 predictors. Handling former case is similar to that of the second case
-in MPVs (\EREF{mpv_second}). In the latter case, consider model described by \EREF{simple_inter_higher}. The interaction is between the focal, $x_2$, and non-focal, $x_3$, predictors. In this case, we chose the values of the focal predictors as previously described and the reference point for the interacting non-focal predictor is predetermined or appropriately chosen set of values. In our example, suppose we pick $i$ and $j$ unique values of the focal predictor, $x_2$, and interacting non-focal predictor, $x_3$, respectively. The central estimate on linear predictor scale is given by
+in MPVs (\EREF{mpv_second}). In the latter case, consider model described by \EREF{simple_inter_higher}. The interaction is between the focal, $x_2$, and non-focal, $x_3$, predictors. In this case, the values of the focal predictors are chosen as previously described and the reference point for the interacting non-focal predictor is predetermined or appropriately chosen set of values. In our example, suppose we pick $i$ and $j$ unique values of the focal predictor, $x_2$, and interacting non-focal predictor, $x_3$, respectively. The central estimate on linear predictor becomes
 %
 \begin{align*}
 \etahfi(x_{2i}, x_{3j}, {\uset{\bar{x}}_1}) = \betah_0 + \betah_1 \uset{\bar{x}}_1 + \betah_2x_{2i} + \betah_3x_{3j} + \betah_{23}x_{2i}x_{3j}.
@@ -171,10 +166,10 @@ so that the confidence intervals are $\etahfi \pm q\sigma_i$, where $\boldsymbol
 
 But what if we are interested in the uncertainty as a result of the focal predictor only (effect-style CIs), so that the CIs are $\etahfi \pm q\sigma^f_i$, i.e., effects? For effect-style CIs, we need an anchor and centered model matrix with all non-focal predictor variables set to zero. 
 
-Let $\bxo$ be a centered model matrix previously defined, and let $\ba$ be an anchor matrix, with the same dimensions and entries in all non-focal predictors as $\bxo$. Let $\baf$ be the column of $\ba$ corresponding to focal predictor(s) defined in $\bxo$. Any appropriate values can be chosen for $\baf$ but for model center (center-anchored), we use $\bafc$ which is the mean of the focal predictor(s). Thus 
+Let $\bxo$ be a centered model matrix previously defined, and let $\ba$ be an anchor matrix, with the same dimensions and entries of all non-focal linear predictor variables as $\bxo$. Let $\baf$ be the column of $\ba$ corresponding to focal linear predictor variable defined in $\bxo$. Any appropriate values can be chosen for $\baf$ but for model center (center-anchored), we use $\bafc$ which is the mean of the focal predictor. Thus 
 %
 \begin{align}\label{eq:centered_variance}
-\boldsymbol\sigma^2_i = \textrm{Diag}((\bxo - \bafc) \boldsymbol{\Sigma} (\bxo - \bafc)^\top).
+\boldsymbol\sigma^2_i = \textrm{Diag}((\bxo - \bafc) \boldsymbol{\Sigma} {(\bxo - \bafc)}^\top).
 \end{align}
 %
 We can see that $\forall ~\bxof=\baf$, $\bxo - \baf = \boldsymbol 0$, hence $\boldsymbol\sigma_i^2 = \boldsymbol{0}$. Similarly, for all values of $\bxof$ close to anchor point $\bafc$, the term $(\bxo - \bafc)$ and $\boldsymbol\sigma_i^2$ goes to $\boldsymbol 0$ and $\boldsymbol\sigma_i^2 = \boldsymbol 0$ if $\bxof=\bafc$. This means that $\boldsymbol\sigma_i^2$ close to the anchor point are smaller than those away from the anchor point; and results to confidence intervals which are narrower around the anchor or crosses at the anchor point for simple models. In other words, this shows the effect of changing the focal value from the anchor value. By setting $\baf = \boldsymbol 0$, we get the variances for the prediction-style CIs in \EREF{conventional_variance}.
@@ -197,7 +192,7 @@ corresponding to the focal predictor linear variables are not affected.
 
 \section{Bias correction}
 
-We can directly compare the outcome estimate at the model center for non-focal parameters (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (sample-based estimate, the colon below indicates that we are comparing two quantities):
+We can directly compare the outcome estimate at the model center for non-focal parameters (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (observed-value-based estimate, the colon below indicates that we are comparing two quantities):
 %
 \begin{align}\label{eq:compare_anchored_pop_based}
 g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
@@ -205,9 +200,11 @@ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{
 %
 In an ordinary linear model, the link function $g$ is the identity function, so the two means are the same. For non-trivial link functions, we expect them to be different in general.
 
-From Jensen's inequality, the exponential link function, for example, is concave up; hence we expect the right-hand side of \EREF{compare_anchored_pop_based} to be greater than the left-hand side, i.e., the average of the predictions is greater than the prediction at the average of the focal and non-focal parameters. On the other hand, the logistic function is concave up and concave down at low and high probabilities, respectively. We expect a pattern similar to that of exponential function when the logistic function is concave up and the opposite when the logistic function is concave down. In other words, the mean-based approach can under-estimate the prediction in exponential and low probability logistic function and over-estimate in high probability logistic function.
+From Jensen's inequality, the exponential link function, for example, is concave up; hence we expect the right-hand side of \EREF{compare_anchored_pop_based} to be greater than the left-hand side, i.e., the average of the predictions is greater than the prediction at the average of the focal and non-focal parameters. On the other hand, the logistic function is concave up and concave down at low and high probabilities, respectively. We expect a pattern similar to that of exponential function when the logistic function is concave up and the opposite when the logistic function is concave down. In other words, the mean-based approach can under-estimate the prediction in exponential and low probability logistic functions and over-estimate in high probability logistic function.
 
-When dealing with nonlinear link functions,  generated estimates may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable -- as illustrated by the two examples above. In such cases, bias correction is needed when back-transforming the estimates to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{duursma2003bias, hanmer2013behind}; already implemented in \pkg{emmeans} \citep{lenth2018package}. Here, we describe and implement a different approach -- observed-value-based approach for bias correction. Hanmer and Kalkan \citep{hanmer2013behind} discuss and implement mean- and observed-value- based approaches in binary response models only. Our formulation is more general and can easily be extended to other link functions other than logistic. 
+\fix{Thinking about RE}
+
+When dealing with nonlinear link functions,  generated estimates may not reflect the observed response due to the bias in the expected mean induced by the nonlinear transformation of the response variable -- as illustrated by the two examples above. In such cases, bias correction is needed when back-transforming the estimates to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{duursma2003bias, hanmer2013behind}; already implemented in \pkg{emmeans} \citep{lenth2018package}. Here, we describe and implement a different approach -- observed-value-based approach for bias correction. Hanmer and Kalkan \citep{hanmer2013behind} discussed and implemented mean- and observed-value- based approaches in binary response models only. Our formulation is more general and can easily be extended to other link functions other than logistic. 
 
 
 \subsection{Observed-value-based approach for bias correction}
@@ -224,7 +221,6 @@ An alternative approach to choosing a reference point is to make predictions ove
 \end{align}
 \end{itemize}
 %
-HERE
 
 Once \EREF{pop_eta} is computed, we back-transform the estimates to the original scale and average over the levels of the focal predictors, $j$:
 %
@@ -242,7 +238,7 @@ We make similar adjustments to compute the variances of the predictions at every
 and
 %
 \begin{align}
-\mathrm{CI}_i = \underset{j}{\textrm{mean}} ~ g^{-1} \left(\etahfj(x^f, \uset{x}) \pm q\sigma_{j}\right).
+\mathrm{CI}_i = \underset{j}{\textrm{mean}} ~ g^{-1} \left(\etahfj(x^f, \uset{x}) \pm q\sigma^f_{j}\right).
 \end{align}
 %
 
