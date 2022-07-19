@@ -22,7 +22,7 @@ pred_age_none_mean <- getmeans(pred_age_none, what="estimate")
 pred_age_pop <- varpred(glm_mod
 	, "age"
 	, bias.adjust="population"
-	, modelname="Whole-sample-based"
+	, modelname="Observed-value-based"
 )
 pred_age_pop_mean <- getmeans(pred_age_pop, what="estimate")
 
@@ -37,7 +37,7 @@ pred_age_pop_mean_true <- getmeans(pred_age_pop_true, what="estimate")
 
 ### Binned obs
 binned_df <- binfun(glm_mod, focal="age", bins=50, groups=NULL)
-col_limits <- c("Observed mean", "Truth", "Mean-based", "Whole-sample-based")
+col_limits <- c("Observed mean", "Truth", "Mean-based", "Observed-value-based")
 
 ### Combine all predictions
 vlist <- list(pred_age_none, pred_age_pop, pred_age_pop_true)
@@ -74,7 +74,7 @@ pred_wealthindex_none_mean <- getmeans(pred_wealthindex_none, what="estimate")
 pred_wealthindex_pop <- varpred(glm_mod
 	, "wealthindex"
 	, bias.adjust="population"
-	, modelname="Whole-sample-based"
+	, modelname="Observed-value-based"
 )
 pred_wealthindex_pop_mean <- getmeans(pred_wealthindex_pop, what="estimate")
 

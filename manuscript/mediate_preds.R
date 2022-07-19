@@ -22,7 +22,7 @@ pred_notmediated_none_mean <- getmeans(pred_notmediated_none, what="estimate")
 pred_notmediated_pop <- varpred(mod_notmediated
 	, "x"
 	, bias.adjust="population"
-	, modelname="Whole-sample-based"
+	, modelname="Observed-value-based"
 )
 pred_notmediated_pop_mean <- getmeans(pred_notmediated_pop, what="estimate")
 
@@ -36,7 +36,7 @@ summary(binned_df)
 
 ### Combine all predictions
 vlist <- list(pred_notmediated_none, pred_notmediated_pop)
-col_limits <- c("Observed mean", "Mean-based", "Whole-sample-based")
+col_limits <- c("Observed mean", "Mean-based", "Observed-value-based")
 
 pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL
@@ -69,7 +69,7 @@ pred_mediated_none_mean <- getmeans(pred_mediated_none, what="estimate")
 pred_mediated_pop <- varpred(mod_mediated
 	, "x"
 	, bias.adjust="population"
-	, modelname="Whole-sample-based"
+	, modelname="Observed-value-based"
 )
 pred_mediated_pop_mean <- getmeans(pred_mediated_pop, what="estimate")
 

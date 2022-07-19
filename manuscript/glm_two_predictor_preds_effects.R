@@ -54,7 +54,7 @@ pred_age <- comparevarpred(vlist=vlist
 pred_age_df <- pred_age$preds
 pred_age_df$.method <- "A) Mean-based" 
 
-## Corrected (Whole-sample)
+## Corrected (Observed-value)
 ### Predictions
 pred_age_prediction_ws <- varpred(glm_mod
 	, "age"
@@ -80,9 +80,9 @@ pred_age_ws <- comparevarpred(vlist=vlist
 	, ci=TRUE
 )
 pred_age_ws_df <- pred_age_ws$preds
-pred_age_ws_df$.method <- "B) Whole-sample-based"
+pred_age_ws_df$.method <- "B) Observed-value-based"
 pred_age_pop_ws_true_df <- pred_age_pop_true_df
-pred_age_pop_ws_true_df$.method <- "B) Whole-sample-based"
+pred_age_pop_ws_true_df$.method <- "B) Observed-value-based"
 
 ## Compare the predictions
 pred_df <- do.call("rbind"
