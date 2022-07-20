@@ -10,10 +10,12 @@ library(effects)
 loadEnvironments()
 startGraphics()
 
-## No interactions
+numBins <- 10
 quants <- seq(0,1,length.out=100)
+
+## No interactions
 x1_focal <- quantile(justify_sim_df$x1, quants, names=FALSE)
-binned_df <- binfun(justify_mod, focal="x1", bins=20, groups=NULL)
+binned_df <- binfun(justify_mod, focal="x1", bins=numBins, groups=NULL)
 ## Preds based on true parameter values
 x1_truepred_df <- varpred(justify_mod, "x1", true.bata=justify_sim_betas, bias.adjust="population", modelname="observed")$preds
 
@@ -38,14 +40,13 @@ simple_plot <- (combinepreds(justify_mod
 	+ scale_linetype_discrete(limits=col_limits 
 		, labels=col_labels
 	)
-	+ labs(y="y", title="B) No interaction", colour="Method", linetype="Method")
+	+ labs(y="y", title="A) No interaction", colour="Method", linetype="Method")
 	+ theme(legend.position="bottom")
 )
 
 ## With interactions
-quants <- seq(0,1,length.out=100)
 x1_focal <- quantile(justify_inter_sim_df$x1, quants, names=FALSE)
-binned_df <- binfun(justify_inter_mod, focal="x1", bins=20, groups=NULL)
+binned_df <- binfun(justify_inter_mod, focal="x1", bins=numBins, groups=NULL)
 x1_truepred_df <- varpred(justify_inter_mod, "x1", true.beta=justify_inter_sim_betas, bias.adjust="population", modelname="observed")$preds
 
 inter_plot <- (combinepreds(justify_inter_mod
