@@ -19,11 +19,11 @@ Conversely, if we wish to focus on the \emph{effect} of a focal predictor only, 
 If we follow this convention, we expect effects plots to have narrower confidence intervals (CIs) than prediction plots.
 
 The other distinction relates not to the method of calculating CIs, but to the model chosen for the plot. 
-In general, if we want to predict based on a focal parameter, we are likely to want to fit a univariate model, that only contains terms related to that predictor.
-If we want to know the effects of a predictor, we may want to control for covariates with a multivariate model, in order to estimate “direct” effects, or leave covariates out, in order to estimate “total” effects (direct plus indirect), or take an intermediate strategy.
-Shi et al. \citep{shi_evidence_2017} used multivariate effects plots to visualize estimated direct effects of different predictors in a paper that compared the difference in sexual risk behaviors between circumcised and uncircumcised men.
+In general, if we want to predict based on a focal parameter, we are likely to want to fit a univariate model that only contains terms related to that predictor.
+If we want to know the effects of a predictor, we may want to control for covariates with a multivariate model, in order to estimate “direct” effects; leave covariates out, in order to estimate “total” effects (direct plus indirect); or take an intermediate strategy.
+Shi et al. \citep{shi_evidence_2017}, for example, used multivariate effects plots to visualize estimated direct effects of different predictors in a paper that compared the difference in sexual risk behaviors between circumcised and uncircumcised men.
 
-Generating quantities, i.e., central estimate together with the corresponding confidence intervals has some challenges. In particular:
+Producing this sort of outcome plot has some challenges, including:
 \begin{enumerate}
 \item choosing the \emph{reference point} for non-focal predictors in multivariate models
 \item uncertainty estimation -- appropriate choice of \emph{anchor} for computing confidence intervals in effects plots
@@ -32,27 +32,29 @@ Generating quantities, i.e., central estimate together with the corresponding co
 \end{enumerate}
 
 Representative values for a focal predictor are generally chosen using quantiles, or equally spaced values, for a continuous predictor; or an exhaustive set of levels for a categorical predictor.
-The central estimates are then calculated by holding the non-focal predictors at a reference point (a value chosen for a non-focal predictor) while varying the focal predictor, with the goal that the estimates represent how the model responds to the changes in the focal predictor \citep{fox2009effect, hanmer2013behind}. These values have been called: \emph{predictor effects} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} or \emph{estimated marginal means} \citep{lenth2018package} \jd{Is this also the same as least-squares means?} \BC{Yes. But was later renamed to emmeans}. In this article, we refer to these quantities as the \emph{central estimates} of the outcome. The mean of the central estimates is the prediction at the \emph{model center}. 
+The central estimates are then calculated by holding the non-focal predictors at a reference point (a value chosen for a non-focal predictor) while varying the focal predictor, with the goal that the estimates represent how the model responds to the changes in the focal predictor \citep{fox2009effect, hanmer2013behind}. These values have been called: \emph{predictor effects} \citep{fox2009effect}, \emph{marginal predictions} \citep{leeper2017package} or \emph{estimated marginal means} \citep{lenth2018package} In this article, we refer to these quantities as the \emph{central estimates} of the outcome. 
+
+\jd{The model center is the average of predictor rows of the model matrix. It is a calculation that this is equal to the mean of estimates for a linear model (identity link function). Maybe discuss later.} The mean of the central estimates is the prediction at the \emph{model center}. 
 
 In a model with non-focal predictors such as multivariate models, reference points can be chosen as the average of the non-focal \emph{linear predictor variables} -- we call this approach \emph{mean-based} reference point and is currently not implemented in commonly used \proglang{R} software packages. We introduce an alternative choice for the reference point.
+\jd{This is where I would introduce model center. Maybe we should drop it? Or maybe your definition is better?}
 
-For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. However, in a model with non-linear link function, this is not usually true. In particular, when dealing with a generalized model with non-linear link function, the averaging is done on the non-linear scale, i.e., non-linear averaging, making generating correct predictions much harder. This is the bias in the expected mean prediction induced by the non-linear transformation of the response variable. An alternative to the mean-based reference point is the \emph{observed-value-based} approach, discussed in detail later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
+For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. \jd{Why is there a bias to be corrected? Is this stuff we're going to explain later?}
+However, in a model with non-linear link function, this is not usually true. When averaging is done on a separate link scale, the mean of the estimates is not the same as the estimate at the mean point. 
+This leads to bias: in this case a systematic difference between the values seen on average for a given value of the focal predictor and the value predicted by the mean-based approach. 
+An alternative to the mean-based reference point is the \emph{observed-value-based} approach, discussed later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
 
-This article aims to discuss and implement various approaches for computing predictions and effects, together with the associated plots. We further explore and demonstrate, using simulated data, approaches for correcting bias in central estimates for generalized (mixed) models involving non-linear link functions. The proposed method and \proglang{R} software package will complement the existing ones by providing: 1) a straightforward way to generate effects, and 2) an alternative and a more robust way to correct for prediction bias in generalized (mixed) models.
-
-\jd{We should revisit this list.}
+This article will discuss and implement various approaches for computing predictions and effects plots. We further explore and demonstrate, using simulated data, approaches for correcting bias in central estimates for generalized models involving non-linear link functions, including models with random effects. The proposed method and \proglang{R} software package will complement the existing ones by providing: 1) a straightforward way to generate effects plots (in our sense), and 2) a robust way to correct for non-linear averaging bias in generalized (mixed) models. 
 
 \section{Definitions}
 
 In order to discuss the statistical background and mathematical formulation of the proposed approaches, we need to understand and formally define a number of terms, some of which have been introduced in the previous section:
 
-\jd{I guess this list should really be a desc, not an itemize.}\BC{Clarify}
+\begin{description}
+\item [Input variables] Refers to the observed (or scientific) variables underlying an inference or exploration. For example, the regression models described by \EREF{simple_inter_higher_no_interaction} and \EREF{simple_inter_higher} both have $3$ input variables -- $x_1, x_2, x_3$.
+\item [Focal predictors] We call the input variable on the x-axis of an outcome plot the focal predictor.  Any other predictor variables are ``non-focal'' predictors. 
 
-\begin{itemize}
-\item \textbf{Input variables:} Refers to the observed (or scientific) variables underlying an inference or exploration. For example, the regression models described by \EREF{simple_inter_higher_no_interaction} and \EREF{simple_inter_higher} both have $3$ input variables -- $x_1, x_2, x_3$.
-\item \textbf{Focal predictors}: We call the input variable on the x-axis of an outcome plot the focal predictor.  Any other predictor variables are ``non-focal'' predictors. 
-
-\item \textbf{Model matrix:} Refers to the design matrix whose rows include all combination of input variables. Consider an example for three hypothetical households -- the first household head is a Christian with an income of $\$ 50$, the second household head is Muslim with an income of $\$ 100$ while the third household head is a Jew with an income of $\$ 77$. Suppose we want to model the household size (\code{hhsize}) as function of these household characteristics, i.e., $$\mathrm{hhsize} = \beta_0 + \beta_1\times\mathrm{income} + \beta_{2[r]}\times\mathrm{religion} + \mathrm{error}.$$ The model matrix corresponding to this model is given by
+\item [Model matrix] Refers to the design matrix whose rows include all combination of input variables. Consider an example for three hypothetical households -- the first household head is a Christian with an income of $\$ 50$, the second household head is Muslim with an income of $\$ 100$ while the third household head is a Jew with an income of $\$ 77$. Suppose we want to model the household size (\code{hhsize}) as function of these household characteristics, i.e., $$\mathrm{hhsize} = \beta_0 + \beta_1\times\mathrm{income} + \beta_{2[r]}\times\mathrm{religion} + \mathrm{error}.$$ The model matrix corresponding to this model is given by
 $$\begin{bmatrix}{}
  Intercept & income & religionJew & religionMuslim \\
  1 & 50 & 0 & 0 \\
@@ -60,18 +62,18 @@ $$\begin{bmatrix}{}
   1 & 77 & 1 & 0 \\
 \end{bmatrix}.$$ The first column represents the constant term in our model, $\beta_0$. For continuous input variables, the representation in the model matrix is the same as the corresponding input variables (for example second column representing income). For categorical variables, however, by default, the model matrix  creates additional dummy variables using the reference cell parameterization. This means that, if an input variable has $L$ factor levels, then there will be $L-1$ dummy columns representing all but the first level created in the model matrix. In our example, the column \code{religion} is missing and instead we have \code{religionJew} and \code{religionMuslim}; the missing category \code{religionChristian} is treated as the reference category.
 
-\item \textbf{Linear predictor variables}: Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such variables “multi-parameter variables”.
+\item [Linear predictor variables] Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such variables “multi-parameter variables”.
 
-\item \textbf{Model center:} A point corresponding to a column-wise mean of the model matrix (the mean of one or more linear predictor variables). Also referred to as center point. The center point for a set of linear predictor variables corresponding to an input variable may not represent a possible value of the input variable -- the case in \FREF{justify_plots}B. In a simple linear model with no interactions, the mean of the input variable can be used as a center point. If there are more than one linear predictor variables associated with the focal predictor, however, the model center does not correspond to a single value of the focal predictor, see \FREF{pred_cubic_plots}.
+\item [Model center] A point corresponding to a column-wise mean of the model matrix (the mean of one or more linear predictor variables). In a simple linear model with no interactions, the center point is just the point corresponding to the mean of the input variables. Also referred to as center point. The center point for a set of linear predictor variables corresponding to an input variable may not represent a possible value of the input variable -- the case in \FREF{justify_plots}B. If there are more than one linear predictor variables associated with the focal predictor, however, the model center does not correspond to a single value of the focal predictor, see \FREF{pred_cubic_plots}.
+\jd{Here we're using my original definition of model center.}
 
+\item [Reference point] The values (or sets of values) chosen for non-focal predictors, when estimating the predictions and effects. Typically the center point, but can also be chosen as a baseline value or as a mean across categories. We will also discuss using a set of quantiles or observations as a reference.
 
-\item \textbf{Reference point:} The values (or sets of values) chosen for non-focal predictors, when estimating the predictions and effects. Typically the center point, but can also be chosen as a baseline value or as a mean across categories. We will also discuss using a set of quantiles or observations as a reference.
+\item [Anchor] The value chosen for the focal predictor when estimating effect-style confidence intervals. The anchor choice does not affect the central estimates, nor prediction-style. Often chosen as the center point of the linear predictor variables corresponding to the focal predictor. 
 
-\item \textbf{Anchor:} The value chosen for the focal predictor when estimating effect-style confidence intervals. The anchor choice does not affect the central estimates, nor prediction-style. Often chosen as the center point of the linear predictor variables corresponding to the focal predictor. 
+\item [Prediction-style and effect-style plots] A prediction-style plot is about predicting observations for a given value of the focal predictor. For this, we want to use the classic curved confidence intervals. An effect-style plot attempts to visualize the effect of a focal predictor and are characterized with narrower confidence intervals. Unlike a prediction-style plot, where the confidence intervals capture the uncertainty associated all predictors in the model, the effect-style plot focuses on uncertainty associated with the focal predictor only and depend on the anchor.
 
-\item \textbf{Prediction-style and effect-style plots:} A prediction-style plot is about predicting observations for a given value of the focal predictor. For this, we want to use the classic curved confidence intervals. An effect-style plot attempts to visualize the effect of a focal predictor and are characterized with narrower confidence intervals. Unlike a prediction-style plot, where the confidence intervals capture the uncertainty associated all predictors in the model, the effect-style plot focuses on uncertainty associated with the focal predictor only and depend on the anchor.
-
-\end{itemize}
+\end{description}
 
 \section{Statistical formulation}
 
