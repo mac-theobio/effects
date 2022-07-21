@@ -117,9 +117,6 @@ In a model with a multi-parameter variable or input variables with complex inter
 
 \subsubsection{Dealing with multi-parameter variables}
 
-\jd{I feel the first s.~is perfectly clear, and I don't know why it needs any explanation at all.}
-\BC{I suggest we keep the illustrations.}
-
 Multi-parameter variables (MPVs) such as splines, polynomials, etc., can be within the focal predictor, or within non-focal predictor(s). To distinguish the two, suppose the model which describes the hypothetical simulation of household size based on a number of socio-demographic factors such as age and wealth index is
 %
 \begin{align}\label{eq:lm_cubic}
@@ -283,12 +280,15 @@ We simulate using $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$, $
 \begin{center}
 \includegraphics{justify_preds.inter.pdf}
 \end{center}
-\caption{{\bf A comparison of central estimates for \pkg{emmeans}, \pkg{effects} and \pkg{varpred}.} The horizontal dashed lines are the mean of the central estimates and simulated $y$, $\bar{\hat{y}}$ and $\bar{y}$, respectively. The grey points are averages of the simulated points binned according to value of $x_1$. The trend lines represent the $\hat{y}$ -- central estimate. A: In the absence of interaction, the predicted mean, $\bar{\hat{y}}$, is the same in all three approaches, and closely matches the true mean; the central estimate likewise matches the truth (horizontal lines). B: With a simple interaction between non-focal predictors, we see differences between predicted mean, $\bar{\hat{y}}$ and simulated mean, $\bar{y}$. Similarly, there are differences between central estimates and the truth, in two commonly used packages (\pkg{emmeans} and \pkg{effects}), but not the proposed \pkg{varpred}.}
+\caption{{\bf A comparison of central estimates for \pkg{emmeans}, \pkg{effects} and \pkg{varpred}.} The horizontal dashed lines are the mean of the central estimates and simulated $y$, $\bar{\hat{y}}$ and $\bar{y}$, respectively. The grey points are averages of the simulated points binned according to value of $x_1$. The trend lines represent the $\hat{y}$ -- central estimate. A: In the absence of interaction, the predicted mean, $\bar{\hat{y}}$, is the same in all three approaches, and closely matches the true mean; the central estimate likewise matches the truth (horizontal lines). B: With a simple interaction between non-focal predictors, results from \pkg{emmeans} and \pkg{effects}, but not from the proposed \pkg{varpred}, are biased}
 \label{fig:justify_plots}
 \end{figure}
 %
-In the absence of interactions (\EREF{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \FREF{justify_plots}A. However, in the presence of interactions, even as simple as the one in \EREF{simple_inter_higher}, the estimates start to differ. In particular, \pkg{emmeans} and \pkg{effects} have similar estimates ($\bar{\hat{y}}$) but different from the \pkg{varpred}'s which, however, is very close to the simulated average ($\bar{y}$), \FREF{justify_plots}B. To generate \FREF{justify_plots}A,  \pkg{emmeans} and \pkg{effects} average $x_2$ and $x_3$, i.e., the input variables while \pkg{varpred} averages the linear predictor variables corresponding to $x_2$ and $x_3$. On other hand, to generate \FREF{justify_plots}B, the difference in the estimates lies on how each of the packages average the interaction linear predictor variable ($x_2x_3$). In particular, \pkg{emmeans} and \pkg{effects} use input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} uses linear predictor variables to compute $\over{x_2x_3}$. In the case of \FREF{justify_plots}A, averaging the input variables is equivalent to averaging the linear predictor variables.
+In the absence of interactions (\EREF{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \FREF{justify_plots}A. However, in the presence of interactions, even as simple as the one in \EREF{simple_inter_higher}, the estimates start to differ. In particular, estimates from \pkg{emmeans} and \pkg{effects} but differ from \pkg{varpred}'s, which is very close to the simulated average ($\bar{y}$), \FREF{justify_plots}B.
+In the simple model \FREF{justify_plots}A the input variables are the same as the linear predictor variables, so all the two methods produce identical results.
+In the interaction model \FREF{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages. 
 
+\jd{I still feel you're too interested in the comparison. Can't we first explain want we're trying to do? And then explain the ways of doing it.}
 One may be interested in the uncertainties associated with the focal predictor only, excluding other uncertainties due to other non-focal predictors -- effect plots. However, as previously mentioned, the two packages do not provide a straightforward way do achieve this. To illustrate this, we consider \EREF{simple_inter_higher_no_interaction} and use $x_2$ as the focal predictor, and generate the outcome plot shown in \FREF{justify_ci_plots}. 
 %
 \begin{figure}
