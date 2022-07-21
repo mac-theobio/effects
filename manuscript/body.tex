@@ -295,12 +295,14 @@ One may be interested in the uncertainties associated with the focal predictor o
 \begin{center}
 \includegraphics{justify_anchors_all.ggp.pdf}
 \end{center}
-\caption{{\bf Prediction and effect plots.} The description of horizontal, vertical and trend lines remain the same as above. A: The wider dashed curves corresponds to the conventional prediction curves from \pkg{emmeans} and \pkg{effects} packages, while the narrower curves crossing at the center point represent the effect from \pkg{varpred}. For simple OLS models, the effect-styled curves cross at the center point (which is the default anchor and also referred to as center-anchored). The prediction-styled curves incorporates not only the uncertainties due to intercept term but also other non-focal predictors. On the other hand, effect-styled curves only take into account the main effect uncertainty of the focal predictor. B: center- and zero- anchored effects. The zero-anchored effects means that the anchor is at zero value of the focal predictor. The choice of the anchor do not affect the central estimates, hence they are identical in both choices of the anchor.}
+\caption{{\bf Prediction and effect plots.} The description of horizontal, vertical and trend lines remain the same as above. A: The wider dashed curves corresponds to the conventional prediction curves from \pkg{emmeans} and \pkg{effects} packages, while the narrower curves crossing at the center point represent the effect from \pkg{varpred}. For simple OLS models, the effect-style curves cross at the center point (which is the default anchor and also referred to as center-anchored). The prediction-style curves incorporates not only the uncertainties due to intercept term but also other non-focal predictors. On the other hand, effect-style curves only take into account the main effect uncertainty of the focal predictor. B: center- and zero- anchored effects. The zero-anchored effects means that the anchor is at zero value of the focal predictor. The choice of the anchor do not affect the central estimates, hence they are identical in both choices of the anchor.}
 \label{fig:justify_ci_plots}
 \end{figure}
 %
 For \pkg{emmeans} and \pkg{effects}, the confidence intervals are much wider because they include uncertainties associated with the intercept and non-focal predictors, but narrower and crosses at the mean of the focal predictor in \pkg{varpred}. In other words, with \pkg{varpred}, we are able to generate effects indicating zero uncertainty at the value of the focal predictor we are more certain about, i.e., the anchor. For simple OLS models, the point where the curves cross is the model center or simply center point; it corresponds to anchor we choose, in this case, the center point (which is generally an appropriate and stable choice). 
+\jd{I agree with my point above even more now. The main point is that varpred can make \emph{both} effect-style and prediction-style plots, and to show those. As far as I'm concerned, we can just briefly say that it's hard to make effect-style plots in the other packages? If it even is, I guess?}
 
+\jd{Why is this here? How does panel A compare to what we would get from either effect- or prediction-style plots?}
 Lastly, we compare effect plots and the marginal effects \citep{leeper2017interpreting} plots implemented in package \pkg{margins} \citep{lenth2018package}. To illustrate this, we use the simulated data described in \nameref{S1_Appendix}. The results are shown in \FREF{qoi_age_pred_plot}.
 %
 \begin{figure}
@@ -311,25 +313,25 @@ Lastly, we compare effect plots and the marginal effects \citep{leeper2017interp
 \end{figure}
 %
 
-
-\subsection{Prediction and effect styled plots for MPVs}
+\subsection{Prediction- and effect-style plots for MPVs}
 
 To illustrate the distinction between predictions and effects in MPVs, we simulated a multivariate model described in \nameref{S1_Appendix}. We also used the same model to illustrate how predictions and effects differ if MPVs are in the focal or non-focal predictor. In particular, we generated two sets of mean-based predictions and effects: 1) one with \code{age} as the focal predictor (a cubic polynomial - MPV); and 2) one with \code{Wealthindex} as the focal predictor (linear). In both cases the, we used center point as the anchor for the effects, as shown in \FREF{pred_cubic_plots}.
-
+\jd{Deleted some stuff about transformations: I don't think transformations affect the intersecting part. }
+In a model with a simple focal predictor, we expect the CIs for effect-style plots to cross at the anchor point. On the other hand, if the focal predictor is a MPV, the center point is not expected to correspond to a single value of the focal predictor \jd{It's nothing to do with range; it's an \emph{impossible} value (e.g., $x=1; x^2=5$)}. In this case, the effects will be narrower than the predictions plots but will not necessarily intersect. 
+For linear models, we expect the observed average, the average of the predictions and the prediction at the model to all be identical. 
 \begin{figure}
 \begin{center}
 \includegraphics{cubic_predictors_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Prediction and effect plots for cubic polynomial and simple focal predictors.} A: The focal predictor is a MPV cubic polynomial. B: The focal predictor is linear, with MPV non-focal predictor. The central estimates (dashed central curves or lines) are the same for predictions and effects, in respective case (A and B). However, the effects are narrower than the predictions. The default anchor for generating effects is the center point. For linear (or simple) focal predictor, the center point is a point within the range of focal values; and therefore the effect curves intersect at that that point -- B. In the case of MPVs such as cubic polynomials, the center point is not a point but a combination of all the linear predictor variables associated with the cubic polynomial, consequently, curves will not necessarily cross at a point -- A. The horizontal black and yellow dashed lines are the observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively.}
+\caption{{\bf Prediction and effect plots for cubic polynomial and simple focal predictors.} A: The focal predictor is a MPV cubic polynomial. B: The focal predictor is linear, with MPV non-focal predictor. The central estimates (dashed central curves or lines) are the same for predictions and effects in both cases. We use the model center as the anchor for effect-style CIs. For a simple predictor (panel B), this corresponds simply to the mean of the input variable, thus the effect curves intersect at that that point. For an MPV predictor (panel A), the center point does not correspond to a single value of the predictor, and the curves do not cross. The horizontal black and yellow dashed lines are the observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively.}
 \label{fig:pred_cubic_plots}
 \end{figure}
 
-In the absence of, complex interactions, MPVs, or transformations on the focal predictor, in simple OLS models we would expect the observed average, $\over{hh~size}$, and the average of the predictions, $\over{\widehat{hh~size}}$, to be identical and intersect with the trend lines at the center point, for the effect plot. On the other hand, if the focal predictor is a MPVs or has any other form of transformation, the center point is not necessarily a point in the range of focal predictor. In this case, the effects will be narrower than the predictions plots but will not necessarily intersect. 
-
-
 \subsection{Bias correction}
 
-In a generalized linear model with at least one non-focal predictor, mean-based and observed-value-based approaches can produce very different. To demonstrate this, we considered a two input variables binary outcome simulation described in \nameref{S2_Appendix}, such that \code{Age} has a very small effect size in comparison to \code{Wealthindex}, and compared their effects on the estimated probability of improved water quality as shown in \FREF{pred_bin_plots}. 
+\jd{Why is this your lead in? I don't understand the focus on us being “different”. Did the \pkg{pcoxtime} reviews scare you? We did all of this because our uncorrected predictions looked \emph{wrong}. Tie this back to your discussion of the Jensen stuff.}
+
+In a generalized linear model with at least one non-focal predictor, mean-based and observed-value-based approaches can produce very different \jd{different what?}. To demonstrate this, we considered a binary-outcome simulation with two input variables binary outcome simulation (described in \nameref{S2_Appendix}), such that \code{Age} has a very small effect size in comparison to \code{Wealthindex}, and compared their effects on the estimated probability of improved water quality as shown in \FREF{pred_bin_plots}. \jd{Is it easy to explain why we did it this way?}
 
 \begin{figure}
 \begin{center}
