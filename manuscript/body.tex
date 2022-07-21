@@ -359,6 +359,7 @@ In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bi
 \subsection{Mediated effect}
 
 A \emph{mediated} effect is a situation in which only some of the input variables have a \emph{causal} impact on the outcome, even though all the variables are (somehow) associated with the outcome. For example, the age at marriage may be strongly associated with divorce rate but only married people divorce. So does marriage \emph{cause} divorce?
+\jd{This is a very weird example. Of course marriage causes divorce in the statistical sense (if you reduce marriage, you reduce divorce). Please see if you can come up with a good, clear example of mediation.}
 
 For simplicity, we consider an hypothetical simulation for three variables: input variables $x$ and $y$; and outcome variable $z$; such that
 %
@@ -376,7 +377,10 @@ For simplicity, we consider an hypothetical simulation for three variables: inpu
 %
 The arrows above show the direction of influence; and the implication of $x\rightarrow y$ and $y \rightarrow z$ is that $x$ affects $z$ in two ways. First, it has (some) direct effect; and second, it can have indirect effect by influencing $y$, regulated by parameter $\rho$ as shown in \nameref{S3_Appendix}.
 
+\jd{We don't \emph{need} more than one model; better to say there is more than one question we could ask. In this case, we should make a distinction between direct and total effects.}
 To make inferences about this mediated effect, we need more than one model. First, the regression of $z$ on $x$, i.e., the \emph{non-mediated} (or univariate) model which tells on the \emph{total} effect of $x$ on $z$; and second, the regression of $z$ on $x$ and $y$, i.e., the \emph{mediated} (or multivariate or full) model. We simulated the data as shown in \nameref{S3_Appendix} and fitted the two models -- non-mediated and mediated. In both cases, we compared mean-based and the observed-value-based central estimates, as shown in \FREF{pred_mediated_plots}.
+
+\jd{“no” direct effect is a weird and confusing choice. The absence of direct effect is not what's causing the bias: it's the presence of the indirect effect. Please re-do with a relatively small (but non-zero) direct effect.}
 
 \begin{figure}
 \begin{center}
@@ -386,12 +390,15 @@ To make inferences about this mediated effect, we need more than one model. Firs
 \label{fig:pred_mediated_plots}
 \end{figure}
 
+\jd{I'd like to see a better explanation here as well. In my opinion, the reason for the mismatch is non-linear averaging over the non-focal variable; I don't think dilution is a good metaphor (a linear model could be equally diluted, but would not have this effect, I think?).}
 From \FREF{pred_mediated_plots}A, we see what we would expect in the absence of additional sources of bias, even though in the simulation, the effect of $x$ on $z$ is mediated through $y$. This is the total effect of $x$, which only tells us the influence of $x$ on $z$. By ignoring $y$ in the model, we are still able to capture the effect of $x$ and closely match the observed values using both approaches. However, if there were additional non-focal predictors, we would expect to see the differences similar to those in \FREF{pred_bin_plots}A. Including both $y$ and $x$ ``dilutes'' the direct effect of $x$ on $z$ and as a result, our estimates do not necessarily match the observed binned observations (see \FREF{pred_mediated_plots}B).
 
 \section{Discussion}
 
+\jd{This doesn't seem like a good starting point. I guess the point is that you're worried about taking out random effects? Don't worry, and let's just take them all the way out!}
 Our simulations examples focused on simple linear and logistic models due their wide range of usage and application. These models also act as a starting point for building other complex models, including mixed effect models and models with categorical predictors. The logic for extending to more complex models, including other forms of nonlinear link functions is very straightforward. In fact the components needed for extension are the correct linear predictor and the inverse link function; everything else generalizes. In addition, our \proglang{R} package implementation already extends to and supports most of the nonlinear link functions and mixed model framework, including multivariate binary outcome models.
 
+\jd{and now we're left with only one, boring Discussion \P. Maybe merge Discussion and Conclusion.}
 Although commonly used \proglang{R} software packages, by default, implements mean-based approach, our simulation results demonstrated that the observed-value-based approach has a potential of yielding results which are more consistent with the observed data. We would, therefore, argue that the use of mean-based approach should have some theoretical justification, especially in complex models. 
 
 \section{Conclusion}
@@ -402,6 +409,7 @@ The argument and results we present in this paper support a greater need for a s
 
 From our theoretical, methodological and simulation results, researchers using these kind of models should, in the absence of theoretical justification, report predictions based on observed-value-based approach or at least attempt to do a comparison of the two approaches before settling on the most appropriate in answering their research question. Moreover, we provide \proglang{R} package, \pkg{vareffects}, which implements these methods and is available on github (\href{https://github.com/mac-theobio/effects}{https://github.com/mac-theobio/effects}).
 
+\jd{Let's do a better job of summarizing what we did. We talk about different purposes of outcome plots, and try to distinguish the goals of predicition and effect. We talk about the model center and why it's a good reference point (maybe we should talk more about why we think it's a good anchor point as well … We explain a fairly weird kind of “bias” (an accurate kind of curve that does not match well with the data) and re-discover and implement a cool way of dealing with it.}
 
 \section{Supporting information}
 
@@ -465,11 +473,10 @@ This work was supported by a grant to Jonathan Dushoff from the Natural Sciences
 
 \section*{Author Contributions}
 
-\textbf{Conceptualization:} Jonathan Dushoff
+\textbf{Conceptualization:} Jonathan Dushoff, Steve Cygu
 
 \noindent\textbf{Software:} Steve Cygu, Benjamin M. Bolker
 
 \noindent\textbf{Writing – original draft:} Steve Cygu
-
 
 \nolinenumbers
