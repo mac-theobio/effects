@@ -191,6 +191,8 @@ corresponding to the focal predictor linear variables are not affected.
 
 \section{Bias correction}
 
+\jd{After conversation: please re-write this whole section to: describe the “bias” -- talk about Jensen, the problem is that the curve is not actually wrong, but is above or below the points, which is confusing; re-do the plots without any “truth”, the point is to show that bias correction is a sensible way to do it that has the curve closer to the points.}
+
 We can directly compare the outcome estimate at the model center for non-focal parameters (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (observed-value-based estimate, the colon below indicates that we are comparing two quantities):
 %
 \begin{align}\label{eq:compare_anchored_pop_based}
@@ -353,7 +355,6 @@ In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bi
 }
 \label{fig:pred_bin_prediction_effects_plots}
 \end{figure}
-
 
 \subsection{Mediated effect}
 
