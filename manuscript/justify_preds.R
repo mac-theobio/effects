@@ -12,6 +12,7 @@ startGraphics()
 
 numBins <- 10
 quants <- seq(0,1,length.out=100)
+compare_with_others <- FALSE # TRUE to compare with effects/emmeans
 
 ## No interactions
 x1_focal <- quantile(justify_sim_df$x1, quants, names=FALSE)
@@ -100,6 +101,23 @@ pred_means_df <- (justify_ci_df
 	%>% mutate(fit=mean(fit))
 )
 
+if (!compare_with_others) {
+	pred_df <- varpred(justify_mod, "x2", isolate=FALSE, modelname="prediction")$preds
+	justify_ci_df <- (justify_ci_df
+		%>% filter(model=="varpred")
+		%>% mutate(model="effect")
+		%>% bind_rows(pred_df
+			%>% rename(xvar=x2)
+		)
+	)
+	pred_means_df <- (justify_ci_df
+		%>% group_by(model)
+		%>% mutate(fit=mean(fit))
+	)
+	col_limits <- c("observed", "prediction", "effect")
+	col_labels <- c("observed", "prediction", "effect")
+}
+
 justify_ci_plots <- (ggplot(justify_ci_df, aes(x=xvar, colour=model, linetype=model))
 	+ geom_line(aes(y=fit))
 	+ geom_line(aes(y=lwr))
@@ -113,7 +131,7 @@ justify_ci_plots <- (ggplot(justify_ci_df, aes(x=xvar, colour=model, linetype=mo
  	+ scale_color_colorblind(limits=col_limits#[4:2] 
  		, labels=col_labels#[4:2]
  	)
-	+ labs(colour="Method", linetype="Method", x="x1", y="y")
+	+ labs(colour="Method", linetype="Method", x="x2", y="y")
 )
 
 

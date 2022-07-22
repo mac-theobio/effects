@@ -26,7 +26,8 @@ df <- data.frame(x=rnorm(N))
 sim_df_mediate <- (df
 	%>% mutate(y = rho*x + sqrt(1-rho^2)*rnorm(N)
 		, z = b0 + bxz*x + byz*y
-		, z = rbinom(N, 1, plogis(z))
+	#	, z = rbinom(N, 1, plogis(z))
+		, z = rnorm(N, mean=z, sd=1)
 	)
 )
 

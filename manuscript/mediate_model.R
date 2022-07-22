@@ -11,10 +11,10 @@ set.seed(9991)
 
 ### glm model
 
-mod_notmediated <- glm(z~x, sim_df_mediate, family=binomial())
+mod_notmediated <- glm(z~x, sim_df_mediate, family=gaussian())
 summary(mod_notmediated)
 
-mod_mediated <- glm(z~x+y, sim_df_mediate, family=binomial())
+mod_mediated <- glm(z~x+y, sim_df_mediate, family=gaussian())
 summary(mod_mediated)
 
 saveEnvironment()

@@ -44,14 +44,14 @@ pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, addmarginals=FALSE
 		, ci=FALSE
 	)
+	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_hline(data=pred_notmediated_none_mean, aes(yintercept=fit, colour=model, lty=model))
 	+ geom_hline(data=pred_notmediated_pop_mean, aes(yintercept=fit, colour=model, lty=model))
-	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ geom_point(data=binned_df, aes(x=x, y=z), colour="grey")
 	+ scale_color_colorblind(limits=col_limits)
  	+ scale_linetype_discrete(limits=col_limits)
-	+ labs(colour="Method", linetype="Method", title="A) Non-mediated", y="Predicted probability")
+	+ labs(colour="Method", linetype="Method", title="A) Non-mediated", y="z")
 	+ theme(legend.position="bottom")
 )
 
@@ -85,14 +85,14 @@ pred_mediated_plots <- (comparevarpred(vlist=vlist
 		, addmarginals=FALSE
 		, ci=FALSE
 	)
+	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_hline(data=pred_mediated_none_mean, aes(yintercept=fit, colour=model, lty=model))
 	+ geom_hline(data=pred_mediated_pop_mean, aes(yintercept=fit, colour=model, lty=model))
-	+ geom_hline(data=observed_df_med, aes(yintercept=z, colour=model, lty=model))
 	+ geom_vline(data=observed_df_med, aes(xintercept=x), lty=2, col="black")
 	+ geom_point(data=binned_df, aes(x=x, y=z), colour="grey")
 	+ scale_color_colorblind(limits=col_limits)
  	+ scale_linetype_discrete(limits=col_limits)
-	+ labs(colour="Method", linetype="Method", title="B) Mediated", y="Predicted probability")
+	+ labs(colour="Method", linetype="Method", title="B) Mediated", y="z")
 	+ theme(legend.position="bottom")
 )
 
