@@ -60,6 +60,7 @@ pred_age_effect_ws <- varpred(glm_mod
 )
 
 ### Combine all predictions
+vlist <- list(pred_age_prediction_ws, pred_age_effect_ws)
 pred_age_ws <- comparevarpred(vlist=vlist
 	, lnames=NULL
 	, plotit=FALSE

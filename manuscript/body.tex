@@ -27,7 +27,7 @@ Producing this sort of outcome plot has some challenges, including:
 \begin{enumerate}
 \item choosing the \emph{reference point} for non-focal predictors in multivariate models
 \item uncertainty estimation -- appropriate choice of \emph{anchor} for computing confidence intervals in effects plots
-\item \jd{When is this a challenge? Doesn't it just work like magic with the lm machinery? and how to incorporate the uncertainty due to non-focal predictors} \BC{Clarify with JD. Another challenge or a continuation  of the above?} 
+\item \jd{When is this a challenge? Doesn't it just work like magic with the lm machinery? and how to incorporate the uncertainty due to non-focal predictors} \BC{\fix{Clarify with JD. Another challenge or a continuation  of the above?}}
 \item biases induced by non-linear transformations of the response variable in generalized linear models (especially generalized mixed models).
 \end{enumerate}
 
@@ -37,7 +37,7 @@ The central estimates are then calculated by holding the non-focal predictors at
 
 In a model with non-focal predictors such as multivariate models, reference points can be chosen as the average of the non-focal \emph{linear predictor variables} -- we call this approach \emph{mean-based} reference point and is currently not implemented in commonly used \proglang{R} software packages. We introduce an alternative choice for the reference point.
 
-For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. \jd{Why is there a bias to be corrected? Is this stuff we're going to explain later?} \BC{We talk about this in Bias correction.}
+For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. \jd{Why is there a bias to be corrected? Is this stuff we're going to explain later?} \BC{\fix{We talk about this in Bias correction.}}
 However, in a model with non-linear link function, this is not usually true. When averaging is done on a separate link scale, the mean of the estimates is not the same as the estimate at the mean point. 
 This leads to bias: in this case a systematic difference between the values seen on average for a given value of the focal predictor and the value predicted by the mean-based approach. 
 An alternative to the mean-based reference point is the \emph{observed-value-based} approach, discussed later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
@@ -190,7 +190,8 @@ corresponding to the focal predictor linear variables are not affected.
 
 \section{Bias correction}
 
-\jd{After conversation: please re-write this whole section to: describe the “bias” -- talk about Jensen, the problem is that the curve is not actually wrong, but is above or below the points, which is confusing; re-do the plots without any “truth”, the point is to show that bias correction is a sensible way to do it that has the curve closer to the points.}
+When dealing with non-linear link functions and additional non-focal predictors,  generated estimates may not reflect the observed response due to the bias, i.e., a term we use to describe a situation in which the central curve does not align well with the observed data points -- the central curve is either below or above the points. In such cases, bias correction is needed when back-transforming the estimates to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{duursma2003bias, hanmer2013behind}; already implemented in \pkg{emmeans} \citep{lenth2018package}. Here, we describe and implement a different approach -- observed-value-based approach for bias correction. Hanmer and Kalkan \citep{hanmer2013behind} discussed and implemented observed-value-based and input-variable-based mean-based approaches in binary response models only. Our formulation is more general and can easily be extended to other link functions other than logistic. 
+
 
 We can directly compare the outcome estimate at the model center for non-focal parameters (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (observed-value-based estimate, the colon below indicates that we are comparing two quantities):
 %
@@ -201,11 +202,6 @@ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{
 In an ordinary linear model, the link function $g$ is the identity function, so the two means are the same. For non-trivial link functions, we expect them to be different in general.
 
 From Jensen's inequality, the exponential link function, for example, is concave up; hence we expect the right-hand side of \EREF{compare_anchored_pop_based} to be greater than the left-hand side, i.e., the average of the predictions is greater than the prediction at the average of the focal and non-focal parameters. On the other hand, the logistic function is concave up and concave down at low and high probabilities, respectively. We expect a pattern similar to that of exponential function when the logistic function is concave up and the opposite when the logistic function is concave down. In other words, the mean-based approach can under-estimate the prediction in exponential and low probability logistic functions and over-estimate in high probability logistic function.
-
-\fix{Thinking about RE}
-
-When dealing with non-linear link functions and additional non-focal predictors,  generated estimates may not reflect the observed response due to the bias in the expected mean induced by the non-linear transformation of the response variable -- as illustrated by the two examples above. In such cases, bias correction is needed when back-transforming the estimates to the original scales. The common approach for bias-adjustment is second-order Taylor approximation \citep{duursma2003bias, hanmer2013behind}; already implemented in \pkg{emmeans} \citep{lenth2018package}. Here, we describe and implement a different approach -- observed-value-based approach for bias correction. Hanmer and Kalkan \citep{hanmer2013behind} discussed and implemented observed-value-based and input-variable-based mean-based approaches in binary response models only. Our formulation is more general and can easily be extended to other link functions other than logistic. 
-
 
 \subsection{Observed-value-based approach for bias correction}
 
@@ -242,7 +238,7 @@ and
 \end{align}
 %
 
-For models with random effects components, we make further adjustment to correct for bias induced by the random effects terms. In observed-value approach, we treat the random effects terms as additional non-focal predictors and simply make adjustment to \EREF{pop_eta}. In particular
+We make further adjustments for models with random effects components to correct the bias induced by the random effects components. We treat the random effects components as additional non-focal predictors in the observed-value approach and modify \EREF{pop_eta}. In particular
 %
 \begin{align}\label{eq:pop_eta_re} 
 \uset{\tau} &= \bZ b \nonumber \\
@@ -252,21 +248,20 @@ where $\bZ$ and $b$ are the design matrix and a vector of random effects, respec
 
 \section{Mean-based vs. observed-value-based}
 
-In the observed-value-based approach, the ensemble of predictions and CIs are back-transformed before averaging, see \EREF{pop_response}, so we do not need to worry about the non-linear averaging. In other words, the averaging is no longer on the link scale and is likely to be bounded by the original data scale. In simple linear models without interactions, averaging on the link scale is identical to averaging on the response, so both approaches yield similar results. However, picking a single value, e.g., the mean of the predictor, on which to draw conclusions about the effect can be problematic, unrealistic, or not contained in or representative of the population. In addition, the mean-based approach fails to use every value of non-focal predictors hence not utilizing the full potential of the information contained in the data. This may limit the inferences we can make about the entire population. In general, the mean-based approach provides the predictions of an average case, whereas the observed-value-based approach summarizes the predictions over the entire population. In some applications, the effect of an average case might not be generalizable to the entire population, especially, if the average does not represent the population. This might not be a problem in the observed-value-based approach since it focuses on specific observations -- the prediction is first obtained for each observation and then averaged across the levels of the focal predictor.
+In the observed-value-based approach, the ensemble of predictions and CIs are back-transformed before averaging, see \EREF{pop_response}, so we do not need to worry about the non-linear averaging. In other words, the averaging is no longer on the link scale and is likely to be bounded by the original data scale. In simple linear models without interactions, averaging on the link scale is identical to averaging on the response, so both approaches yield similar results. However, picking a single value, e.g., the mean of the predictor, on which to draw conclusions about the effect can be problematic, unrealistic, or not contained in or representative of the population. In addition, the mean-based approach fails to use every value of non-focal predictors hence not utilizing the full potential of the information contained in the data. This may limit the inferences we can make about the entire population. In general, the mean-based approach provides the predictions of an average case, whereas the observed-value-based approach summarizes the predictions over the entire population. In some applications, the effect of an average case might not be generalizable to the entire population, especially if the average does not represent the population. This might not be a problem in the observed-value-based approach since it focuses on specific observations -- the prediction is first obtained for each observation and then averaged across the levels of the focal predictor.
 
 Another potential concern with the mean-based approach arises when direct naive use leads to a rare or meaningless basis for generalization. For example, if our sample has 20\% Jews, 30\% Muslims, and 50\% Christians. One approach (default in common packages) is assigning equal category weight, i.e., 1/3 Jews, 1/3 Muslims, and 1/3 Christians (the ``sum-to-zero'' approach). The second approach (our default) is setting dummy categorical variables in the model matrix to their means, which, by default, set them to their sample means or observed proportions. The first or second approach translates to prediction for a household head who is 1/3 or 50\% Christian, respectively \citep{hanmer2013behind}. The second approach seems more realistic and will converge to the population mean in many cases.
 
 The observed-value-based approach is not entirely foolproof. For instance, similar to the mean-based approach, in the case of continuous focal predictors, choosing the representative values of the focal predictors can be very challenging, especially if the cases are not evenly distributed around the minimum and the maximum values or within some subgroups defined in the population. In addition, the observed-value-based approach can be computationally intensive for large datasets.
 
 
-
 \section{Simulation examples}
 
-We start by comparing our proposed approach with the existing implementations and then illustrate the construction of outcome plots and also demonstrate that the mean-based approach works well for interactions and multi-parameter variables, and that and observed-value approach can correct for bias induced by non-linear averaging.
+We start by comparing our proposed approach with the existing implementations and then illustrate the construction of outcome plots. We also demonstrate that the mean-based approach works well for interactions and multi-parameter variables and that the observed-value approach can correct the bias induced by non-linear averaging.
 
 \subsection{Comparison with other implementations}
 
-The most commonly used \proglang{R} software packages for outcome plots (\pkg{emmeans} and \pkg{effects}), by default, use the average of input variables and ``sum-to-zero'' as the reference point approach for continuous and categorical input variables, respectively. However, there are a number of choices one can make when constructing outcome plots -- for example, in the presence of interactions, the default for \pkg{emmeans} and \pkg{effects} is to average the predictor variables and use these averaged values for the interaction, as opposed to our preferred model-center approach (averaging each linear predictor variable separately). The packages give the same results as our method for models without interactions, but when interactions are present, the two approaches can produce substantially different results, with the model-center approach more closely matching the observed values. 
+The most commonly used \proglang{R} software packages for outcome plots (\pkg{emmeans} and \pkg{effects}), by default, use the average of input variables and ``sum-to-zero'' as the reference point approach for continuous and categorical input variables, respectively. However, there are a number of choices one can make when constructing outcome plots -- for example, in the presence of interactions, the default for \pkg{emmeans} and \pkg{effects} is to average the predictor variables and use these averaged values for the interaction, as opposed to our preferred model-center approach (averaging each linear predictor variable separately). The packages give the same results as our method for models without interactions. However, when interactions are present, the two approaches can produce substantially different results, with the model-center approach more closely matching the observed values.
 
 To illustrate this, we simulate data from the models below:
 %
@@ -281,40 +276,40 @@ We simulate using $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$, $
 \begin{center}
 \includegraphics{justify_preds.inter.pdf}
 \end{center}
-\caption{{\bf A comparison of central estimates for \pkg{emmeans}, \pkg{effects} and \pkg{varpred}.} The horizontal dashed lines are the mean of the central estimates and simulated $y$, $\bar{\hat{y}}$ and $\bar{y}$, respectively. The grey points are averages of the simulated points binned according to value of $x_1$. The trend lines represent the $\hat{y}$ -- central estimate. A: In the absence of interaction, the predicted mean, $\bar{\hat{y}}$, is the same in all three approaches, and closely matches the true mean; the central estimate likewise matches the truth (horizontal lines). B: With a simple interaction between non-focal predictors, results from \pkg{emmeans} and \pkg{effects}, but not from the proposed \pkg{varpred}, are biased}
+\caption{{\bf A comparison of central estimates for \pkg{emmeans}, \pkg{effects} and \pkg{varpred}.} The horizontal dashed lines are the mean of the central estimates and simulated $y$, $\bar{\hat{y}}$ and $\bar{y}$, respectively. The grey points are averages of the simulated points binned according to the value of $x_1$. The trend lines represent the $\hat{y}$ -- central estimate. A: In the absence of interaction, the predicted mean, $\bar{\hat{y}}$, is the same in all three approaches and closely matches the actual mean (truth); the central estimate likewise matches the truth (horizontal lines). B: With a simple interaction between non-focal predictors, results from \pkg{emmeans} and \pkg{effects}, but not from the proposed \pkg{varpred}, are biased}
 \label{fig:justify_plots}
 \end{figure}
 %
-In the absence of interactions (\EREF{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \FREF{justify_plots}A. However, in the presence of interactions, even as simple as the one in \EREF{simple_inter_higher}, the estimates start to differ. In particular, estimates from \pkg{emmeans} and \pkg{effects} but differ from \pkg{varpred}'s, which is very close to the simulated average ($\bar{y}$), \FREF{justify_plots}B.
+In the absence of interactions (\EREF{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \FREF{justify_plots}A. However, the estimates start to differ in the presence of interactions, even as simple as the one in \EREF{simple_inter_higher}. In particular, estimates from \pkg{emmeans} and \pkg{effects} but differ from \pkg{varpred}'s, which is very close to the simulated average ($\bar{y}$), \FREF{justify_plots}B.
 In the simple model \FREF{justify_plots}A the input variables are the same as the linear predictor variables, so all the two methods produce identical results.
-In the interaction model \FREF{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages. 
+In the interaction model \FREF{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages.
 
-Our implementation, \pkg{varpred}, can generate both prediction-style and effect-style plots. However, as previously mentioned, it is hard to generate an effect-style plot in \pkg{emmeans} and \pkg{effects}. We consider \EREF{simple_inter_higher_no_interaction} and use $x_2$ as the focal predictor, and compare prediction and effect plots using \pkg{varpred}. We also compare different anchors for effect plot. See \FREF{justify_ci_plots}. 
+Our implementation, \pkg{varpred}, can generate both prediction-style and effect-style plots. However, as previously mentioned, it is hard to generate an effect-style plot in \pkg{emmeans} and \pkg{effects}. We consider \EREF{simple_inter_higher_no_interaction} and use $x_2$ as the focal predictor, and compare prediction and effect plots using \pkg{varpred}. We also compare different anchors for the effect plot. See \FREF{justify_ci_plots}.
 %
 \begin{figure}
 \begin{center}
 \includegraphics{justify_anchors_all.ggp.pdf}
 \end{center}
-\caption{{\bf Prediction and effect plots.} The description of horizontal, vertical and trend lines remain the same as above. A: The wider dashed curves corresponds to the conventional prediction curves, while the narrower curves crossing at the center point represent the effect from \pkg{varpred}. For simple OLS models, the effect-style curves cross at the center point (which is the default anchor and also referred to as center-anchored). The prediction-style curves incorporates not only the uncertainties due to intercept term but also other non-focal predictors. On the other hand, effect-style curves only take into account the main effect uncertainty of the focal predictor. B: center- and zero- anchored effects. The zero-anchored effects means that the anchor is at zero value of the focal predictor. The choice of the anchor do not affect the central estimates, hence they are identical in both choices of the anchor.}
+\caption{{\bf Prediction and effect plots.} The description of horizontal, vertical, and trend lines remain the same as above. A: The wider dashed curves correspond to the conventional prediction curves, while the narrower curves crossing at the center point represent the effect from \pkg{varpred}. For simple OLS models, the effect-style curves cross at the center point (the default anchor and also referred to as center-anchored). The prediction-style curves incorporate the uncertainties due to intercept term and other non-focal predictors. On the other hand, effect-style curves only consider the focal predictor's main effect uncertainty. B: center- and zero- anchored effects. The zero-anchored effect means that the anchor is at the zero value of the focal predictor. The choice of the anchor does not affect the central estimates; hence they are identical in both choices of the anchor.}
 \label{fig:justify_ci_plots}
 \end{figure}
 %
-For a prediction-style plot, the confidence intervals are much wider because they include uncertainties associated with the intercept and non-focal predictors, but narrower and crosses at the mean of the focal predictor. In other words, with \pkg{varpred}, we are able to generate effects indicating zero uncertainty at the value of the focal predictor we are more certain about, i.e., the anchor. For simple OLS models, the point where the curves cross is the model center or simply center point; it corresponds to anchor we choose, in this case, the center point (which is generally an appropriate and stable choice). 
+For a prediction-style plot, the confidence intervals are much wider because they include uncertainties associated with the intercept and non-focal predictors but are narrower and cross at the mean of the focal predictor. In other words, with \pkg{varpred}, we can generate effects indicating zero uncertainty at the value of the focal predictor we are more certain about, i.e., the anchor. For simple OLS models, the point where the curves cross is the model center or center point; it corresponds to the anchor we choose, in this case, the center point (which is generally an appropriate and stable choice).
 
 \subsection{Prediction- and effect-style plots for MPVs}
 
-To illustrate the distinction between predictions and effects in MPVs, we simulated a multivariate model described in \nameref{S1_Appendix}. We also used the same model to illustrate how predictions and effects differ if MPVs are in the focal or non-focal predictor. In particular, we generated two sets of mean-based predictions and effects: 1) one with \code{age} as the focal predictor (a cubic polynomial - MPV); and 2) one with \code{Wealthindex} as the focal predictor (linear). In both cases the, we used center point as the anchor for the effects, as shown in \FREF{pred_cubic_plots}.
+To illustrate the distinction between predictions and effects in MPVs, we simulated a multivariate model described in \nameref{S1_Appendix}. We also used the same model to illustrate how predictions and effects differ if MPVs are in the focal or non-focal predictor. In particular, we generated two sets of mean-based predictions and effects: 1) one with \code{age} as the focal predictor (a cubic polynomial - MPV); and 2) one with \code{Wealthindex} as the focal predictor (linear). We used the center point as the anchor for the effects in both cases, as shown in \FREF{pred_cubic_plots}.
 %
 \begin{figure}
 \begin{center}
 \includegraphics{cubic_predictors_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Prediction and effect plots for cubic polynomial and simple focal predictors.} A: The focal predictor is a MPV cubic polynomial. B: The focal predictor is linear, with MPV non-focal predictor. The central estimates (dashed central curves or lines) are the same for predictions and effects in both cases. We use the model center as the anchor for effect-style CIs. For a simple predictor (panel B), this corresponds simply to the mean of the input variable, thus the effect curves intersect at that that point. For an MPV predictor (panel A), the center point does not correspond to a single value of the predictor, and the curves do not cross. The horizontal black and yellow dashed lines are the observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively.}
+\caption{{\bf Prediction and effect plots for cubic polynomial and simple focal predictors.} A: The focal predictor is an MPV cubic polynomial. B: The focal predictor is linear, with MPV non-focal predictor. The central estimates (dashed central curves or lines) are the same for predictions and effects in both cases. We use the model center as the anchor for effect-style CIs. For a simple predictor (panel B), this corresponds simply to the mean of the input variable; thus, the effect curves intersect at that point. For an MPV predictor (panel A), the center point does not correspond to a single value of the predictor, and the curves do not cross. The horizontal black and yellow dashed lines are observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively.}
 \label{fig:pred_cubic_plots}
 \end{figure}
 %
-In a model with a simple focal predictor, we expect the CIs for effect-style plots to cross at the anchor point. On the other hand, if the focal predictor is a MPV, the center point is not expected to correspond to a single value of the focal predictor. In this case, the effects will be narrower than the predictions plots but will not necessarily intersect. 
-For linear models, we expect the observed average, the average of the central estimates and the prediction at the model to all be identical. 
+We expect the CIs for effect-style plots to cross at the anchor point in a model with a simple focal predictor. On the other hand, if the focal predictor is an MPV, the center point is not expected to correspond to a single value of the focal predictor. In this case, the effects will be narrower than the predictions plots but will not necessarily intersect. 
+For linear models, we expect the observed average, the average of the central estimates and the prediction at the model center to all be identical. 
 
 \subsection{Bias correction}
 
@@ -324,19 +319,19 @@ We simulated data motivated by the water, sanitation, and hygiene (WaSH) study i
 \begin{center}
 \includegraphics{glm_two_predictor_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. In the case of strong effect size, however, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. Mean-based approach suffers from non-linear averaging; and if focal predictor has small effect size, the bias is even pronounced since the effect of non-linear averaging is driven by the non-focal predictor(s) with the strong effect. However, this is not the case if the non-focal predictor(s) have small effect since the bias they induce is equally likely to be small. Since observed-value-based approach averages over the whole population of the non-focal predictor variables, it is less likely to be affected by the non-linear averaging for the reasons already mentioned. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
+\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. The mean-based approach suffers from non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is driven by the non-focal predictor(s) with a strong effect. However, this is not the case if the non-focal predictor(s) have a small effect since the bias they induce is equally likely to be small. Since the observed-value-based approach averages over the whole population of the non-focal predictor variables, it is less likely to be affected by the non-linear averaging for the reasons already mentioned. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
 \label{fig:pred_bin_plots}
 \end{figure}
-
-If there was no effect of non-linear averaging, then we would expect the average observed proportion and the average predictions to intersect at the center point as we see in \FREF{pred_cubic_plots}B. One possible reason for the variations we see in \FREF{pred_bin_plots} is the non-linear averaging; since both observed status and predicted probabilities are averaged on the response scale as opposed to link scale. For example, if the range of values are bigger than $0.5$ (seemingly the case here), then we would expected the averages to be slightly higher than what we would expect at the center point.
+%
+If there were no effect of non-linear averaging, then we would expect the average observed proportion and the average predictions to intersect at the center point as we see in \FREF{pred_cubic_plots}B. One possible reason for the variations we see in \FREF{pred_bin_plots} is the non-linear averaging; since both observed status and predicted probabilities are averaged on the response scale as opposed to the link scale. For example, if the range of values is bigger than $0.5$ (seemingly the case here), then we would expect the averages to be slightly higher than we would expect at the center point.
 
 In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bin_plots}A and compare the prediction and effect plots associated with the central estimates. 
-
+%
 \begin{figure}
 \begin{center}
 \includegraphics{glm_two_predictor_preds_effects.ggp.pdf}
 \end{center}
-\caption{{\bf Bias correction for prediction and effect plots.} In each case (A and B), the central estimates for predictions and effects are the same. These patterns are  consistent with the ones in \FREF{pred_bin_plots}A compared to the truth. Further, the predictions and effects exhibit patterns and generalize in a similar way to the ones in simple linear models.
+\caption{{\bf Bias correction for prediction and effect plots.} In each case (A and B), the central estimates for predictions and effects are the same. Compared to the truth, these patterns are consistent with the ones in \FREF{pred_bin_plots}A. Further, the predictions and effects exhibit patterns and generalize similarly to the ones in simple linear models.
 }
 \label{fig:pred_bin_prediction_effects_plots}
 \end{figure}
@@ -359,42 +354,41 @@ For simplicity, we consider a hypothetical simulation for three variables: input
 \end{tikzpicture}
 \end{center}
 %
-The arrows above show the direction of influence; and the implication of $x\rightarrow y$ and $y \rightarrow z$ is that $x$ affects $z$ in two ways. First, it has (some) direct effect; and second, it can have indirect effect by influencing $y$, regulated by parameter $\rho$ as shown in \nameref{S3_Appendix}.
+The arrows above show the direction of influence, and the implication of $x\rightarrow y$ and $y \rightarrow z$ is that $x$ affects $z$ in two ways. First, it has (some) direct effect; second, it can have an indirect effect by influencing $y$, regulated by parameter $\rho$ as shown in \nameref{S3_Appendix}.
 
-To make inferences about this mediated effect, we can ask questions about the \emph{total} and \emph{direct} effects. In the first case, we want to fit a univariate model which regresses $z$ on $x$, excluding $y$. We refer to this as \emph{non-mediated} model. In the second case, we want to fit a multivariate model which regresses $z$ on $x$ and $y$. We refer to this as \emph{mediated} model. We simulated the data as shown in \nameref{S3_Appendix} and fitted the two models -- non-mediated and mediated. In both cases, we compared mean-based and the observed-value-based central estimates, as shown in \FREF{pred_mediated_plots}.
+To make inferences about this mediated effect, we can ask questions about the \emph{total} and \emph{direct} effects. In the first case, we want to fit a univariate model which regresses $z$ on $x$, excluding $y$. We refer to this as \emph{non-mediated} model. In the second case, we want to fit a multivariate model which regresses $z$ on $x$ and $y$. We refer to this as \emph{mediated} model. We simulated the data as shown in \nameref{S3_Appendix} and fitted the two models -- non-mediated and mediated. We compared mean-based and the observed-value-based central estimates in both cases, as shown in \FREF{pred_mediated_plots}.
 %
 \begin{figure}
 \begin{center}
 \includegraphics{mediate_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Mean-based and observed-value-based estimates for non-mediated (total) effect models and mediated (direct).} A: In the absence of mediator variable, the central estimate aligns well with the observed data. B: In the presence of indirect effect (mediator variable included), the central estimates do not align with the observations. Since the models in A and B are both linear models with identity link function, both approaches (mean-based and observed-value) give the same estimates. The horizontal dashed lines are the respective average estimates and observed means ($\bar{\hat{z}} \approx \bar{z}$). The vertical dashed black represents the center point, and the point at which it crosses the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are the binned observations.}
+\caption{{\bf Mean-based and observed-value-based estimates for non-mediated (total) and mediated (direct) effect models.} A: In the absence of a mediator variable, the central estimate aligns well with the observed data. B: In the presence of indirect effect (mediator variable included), the central estimates do not align with the observations. Since the models in A and B are linear models with identity link functions, both approaches (mean-based and observed-value) give the same estimates. The horizontal dashed lines are the respective average estimates and observed means ($\bar{\hat{z}} \approx \bar{z}$). The vertical dashed black represents the center point, and the point at which it crosses the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are the binned observations.}
 \label{fig:pred_mediated_plots}
 \end{figure}
 %
-From \FREF{pred_mediated_plots}A, we see what we would expect if we simulated a univariate model with no non-focal predictors, even though in the simulation, the effect of $x$ on $z$ is mediated through $y$. This is the total effect of $x$, which only tells us the influence of $x$ on $z$. By ignoring $y$ in the model, we are still able to capture the effect of $x$ and match the observed values using both approaches. However, if we control for the mediator variable $y$, the estimates do not necessarily match the observed values since $x$ has indirect effect on $z$. By controlling for the mediator variable, we able to get an indication of the direct (vary week) effect of $x$ on $z$ (see \FREF{pred_mediated_plots}B).
+From \FREF{pred_mediated_plots}A, we see what we would expect if we simulated a univariate model with no non-focal predictors, even though in the simulation, the effect of $x$ on $z$ is mediated through $y$. This is the total effect of $x$, which only tells us the influence of $x$ on $z$. By ignoring $y$ in the model, we can still capture the effect of $x$ and match the observed values using both approaches. However, if we control for the mediator variable $y$, the estimates do not necessarily match the observed values since $x$ indirectly affects $z$. By controlling for the mediator variable, we can get an indication of the direct (very weak) effect of $x$ on $z$ (see \FREF{pred_mediated_plots}B).
 
 
 \section{Discussion and conclusion}
 
-Generalized linear (mixed) models have a wide usage in various fields including public health. In a model involving difficult-to-interpret coefficient estimates, an outcome plot can aid in understanding and summarizing the results. In particular, if the goal is to capture every uncertainty in the model for a particular focal predictor or if we are interested on total effect, then a prediction plot would be appropriate. On the hand, an effect plot is preferable if we want to focus on the uncertainty associated with a focal predictor only or if we are interested in the direct effect.
+Generalized linear (mixed) models are widely used in various fields, including public health. In a model involving difficult-to-interpret coefficient estimates, an outcome plot can aid in understanding and summarizing the results. In particular, a prediction plot would be appropriate if the goal is to capture every uncertainty in the model for a particular focal predictor or if we are interested in total effect. Conversely, an effect plot is preferable if we want to focus on the uncertainty associated with a focal predictor only or if we are interested in the direct effect.
 
-Mean-based approach is widely to generate outcome plots. However, in a model with complex interaction, MPVs or categorical variables, it is sensitive to the choice of the reference point. We have demonstrated that non-focal model-center-based reference point is generally a stable choice and provide estimates which are more consistent with the observed quantities.
+The mean-based approach is widely used to create outcome plots. However, in a model with complex interaction, MPVs or categorical variables, it is sensitive to the choice of the reference point. We have demonstrated that a non-focal model-center-based reference point is generally a stable choice and provides estimates more consistent with the observed quantities as compared to common input-variable mean-based approach.
 
-In a model with non-linear link function such as a logistic or exponential function, the generated central estimate curve may not match well with the observed data, i.e., our description for ``bias''. In such such a model, observed-value-based approach provides a way to generate more consistent estimates and is preferable over conventional mean-based approach.
+In a model with a non-linear link function such as a logistic or exponential function, the generated central estimate curve may not match well with the observed data, i.e., our description for bias. In such a model, the observed-value-based approach provides a way to generate more consistent estimates and is preferable to the widely used mean-based approach.
 
-The argument and results we present in this paper support a greater need for a shift on focus on how to summarize regression models. From our theoretical, methodological and simulation results, researchers using these kind of models should, in the absence of theoretical justification, report predictions based on observed-value-based approach or at least attempt to do a comparison of the two approaches before settling on the most appropriate in answering their research question. Moreover, we provide \proglang{R} package, \pkg{vareffects}, which implements these methods and is available on github (\href{https://github.com/mac-theobio/effects}{https://github.com/mac-theobio/effects}).
+The argument and results we present in this paper support a greater need for a shift in focus on how to summarize these kinds of models. From our theoretical, methodological and simulation results, researchers using these models should, in the absence of theoretical justification, report predictions based on the observed-value-based approach or at least attempt to compare the two approaches before settling on the most appropriate in answering their research question. Moreover, we provide \proglang{R} package, \pkg{vareffects}, which implements these methods and is available on GitHub (\href{https://github.com/mac-theobio/effects}{https://github.com/mac-theobio/effects}).
 
-Our simulations examples focused on simple linear and logistic models due their wide range of usage and application. These models also act as a starting point for building other complex models, including mixed effect models and models with categorical predictors. The logic for extending to more complex models, including other forms of non-linear link functions is very straightforward. In fact the components needed for extension are the correct linear predictor and the inverse link function; everything else generalizes. In addition, our \proglang{R} package implementation already extends to and supports most of the non-linear link functions and mixed model framework, including multivariate binary outcome models.
+Our simulation examples focused on simple linear and logistic models due to their wide range of usage and application. These models also act as a starting point for building other complex models, including mixed effect models and models with categorical predictors. The logic for extending to more complex models, including other forms of non-linear link functions, is very straightforward. The components needed for extension are the correct linear predictor and the inverse link function; everything else generalizes. In addition, our \proglang{R} package implementation already extends to and supports most of the non-linear link functions and mixed model framework, including multivariate binary outcome models.
 
-\jd{Let's do a better job of summarizing what we did. We talk about different purposes of outcome plots, and try to distinguish the goals of predicition and effect. We talk about the model center and why it's a good reference point (maybe we should talk more about why we think it's a good anchor point as well … We explain a fairly weird kind of “bias” (an accurate kind of curve that does not match well with the data) and re-discover and implement a cool way of dealing with it.}
 
 \section{Supporting information}
 
 % Include only the SI item label in the paragraph heading. Use the \nameref{label} command to cite SI items in the text.
 \paragraph*{S1 Appendix.}
 \label{S1_Appendix}
-{\bf Cubic polynomial interaction simulation.} Consider an hypothetical simulation which simulates household size as a function of household wealth index and cubic function of the age of the household head, specified as follows:
-
+{\bf Cubic polynomial interaction simulation.} Consider a hypothetical simulation which simulates household size as a function of household wealth index and cubic function of the age of the household head, specified as follows:
+%
 \begin{align}\label{sim:lm_cubic}
 \mathrm{hh~size}_i &= \beta_0 + \beta_{\mathrm{A_1}}\mathrm{Age}_i + \beta_{\mathrm{A_2}}\mathrm{Age}^2_i + \beta_{\mathrm{A_3}}\mathrm{Age}^3_i + \beta_{\mathrm{W}}\mathrm{Wealthindex}_i + \epsilon_i \nonumber\\
 \mathrm{Age}_i &\sim \mathrm{Normal}(0, 1) \nonumber\\
@@ -411,8 +405,8 @@ i &= 1,\cdots, 100
 
 \paragraph*{S2 Appendix.}
 \label{S2_Appendix}
-{\bf Binary outcome simulation.} Consider a simple simulation for improved water quality in Nairobi slums, such that the status is $1$ for improved and $0$ for unimproved water quality. In additional to the focal predictor, age of the household head, we add wealth index. In particular:
-
+{\bf Binary outcome simulation.} Consider a simple simulation for improved water quality in Nairobi slums, such that the status is $1$ for improved and $0$ for unimproved water quality. In addition to the focal predictor, age of the household head, we add wealth index. In particular:
+%
 \begin{align}\label{sim:glm_two_pred}
 \mathrm{status}_i &\sim \mathrm{Bern}(\mathrm{P_i}) \nonumber\\
 \mathrm{logit}(\mathrm{P_i}) &= \eta_i \nonumber\\
@@ -430,9 +424,9 @@ i &= 1,\cdots, 10000
 {\bf Mediated effect simulation.} Next, we consider a simple indirect mediation previously described and simulate a binary outcome model such that:
 
 \begin{align}\label{sim:simple_mediate}
-z_i &\sim \mathrm{Bern}(\mathrm{P_i}) \nonumber\\
-\mathrm{logit}(\mathrm{P_i}) &= \eta_i \nonumber\\
-\eta_i &= \beta_0 + \beta_{xz} x_i + \beta_{yz} y_i \nonumber\\
+%% z_i &\sim \mathrm{Bern}(\mathrm{P_i}) \nonumber\\
+%% \mathrm{logit}(\mathrm{P_i}) &= \eta_i \nonumber\\
+z_i &= \beta_0 + \beta_{xz} x_i + \beta_{yz} y_i \nonumber\\
 y_i &= \rho x_i + \sqrt{1-\rho^2} y_y \nonumber\\
 x_i &\sim \mathrm{Normal(0, 1)} \nonumber\\
 y_y &\sim \mathrm{Normal(0, 1)} \nonumber\\
@@ -457,3 +451,4 @@ This work was supported by a grant to Jonathan Dushoff from the Natural Sciences
 \noindent\textbf{Writing – original draft:} Steve Cygu
 
 \nolinenumbers
+
