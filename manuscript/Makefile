@@ -100,19 +100,20 @@ Ignore += draft.pdf
 
 Ignore += draft.tex
 msfiles = mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
-msoldfiles = mscommands.tex begindoc.tex abstract.tex $(wildcard body.tex.*.oldfile) msbib.tex enddoc.tex
 draft.tex: drafthead.tex $(msfiles)
 	$(catro)
 
-## body.tex.7e1cc3fe.oldfile: 
+msoldfiles = mscommands.tex begindoc.tex abstract.tex body.tex.7e1cc3fe.oldfile msbib.tex enddoc.tex
+## msoldfiles = body.tex.7e1cc3fe.oldfile
 
 Ignore += draft.old.tex
 draft.old.tex: drafthead.tex $(msoldfiles)
 	$(catro)
 
 ## draft.diff.pdf: body.tex
-draft.diff.tex: draft.tex
-	latexdiff draft.old.tex $< > $@
+Ignore += draft.diff.tex
+draft.diff.tex: draft.old.tex draft.tex
+	$(latexdiff)
 
 Ignore += plos.tex
 plos.tex: ploshead.tex $(msfiles)
