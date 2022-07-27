@@ -103,7 +103,7 @@ msfiles = mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
 draft.tex: drafthead.tex $(msfiles)
 	$(catro)
 
-msoldfiles = mscommands.tex begindoc.tex abstract.tex body.tex.7e1cc3fe.oldfile msbib.tex enddoc.tex
+msoldfiles = mscommands.tex begindoc.tex abstract.tex body.tex.fb7889b9.oldfile msbib.tex enddoc.tex
 ## msoldfiles = body.tex.7e1cc3fe.oldfile
 
 Ignore += draft.old.tex
