@@ -2,10 +2,6 @@
 
 \linenumbers
 
-% Use "Eq" instead of "Equation" for equation citations. 
-%% BC: use \EREF{} for equations and \FREF{} for figures
-%% JD: Why do you capitalize these? It's scary.
-% Best to use a command that combines the name and the reference
 \section{Introduction}
 
 Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots) are often a useful way to summarize the results of a regression model. These can be used to illustrate model uncertainty or to give a more explicit quantitative sense of how the outcome is expected to change. In generalized models with a non-linear link function, or models with a spline or polynomial response to a predictor variable, they can also aid in understanding difficult-to-interpret coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
@@ -27,7 +23,6 @@ Producing this sort of outcome plot has some challenges, including:
 \begin{enumerate}
 \item choosing the \emph{reference point} for non-focal predictors in multivariate models
 \item uncertainty estimation -- appropriate choice of \emph{anchor} for computing confidence intervals in effects plots
-\item \jd{When is this a challenge? Doesn't it just work like magic with the lm machinery? and how to incorporate the uncertainty due to non-focal predictors} \BC{\fix{Clarify with JD. Another challenge or a continuation  of the above?}}
 \item biases induced by non-linear transformations of the response variable in generalized linear models (especially generalized mixed models).
 \end{enumerate}
 
@@ -37,7 +32,7 @@ The central estimates are then calculated by holding the non-focal predictors at
 
 In a model with non-focal predictors such as multivariate models, reference points can be chosen as the average of the non-focal \emph{linear predictor variables} -- we call this approach \emph{mean-based} reference point and is currently not implemented in commonly used \proglang{R} software packages. We introduce an alternative choice for the reference point.
 
-For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the \emph{bias} in model center estimates can easily be corrected using mean-based approach and the estimates are usually consistent with the observed values. \jd{Why is there a bias to be corrected? Is this stuff we're going to explain later?} \BC{\fix{We talk about this in Bias correction.}}
+For a linear model, the averaging is done on the linear scale, i.e., linear averaging. As a result, the model-center estimates (made using the mean-based approach) are unbiased. 
 However, in a model with non-linear link function, this is not usually true. When averaging is done on a separate link scale, the mean of the estimates is not the same as the estimate at the mean point. 
 This leads to bias: in this case a systematic difference between the values seen on average for a given value of the focal predictor and the value predicted by the mean-based approach. 
 An alternative to the mean-based reference point is the \emph{observed-value-based} approach, discussed later, which involves computing the prediction over the population of non-focal predictors and then averaging across the values of the focal predictor \citep{hanmer2013behind}. 
