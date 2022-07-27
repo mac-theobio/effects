@@ -58,6 +58,7 @@ $$\begin{bmatrix}{}
 \item [Linear predictor variables] Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such variables “multi-parameter variables”.
 
 \item [Focal model center] The average of the linear predictor variables corresponding to the focal predictor. The average of the linear predictor variables corresponding to the non-focal predictor(s) is \emph{non-focal model center}. For simple continuous input variables, averaging linear predictor variables is the same as averaging the input variables (see \FREF{justify_plots}). Focal and non-focal model center values is also referred to as \emph{center point}. 
+\jd{I don't like this as a separate item. What is the need?}
 
 \item [Model center] Is the value of the central estimate calculated using focal and non-focal model center values (center point). It is a calculation that is equal to the average of central estimates for a linear model (identity link function) without complex interactions. 
 
@@ -285,11 +286,11 @@ Our implementation, \pkg{varpred}, can generate both prediction-style and effect
 \begin{center}
 \includegraphics{justify_anchors_all.ggp.pdf}
 \end{center}
-\caption{{\bf Prediction and effect plots.} The description of horizontal, vertical, and trend lines remain the same as above. A: The wider dashed curves correspond to the conventional prediction curves, while the narrower curves crossing at the center point represent the effect from \pkg{varpred}. For simple OLS models, the effect-style curves cross at the center point (the default anchor and also referred to as center-anchored). The prediction-style curves incorporate the uncertainties due to intercept term and other non-focal predictors. On the other hand, effect-style curves only consider the focal predictor's main effect uncertainty. B: center- and zero- anchored effects. The zero-anchored effect means that the anchor is at the zero value of the focal predictor. The choice of the anchor does not affect the central estimates; hence they are identical in both choices of the anchor.}
+\caption{{\bf Prediction and effect plots.} The description of horizontal, vertical, and trend lines remain the same as above. A: The wider dashed curves correspond to the conventional prediction curves, while the narrower curves crossing at the center point represent the effect from \pkg{varpred}. For simple OLS models, the effect-style curves cross at the center point (center-anchored, the default). The prediction-style curves incorporate the uncertainties due to the intercept term and other non-focal predictor, while effect-style curves only consider the focal predictor's main effect uncertainty. B: center- and zero- anchored effects. The zero-anchored effect means that the anchor is at the zero value of the focal predictor. The choice of the anchor does not affect the central estimates.}
 \label{fig:justify_ci_plots}
 \end{figure}
 %
-For a prediction-style plot, the confidence intervals are much wider because they include uncertainties associated with the intercept and non-focal predictors but are narrower and cross at the mean of the focal predictor. In other words, with \pkg{varpred}, we can generate effects indicating zero uncertainty at the value of the focal predictor we are more certain about, i.e., the anchor. For simple OLS models, the point where the curves cross is the model center or center point; it corresponds to the anchor we choose, in this case, the center point (which is generally an appropriate and stable choice).
+For a prediction-style plot, the confidence intervals are wider because they include uncertainties associated with the intercept and non-focal predictors but are narrower and cross at the mean of the focal predictor. In other words, with \pkg{varpred}, we can generate effects indicating uncertainty due only to \emph{changes} in the focal predictor (thus in the case of a simple focal predictor, there is no uncertainty at the anchor point, in this case, the model center).
 
 \subsection{Prediction- and effect-style plots for MPVs}
 
@@ -314,7 +315,7 @@ We simulated data motivated by the water, sanitation, and hygiene (WaSH) study i
 \begin{center}
 \includegraphics{glm_two_predictor_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. The mean-based approach suffers from non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is driven by the non-focal predictor(s) with a strong effect. However, this is not the case if the non-focal predictor(s) have a small effect since the bias they induce is equally likely to be small. Since the observed-value-based approach averages over the whole population of the non-focal predictor variables, it is less likely to be affected by the non-linear averaging for the reasons already mentioned. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
+\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. The mean-based approach suffers from non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is primarily driven by the non-focal predictor(s) with a strong effect. Since the observed-value-based approach averages over the whole population of the non-focal predictor variables, it accounts for the effects of non-linear averaging. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
 \label{fig:pred_bin_plots}
 \end{figure}
 %
@@ -326,13 +327,17 @@ In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bi
 \begin{center}
 \includegraphics{glm_two_predictor_preds_effects.ggp.pdf}
 \end{center}
-\caption{{\bf Bias correction for prediction and effect plots.} In each case (A and B), the central estimates for predictions and effects are the same. Compared to the truth, these patterns are consistent with the ones in \FREF{pred_bin_plots}A. Further, the predictions and effects exhibit patterns and generalize similarly to the ones in simple linear models.
+\caption{{\bf Bias correction for prediction and effect plots.} 
+As in \FREF{pred_bin_plots}, the observed-value based estimates match the pattern of the data better than mean-based estimates. 
+\jd{Fix the caption (maybe we should say “central, effects, predictions”). I don't think you need to repeat again about central estimates being the same.}
+\jd{Add “data mean” as a horizontal line to the plots? I think data mean might be a good name, actually.
 }
 \label{fig:pred_bin_prediction_effects_plots}
 \end{figure}
 
 \subsection{Mediated effect}
 
+\jd{We should maybe discuss mediated effects and other stuff. We need to be much clearer about chains of causality and this example. Let's not say “somehow”}
 A \emph{mediated} effect is a situation in which only some of the input variables have a \emph{causal} impact on the outcome, even though all the variables are (somehow) associated with the outcome. For example, psychological factors such as water taste in the relationship between household socio-economic status and improved water quality status.
 
 For simplicity, we consider a hypothetical simulation for three variables: input variables $x$ and $y$; and outcome variable $z$; such that
