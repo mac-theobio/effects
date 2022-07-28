@@ -59,7 +59,7 @@ inter_plot <- (combinepreds(justify_inter_mod
 		, nesting=NULL
 		, ci=FALSE
 	)
-	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="observed", linetype="observed"))
+	+ geom_hline(data=true_prop_inter_df, aes(yintercept=y, colour="observed", linetype="observed"), alpha=0.7)
 	+ geom_vline(xintercept=mean(x1_focal), lty=2, col="grey")
 	+ geom_point(data=binned_df, aes(x=x1, y=y), colour="grey")
 	+ geom_line(data=x1_truepred_df, aes(x=x1, y=fit, colour=model, linetype=model), lty=2)

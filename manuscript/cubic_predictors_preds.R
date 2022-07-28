@@ -30,7 +30,7 @@ pred_fit_mean <- getmeans(pred_age_isolated_cubic, what="estimate", modelname="P
 print(pred_fit_mean)
 
 ## Colour limits
-col_limits <- c("Observed mean", "Predicted mean", "Effects", "Predictions")
+col_limits <- c("Data mean", "Predicted mean", "Effects", "Predictions")
 
 ### Combine
 vlist <- list(pred_age_non_cubic, pred_age_isolated_cubic)
@@ -44,7 +44,7 @@ pred_age_cubic_df <- (comparevarpred(vlist=vlist
 pred_age_cubic_plots <- (ggplot(pred_age_cubic_df$preds, aes(x=age, y=fit))
 	+ geom_line(aes(linetype=model, colour=model), size=1, alpha=0.5)
 	+ geom_ribbon(aes(ymin=lwr, ymax=upr, fill=model), alpha=0.5)
- 	+ geom_hline(data=true_prop_df, aes(yintercept=fit, colour=model, linetype="Observed mean"))
+ 	+ geom_hline(data=true_prop_df, aes(yintercept=fit, colour=model, linetype="Data mean"))
  	+ geom_hline(data=pred_fit_mean, aes(yintercept=fit, colour=model, linetype=model))
  	+ scale_color_colorblind(limits=col_limits)
  	+ scale_fill_colorblind(limits=col_limits)
@@ -84,7 +84,7 @@ pred_wealthindex_cubic_df <- (comparevarpred(vlist=vlist
 pred_wealthindex_cubic_plots <- (ggplot(pred_wealthindex_cubic_df$preds, aes(x=wealthindex, y=fit))
 	+ geom_line(aes(linetype=model, colour=model), size=1, alpha=0.5)
 	+ geom_ribbon(aes(ymin=lwr, ymax=upr, fill=model), alpha=0.5)
- 	+ geom_hline(data=true_prop_df, aes(yintercept=fit, colour=model, linetype="Observed mean"))
+ 	+ geom_hline(data=true_prop_df, aes(yintercept=fit, colour=model, linetype="Data mean"))
 	+ geom_vline(aes(xintercept=mean(wealthindex)), lty=2)
  	+ geom_hline(data=pred_fit_mean, aes(yintercept=fit, colour=model, linetype=model))
  	+ scale_color_colorblind(limits=col_limits)

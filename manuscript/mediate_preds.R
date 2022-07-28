@@ -36,7 +36,7 @@ summary(binned_df)
 
 ### Combine all predictions
 vlist <- list(pred_notmediated_none, pred_notmediated_pop)
-col_limits <- c("Observed mean", "Mean-based", "Observed-value-based")
+col_limits <- c("Data mean", "Mean-based", "Observed-value-based")
 
 pred_notmediated_plots <- (comparevarpred(vlist=vlist
 		, lnames=NULL

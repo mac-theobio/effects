@@ -15,7 +15,7 @@ set.seed(9991)
 true_prop_df <- (sim_df_cubic
 	%>% summarize_all(mean)
 	%>% rename(fit=hhsize)
-	%>% mutate(model="Observed mean")
+	%>% mutate(model="Data mean")
 )
 print(true_prop_df)
 

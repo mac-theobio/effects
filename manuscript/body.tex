@@ -4,7 +4,7 @@
 
 \section{Introduction}
 
-Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots) are often a useful way to summarize the results of a regression model. These can be used to illustrate model uncertainty or to give a more explicit quantitative sense of how the outcome is expected to change. In generalized models with a non-linear link function, or models with a spline or polynomial response to a predictor variable, they can also aid in understanding difficult-to-interpret coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
+Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots) are often a useful way to summarize the results of a regression model. These can be used to illustrate model uncertainty or to give a more explicit quantitative sense of how the outcome is expected to change. In generalized models with a non-linear link function, or models with a spline or polynomial response to an input variable, they can also aid in understanding difficult-to-interpret coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
 
 To make an outcome plot, we use a \emph{focal} predictor on the x-axis and \emph{central estimate} (predicted values) on the y-axis. The resulting plot will depend on choices we make about other (non-focal) predictor(s). In ordinary (Gaussian) linear regression, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
 
@@ -45,7 +45,7 @@ In order to discuss the statistical background and mathematical formulation of t
 
 \begin{description}
 \item [Input variables] Refers to the observed (or scientific) variables underlying an inference or exploration. For example, the regression models described by \EREF{simple_inter_higher_no_interaction} and \EREF{simple_inter_higher} both have $3$ input variables -- $x_1, x_2, x_3$.
-\item [Focal predictors] We call the input variable on the x-axis of an outcome plot the focal predictor.  Any other predictor variables are ``non-focal'' predictors. 
+\item [Focal predictors] We call the input variable on the x-axis of an outcome plot the focal predictor.  Any other input variables are ``non-focal'' predictors. 
 
 \item [Model matrix] Refers to the design matrix whose rows include all combination of input variables. Consider an example for three hypothetical households -- the first household head is a Christian with an income of $\$ 50$, the second household head is Muslim with an income of $\$ 100$ while the third household head is a Jew with an income of $\$ 77$. Suppose we want to model the household size (\code{hhsize}) as function of these household characteristics, i.e., $$\mathrm{hhsize} = \beta_0 + \beta_1\times\mathrm{income} + \beta_{2[r]}\times\mathrm{religion} + \mathrm{error}.$$ The model matrix corresponding to this model is given by
 $$\begin{bmatrix}{}
@@ -59,6 +59,7 @@ $$\begin{bmatrix}{}
 
 \item [Focal model center] The average of the linear predictor variables corresponding to the focal predictor. The average of the linear predictor variables corresponding to the non-focal predictor(s) is \emph{non-focal model center}. For simple continuous input variables, averaging linear predictor variables is the same as averaging the input variables (see \FREF{justify_plots}). Focal and non-focal model center values is also referred to as \emph{center point}. 
 \jd{I don't like this as a separate item. What is the need?}
+\BC{\fix{We need the terms to talk about model center \dots}}
 
 \item [Model center] Is the value of the central estimate calculated using focal and non-focal model center values (center point). It is a calculation that is equal to the average of central estimates for a linear model (identity link function) without complex interactions. 
 
@@ -158,7 +159,7 @@ so that the confidence intervals are $\etahfi \pm q\sigma_i$, where $\boldsymbol
 
 \subsubsection{Effect-style CIs}
 
-But what if we are interested in the uncertainty as a result of the focal predictor only (effect-style CIs), so that the CIs are $\etahfi \pm q\sigma^f_i$, i.e., effects? For effect-style CIs, we need an anchor and centered model matrix with all non-focal predictor variables set to zero. 
+But what if we are interested in the uncertainty as a result of the focal predictor only (effect-style CIs), so that the CIs are $\etahfi \pm q\sigma^f_i$, i.e., effects? For effect-style CIs, we need an anchor and centered model matrix with all non-focal linear predictor variables set to zero. 
 
 Let $\bxo$ be a centered model matrix previously defined, and let $\ba$ be an anchor matrix, with the same dimensions and entries of all non-focal linear predictor variables as $\bxo$. Let $\baf$ be the column of $\ba$ corresponding to focal linear predictor variable defined in $\bxo$. Any appropriate values can be chosen for $\baf$ but for model center (center-anchored), we use $\bafc$ which is the mean of the focal predictor. Thus 
 %
@@ -257,7 +258,7 @@ We start by comparing our proposed approach with the existing implementations an
 
 \subsection{Comparison with other implementations}
 
-The most commonly used \proglang{R} software packages for outcome plots (\pkg{emmeans} and \pkg{effects}), by default, use the average of input variables and ``sum-to-zero'' as the reference point approach for continuous and categorical input variables, respectively. However, there are a number of choices one can make when constructing outcome plots -- for example, in the presence of interactions, the default for \pkg{emmeans} and \pkg{effects} is to average the predictor variables and use these averaged values for the interaction, as opposed to our preferred model-center approach (averaging each linear predictor variable separately). The packages give the same results as our method for models without interactions. However, when interactions are present, the two approaches can produce substantially different results, with the model-center approach more closely matching the observed values.
+The most commonly used \proglang{R} software packages for outcome plots (\pkg{emmeans} and \pkg{effects}), by default, use the average of input variables and ``sum-to-zero'' as the reference point approach for continuous and categorical input variables, respectively. However, there are a number of choices one can make when constructing outcome plots -- for example, in the presence of interactions, the default for \pkg{emmeans} and \pkg{effects} is to average the input variables and use these averaged values for the interaction, as opposed to our preferred model-center approach (averaging each linear predictor variable separately). The packages give the same results as our method for models without interactions. However, when interactions are present, the two approaches can produce substantially different results, with the model-center approach more closely matching the observed values.
 
 To illustrate this, we simulate data from the models below:
 %
@@ -266,7 +267,7 @@ y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \epsilon \label{eq:simple_
 y &= \beta_0 + \beta_1x_1 + \beta_2x_2 + \beta_3x_3 + \beta_{23}x_2x_3 + \epsilon \label{eq:simple_inter_higher}.
 \end{align}
 %
-We simulate using $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$, $\beta_{23} = 5$, $\{x_{1,2,3}, \epsilon\} \sim \mathrm{Normal}(0, 1)$, and then compare estimates from the \pkg{emmeans}, \pkg{effects} and our proposed alternative (\pkg{varpred}) to the ``true'' central estimates (calculated using the simulation parameters) and observed average, i.e., $\bar{y}$, as shown in \FREF{justify_plots}.
+We simulate using $\beta_0 = 5$, $\beta_1 = -3$, $\beta_2 = 1$, $\beta_3 = 2$, $\beta_{23} = 5$, $\{x_{1,2,3}, \epsilon\} \sim \mathrm{Normal}(0, 1)$, and then compare estimates from the \pkg{emmeans}, \pkg{effects} and our proposed alternative (\pkg{varpred}) to the ``true'' central estimates (calculated using the simulation parameters) and mean of the data, i.e., $\bar{y}$, as shown in \FREF{justify_plots}.
 %
 \begin{figure}
 \begin{center}
@@ -300,12 +301,12 @@ To illustrate the distinction between predictions and effects in MPVs, we simula
 \begin{center}
 \includegraphics{cubic_predictors_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Prediction and effect plots for cubic polynomial and simple focal predictors.} A: The focal predictor is an MPV cubic polynomial. B: The focal predictor is linear, with MPV non-focal predictor. The central estimates (dashed central curves or lines) are the same for predictions and effects in both cases. We use the model center as the anchor for effect-style CIs. For a simple predictor (panel B), this corresponds simply to the mean of the input variable; thus, the effect curves intersect at that point. For an MPV predictor (panel A), the center point does not correspond to a single value of the predictor, and the curves do not cross. The horizontal black and yellow dashed lines are observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively.}
+\caption{{\bf Central estimate, prediction and effect plots for cubic polynomial and simple focal predictors.} A: The focal predictor is an MPV cubic polynomial. B: The focal predictor is linear, with MPV non-focal predictor. The central estimates (dashed central curves or lines) are the same for predictions and effects in both cases. We use the model center as the anchor for effect-style CIs. For a simple predictor (panel B), this corresponds simply to the mean of the input variable; thus, the effect curves intersect at that point. For an MPV predictor (panel A), the center point does not correspond to a single value of the predictor, and the curves do not cross. The horizontal black and yellow dashed lines are observed and predicted average household size, i.e., $\over{hh~size}$ and $\over{\widehat{hh~size}}$, respectively.}
 \label{fig:pred_cubic_plots}
 \end{figure}
 %
 We expect the CIs for effect-style plots to cross at the anchor point in a model with a simple focal predictor. On the other hand, if the focal predictor is an MPV, the center point is not expected to correspond to a single value of the focal predictor. In this case, the effects will be narrower than the predictions plots but will not necessarily intersect. 
-For linear models, we expect the observed average, the average of the central estimates and the prediction at the model center to all be identical. 
+For linear models, we expect mean of the data, the average of the central estimates and the prediction at the model center to all be identical. 
 
 \subsection{Bias correction}
 
@@ -315,7 +316,7 @@ We simulated data motivated by the water, sanitation, and hygiene (WaSH) study i
 \begin{center}
 \includegraphics{glm_two_predictor_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. The mean-based approach suffers from non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is primarily driven by the non-focal predictor(s) with a strong effect. Since the observed-value-based approach averages over the whole population of the non-focal predictor variables, it accounts for the effects of non-linear averaging. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
+\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. The mean-based approach suffers from non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is primarily driven by the non-focal predictor(s) with a strong effect. Since the observed-value-based approach averages over the whole population of the non-focal linear predictor variables, it accounts for the effects of non-linear averaging. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
 \label{fig:pred_bin_plots}
 \end{figure}
 %
@@ -327,19 +328,19 @@ In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bi
 \begin{center}
 \includegraphics{glm_two_predictor_preds_effects.ggp.pdf}
 \end{center}
-\caption{{\bf Bias correction for prediction and effect plots.} 
-As in \FREF{pred_bin_plots}, the observed-value based estimates match the pattern of the data better than mean-based estimates. 
-\jd{Fix the caption (maybe we should say “central, effects, predictions”). I don't think you need to repeat again about central estimates being the same.}
-\jd{Add “data mean” as a horizontal line to the plots? I think data mean might be a good name, actually.}
-}
+\caption{{\bf Bias correction for central, effect and prediction estimates.} 
+As in \FREF{pred_bin_plots}, the observed-value based estimates match the pattern of the data better than mean-based estimates.}
 \label{fig:pred_bin_prediction_effects_plots}
 \end{figure}
 
 \subsection{Mediated effect}
 
+\BC{\fix{Discuss with JD}}
+
 \jd{We should maybe discuss mediated effects and other stuff. We need to be much clearer about chains of causality and this example. Let's not say “somehow”}
-A \emph{mediated} effect is a situation in which only some of the input variables have a \emph{causal} impact on the outcome, even though all the variables are (somehow) associated with the outcome. For example, psychological factors such as water taste in the relationship between household socio-economic status and improved water quality status.
+A \emph{mediated} effect is a situation in which only some of the input variables have a \emph{causal} impact on the outcome, even though all the variables are associated with the outcome. For example, psychological factors such as water taste in the relationship between household socio-economic status and improved water quality status.
 \jd{Maybe a good example for this would be using education as a mediator for effects of wealth? Can you think of a better one?}
+\BC{\fix{Discuss with JD}}
 
 For simplicity, we consider a hypothetical simulation for three variables: input variables $x$ and $y$; and outcome variable $z$; such that
 %
@@ -363,7 +364,7 @@ To make inferences about this mediated effect, we can ask questions about the \e
 \begin{center}
 \includegraphics{mediate_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Mean-based and observed-value-based estimates for non-mediated (total) and mediated (direct) effect models.} A: In the absence of a mediator variable, the central estimate aligns well with the observed data. B: In the presence of indirect effect (mediator variable included), the central estimates do not align with the observations. Since the models in A and B are linear models with identity link functions, both approaches (mean-based and observed-value) give the same estimates. The horizontal dashed lines are the respective average estimates and observed means ($\bar{\hat{z}} \approx \bar{z}$). The vertical dashed black represents the center point, and the point at which it crosses the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are the binned observations.}
+\caption{{\bf Mean-based and observed-value-based estimates for non-mediated (total) and mediated (direct) effect models.} A: In the absence of a mediator variable, the central estimate aligns well with the observed data. B: In the presence of indirect effect (mediator variable included), the central estimates do not align with the observations. Since the models in A and B are linear models with identity link functions, both approaches (mean-based and observed-value) give the same estimates. The horizontal dashed lines are the respective average estimates and mean of the data ($\bar{\hat{z}} \approx \bar{z}$). The vertical dashed black represents the center point, and the point at which it crosses the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are the binned observations.}
 \label{fig:pred_mediated_plots}
 \end{figure}
 %
@@ -374,8 +375,7 @@ From \FREF{pred_mediated_plots}A, we see what we would expect if we simulated a 
 
 Generalized linear (mixed) models are widely used in various fields, including public health. In a model involving difficult-to-interpret coefficient estimates, an outcome plot can aid in understanding and summarizing the results. In particular, a prediction plot would be appropriate if the goal is to capture every uncertainty in the model for a particular focal predictor or if we are interested in total effect. Conversely, an effect plot is preferable if we want to focus on the uncertainty associated with a focal predictor only or if we are interested in the direct effect.
 
-The mean-based approach is widely used to create outcome plots. However, in a model with complex interaction, MPVs or categorical variables, it is sensitive to the choice of the reference point. We have demonstrated that a non-focal model-center-based reference point is generally a stable choice and provides estimates more consistent with the observed quantities as compared to common input-variable mean-based approach.
-\jd{I don't feel we need to say “non-focal” -- “-based” really covers it.}
+The mean-based approach is widely used to create outcome plots. However, in a model with complex interaction, MPVs or categorical variables, it is sensitive to the choice of the reference point. We have demonstrated that a model-center-based reference point is generally a stable choice and provides estimates more consistent with the observed quantities as compared to common input-variable mean-based approach.
 
 In a model with a non-linear link function such as a logistic or exponential function, the generated central estimate curve may not match well with the observed data, i.e., our description for bias. In such a model, the observed-value-based approach provides a way to generate more consistent estimates and is preferable to the widely used mean-based approach.
 

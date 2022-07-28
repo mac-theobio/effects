@@ -35,7 +35,7 @@ glm_sim_df <- glm_sim$data
 head(glm_sim_df)
 true_prop_df <- (glm_sim_df
 	%>% summarize_all(mean)
-	%>% mutate(model="Observed mean")
+	%>% mutate(model="Data mean")
 )
 true_prop_df
 

@@ -38,7 +38,7 @@ sim_mediate_betas <- c(b0, bxz, byz)
 ## Observed marginals
 observed_df_med <- (sim_df_mediate
 	%>% summarise_all(mean)
-	%>% mutate(model="Observed mean")
+	%>% mutate(model="Data mean")
 )
 observed_df_med
 

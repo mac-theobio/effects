@@ -32,7 +32,7 @@ binned_df <- binfun(glm_mod, focal="age", bins=50, groups=NULL)
 
 ### Combine all predictions
 vlist <- list(pred_age_prediction, pred_age_effect)
-col_limits <- c("Truth", "Effects", "Predictions")
+col_limits <- c("Data mean", "Effects", "Predictions")
 
 pred_age <- comparevarpred(vlist=vlist
 	, lnames=NULL
@@ -75,6 +75,7 @@ pred_df <- do.call("rbind"
 	, list(pred_age_df, pred_age_ws_df)
 )
 pred_age_plots <- (ggplot(pred_df, aes(x=age, y=fit))
+	+ geom_hline(data=true_prop_df, aes(yintercept=status, colour=model,lty=model))
 	+ geom_line(aes(colour=model, linetype=model), size=1)
 	+ geom_ribbon(aes(ymin=lwr, ymax=upr, fill=model), alpha=0.5)
 	+ geom_point(data=binned_df, aes(x=age, y=status), colour="grey")

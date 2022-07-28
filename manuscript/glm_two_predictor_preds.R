@@ -28,7 +28,7 @@ pred_age_pop_mean <- getmeans(pred_age_pop, what="estimate")
 
 ### Binned obs
 binned_df <- binfun(glm_mod, focal="age", bins=50, groups=NULL)
-col_limits <- c("Observed mean", "Mean-based", "Observed-value-based")
+col_limits <- c("Data mean", "Mean-based", "Observed-value-based")
 
 ### Combine all predictions
 vlist <- list(pred_age_none, pred_age_pop)
