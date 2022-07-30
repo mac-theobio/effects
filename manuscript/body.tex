@@ -55,7 +55,7 @@ $$\begin{bmatrix}{}
   1 & 77 & 1 & 0 \\
 \end{bmatrix}.$$ The first column represents the constant term in our model, $\beta_0$. For continuous input variables, the representation in the model matrix is the same as the corresponding input variables (for example second column representing income). For categorical variables, however, by default, the model matrix  creates additional dummy variables using the reference cell parameterization. This means that, if an input variable has $L$ factor levels, then there will be $L-1$ dummy columns representing all but the first level created in the model matrix. In our example, the column \code{religion} is missing and instead we have \code{religionJew} and \code{religionMuslim}; the missing category \code{religionChristian} is treated as the reference category.
 
-\item [Linear predictor variables] Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such variables “multi-parameter variables”.
+\item [Linear predictor variables] Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such multi-parameter variables (MPVs).
 
 \item [Focal model center] The average of the linear predictor variables corresponding to the focal predictor. The average of the linear predictor variables corresponding to the non-focal predictor(s) is \emph{non-focal model center}. For simple continuous input variables, averaging linear predictor variables is the same as averaging the input variables (see \FREF{justify_plots}). Focal and non-focal model center values is also referred to as \emph{center point}. 
 \jd{I don't like this as a separate item. What is the need?}
@@ -107,9 +107,9 @@ An alternative formulation of \EREF{eta_linear_mean} involves expressing the lin
 \etahfi(x^f, \uset{{\bar{x}}}) &= \hat{\beta}^f x^f + \sum \uset{\hat{\beta}} \uset{{\bar{x}}} \\
 \yfi  &= g^{-1} \left(\eta_i(x^f, \uset{{\bar{x}}})\right)
 \end{align}
-where $x^f$ and $\uset{{\bar{x}}}$ are columns of $\bX^{f}_c$ focal predictor and non-focal predictors, respectively.
+where $x^f$ and $\uset{{\bar{x}}}$ are columns of $\bX^{f}_c$ corresponding to focal predictor and non-focal predictors, respectively.
 
-In a model with a multi-parameter variable or input variables with complex interactions, construction of $\etahfi(x^f, \uset{{\bar{x}}})$ is not usually straightforward since we want $\uset{{\bar{x}}}$ to be or represent the ``true'' model center. We therefore illustrate some of these cases.
+In a model with MPVs or input variables with complex interactions, construction of $\etahfi(x^f, \uset{{\bar{x}}})$ is not usually straightforward since we want $\uset{{\bar{x}}}$ to be or represent the ``true'' model center. We therefore illustrate some of these cases.
 
 \subsubsection{Dealing with multi-parameter variables}
 
@@ -123,14 +123,14 @@ Multi-parameter variables (MPVs) such as splines, polynomials, etc., can be with
 In the first case, with \code{Age} as the focal predictor, is a cubic polynomial with three linear predictor variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$). In this case, each linear predictor variable is evaluated separately across the chosen levels of the focal predictor, $Age_i$. Specifically, the linear predictor variables are treated as additional columns of the model matrix evaluated with the same values chosen for the focal predictor, while non-focal predictors are fixed at their reference point as discussed in the previous section. The central estimates associated with \code{Age} on the linear predictor scale become
 %
 \begin{align}
-\etahfi(\mathrm{Age}_i, \nset{{\over{\mathrm{Wealthindex}}}}) &= \betah_0 + \betah_{\mathrm{A_1}}\mathrm{Age}_i + \betah_{\mathrm{A_2}}\mathrm{Age}^2_i + \betah_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\
-	& + \betah_{\mathrm{W}}\over{\mathrm{Wealthindex}}.
+\etahfi(\mathrm{Age}_i, \uset{{\over{\mathrm{Wealthindex}}}}) &= \betah_0 + \betah_{\mathrm{A_1}}\mathrm{Age}_i + \betah_{\mathrm{A_2}}\mathrm{Age}^2_i + \betah_{\mathrm{A_3}}\mathrm{Age}^3_i \nonumber\\
+	& + \betah_{\mathrm{W}}\uset{\over{\mathrm{Wealthindex}}}.
 \end{align}
 %
 In the second case, with \code{Wealthindex} as the focal predictor, the non-focal predictor, \code{Age}, is a cubic polynomial. In this case, the non-focal linear predictor variables ($\mathrm{Age}_i, \mathrm{Age}^2_i$ and $\mathrm{Age}^3_i$) are all treated as separate non-focal linear predictor variables and an appropriate choice of reference point applies just like in the models without MPVs. For instance, in mean-based approach, we average all non-focal MPVs. Thus
 %
 \begin{align}\label{eq:mpv_second}
-\etahfi(\mathrm{Wealthindex}_i, \nset{{\{\over{\mathrm{Age\mathop{\vphantom{^2}}}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^2}\}}}) &= \betah_0 + \betah_{\mathrm{A_1}}\over{\mathrm{Age\mathop{\vphantom{^2}}}} + \betah_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \betah_{\mathrm{A_3}}\over{\mathrm{Age}^3}\nonumber\\
+\etahfi(\mathrm{Wealthindex}_i, \uset{{\{\over{\mathrm{Age\mathop{\vphantom{^2}}}}, \over{\mathrm{Age}^2}, \over{\mathrm{Age}^2}\}}}) &= \betah_0 + \betah_{\mathrm{A_1}}\over{\mathrm{Age\mathop{\vphantom{^2}}}} + \betah_{\mathrm{A_2}}\over{\mathrm{Age}^2} + \betah_{\mathrm{A_3}}\over{\mathrm{Age}^3}\nonumber\\
 	& + \betah_{\mathrm{W}}\mathrm{Wealthindex}_i.
 \end{align}
 %
@@ -193,7 +193,7 @@ When dealing with non-linear link functions and additional non-focal predictors,
 We can directly compare the outcome estimate at the model center for non-focal parameters (mean-based estimate) with the average of predictions evaluated across the population values of non-focal predictors (observed-value-based estimate, the colon below indicates that we are comparing two quantities):
 %
 \begin{align}\label{eq:compare_anchored_pop_based}
-g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{\bar{x}})\right) : \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_j^\star(\bar{x}_f, \nset{x})\right)}.
+g^{-1} \left(\eta_i^f(\bar{x}^f, \uset{\bar{x}})\right) : \frac{1}{n} \sum_{i=1}^n{ g^{-1} \left(\eta_i^f(\bar{x}^f, \uset{x})\right)}.
 \end{align}
 %
 In an ordinary linear model, the link function $g$ is the identity function, so the two means are the same. For non-trivial link functions, we expect them to be different in general.
@@ -202,7 +202,7 @@ From Jensen's inequality, the exponential link function, for example, is concave
 
 \subsection{Observed-value-based approach for bias correction}
 
-An alternative approach to choosing a reference point is to make predictions over all observations of the non-focal predictors (members of the population) \citep{hanmer2013behind}. The non-linear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population to a one-dimensional distribution of $\etahfi(x_f, \nset{x})$, which is a function of the chosen values of the focal predictor and the whole sample of non-focal predictors, as opposed to the definition in \EREF{eta_mean}. More specifically:
+An alternative approach to choosing a reference point is to compute central estimates over all observations of the non-focal predictors (members of the population) \citep{hanmer2013behind}. The non-linear transformation involved in these computations is always \emph{one-dimensional}; all of the multivariate computations required are at the stage of collapsing the multidimensional set of predictors for some subset of the population to a one-dimensional distribution of $\etahfi(x_f, \nset{x})$, which is a function of the chosen values of the focal predictor and the whole sample of non-focal predictors, as opposed to the definition in \EREF{eta_mean}. More specifically:
 \begin{itemize}
 \item compute linear predictor associated with whole sample of the non-focal predictors, $\etanfj = \sum \uset{\hat{\beta}} \uset{x}$
 \item compute linear predictor associated with the chosen values focal predictor, $\etahfi = \hat{\beta}^f x^f$
@@ -254,7 +254,7 @@ The observed-value-based approach is not entirely foolproof. For instance, simil
 
 \section{Simulation examples}
 
-We start by comparing our proposed approach with the existing implementations and then illustrate the construction of outcome plots. We also demonstrate that the mean-based approach works well for interactions and multi-parameter variables and that the observed-value approach can correct the bias induced by non-linear averaging.
+We start by comparing our proposed approach with the existing implementations and then illustrate the construction of outcome plots. We also demonstrate that the mean-based approach works well for interactions and MPVs, and that the observed-value approach can correct the bias induced by non-linear averaging.
 
 \subsection{Comparison with other implementations}
 
@@ -310,19 +310,19 @@ For linear models, we expect mean of the data, the average of the central estima
 
 \subsection{Bias correction}
 
-We simulated data motivated by the water, sanitation, and hygiene (WaSH) study in which we were interested in investing the contribution of demographic and socio-economic factors to improved WaSH indicators among slum dwellers in Nairobi, Kenya. We used the mean-based approach to generate the predicted probabilities. However, we noticed that the predictions consistently over- or under- estimated the observed proportions; and did not align well with the observed data points. To demonstrate this, we consider a binary-outcome simulation with two input variables (described in \nameref{S2_Appendix}), such that \code{Age} has a very small effect size in comparison to \code{Wealthindex}, and compared their effects on the estimated probability of improved water quality as shown in \FREF{pred_bin_plots}.
+We simulated data motivated by the water, sanitation, and hygiene (WaSH) study in which we were interested in investing the contribution of demographic and socio-economic factors to improved WaSH indicators among slum dwellers in Nairobi, Kenya. In this particular study, we used the mean-based approach to generate the predicted probabilities. However, we noticed that the predictions consistently over- or under- estimated the observed proportions; and did not align well with the observed data points. To demonstrate this, we consider a binary-outcome simulation with two input variables (described in \nameref{S2_Appendix}), such that \code{Age} has a very small effect size in comparison to \code{Wealthindex}, and compared their effects on the estimated probability of improved water quality as shown in \FREF{pred_bin_plots}.
 %
 \begin{figure}
 \begin{center}
 \includegraphics{glm_two_predictor_preds.ggp.pdf}
 \end{center}
-\caption{{\bf Mean-based and observed-value-based central estimates.} The \emph{truth} is based on the true simulation parameters. If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. In both cases, the observed-value-based estimates are closer to the truth. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear link function in the logistic model. The mean-based approach suffers from non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is primarily driven by the non-focal predictor(s) with a strong effect. Since the observed-value-based approach averages over the whole population of the non-focal linear predictor variables, it accounts for the effects of non-linear averaging. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
+\caption{{\bf Mean-based and observed-value-based central estimates.} If the focal predictor has a small effect size, mean-based and observed-value-based approaches produce different estimates -- A. However, in the case of strong effect size, the two approaches produce very close estimates -- B. The difference in mean-based and observed-value-based is due to the bias induced by the non-focal predictor and the non-linear averaging in the logistic model. The mean-based approach is affected by the non-linear averaging. If the focal predictor has a small effect size, the bias is even pronounced since the effect of non-linear averaging is primarily driven by the non-focal predictor(s) with a strong effect. Since the observed-value-based approach averages over the whole population of the non-focal linear predictor variables, it accounts for the effects of non-linear averaging. The horizontal dashed lines correspond to the respective averages. The vertical dashed lines represent the center point, and the point at which they intersect the horizontal lines represents the expected ``perfect'' estimate at the model center. The grey points are binned observations -- observed proportions of improved water quality in each bin.} 
 \label{fig:pred_bin_plots}
 \end{figure}
 %
 If there were no effect of non-linear averaging, then we would expect the average observed proportion and the average predictions to intersect at the center point as we see in \FREF{pred_cubic_plots}B. One possible reason for the variations we see in \FREF{pred_bin_plots} is the non-linear averaging; since both observed status and predicted probabilities are averaged on the response scale as opposed to the link scale. For example, if the range of values is bigger than $0.5$ (seemingly the case here), then we would expect the averages to be slightly higher than we would expect at the center point.
 
-In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bin_plots}A and compare the prediction and effect plots associated with the central estimates. 
+In \FREF{pred_bin_prediction_effects_plots}, we use the results in \FREF{pred_bin_plots}A and compare the central estimate, prediction and effect plots associated with the central estimates. 
 %
 \begin{figure}
 \begin{center}
