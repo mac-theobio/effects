@@ -423,10 +423,10 @@ clean_model <- function(focal.predictors, mod, xlevels
     } else if (ff_check && (!any(name %in% components))) {
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- FALSE
 	 }
-
 	 ## Handling model center for *((
 	 if (!ff_check) {
 	 	factor.cols[grep(paste0(":", name, "|", name, ":"), cnames)] <- TRUE # FALSE for product of means as opposed to mean of products
+#	 	factor.cols[grep(paste0(":", name, "$"), cnames)] <- FALSE
       ## FIXME: Best way to identify all polynomial/function terms in a model
 		factor.cols[grep(paste("^[aA-zZ]+\\(", name, sep=""), cnames)] <- TRUE
 	 } 
@@ -620,14 +620,19 @@ get_model_matrix <- function(mod, mod.matrix, X.mod, factor.cols, cnames
   if (check_intercept(mod)) stranger.cols[1] <- TRUE
   if (any(stranger.cols)) {
     facs <- factor.cols & stranger.cols
-	 print(facs)
     covs <- (!factor.cols) & stranger.cols
     if (check_intercept(mod)) covs[1] <- FALSE
-#     if (any(facs)){
+    if (any(facs)){
 #       mod.matrix[,facs] <-  matrix(apply(as.matrix(X.mod[,facs]), 2,
 #                                          if (apply.typical.to.factors) typical else mean),
 #                                    nrow=nrow(mod.matrix), ncol=sum(facs), byrow=TRUE)
-#     }
+    	## 2022 Jul 30 (Sat): Proper way to average over columns?
+		mod.matrix[,facs] <- matrix(colMeans(X.mod[, facs, drop=FALSE])
+			, nrow=nrow(mod.matrix)
+			, ncol=sum(facs)
+			, byrow=TRUE
+		)
+	 }
     for (name in cnames){
       components <- unlist(strsplit(name, ':'))
       components <- components[components %in% cnames]
