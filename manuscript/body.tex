@@ -57,11 +57,7 @@ $$\begin{bmatrix}{}
 
 \item [Linear predictor variables] Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such multi-parameter variables (MPVs).
 
-\item [Focal model center] The average of the linear predictor variables corresponding to the focal predictor. The average of the linear predictor variables corresponding to the non-focal predictor(s) is \emph{non-focal model center}. For simple continuous input variables, averaging linear predictor variables is the same as averaging the input variables (see \FREF{justify_plots}). Focal and non-focal model center values is also referred to as \emph{center point}. 
-\jd{I don't like this as a separate item. What is the need?}
-\BC{\fix{We need the terms to talk about model center \dots}}
-
-\item [Model center] Is the value of the central estimate calculated using focal and non-focal model center values (center point). It is a calculation that is equal to the average of central estimates for a linear model (identity link function) without complex interactions. 
+\item [Model center] Is the value of the central estimate calculated using focal and non-focal model center values. It is a calculation that is equal to the average of central estimates for a linear model (identity link function) without complex interactions. The average of the linear predictor variables corresponding to the focal non-focal predictors are the focal and non-focal model center. Focal and non-focal model center values is also referred to as \emph{center point}. For simple continuous input variables, averaging linear predictor variables is the same as averaging the input variables (see \FREF{justify_plots}).
 
 \item [Reference point] The values (or sets of values) chosen for non-focal predictors, when estimating the predictions and effects. Typically the center point, but can also be chosen as a baseline value or as a mean across categories. We will also discuss using a set of quantiles or observations as a reference.
 
@@ -335,14 +331,7 @@ As in \FREF{pred_bin_plots}, the observed-value based estimates match the patter
 
 \subsection{Mediated effect}
 
-\BC{\fix{Discuss with JD}}
-
-\jd{We should maybe discuss mediated effects and other stuff. We need to be much clearer about chains of causality and this example. Let's not say “somehow”}
-A \emph{mediated} effect is a situation in which only some of the input variables have a \emph{causal} impact on the outcome, even though all the variables are associated with the outcome. For example, psychological factors such as water taste in the relationship between household socio-economic status and improved water quality status.
-\jd{Maybe a good example for this would be using education as a mediator for effects of wealth? Can you think of a better one?}
-\BC{\fix{Discuss with JD}}
-
-For simplicity, we consider a hypothetical simulation for three variables: input variables $x$ and $y$; and outcome variable $z$; such that
+To illustrate this, consider an example in which age of the head of the household (\code{x}) has a direct on the availability of improved water service in the household (\code{z}), as well as an indirect effect through its effect on the income of the head of the household (\code{y}), as illustrated below:
 %
 \begin{center}
 \begin{tikzpicture}
@@ -356,7 +345,7 @@ For simplicity, we consider a hypothetical simulation for three variables: input
 \end{tikzpicture}
 \end{center}
 %
-The arrows above show the direction of influence, and the implication of $x\rightarrow y$ and $y \rightarrow z$ is that $x$ affects $z$ in two ways. First, it has (some) direct effect; second, it can have an indirect effect by influencing $y$, regulated by parameter $\rho$ as shown in \nameref{S3_Appendix}.
+The arrows above show the direction of influence, and the implication of $x\rightarrow y$ and $y \rightarrow z$ is that $x$ affects $z$ in two ways. First, it has direct effect; second, it can have an indirect effect by influencing $y$, regulated by parameter $\rho$ as shown in \nameref{S3_Appendix}.
 
 To make inferences about this mediated effect, we can ask questions about the \emph{total} and \emph{direct} effects. In the first case, we want to fit a univariate model which regresses $z$ on $x$, excluding $y$. We refer to this as \emph{non-mediated} model. In the second case, we want to fit a multivariate model which regresses $z$ on $x$ and $y$. We refer to this as \emph{mediated} model. We simulated the data as shown in \nameref{S3_Appendix} and fitted the two models -- non-mediated and mediated. We compared mean-based and the observed-value-based central estimates in both cases, as shown in \FREF{pred_mediated_plots}.
 %
