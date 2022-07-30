@@ -211,6 +211,7 @@ varpred <- function(mod
 			, data=mf
 			, contrasts.arg=.contr
 		)
+		print(colMeans(mod.matrix))
 		mm <- get_model_matrix(mod
 			, mod.matrix
 			, X.mod
@@ -417,7 +418,7 @@ varpred <- function(mod
 	attr(result, "x.var") <- out$x.var 
 	attr(result, "modelname") <- modelname
 	if (returnall) {
-		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw=out)
+		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma, raw=out, ff=factor.cols, ll=mod.matrix)
 	} else {
 		res <- list(preds = result, offset=out$offset, bias.adjust.sigma=out$bias.adjust.sigma)
 	}

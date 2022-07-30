@@ -620,13 +620,14 @@ get_model_matrix <- function(mod, mod.matrix, X.mod, factor.cols, cnames
   if (check_intercept(mod)) stranger.cols[1] <- TRUE
   if (any(stranger.cols)) {
     facs <- factor.cols & stranger.cols
+	 print(facs)
     covs <- (!factor.cols) & stranger.cols
     if (check_intercept(mod)) covs[1] <- FALSE
-    if (any(facs)){
-      mod.matrix[,facs] <-  matrix(apply(as.matrix(X.mod[,facs]), 2,
-                                         if (apply.typical.to.factors) typical else mean),
-                                   nrow=nrow(mod.matrix), ncol=sum(facs), byrow=TRUE)
-    }
+#     if (any(facs)){
+#       mod.matrix[,facs] <-  matrix(apply(as.matrix(X.mod[,facs]), 2,
+#                                          if (apply.typical.to.factors) typical else mean),
+#                                    nrow=nrow(mod.matrix), ncol=sum(facs), byrow=TRUE)
+#     }
     for (name in cnames){
       components <- unlist(strsplit(name, ':'))
       components <- components[components %in% cnames]
@@ -644,3 +645,5 @@ get_model_matrix <- function(mod, mod.matrix, X.mod, factor.cols, cnames
   }
   mod.matrix
 }
+
+
