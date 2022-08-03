@@ -1,0 +1,46 @@
+
+\documentclass[12pt]{article}
+\usepackage[top=0.85in,footskip=0.75in]{geometry}
+
+% amsmath and amssymb packages, useful for mathematical formulas and symbols
+\usepackage{amsmath,amssymb}
+
+% Use adjustwidth environment to exceed column width (see example table in text)
+\usepackage{changepage}
+
+% Use Unicode characters when possible
+\usepackage[utf8x]{inputenc}
+
+% textcomp package and marvosym package for additional characters
+\usepackage{textcomp,marvosym}
+
+% cite package, to clean up citations in the main text. Do not remove.
+\usepackage{cite}
+
+% Use nameref to cite supporting information files (see Supporting Information section for more info)
+\usepackage{nameref,hyperref}
+
+% line numbers
+\usepackage[right]{lineno}
+
+% ligatures disabled
+\usepackage{microtype}
+\DisableLigatures[f]{encoding = *, family = * }
+
+% color can be used to apply background shading to table cells only
+\usepackage[table]{xcolor}
+
+% array package and thick rules for tables
+\usepackage{array}
+
+\bibliographystyle{plain}
+
+\usepackage{graphicx,grffile}
+
+\usepackage{float}
+
+\makeatletter
+  \providecommand*\floatlocation[2]{\@namedef{fps@#1}{#2}}
+\makeatother
+\floatlocation{figure}{H} % for figures
+\floatlocation{table}{H}  % for tables

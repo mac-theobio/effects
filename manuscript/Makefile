@@ -87,7 +87,21 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ######################################################################
 
-# Manuscript
+## Paper
+
+## draft.paper.pdf: paper.body.tex draft.head.tex
+
+Ignore += *.paper.tex *.paper.pdf
+
+Sources += *.head.tex $(paperfiles)
+paperfiles = mscommands.tex begindoc.tex abstract.tex paper.body.tex msbib.tex enddoc.tex
+
+%.paper.tex: %.head.tex $(paperfiles)
+	$(catro)
+
+######################################################################
+
+# Thesis
 
 # DO NOT edit draft.tex, created automatically, instead edit body.tex
 Ignore += draft.pdf
@@ -103,6 +117,12 @@ msfiles = mscommands.tex begindoc.tex abstract.tex body.tex msbib.tex enddoc.tex
 draft.tex: drafthead.tex $(msfiles)
 	$(catro)
 
+Sources += *head.tex $(msfiles)
+
+######################################################################
+
+## Modular diff stuff
+
 msoldfiles = mscommands.tex begindoc.tex abstract.tex body.tex.fb7889b9.oldfile msbib.tex enddoc.tex
 ## msoldfiles = body.tex.7e1cc3fe.oldfile
 
@@ -115,6 +135,10 @@ Ignore += draft.diff.tex
 draft.diff.tex: draft.old.tex draft.tex
 	$(latexdiff)
 
+######################################################################
+
+## Product templating stuff not used for thesis
+
 Ignore += plos.tex
 plos.tex: ploshead.tex $(msfiles)
 	$(catro)
@@ -123,11 +147,13 @@ Ignore += *.ms.tex
 %.ms.tex: %head.tex $(msfiles)
 	$(catro)
 
+######################################################################
+
+## Try to make readable for JD on tablet (never worked out, but not clear if it was a tech problem)
+
 Ignore += tab.adj.pdf
 tab.adj.pdf: tab.ms.pdf Makefile
 	pdfjam -o $@ --scale 1.25 $<
-
-Sources += *head.tex $(msfiles)
 
 ######################################################################
 

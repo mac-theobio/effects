@@ -6,7 +6,8 @@ library(shellpipes)
 loadEnvironments()
 startGraphics()
 
-m <- glm(z ~ x+y, data=sim_df_mediate, family="binomial")
+## m <- glm(z ~ x+y, data=sim_df_mediate, family="binomial")
+m <- lm(z ~ x+y, data=sim_df_mediate)
 
 def <- varpred(m , "x", modelname="def")
 pred <- varpred(m, "x", isolate=FALSE, modelname="pred")
