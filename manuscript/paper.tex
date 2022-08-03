@@ -1,21 +1,23 @@
 
-\linenumbers
-
 \section{Introduction}
 
-Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots) are often a useful way to summarize the results of a regression model. These can be used to illustrate model uncertainty or to give a more explicit quantitative sense of how the outcome is expected to change. In generalized models with a non-linear link function, or models with a spline or polynomial response to an input variable, they can also aid in understanding difficult-to-interpret coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
+Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots, generalized here as “outcome plots”) are often a useful way to summarize the results of a statistical model. These can be used to illustrate model uncertainty or to give a more explicit quantitative sense of how the outcome is expected to change. In generalized models with a non-linear link function, or models with a spline or polynomial response to an input variable, they can also aid in understanding difficult-to-interpret coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
 
-To make an outcome plot, we use a \emph{focal} predictor on the x-axis and \emph{central estimate} (predicted values) on the y-axis. The resulting plot will depend on choices we make about other (non-focal) predictor(s). In ordinary (Gaussian) linear regression, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
+To make an outcome plot, we use a \emph{focal} predictor on the x-axis and values of the outomcome variable on the y-axis. The resulting plot will depend on choices we make about other (non-focal) predictors. In an ordinary linear model, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
 
-As noted, the outcome plots described above are often called prediction plots or effects plots. We endeavor here to make a conceptual distinction. 
-The primary distinction between the two lies in how we describe the uncertainties around the central estimate. 
+We endeavor here to make a conceptual distinction between two functions of 
+outcome plots: prediction and effects. 
+The primary difference lies in how we describe the uncertainties around the central estimate. 
 If our goal is to \emph{predict} what we learn about the outcome variable by measuring the focal predictor, then we may want to capture a variety of sources of uncertainty, including that due to the intercept, focal and non-focal predictors, and random effects.
 Conversely, if we wish to focus on the \emph{effect} of a focal predictor only, we might want to isolate uncertainty due to coefficients associated with that predictor.
-If we follow this convention, we expect effects plots to have narrower confidence intervals (CIs) than prediction plots.
+If we follow this convention, we expect effects plots to generally have narrower confidence intervals (CIs) than prediction plots, since less uncertainty is taken into account.
 
 The other distinction relates not to the method of calculating CIs, but to the model chosen for the plot. 
-In general, if we want to predict based on a focal parameter, we are likely to want to fit a univariate model that only contains terms related to that predictor.
+In general, if we want to predict based on a focal parameter, we are likely to want to fit a univariate model that only contains terms related to that predictor, thus addressing the question: if we know (only) the focal parameter, what can we predict about the outcome?.
 If we want to know the effects of a predictor, we may want to control for covariates with a multivariate model, in order to estimate “direct” effects; leave covariates out, in order to estimate “total” effects (direct plus indirect); or take an intermediate strategy.
+These address different versions of the question: if we change the focal parameter (possibly allowing it also to affect other covariates), what is the expected effect on the outcome variable. 
+
+\jd{Is there a better place to cite this?}
 Shi et al. \citep{shi_evidence_2017}, for example, used multivariate effects plots to visualize estimated direct effects of different predictors in a paper that compared the difference in sexual risk behaviors between circumcised and uncircumcised men.
 
 Producing this sort of outcome plot has some challenges, including:

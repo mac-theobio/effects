@@ -89,12 +89,12 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ## Paper
 
-## draft.paper.pdf: paper.body.tex draft.head.tex
+## draft.paper.pdf: paper.tex draft.head.tex
 
 Ignore += *.paper.tex *.paper.pdf
 
+paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
 Sources += *.head.tex $(paperfiles)
-paperfiles = mscommands.tex begindoc.tex abstract.tex paper.body.tex msbib.tex enddoc.tex
 
 %.paper.tex: %.head.tex $(paperfiles)
 	$(catro)
