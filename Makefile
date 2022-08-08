@@ -24,8 +24,8 @@ Makefile: makestuff/00.stamp varpred.stamp
 
 Ignore += *.stamp
 varpred.stamp: DESCRIPTION
-	$(MAKE) install
-	touch $@
+	$(touch)
+	$(MAKE) install || ($(RM) $@ && false)
 
 ######################################################################
 
@@ -283,7 +283,7 @@ build-package:
 	R CMD build .
 
 install:
-	$(MAKE) update-doc build-package install-tarball
+	make update-doc && make build-package && make install-tarball
 
 install-tarball:
 	R CMD INSTALL vareffects_1.0.16.*
