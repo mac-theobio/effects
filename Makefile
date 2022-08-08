@@ -282,7 +282,8 @@ Ignore += vareffects_1*.*
 build-package:
 	R CMD build .
 
-install: update-doc build-package install-tarball
+install:
+	$(MAKE) update-doc build-package install-tarball
 
 install-tarball:
 	R CMD INSTALL vareffects_1.0.16.*
