@@ -1,10 +1,23 @@
-## vareffects
+# vareffects
 
 - Visualize variable effects for linear models 
 
-- To install run `make install` from the `terminal`
+## Install package
+
+```make
+install.packages("remotes")
+remotes::install_github("mac-theobio/effects")
+```
 
 OR
 
-- `install.packages("remotes")`
-- `remotes::install_github("mac-theobio/effects")`
+clone this repo and run `make install`
+
+## Make manuscript
+
+clone repo
+
+```bash
+
+```
+
