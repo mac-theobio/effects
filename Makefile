@@ -24,7 +24,8 @@ Makefile: makestuff/00.stamp varpred.stamp
 
 Ignore += *.stamp
 varpred.stamp: DESCRIPTION
-	$(MAKE) install || ($(rm) && false)
+	$(MAKE) install
+	touch $@
 
 ######################################################################
 
