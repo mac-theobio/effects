@@ -4,7 +4,7 @@
 
 ## Install package
 
-```make
+```bash
 install.packages("remotes")
 remotes::install_github("mac-theobio/effects")
 ```
@@ -18,6 +18,9 @@ clone this repo and run `make install`
 clone repo
 
 ```bash
-
+make Makefile
+make pullall
+cd manuscript
+make draft.paper.pdf
 ```
 
