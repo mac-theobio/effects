@@ -12,8 +12,8 @@ nitro_spread <- 0.4
 mass_mean <- 100
 mass_spread <- 0.4
 beta_np <- -0.2
-beta_pm <- 0.2
-beta_nm <- 0.3
+beta_pm <- 0.3
+beta_nm <- 0.9
 
 set.seed(seed)
 

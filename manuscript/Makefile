@@ -251,15 +251,23 @@ glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ######################################################################
 
-## New MS examples
+## New MS examples 2022 Aug 10 (Wed)
 
 eco_data.Rout: eco_data.R
 
-## Branch the model fits
+## Model fits 
 ## eco.uniN.mfit.Rout: uniN.R
 scriptStep += mfit
 mfit += uniN fullN quadN
 mfit_dep = %_data.rds
+
+## Model plots
+pipeRdesc += nitroPlot
+pipeRimplicit += nitroPlot
+## eco.uniN.nitroPlot.Rout: nitroPlot.R
+## eco.quadN.nitroPlot.Rout: nitroPlot.R
+%.nitroPlot.Rout: nitroPlot.R %.mfit.rda
+	$(pipeR)
 
 ######################################################################
 
