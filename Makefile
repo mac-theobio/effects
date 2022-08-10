@@ -22,6 +22,8 @@ update_scripts:
 
 Makefile: makestuff/00.stamp varpred.stamp
 
+## This automatically installs the local package when DESCRIPTION is updated
+## I tried to clean up this make rule and got loops; something is fragile 2022 Aug 10 (Wed)
 Ignore += *.stamp
 varpred.stamp: DESCRIPTION
 	$(touch)
