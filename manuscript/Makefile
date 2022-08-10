@@ -211,6 +211,7 @@ anchorRange.Rout: anchorRange.R
 
 ## Seminar presentation pix
 ## 2022 Mar 15 (Tue)
+## The stats folks were bothered by how badly these fit lm assumptions -- oops
 
 alcohol_data.Rout: alcohol_data.R
 
@@ -250,6 +251,18 @@ glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ######################################################################
 
+## New MS examples
+
+eco_data.Rout: eco_data.R
+
+## Branch the model fits
+## eco.uniN.mfit.Rout: uniN.R
+scriptStep += mfit
+mfit += uniN fullN quadN
+mfit_dep = %_data.rds
+
+######################################################################
+
 ## Algebra
 Ignore += algebra.html
 algebra.html: algebra.Rmd
@@ -259,7 +272,6 @@ algebra.html: algebra.Rmd
 cubic_sim.Rout: cubic_sim.R
 cubic_model.Rout: cubic_model.R cubic_sim.rda
 cubic_preds.Rout: cubic_preds.R cubic_model.rda variable_predictions_funs.rda
-
 
 ######################################################################
 
