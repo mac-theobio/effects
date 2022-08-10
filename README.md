@@ -23,4 +23,3 @@ make pullall
 cd manuscript
 make draft.paper.pdf
 ```
-
