@@ -14,8 +14,8 @@ points <- (ggplot(dat)
 	+ ylab("Biomass")
 )
 
-veff <- as.data.frame(varpred(mod, "nitro"))
-vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE))
+veff <- as.data.frame(varpred(mod, "nitro", steps=200))
+vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE, steps=200))
 
 plain <- (points
 	+ geom_line(data=vpred, aes(y=fit))
