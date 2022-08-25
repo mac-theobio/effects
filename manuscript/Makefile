@@ -87,9 +87,9 @@ mediate_preds.Rout: mediate_preds.R mediate_model.rda
 
 ######################################################################
 
-## Paper
+## New paper version
 
-## draft.paper.pdf: paper.tex draft.head.tex
+## draft.paper.tex.pdf: paper.tex draft.head.tex
 
 Ignore += *.paper.tex *.paper.pdf
 

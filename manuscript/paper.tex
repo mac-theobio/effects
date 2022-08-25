@@ -1,9 +1,32 @@
 
 \section{Introduction}
 
-Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots, generalized here as “outcome plots”) are often a useful way to summarize the results of a statistical model. These can be used to the shape of model response and associated uncertanties, and may be easier to interpret than tables of coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
+Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots, generalized here as “outcome plots”) are often a useful way to summarize the results of a statistical model. These can be used to illustrate the shape of model response and associated uncertainties, and may be easier to interpret than tables of coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
 
-To make an outcome plot, we use a \emph{focal} predictor on the x-axis and values of the outcome variable on the y-axis. The resulting plot will depend on choices about other (non-focal) predictors. In an ordinary linear model, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
+\begin{gloss}
+\subsection*{Glossary}
+\begin{description}
+\item [Input variables] Observed (scientific) variables underlying an inference or exploration. For example, the regression models described by \EREF{simple_inter_higher_no_interaction} and \EREF{simple_inter_higher} both have $3$ input variables -- $x_1, x_2, x_3$.
+
+\item [Focal predictors] The input variable on the x-axis of an outcome plot.
+
+\item [Linear predictor variables] The variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable corresponds to one or more linear predictor variables.
+
+\item[Multi-parameter variables (MPVs)] Input variables which correspond to more than one linear predictor variable -- for example, variables with more than two categories (religion in our first example), or variables with spline or polynomial response. 
+
+\item [Model center] The point corresponding to the mean of the linear predictor variables. In an ordinary linear model, the central estimate at this point will be the mean of the response variable. 
+
+\item [Reference point] The values (or sets of values) chosen for non-focal predictors when estimating the predictions and effects. Can be the model center, chosen baseline values, or a weighted or unweighted mean across categories. We will also discuss averaging over a set of quantiles or observations as a reference point.
+
+\item [Anchor] The values chosen for variables related the focal predictor when estimating effect-style confidence intervals. The anchor choice does not affect the central estimates, nor prediction-style confidence intervals. Often but not always based on the model center. 
+
+\end{description}
+\end{gloss}
+
+
+To make an outcome plot, we use a \emph{focal} predictor on the x-axis and values of the outcome variable on the y-axis. The resulting plot will depend on choices about other (non-focal) predictors. In an \emph{ordinary} linear model, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. 
+In a \emph{generalized} linear model, there is usually a non-linear link function, which complicates the picture of additivity.
+Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
 
 We endeavor here to make a conceptual distinction between two functions of 
 outcome plots: prediction and effects. 
@@ -13,29 +36,13 @@ Conversely, if we wish to focus on the \emph{effect} of a focal predictor only, 
 If we follow this convention, we expect effects plots to generally have narrower confidence intervals (CIs) than prediction plots, since less uncertainty is taken into account.
 
 The other distinction relates not to the method of calculating CIs, but to the model chosen for the plot. 
-In general, if we want to predict based on a focal parameter, we are likely to want to fit a univariate model that only contains terms related to that predictor, thus addressing the question: if we know (only) the focal parameter, what can we predict about the outcome?
+In general, if we want to predict based on a focal parameter, we are likely to prefer a univariate model that only contains terms related to that predictor, thus addressing the question: if we know (only) the focal parameter, what can we predict about the outcome?
 If we want to know the effects of a predictor, we may want to control for covariates with a multivariate model, in order to estimate “direct” effects; leave covariates out, in order to estimate “total” effects (direct plus indirect); or take an intermediate strategy.
 These address different versions of the question: if we change the focal parameter (possibly allowing it also to affect other covariates), what is the expected effect on the outcome variable (see, e.g., \citep{shi_evidence_2017}).
 
 We discuss the idea of a model “center” and show how it simplifies thinking about outcome plot choices, particularly in the case of ordinary linear models. We also discuss biases that arise from non-linear link functions in generalized linear models, and how such biases can be addressed.
 
-\section{Definitions}
-
-\jd{We should make this a box.}
-
-\begin{description}
-\item [Input variables] Refers to the observed (or scientific) variables underlying an inference or exploration. For example, the regression models described by \EREF{simple_inter_higher_no_interaction} and \EREF{simple_inter_higher} both have $3$ input variables -- $x_1, x_2, x_3$.
-\item [Focal predictors] We call the input variable on the x-axis of an outcome plot the focal predictor.  Any other input variables are ``non-focal'' predictors. 
-
-\item [Linear predictor variables] Refer to the variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable may correspond to one or more linear predictor variables. Input variables with more than two categories (for instance religion in our previous example), or input variables with non-linear response functions (e.g., spline or polynomial) will correspond to more than one linear predictor variable -- we call such multi-parameter variables (MPVs).
-
-\item [Model center] Is the value of the central estimate calculated using focal and non-focal model center values. It is a calculation that is equal to the average of central estimates for a linear model (identity link function) without complex interactions. The average of the linear predictor variables corresponding to the focal non-focal predictors are the focal and non-focal model center. Focal and non-focal model center values is also referred to as \emph{center point}. For simple continuous input variables, averaging linear predictor variables is the same as averaging the input variables (see \FREF{justify_plots}).
-
-\item [Reference point] The values (or sets of values) chosen for non-focal predictors, when estimating the predictions and effects. Often based on the model center, can also use chosen baseline values, or an unweighted mean across categories for a categorical variable. We will also discuss using a set of quantiles or observations as a reference.
-
-\item [Anchor] The reference value chosen for variables related the focal predictor when estimating effect-style confidence intervals. The anchor choice does not affect the central estimates, nor prediction-style confidence intervals. Often based on the model center, can also be chosen. 
-
-\end{description}
+%% \clearpage
 
 \section{Statistical formulation}
 
