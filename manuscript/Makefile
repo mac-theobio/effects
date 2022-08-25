@@ -237,7 +237,7 @@ pipeRimplicit += eduPlot
 
 ## alcohol.eduQuad.eduPlot.pred.pdf:
 
-Ignore += *zero.pdf *eff.pdf
+Ignore += *zero.pdf *eff.pdf *.pred.pdf
 
 pipeRdesc += eduzPlot
 pipeRimplicit += eduzPlot
