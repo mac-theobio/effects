@@ -73,13 +73,13 @@ inter_plot <- (combinepreds(justify_inter_mod
 	+ theme(legend.position="bottom")
 )
 
-simple_plot <- ggarrange(simple_plot
+double_plot <- ggarrange(simple_plot
 	, inter_plot + rremove("ylab")
 	, common.legend=TRUE
 	, legend="bottom"
 	, ncol=2
 )
-teeGG(simple_plot, desc="inter")
+teeGG(double_plot, desc="inter")
 
 ## Isolated with CIs
 ### Preds based on true parameter values

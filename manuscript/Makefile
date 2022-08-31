@@ -4,7 +4,7 @@ current: target
 -include target.mk
 
 vim_session:
-	bash -cl "vmt"
+	bash -cl "vmt paper.tex body.tex"
 
 ######################################################################
 
@@ -255,20 +255,32 @@ glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ## New MS examples 2022 Aug 10 (Wed)
 
+## Fake data about nutrients and biomass
 eco_data.Rout: eco_data.R
 
-## Model fits 
+## Fit different models
 ## eco.uniN.mfit.Rout: uniN.R
 scriptStep += mfit
 mfit += uniN fullN quadN
 mfit_dep = %_data.rds
 
+## make different varpred objects
+## eco.uniN.defAnchor.vp.Rout: defAnchor.R
+scriptStep += vp
+vp += defAnchor anchor20
+vp_dep += %.mfit.rda
+
 ## Model plots
 pipeRdesc += nitroPlot
 pipeRimplicit += nitroPlot
-## eco.uniN.nitroPlot.Rout: nitroPlot.R
-## eco.quadN.nitroPlot.Rout: nitroPlot.R
-%.nitroPlot.Rout: nitroPlot.R %.mfit.rda
+## eco.uniN.defAnchor.nitroPlot.Rout: nitroPlot.R
+## eco.uniN.anchor20.nitroPlot.Rout: nitroPlot.R
+## eco.quadN.defAnchor.nitroPlot.Rout: nitroPlot.R
+## eco.quadN.anchor20.nitroPlot.Rout: nitroPlot.R
+%.nitroPlot.Rout: nitroPlot.R %.vp.rda
+	$(pipeR)
+
+eco.splash.Rout: splash.R eco.uniN.defAnchor.nitroPlot.rda eco.uniN.anchor20.nitroPlot.rda
 	$(pipeR)
 
 ######################################################################
