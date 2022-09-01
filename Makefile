@@ -288,7 +288,7 @@ install:
 	$(MAKE) build-package install-tarball
 
 install-tarball:
-	R CMD INSTALL vareffects_1.0.16.*
+	R CMD INSTALL vareffects_1.0.17.*
 
 check-package:
 	echo "devtools::check('.')" | R --slave

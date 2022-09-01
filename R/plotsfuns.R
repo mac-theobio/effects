@@ -137,10 +137,10 @@ plot.vareffects <- function(x, ..., xlabs = NULL, ylabs = NULL, xtrans_fun=NULL,
 #' @import ggplot2
 #' @export
 
-varefftheme <- function(type=c("minimal", "complete")){
+varefftheme <- function(type=c("minimal", "complete"), base_size=16){
 	type=match.arg(type)
 	if (type=="complete") {
-		theme_set(theme_bw() +
+		theme_set(theme_bw(base_size=base_size) +
 			theme(panel.spacing = grid::unit(0,"lines")
 				, plot.title = element_text(hjust = 0.5)
 				, legend.position = "bottom"
@@ -169,7 +169,7 @@ varefftheme <- function(type=c("minimal", "complete")){
 		)
 	} else {
 		theme_set(
-			theme_bw(base_size=12)
+			theme_bw(base_size=base_size)
 			+ theme(
 				strip.background = element_blank()
 				, plot.title = element_text(hjust = 0.5)
