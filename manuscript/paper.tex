@@ -45,13 +45,49 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 
 \section{Ordinary linear models}
 
-\subsection{Outcome plots}
+\begin{figure}
+\begin{center}
+\includegraphics{eco.splash.Rout.pdf}
+\end{center}
+\caption{Outcome plots with effect- (dashed straight lines) and prediction-style (dashed curved lines). The panel on the left anchors the effect-style intervals at the model center; the panel on the right has a specific anchor chosen for biological reasons. Anchor point does not affect prediction-style confidence intervals}
+\flab{splash}
+\end{figure}
+
+\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ the broader \emph{prediction intervals} which give \CIs\ for the observations rather than the predicted means). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the \emph{direct} effect of the focal predictor.
 
 \subsection{The model center}
+
+To make an outcome plot, we vary the value of the focal predictor, but we need to choose values for other predictors. Our default is to do this using the \emph{model center}. We define the model center as the average value of all of the “linear predictor variables” which go into the model matrix. This is not, in general, the same as averaging over the “input variables” which are measured and provided as data. 
+
+The model center does not need to correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome -- in the case of an ordinary linear model, this means that the value is also the same as the observed mean of the outcome variable.
+
+For this reason, using the model center tends to make outcome plots match the data better than other approaches, including that of taking the mean of input variables only.
+
+\begin{figure}
+\begin{center}
+\end{center}
+\{fig:justify_plots}
+\end{figure}
+%
+\fref{center} shows an example, based on simulated data with an interaction between correlated variables.
+In the absence of interactions (\EREF{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \FREF{justify_plots}A. However, the estimates start to differ in the presence of interactions, even as simple as the one in \EREF{simple_inter_higher}. In particular, estimates from \pkg{emmeans} and \pkg{effects} are identical but differ from \pkg{varpred}'s, which is very close to the simulated average ($\bar{y}$), \FREF{justify_plots}B.
+In the simple model, \FREF{justify_plots}A, the input variables are the same as the linear predictor variables, so all the three methods produce identical results.
+In the interaction model, \FREF{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages.
 
 \subsection{Multi-parameter predictors}
 
 \subsection{Direct effects}
+
+\begin{figure}
+\begin{center}
+\includegraphics{eco.mcomp.Rout.pdf}
+\end{center}
+\caption{Outcome plots with effect- (dashed straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text.}
+\flab{mcomp}
+\end{figure}
+%%
+\jd{Alternative figure 1?}
+\fref{mcomp} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ the broader \emph{prediction intervals} which give \CIs\ for the observations rather than the predicted means). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the \emph{direct} effect of the focal predictor.
 
 \section{Generalized linear models}
 

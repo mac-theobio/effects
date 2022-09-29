@@ -25,14 +25,14 @@ pred <- (plain
 teeGG(pred, desc="pred")
 
 eff <- (plain
-	+ geom_line(data=veff, lty=2, aes(y=lwr))
-	+ geom_line(data=veff, lty=2, aes(y=upr))
+	+ geom_line(data=veff, lty=3, aes(y=lwr))
+	+ geom_line(data=veff, lty=3, aes(y=upr))
 )
 teeGG(eff, desc="eff")
 
 predeff <- (pred
-	+ geom_line(data=veff, lty=2, aes(y=lwr))
-	+ geom_line(data=veff, lty=2, aes(y=upr))
+	+ geom_line(data=veff, lty=3, aes(y=lwr))
+	+ geom_line(data=veff, lty=3, aes(y=upr))
 )
 teeGG(predeff, desc="predeff")
 

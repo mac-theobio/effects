@@ -4,16 +4,16 @@ library(tibble)
 library(shellpipes)
 
 N <- 25 
-seed <- 32
+seed <- 31
 phos_mean <- 22
 phos_spread <- 0.4
 nitro_mean <- 33
 nitro_spread <- 0.4
 mass_mean <- 100
 mass_spread <- 0.4
-beta_np <- -0.2
-beta_pm <- 0.3
-beta_nm <- 0.9
+beta_np <- 0.8
+beta_pm <- 0.8
+beta_nm <- 0.4
 
 set.seed(seed)
 

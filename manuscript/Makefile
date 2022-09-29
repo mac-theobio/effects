@@ -14,6 +14,20 @@ Sources += notes.md
 
 ######################################################################
 
+## New paper version
+
+## draft.paper.tex.pdf: paper.tex draft.head.tex
+
+Ignore += *.paper.tex *.paper.pdf
+
+paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
+Sources += *.head.tex $(paperfiles)
+
+%.paper.tex: %.head.tex $(paperfiles)
+	$(catro)
+
+######################################################################
+
 autopipeR = defined
 
 ######################################################################
@@ -84,20 +98,6 @@ mediate_model.Rout: mediate_model.R mediate.rda
 pipeRdesc += mediate_preds
 # mediate_preds.ggp.pdf: mediate_preds.R mediate_model.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
-
-######################################################################
-
-## New paper version
-
-## draft.paper.tex.pdf: paper.tex draft.head.tex
-
-Ignore += *.paper.tex *.paper.pdf
-
-paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
-Sources += *.head.tex $(paperfiles)
-
-%.paper.tex: %.head.tex $(paperfiles)
-	$(catro)
 
 ######################################################################
 
@@ -260,12 +260,13 @@ eco_data.Rout: eco_data.R
 
 ## Fit different models
 ## eco.uniN.mfit.Rout: uniN.R
+## eco.fullN.mfit.Rout: fullN.R
 scriptStep += mfit
 mfit += uniN fullN quadN
 mfit_dep = %_data.rds
 
 ## make different varpred objects
-## eco.uniN.defAnchor.vp.Rout: defAnchor.R
+## eco.fullN.defAnchor.vp.Rout: defAnchor.R
 scriptStep += vp
 vp += defAnchor anchor20
 vp_dep += %.mfit.rda
@@ -275,12 +276,18 @@ pipeRdesc += nitroPlot
 pipeRimplicit += nitroPlot
 ## eco.uniN.defAnchor.nitroPlot.Rout: nitroPlot.R
 ## eco.uniN.anchor20.nitroPlot.Rout: nitroPlot.R
+## eco.fullN.defAnchor.nitroPlot.Rout: nitroPlot.R
 ## eco.quadN.defAnchor.nitroPlot.Rout: nitroPlot.R
 ## eco.quadN.anchor20.nitroPlot.Rout: nitroPlot.R
 %.nitroPlot.Rout: nitroPlot.R %.vp.rda
 	$(pipeR)
 
+## Composites
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitroPlot.rda eco.uniN.anchor20.nitroPlot.rda
+	$(pipeR)
+
+## eco.mcomp.Rout: mcomp.R eco_data.R
+eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitroPlot.rda eco.fullN.defAnchor.nitroPlot.rda 
 	$(pipeR)
 
 ######################################################################
