@@ -20,17 +20,14 @@ update_scripts:
 
 ######################################################################
 
-Makefile: makestuff/00.stamp varpred.stamp
-Ignore += *.stamp
+## Package
 
-## This automatically installs the local package when DESCRIPTION is updated
-## I tried to clean up this make rule and got loops; something is fragile 2022 Aug 10 (Wed)
-varpred.stamp: DESCRIPTION
-	$(touch)
-	$(MAKE) install || ($(RM) $@ && false)
+Ignore += varpred
+
+varpred:
+	git clone https://github.com/CYGUBICKO/varpred
 
 ######################################################################
-
 Rnw = $(wildcard *.Rnw)
 rmd = $(wildcard *.rmd)
 md = $(wildcard *.md)
