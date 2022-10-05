@@ -329,6 +329,8 @@ preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.p
 
 ## preds.pkgcompare.simple.Rout:
 
+## git config pull.rebase true ##
+
 ######################################################################
 
 ## Algebra
