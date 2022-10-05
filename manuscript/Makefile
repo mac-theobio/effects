@@ -292,6 +292,35 @@ eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitroPlot.rda eco.fullN.defAnchor.nit
 
 ######################################################################
 
+## Bicko
+
+## Comparison: varpred, emmeans and effects
+
+### Simulation parameters
+sim.params.pkgcompare.Rout: sim.params.pkgcompare.R
+
+## Simulate data
+### Age*Income interaction term
+sim.data.pkgcompare.Rout: sim.data.pkgcompare.R sim.params.pkgcompare.rda
+## Model
+fit.pkgcompare.Rout: fit.pkgcompare.R sim.data.pkgcompare.rda
+
+## Predictions
+effects.params.pkgcompare.Rout: effects.params.pkgcompare.R fit.pkgcompare.rda
+
+## varpred
+### model center
+varpred.mc.pkgcompare.Rout: varpred.mc.pkgcompare.R effects.params.pkgcompare.rda
+
+### emmeans
+#### input variable
+emmeans.iv.pkgcompare.Rout: emmeans.iv.pkgcompare.R effects.params.pkgcompare.rda
+
+## Compare predictions
+preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda
+
+######################################################################
+
 ## Algebra
 Ignore += algebra.html
 algebra.html: algebra.Rmd
