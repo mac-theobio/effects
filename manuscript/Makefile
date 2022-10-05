@@ -306,18 +306,26 @@ sim.data.pkgcompare.Rout: sim.data.pkgcompare.R sim.params.pkgcompare.rda
 fit.pkgcompare.Rout: fit.pkgcompare.R sim.data.pkgcompare.rda
 
 ## Predictions
-effects.params.pkgcompare.Rout: effects.params.pkgcompare.R fit.pkgcompare.rda
+preds.params.pkgcompare.Rout: preds.params.pkgcompare.R fit.pkgcompare.rda
 
 ## varpred
 ### model center
-varpred.mc.pkgcompare.Rout: varpred.mc.pkgcompare.R effects.params.pkgcompare.rda
+varpred.mc.pkgcompare.Rout: varpred.mc.pkgcompare.R preds.params.pkgcompare.rda
 
 ### emmeans
 #### input variable
-emmeans.iv.pkgcompare.Rout: emmeans.iv.pkgcompare.R effects.params.pkgcompare.rda
+emmeans.iv.pkgcompare.Rout: emmeans.iv.pkgcompare.R preds.params.pkgcompare.rda
+
+### Effects (effects package)
+effects.iv.pkgcompare.Rout: effects.iv.pkgcompare.R preds.params.pkgcompare.rda
+
+### Observed values
+observed.pkgcompare.Rout: observed.pkgcompare.R fit.pkgcompare.rda variable_predictions_funs.rda
 
 ## Compare predictions
-preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda
+# preds.pkgcompare.simple.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
+# preds.pkgcompare.data.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
+preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
 
 ######################################################################
 

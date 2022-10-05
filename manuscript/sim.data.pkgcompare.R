@@ -11,7 +11,7 @@ df <- (data.frame(age=rlnorm(N, log(mean_age), age_sd)
 	)
 	%>% mutate(NULL
 		, age=pmin(age, age_max)
-		, age=age - min(age)
+		, age=pmax(age, age_min)
 		, income=pmin(income, income_max)
 		, income = income - min(income)
 		, eta = beta0 + betaA*age + betaI*income + betaW*wealthindex + betaIW*income*wealthindex
