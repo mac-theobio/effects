@@ -323,6 +323,7 @@ effects.iv.pkgcompare.Rout: effects.iv.pkgcompare.R preds.params.pkgcompare.rda
 observed.pkgcompare.Rout: observed.pkgcompare.R fit.pkgcompare.rda variable_predictions_funs.rda
 
 ## Compare predictions
+# preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
 # preds.pkgcompare.simple.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
 # preds.pkgcompare.data.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
 preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
