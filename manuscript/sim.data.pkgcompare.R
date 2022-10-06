@@ -21,7 +21,12 @@ df <- (data.frame(age=rlnorm(N, log(mean_age), age_sd)
 )
 head(df)
 
-saveVars(df)
+## Data mean
+hhsize_mean <- (df
+	%>% summarise(fit=mean(hhsize), model="data mean")
+)
+
+saveVars(df, hhsize_mean)
 
 
 

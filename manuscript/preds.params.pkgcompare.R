@@ -12,4 +12,5 @@ focal <- (quantile(df$age, quants, names=FALSE)
 saveVars(focal
 	, fit
 	, df
+	, hhsize_mean
 )

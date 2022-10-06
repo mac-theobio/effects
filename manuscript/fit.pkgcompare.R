@@ -5,4 +5,4 @@ loadEnvironments()
 fit <- lm(hhsize ~ age + income + wealthindex + income:wealthindex, df)
 summary(fit)
 
-saveVars(fit, df)
+saveVars(fit, df, hhsize_mean)

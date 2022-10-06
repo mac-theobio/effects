@@ -8,4 +8,4 @@ varpred_mc <- (varpred(fit, "age", at=list(age=focal), modelname="vapred")
 )
 head(varpred_mc)
 
-saveVars(varpred_mc)
+saveVars(varpred_mc, hhsize_mean)
