@@ -305,6 +305,8 @@ sim.data.pkgcompare.Rout: sim.data.pkgcompare.R sim.params.pkgcompare.rda
 ## Model
 fit.pkgcompare.Rout: fit.pkgcompare.R sim.data.pkgcompare.rda
 
+
+comparemm.Rout: comparemm.R fit.pkgcompare.rda
 ## Predictions
 preds.params.pkgcompare.Rout: preds.params.pkgcompare.R fit.pkgcompare.rda
 
@@ -327,6 +329,8 @@ pipeRdesc += preds.pkgcompare
 # preds.pkgcompare.simple.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
 # preds.pkgcompare.data.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
 preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
+
+
 
 ######################################################################
 
