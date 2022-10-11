@@ -27,6 +27,8 @@ Ignore += varpred
 varpred:
 	git clone https://github.com/CYGUBICKO/varpred
 
+alldirs += varpred
+
 ######################################################################
 Rnw = $(wildcard *.Rnw)
 rmd = $(wildcard *.rmd)
