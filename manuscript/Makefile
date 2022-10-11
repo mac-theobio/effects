@@ -306,7 +306,7 @@ sim.data.pkgcompare.Rout: sim.data.pkgcompare.R sim.params.pkgcompare.rda
 ## Model
 fit.pkgcompare.Rout: fit.pkgcompare.R sim.data.pkgcompare.rda
 
-
+## Check model center
 comparemm.Rout: comparemm.R fit.pkgcompare.rda
 ## Predictions
 preds.params.pkgcompare.Rout: preds.params.pkgcompare.R fit.pkgcompare.rda

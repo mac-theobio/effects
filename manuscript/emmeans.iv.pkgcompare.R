@@ -6,7 +6,7 @@ loadEnvironments()
 
 emmeans_iv <- (emmeans(fit, specs=~age
 		, type="response"
-		, at=list(age=focal)
+		, at=list(age=unique(focal))
 		, weights="proportional"
 		, nesting=NULL
 	)

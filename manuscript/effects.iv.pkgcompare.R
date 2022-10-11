@@ -6,7 +6,7 @@ loadEnvironments()
 
 effects_iv <- (Effect("age", fit
 		, type="response"
-		, xlevels=list(age=focal)
+		, xlevels=list(age=unique(focal))
 	)
 	|> data.frame()
 	|> rename(

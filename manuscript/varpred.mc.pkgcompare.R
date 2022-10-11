@@ -3,7 +3,7 @@ library(varpred)
 
 loadEnvironments()
 
-varpred_mc <- (varpred(fit, "age", at=list(age=focal), modelname="vapred")
+varpred_mc <- (varpred(fit, "age", at=list(age=focal), modelname="varpred")
 	|> as.data.frame()
 )
 head(varpred_mc)

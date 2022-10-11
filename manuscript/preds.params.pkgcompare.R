@@ -4,10 +4,11 @@ library(dplyr)
 loadEnvironments()
 
 ## Choose the same focal values
-quants <- seq(0, 1, length.out=200)
-focal <- (quantile(df$age, quants, names=FALSE)
-	|> unique()
-)
+# quants <- seq(0, 1, length.out=200)
+# focal <- (quantile(df$age, quants, names=FALSE)
+# 	|> unique()
+# )
+focal <- df$age
 
 saveVars(focal
 	, fit
