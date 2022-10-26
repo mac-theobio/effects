@@ -2,6 +2,23 @@
 \documentclass[12pt]{article}
 \usepackage[top=0.85in,footskip=0.75in]{geometry}
 
+\usepackage{newfloat}
+\usepackage{caption}
+\DeclareFloatingEnvironment[fileext=tbx,placement={HT},name=Frame]{tbx}
+
+\usepackage{lipsum}
+\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{multicol}
+\usepackage[colorlinks=true]{hyperref}
+
+\newenvironment{gloss}[1][]
+{
+	\begin{tbx}[tb]
+	\begin{mdframed}[roundcorner=10pt]
+}{
+	\end{mdframed}\end{tbx}
+}
+
 % amsmath and amssymb packages, useful for mathematical formulas and symbols
 \usepackage{amsmath,amssymb}
 
@@ -28,7 +45,7 @@
 \DisableLigatures[f]{encoding = *, family = * }
 
 % color can be used to apply background shading to table cells only
-\usepackage[table]{xcolor}
+% \usepackage[table]{xcolor}
 
 % array package and thick rules for tables
 \usepackage{array}

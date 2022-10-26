@@ -21,5 +21,7 @@ clone repo
 make Makefile
 make pullall
 cd manuscript
-make draft.paper.pdf
+make <msver>.pdf
 ```
+
+where <msver> is “draft” for thesis-chapter draft and “draft.paper” for new MS draft 2022 Aug 10 (Wed)

@@ -4,13 +4,28 @@ current: target
 -include target.mk
 
 vim_session:
-	bash -cl "vmt"
+	bash -cl "vmt paper.tex body.tex"
 
 ######################################################################
 
 Sources += $(wildcard *.R *.bib *.bst *.Rmd)
 
 Sources += notes.md
+
+######################################################################
+
+## New paper version
+
+## draft.paper.pdf: paper.tex draft.head.tex
+
+Ignore += *.paper.tex *.paper.pdf
+
+paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
+Sources += *.head.tex $(paperfiles)
+
+## draft.paper.tex: 
+%.paper.tex: %.head.tex $(paperfiles)
+	$(catro)
 
 ######################################################################
 
@@ -84,20 +99,6 @@ mediate_model.Rout: mediate_model.R mediate.rda
 pipeRdesc += mediate_preds
 # mediate_preds.ggp.pdf: mediate_preds.R mediate_model.rda
 mediate_preds.Rout: mediate_preds.R mediate_model.rda
-
-######################################################################
-
-## Paper
-
-## draft.paper.pdf: paper.tex draft.head.tex
-
-Ignore += *.paper.tex *.paper.pdf
-
-paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
-Sources += *.head.tex $(paperfiles)
-
-%.paper.tex: %.head.tex $(paperfiles)
-	$(catro)
 
 ######################################################################
 
@@ -237,6 +238,8 @@ pipeRimplicit += eduPlot
 
 ## alcohol.eduQuad.eduPlot.pred.pdf:
 
+Ignore += *zero.pdf *eff.pdf *.pred.pdf
+
 pipeRdesc += eduzPlot
 pipeRimplicit += eduzPlot
 ## zeroPlots are fragile so do them separately
@@ -251,15 +254,84 @@ glm_talk.Rout: glm_talk.R glm_calcs.rda
 
 ######################################################################
 
-## New MS examples
+## New MS examples 2022 Aug 10 (Wed)
 
+## Fake data about nutrients and biomass
 eco_data.Rout: eco_data.R
 
-## Branch the model fits
+## Fit different models
 ## eco.uniN.mfit.Rout: uniN.R
+## eco.fullN.mfit.Rout: fullN.R
 scriptStep += mfit
 mfit += uniN fullN quadN
 mfit_dep = %_data.rds
+
+## make different varpred objects
+## eco.fullN.defAnchor.vp.Rout: defAnchor.R
+scriptStep += vp
+vp += defAnchor anchor20
+vp_dep += %.mfit.rda
+
+## Model plots
+pipeRdesc += nitroPlot
+pipeRimplicit += nitroPlot
+## eco.uniN.defAnchor.nitroPlot.Rout: nitroPlot.R
+## eco.uniN.anchor20.nitroPlot.Rout: nitroPlot.R
+## eco.fullN.defAnchor.nitroPlot.Rout: nitroPlot.R
+## eco.quadN.defAnchor.nitroPlot.Rout: nitroPlot.R
+## eco.quadN.anchor20.nitroPlot.Rout: nitroPlot.R
+%.nitroPlot.Rout: nitroPlot.R %.vp.rda
+	$(pipeR)
+
+## Composites
+eco.splash.Rout: splash.R eco.uniN.defAnchor.nitroPlot.rda eco.uniN.anchor20.nitroPlot.rda
+	$(pipeR)
+
+## eco.mcomp.Rout: mcomp.R eco_data.R
+eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitroPlot.rda eco.fullN.defAnchor.nitroPlot.rda 
+	$(pipeR)
+
+######################################################################
+
+## Bicko
+
+## Comparison: varpred, emmeans and effects
+
+### Simulation parameters
+sim.params.pkgcompare.Rout: sim.params.pkgcompare.R
+
+## Simulate data
+### Age*Income interaction term
+sim.data.pkgcompare.Rout: sim.data.pkgcompare.R sim.params.pkgcompare.rda
+## Model
+fit.pkgcompare.Rout: fit.pkgcompare.R sim.data.pkgcompare.rda
+
+## Check model center
+comparemm.Rout: comparemm.R fit.pkgcompare.rda
+## Predictions
+preds.params.pkgcompare.Rout: preds.params.pkgcompare.R fit.pkgcompare.rda
+
+## varpred
+### model center
+varpred.mc.pkgcompare.Rout: varpred.mc.pkgcompare.R preds.params.pkgcompare.rda
+
+### emmeans
+#### input variable
+emmeans.iv.pkgcompare.Rout: emmeans.iv.pkgcompare.R preds.params.pkgcompare.rda
+
+### Effects (effects package)
+effects.iv.pkgcompare.Rout: effects.iv.pkgcompare.R preds.params.pkgcompare.rda
+
+### Observed values
+observed.pkgcompare.Rout: observed.pkgcompare.R fit.pkgcompare.rda variable_predictions_funs.rda
+
+## Compare predictions
+pipeRdesc += preds.pkgcompare
+# preds.pkgcompare.simple.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
+# preds.pkgcompare.data.pdf: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
+preds.pkgcompare.Rout: preds.pkgcompare.R varpred.mc.pkgcompare.rda emmeans.iv.pkgcompare.rda effects.iv.pkgcompare.rda observed.pkgcompare.rda
+
+
 
 ######################################################################
 

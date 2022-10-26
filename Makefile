@@ -20,17 +20,16 @@ update_scripts:
 
 ######################################################################
 
-Makefile: makestuff/00.stamp varpred.stamp
+## Package
 
-## This automatically installs the local package when DESCRIPTION is updated
-## I tried to clean up this make rule and got loops; something is fragile 2022 Aug 10 (Wed)
-Ignore += *.stamp
-varpred.stamp: DESCRIPTION
-	$(touch)
-	$(MAKE) install || ($(RM) $@ && false)
+Ignore += varpred
+
+varpred:
+	git clone https://github.com/CYGUBICKO/varpred
+
+alldirs += varpred
 
 ######################################################################
-
 Rnw = $(wildcard *.Rnw)
 rmd = $(wildcard *.rmd)
 md = $(wildcard *.md)
@@ -285,10 +284,10 @@ build-package:
 	R CMD build .
 
 install:
-	$(MAKE) update-doc build-package install-tarball
+	$(MAKE) build-package install-tarball
 
 install-tarball:
-	R CMD INSTALL vareffects_1.0.16.*
+	R CMD INSTALL vareffects_1.0.17.*
 
 check-package:
 	echo "devtools::check('.')" | R --slave
@@ -317,6 +316,7 @@ Sources += Makefile
 Ignore += makestuff
 msrepo = https://github.com/dushoff
 
+Makefile: makestuff/effects00.stamp
 makestuff/%.stamp:
 	- $(RM) makestuff/*.stamp
 	(cd makestuff && $(MAKE) pull) || git clone $(msrepo)/makestuff
