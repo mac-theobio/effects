@@ -60,7 +60,8 @@ autopipeR = defined
 
 ######################################################################
 
-## vareffects package
+## vareffects package ## DEPRECATED 2022 Nov 08 (Tue)
+## Do not delete because we use it to make Bicko's thesis
 vareffects_pkg.Rout: R/vareffects_pkg.R
 effectsfuns.Rout: R/effectsfuns.R
 implemented.Rout: R/implemented.R
