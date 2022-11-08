@@ -1,4 +1,4 @@
-library(vareffects)
+library(varpred)
 
 library(shellpipes)
 loadEnvironments()
