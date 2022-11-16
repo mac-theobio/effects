@@ -23,7 +23,6 @@ update_scripts:
 ## Package
 
 Ignore += varpred
-
 varpred:
 	git clone https://github.com/CYGUBICKO/varpred
 
