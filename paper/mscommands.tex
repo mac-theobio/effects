@@ -1,0 +1,71 @@
+%% Include all macros below
+
+\newcommand{\fix}[1]{{[\bf \textcolor{red}{FIXME: {#1}}]}}
+\newcommand{\JD}[1]{{\color{blue} [JD: \emph{#1}]}}
+\newcommand{\jd}{\JD}
+\newcommand{\BC}[1]{{\color{red} [Bicko: \emph{#1}]}}
+\newcommand{\dya}[1]{{[\textbf{DELETE?:} \textcolor{gray}{\emph{#1}}]}}
+\newcommand{\NEW}[1]{{[\textbf{NEW:} \textcolor{brown}{#1}]}}
+\newcommand{\MOVE}[1]{{[\textbf{MOVE?:} \textcolor{cyan}{#1}]}}
+\newcommand{\bmb}[1]{{\color{green} [BMB: \emph{#1}]}}
+\newcommand{\pkg}[1]{\textbf{#1}}
+
+\newcommand{\eref}[1]{Eq.~\ref{eq:#1}} 
+\newcommand{\elab}[1]{\label{eq:#1}}
+\newcommand{\fref}[1]{Fig~\ref{fig:#1}}
+\newcommand{\flab}[1]{\label{fig:#1}}
+
+\def\code#1{\texttt{#1}}
+\let\proglang=\textsf
+
+\newcommand{\bX}{{\mathbf X}}
+\newcommand{\bZ}{{\mathbf Z}}
+\newcommand{\bbeta}{{\boldsymbol \beta}}
+\newcommand{\betah}{{\hat{\beta}}}
+\newcommand{\bbetah}{{\boldsymbol{\hat{\beta}}}}
+\newcommand{\boldeta}{{\boldsymbol \eta}}
+\newcommand{\boldetah}{{\boldsymbol{\hat{\eta}}}}
+\newcommand{\boldmu}{{\boldsymbol \mu}}
+\newcommand{\boldmuh}{{\boldsymbol{\hat{\mu}}}}
+\newcommand{\etahfi}{\hat{\eta}^f_i}
+\newcommand{\yfi}{\hat{y}^f_i}
+\newcommand{\etahfj}{\hat{\eta}^f_j}
+\newcommand{\bXstar}{\bX^\star}
+
+\newcommand{\nset}[1]{#1_{\{n\}}}
+\newcommand{\uset}[1]{#1^{\{n\}}}
+\newcommand{\yref}{y_{\textrm{ref}}}
+\newcommand{\cdist}{{D(\nset{x}|x_f)}}
+\newcommand{\cdistprime}{{D(\nset{x}|x_{f'})}}
+\newcommand{\xfprime}{x_{f'}}
+\newcommand{\etanfj}{\uset{\hat{\eta}}_j}
+
+\newcommand{\yE}{{\mathrm E}}
+\let\over=\overline
+
+\newcommand{\bxo}{\ensuremath{\bX^{f}_c}}
+\newcommand{\bxof}{\ensuremath{{\bX}^f}}
+\newcommand{\ba}{{\mathbf A}}
+\newcommand{\bao}{{\mathbf A}_0}
+\newcommand{\baf}{{\mathbf A^f}}
+\newcommand{\bafc}{\ensuremath{{\mathbf A^{\bar{f}}}}}
+\let\citep=\cite
+
+
+\newcommand{\CIs}{95\% CIs}
+
+\setcounter{secnumdepth}{-\maxdimen}
+
+\usepackage{tikz}
+
+% Tikz settings optimized for causal graphs.
+\usetikzlibrary{shapes,decorations,arrows,calc,arrows.meta,fit,positioning}
+\tikzset{
+    -Latex,auto,node distance =1 cm and 1 cm,semithick,
+    state/.style ={ellipse, draw, minimum width = 0.7 cm},
+    point/.style = {circle, draw, inner sep=0.04cm,fill,node contents={}},
+    bidirected/.style={Latex-Latex,dashed},
+    el/.style = {inner sep=2pt, align=left, sloped}
+}
+
+%% END MACROS SECTION
