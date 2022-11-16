@@ -1,4 +1,6 @@
 ## vareffects manuscript
+## This is now deprecated in favor of ../paper/ for new work
+## It's the permanent home of the thesis-chapter version
 
 current: target
 -include target.mk
@@ -16,16 +18,11 @@ Sources += notes.md
 
 ## New paper version
 
-## draft.paper.pdf: paper.tex draft.head.tex
+## git mv paper.tex draft.head.tex ../paper/ ##
 
 Ignore += *.paper.tex *.paper.pdf
 
-paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
-Sources += *.head.tex $(paperfiles)
-
-## draft.paper.tex: 
-%.paper.tex: %.head.tex $(paperfiles)
-	$(catro)
+## cp mscommands.tex begindoc.tex title.tex pabs.tex msbib.tex enddoc.tex ../paper
 
 ######################################################################
 
