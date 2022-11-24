@@ -29,6 +29,7 @@ varpred:
 alldirs += varpred
 
 ######################################################################
+
 Rnw = $(wildcard *.Rnw)
 rmd = $(wildcard *.rmd)
 md = $(wildcard *.md)
