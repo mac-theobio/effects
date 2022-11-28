@@ -75,7 +75,6 @@ eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitroPlot.rda eco.fullN.defAnchor.nit
 
 ######################################################################
 
-
 ### Makestuff
 
 Sources += Makefile todo.md
