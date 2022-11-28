@@ -1,4 +1,4 @@
-## vareffects manuscript
+## vareffects follow-on paper
 
 current: target
 -include target.mk
@@ -41,8 +41,9 @@ eco_data.Rout: eco_data.R
 ## Fit different models
 ## eco.uniN.mfit.Rout: uniN.R
 ## eco.fullN.mfit.Rout: fullN.R
+## eco.inter.mfit.Rout: inter.R
 scriptStep += mfit
-mfit += uniN fullN quadN
+mfit += uniN fullN quadN inter
 mfit_dep = %_data.rds
 
 ## make different varpred objects
@@ -59,6 +60,7 @@ pipeRimplicit += nitroPlot
 ## eco.fullN.defAnchor.nitroPlot.Rout: nitroPlot.R
 ## eco.quadN.defAnchor.nitroPlot.Rout: nitroPlot.R
 ## eco.quadN.anchor20.nitroPlot.Rout: nitroPlot.R
+## eco.inter.defAnchor.nitroPlot.Rout: nitroPlot.R
 %.nitroPlot.Rout: nitroPlot.R %.vp.rda
 	$(pipeR)
 
@@ -66,27 +68,17 @@ pipeRimplicit += nitroPlot
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitroPlot.rda eco.uniN.anchor20.nitroPlot.rda
 	$(pipeR)
 
+## Univariate/multi-variate
 ## eco.mcomp.Rout: mcomp.R eco_data.R
 eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitroPlot.rda eco.fullN.defAnchor.nitroPlot.rda 
 	$(pipeR)
 
 ######################################################################
 
-## Cribbing
-
-Sources += content.mk
-
-%.R:
-	cat ../manuscript/$@ | perl -npe "s/vareffects/varpred/" > $@
-
-%.bib:
-	cat ../manuscript/$@ > $@
-
-######################################################################
 
 ### Makestuff
 
-Sources += Makefile
+Sources += Makefile todo.md
 
 Ignore += makestuff
 msrepo = https://github.com/dushoff
