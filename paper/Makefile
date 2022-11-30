@@ -52,6 +52,8 @@ scriptStep += vp
 vp += defAnchor anchor20
 vp_dep += %.mfit.rda
 
+## HEEERE scriptStep += plot
+
 ## Model plots
 pipeRdesc += nitroPlot
 pipeRimplicit += nitroPlot

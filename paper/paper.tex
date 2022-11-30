@@ -63,7 +63,8 @@ The model center does not need to correspond to a physically possible data point
 
 For this reason, using the model center tends to make outcome plots match the data better than other approaches, including that of taking the mean of input variables only.
 
-\fref{center} shows an example, based on simulated data with an interaction between correlated variables.
+\fref{modelcenter} shows an example, based on simulated data with an interaction between correlated variables.
+
 In the absence of interactions (\eref{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \fref{justify_plots}A. However, the estimates start to differ in the presence of interactions, even as simple as the one in \eref{simple_inter_higher}. In particular, estimates from \pkg{emmeans} and \pkg{effects} are identical but differ from \pkg{varpred}'s, which is very close to the simulated average ($\bar{y}$), \fref{justify_plots}B.
 In the simple model, \fref{justify_plots}A, the input variables are the same as the linear predictor variables, so all the three methods produce identical results.
 In the interaction model, \fref{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages.
