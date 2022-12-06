@@ -47,24 +47,17 @@ mfit += uniN fullN quadN inter
 mfit_dep = %_data.rds
 
 ## make different varpred objects
-## eco.fullN.defAnchor.vp.Rout: defAnchor.R
+## eco.inter.defAnchor.vp.Rout: defAnchor.R
 scriptStep += vp
 vp += defAnchor anchor20
 vp_dep += %.mfit.rda
 
-## HEEERE scriptStep += plot
-
 ## Model plots
-pipeRdesc += nitroPlot
-pipeRimplicit += nitroPlot
-## eco.uniN.defAnchor.nitroPlot.Rout: nitroPlot.R
-## eco.uniN.anchor20.nitroPlot.Rout: nitroPlot.R
-## eco.fullN.defAnchor.nitroPlot.Rout: nitroPlot.R
-## eco.quadN.defAnchor.nitroPlot.Rout: nitroPlot.R
-## eco.quadN.anchor20.nitroPlot.Rout: nitroPlot.R
-## eco.inter.defAnchor.nitroPlot.Rout: nitroPlot.R
-%.nitroPlot.Rout: nitroPlot.R %.vp.rda
-	$(pipeR)
+scriptStep += plot
+plot += nitro ncomp
+plot_dep += %.vp.rda
+## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
+## eco.inter.defAnchor.ncomp.plot.Rout: ncomp.R
 
 ## Composites
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitroPlot.rda eco.uniN.anchor20.nitroPlot.rda
