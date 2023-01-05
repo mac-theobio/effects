@@ -33,6 +33,8 @@ autopipeR = defined
 
 ######################################################################
 
+## eco.uniN.defAnchor.nitroPlot.Rout
+
 ## New MS examples 2022 Aug 10 (Wed)
 
 ## Fake data about nutrients and biomass
@@ -60,12 +62,12 @@ plot_dep += %.vp.rda
 ## eco.inter.defAnchor.ncomp.plot.Rout: ncomp.R
 
 ## Composites
-eco.splash.Rout: splash.R eco.uniN.defAnchor.nitroPlot.rda eco.uniN.anchor20.nitroPlot.rda
+eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
 	$(pipeR)
 
 ## Univariate/multi-variate
 ## eco.mcomp.Rout: mcomp.R eco_data.R
-eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitroPlot.rda eco.fullN.defAnchor.nitroPlot.rda 
+eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitro.plot.rda eco.fullN.defAnchor.nitro.plot.rda 
 	$(pipeR)
 
 ######################################################################
