@@ -23,7 +23,7 @@ Plots of predicted values of an outcome against predictors (often called effect 
 \end{description}
 \end{gloss}
 
-To make an outcome plot, we use a \emph{focal} predictor on the x-axis and values of the outcome variable on the y-axis. The resulting plot will depend on choices about other (non-focal) predictors. In an \emph{ordinary} linear model, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the slope of the estimate. 
+To make an outcome plot, we use a \emph{focal} predictor on the x-axis and values of the outcome variable on the y-axis. The resulting plot will depend on choices about other (non-focal) predictors. In an \emph{ordinary} linear model, the non-focal choices may have a simple additive effect on the central estimate. However, when the focal predictor has interactions or non-linear response functions (e.g., spline or polynomial), non-focal choices can also affect the shape of the estimated curve. 
 In a \emph{generalized} linear model, there is usually a non-linear link function, which complicates the picture of additivity.
 Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
 
@@ -59,9 +59,7 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 
 To make an outcome plot, we vary the value of the focal predictor, but we need to choose values for other predictors. Our default is to do this using the \emph{model center}. We define the model center as the average value of all of the “linear predictor variables” which go into the model matrix. This is not, in general, the same as averaging over the “input variables” which are measured and provided as data. 
 
-The model center does not always correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome (on the link scale where the model operates) -- in the case of an ordinary linear model, this means that the value is also the same as the observed mean of the outcome variable.
-
-For this reason, using the model center tends to make outcome plots match the data better than other approaches, including that of taking the mean of input variables only.
+The model center does not always correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome (in a generalized linear model, this is true on the link scale where the model operates, not the original scale of the outcome variable). For this reason, using the model center tends to make outcome plots match the data better than other approaches, including that of taking the mean of input variables only.
 
 \fref{modelcenter} shows an example, based on simulated data with an interaction between correlated variables.
 

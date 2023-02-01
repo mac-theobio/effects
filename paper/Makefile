@@ -40,16 +40,16 @@ autopipeR = defined
 ## Fake data about nutrients and biomass
 eco_data.Rout: eco_data.R
 
-## Fit different models
+## Fit different models 
 ## eco.uniN.mfit.Rout: uniN.R
-## eco.fullN.mfit.Rout: fullN.R
-## eco.inter.mfit.Rout: inter.R
+## eco.multi.mfit.Rout: multi.R
+## eco.maximal.mfit.Rout: maximal.R
 scriptStep += mfit
-mfit += uniN fullN quadN inter
+mfit += uniN multi quadN maximal
 mfit_dep = %_data.rds
 
-## make different varpred objects
-## eco.inter.defAnchor.vp.Rout: defAnchor.R
+## make different varpred objects, using N as focal variable
+## eco.maximal.defAnchor.vp.Rout: defAnchor.R
 scriptStep += vp
 vp += defAnchor anchor20
 vp_dep += %.mfit.rda
@@ -59,7 +59,7 @@ scriptStep += plot
 plot += nitro ncomp
 plot_dep += %.vp.rda
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.inter.defAnchor.ncomp.plot.Rout: ncomp.R
+## eco.maximal.defAnchor.ncomp.plot.Rout: ncomp.R
 
 ## Composites
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
@@ -67,7 +67,7 @@ eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.ni
 
 ## Univariate/multi-variate
 ## eco.mcomp.Rout: mcomp.R eco_data.R
-eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitro.plot.rda eco.fullN.defAnchor.nitro.plot.rda 
+eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
 	$(pipeR)
 
 ######################################################################

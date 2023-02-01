@@ -4,7 +4,7 @@ dat <- rdsRead()
 
 summary(dat)
 
-mod <- lm(mass~nitro*phos, data=dat)
+mod <- lm(mass~nitro+phos+pot, data=dat)
 
 summary(mod)
 
