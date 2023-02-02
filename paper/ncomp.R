@@ -10,7 +10,7 @@ loadEnvironments()
 
 points <- (ggplot(dat)
 	+ aes(nitro, mass)
-	## + geom_point()
+	+ geom_point()
 	+ xlab("Nitrogen")
 	+ ylab("Biomass")
 )
@@ -21,8 +21,3 @@ comp <- (points
 )
 
 print(comp)
-
-## teeGG(predeff, desc="predeff")
-
-saveEnvironment()
-

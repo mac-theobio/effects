@@ -10,8 +10,6 @@ vim_session:
 
 Sources += $(wildcard *.R *.bib *.bst *.Rmd)
 
-## Sources += notes.md
-
 ######################################################################
 
 ## New paper version
@@ -36,30 +34,31 @@ autopipeR = defined
 ## eco.uniN.defAnchor.nitroPlot.Rout
 
 ## New MS examples 2022 Aug 10 (Wed)
+Sources += $(wildcard *.md)
 
 ## Fake data about nutrients and biomass
 eco_data.Rout: eco_data.R
 
-## Fit different models 
+## Fit different models ## mfit.md
+scriptStep += mfit
+mfit += uniN quadN inter multi multiPK
+mfit_dep = %_data.rds
 ## eco.uniN.mfit.Rout: uniN.R
 ## eco.multi.mfit.Rout: multi.R
-## eco.maximal.mfit.Rout: maximal.R
-scriptStep += mfit
-mfit += uniN multi quadN maximal
-mfit_dep = %_data.rds
+## eco.inter.mfit.Rout: inter.R
 
-## make different varpred objects, using N as focal variable
-## eco.maximal.defAnchor.vp.Rout: defAnchor.R
+## make different prediction objects ## vp.md
 scriptStep += vp
 vp += defAnchor anchor20
 vp_dep += %.mfit.rda
+## eco.inter.defAnchor.vp.Rout: defAnchor.R
 
-## Model plots
+## Model plots plot.md
 scriptStep += plot
 plot += nitro ncomp
 plot_dep += %.vp.rda
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.maximal.defAnchor.ncomp.plot.Rout: ncomp.R
+## eco.inter.defAnchor.ncomp.plot.Rout: ncomp.R
 
 ## Composites
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
