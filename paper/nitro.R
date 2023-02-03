@@ -12,6 +12,7 @@ points <- (ggplot(dat)
 	+ geom_point()
 	+ xlab("Nitrogen")
 	+ ylab("Biomass")
+	+ geom_point(aes(mean(dat$nitro), mean(dat$mass)), size=4)
 )
 
 plain <- (points
