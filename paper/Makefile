@@ -57,6 +57,7 @@ vp_dep += %.mfit.rda
 scriptStep += plot
 plot += nitro ncomp
 plot_dep += %.vp.rda
+pipeRdesc += plot
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.multiPK.defAnchor.ncomp.plot.Rout: ncomp.R
 ## eco.inter.defAnchor.ncomp.plot.Rout: ncomp.R
