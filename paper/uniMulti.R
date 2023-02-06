@@ -7,7 +7,7 @@ startGraphics(height=4)
 
 comb <- ggarrange(
 	getEnvObj("predeff", "uniN") + ggtitle("Univariate")
-	, getEnvObj("predeff", "fullN") + ggtitle("Multivariate")
+	, getEnvObj("predeff", "multi") + ggtitle("Multivariate")
 		+ rremove("ylab")
 	, ncol=2
 )

@@ -16,7 +16,7 @@ Sources += $(wildcard *.R *.bib *.bst *.Rmd)
 
 ## draft.paper.pdf: paper.tex draft.head.tex
 
-Ignore += *.paper.tex *.paper.pdf
+Ignore += *.paper.tex *.pdf
 
 paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
 Sources += *.head.tex $(paperfiles)
@@ -55,20 +55,21 @@ vp_dep += %.mfit.rda
 
 ## Model plots plot.md
 scriptStep += plot
-plot += nitro ncomp
+plot += nitro centers
 plot_dep += %.vp.rda
-pipeRdesc += plot
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.multiPK.defAnchor.ncomp.plot.Rout: ncomp.R
-## eco.inter.defAnchor.ncomp.plot.Rout: ncomp.R
+## eco.multiPK.defAnchor.centers.plot.Rout: centers.R
+## eco.inter.defAnchor.centers.plot.Rout: centers.R
 
 ## Composites
+## eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.uniN.anchor20.nitro.plot.Rout.pdf
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
 	$(pipeR)
 
 ## Univariate/multi-variate
-## eco.mcomp.Rout: mcomp.R eco_data.R
-eco.mcomp.Rout: mcomp.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
+## eco.uniMulti.Rout: uniMulti.R eco_data.R
+uniMulti: eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.multi.defAnchor.nitro.plot.Rout.pdf 
+eco.uniMulti.Rout: uniMulti.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
 	$(pipeR)
 
 ######################################################################

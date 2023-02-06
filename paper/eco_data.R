@@ -13,11 +13,14 @@ nitro_mean <- 33
 nitro_spread <- 0.4
 mass_mean <- 100
 mass_spread <- 0.4
+
+# nitrogen, phosphorous, kpotassium
 beta_np <- 0.8
 beta_pm <- 0.8
 beta_nm <- 0.4
 beta_km <- 0.2
 beta_nk <- 0
+beta_pk <- 0.4
 beta_pkm <- 0.1
 
 set.seed(seed)
@@ -27,7 +30,9 @@ dat <- (data.frame(nitro = rlnorm(N, meanlog=log(nitro_mean), sdlog=nitro_spread
 	%>% mutate(NULL
 		, phos_pred = phos_mean+(nitro-nitro_mean)*beta_np
 		, phos = rlnorm(N, meanlog=log(phos_pred), sdlog=phos_spread)
-		, pot_pred = pot_mean+(nitro-nitro_mean)*beta_nk
+		, pot_pred = pot_mean
+			+ (nitro-nitro_mean)*beta_nk
+			+ (phos-phos_mean)*beta_pk
 		, pot = rlnorm(N, meanlog=log(pot_pred), sdlog=pot_spread)
 		, mass_pred=mass_mean
 			+ (nitro-nitro_mean)*beta_nm
