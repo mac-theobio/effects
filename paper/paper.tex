@@ -6,11 +6,11 @@ Plots of predicted values of an outcome against predictors (often called effect 
 \begin{gloss}
 \subsection*{Glossary}
 \begin{description}
-\item [Input variables] Observed (scientific) variables underlying an inference or exploration. For example, the regression models described by \eref{simple_inter_higher_no_interaction} and \eref{simple_inter_higher} both have $3$ input variables -- $x_1, x_2, x_3$.
+\item [Input variables] Observed (scientific) variables underlying an inference or exploration. Input variables for our simulated ecological data set are N, P and K, plus the biomass used as a response variable.
 
 \item [Focal predictors] The input variable on the x-axis of an outcome plot.
 
-\item [Linear predictor variables] The variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable corresponds to one or more linear predictor variables.
+\item [Linear predictor variables] The variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable contributes to one or more linear predictor variables. N, P and K in our ecological data set are all linear predictor variables, but combinations like P:K or N$\mbox{}^2$ when they appear in the model.
 
 \item[Multi-parameter variables (MPVs)] Input variables which correspond to more than one linear predictor variable -- for example, variables with more than two categories (religion in our first example), or variables with spline or polynomial response. 
 
@@ -63,15 +63,13 @@ The model center does not always correspond to a physically possible data point.
 
 \begin{figure}
 \begin{center}
-\includegraphics{eco.uniMulti.Rout.pdf}
+\includegraphics{eco.multiPK.defAnchor.centers.plot.Rout.pdf}
 \end{center}
-\caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left anchors the effect-style intervals at the model center; the panel on the right has a specific anchor chosen for biological reasons. Anchor point does not affect prediction-style confidence intervals}
-\flab{uniMulti}
+\caption{Outcome plots for a model with a non-focal interaction. Black lines show an effect plot (mean estimate and CIs) made using the model center (average of linear predictor variables) as a reference point. Blue lines show the same approach made by centering based on input variables; due to the interaction this model does not go through the model center.}
+\flab{centers}
 \end{figure}
 
-\fref{uniMulti} shows an example, based on simulated data with an interaction between correlated variables.
-
-In the absence of interactions (\eref{simple_inter_higher_no_interaction}), the three approaches produce identical estimates, which match the simulated values, \fref{justify_plots}A. However, the estimates start to differ in the presence of interactions, even as simple as the one in \eref{simple_inter_higher}. In particular, estimates from \pkg{emmeans} and \pkg{effects} are identical but differ from \pkg{varpred}'s, which is very close to the simulated average ($\bar{y}$), \fref{justify_plots}B.
+\fref{centers} shows an example, based on simulated data with an interaction between correlated variables. The two approaches correctly show the same information about effects of the focal variable, but the one using the model center as a reference point (the \pkg{varpred} default) is centered with respect to the data, while the one that centers based on input variables alone (the most common default, including \pkg{emmeans} and \pkg{effects}:e tod	 which is very close to the simulated average ($\bar{y}$), \fref{justify_plots}B.
 In the simple model, \fref{justify_plots}A, the input variables are the same as the linear predictor variables, so all the three methods produce identical results.
 In the interaction model, \fref{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages.
 
