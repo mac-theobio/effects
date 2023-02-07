@@ -31,9 +31,6 @@ autopipeR = defined
 
 ######################################################################
 
-## eco.uniN.defAnchor.nitroPlot.Rout
-
-## New MS examples 2022 Aug 10 (Wed)
 Sources += $(wildcard *.md)
 
 ## Fake data about nutrients and biomass
@@ -49,7 +46,7 @@ mfit_dep = %_data.rds
 
 ## make different prediction objects ## vp.md
 scriptStep += vp
-vp += defAnchor anchor20
+vp += defAnchor anchor20 meanAnchor
 vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
 
@@ -57,11 +54,19 @@ vp_dep += %.mfit.rda
 scriptStep += plot
 plot += nitro centers
 plot_dep += %.vp.rda
+
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.multiPK.defAnchor.centers.plot.Rout: centers.R
 ## eco.inter.defAnchor.centers.plot.Rout: centers.R
 
+## eco.quadN.defAnchor.nitro.plot.Rout: nitro.R
+## eco.quadN.anchor20.nitro.plot.Rout: nitro.R
+
+## Anchor check
+eco.anchorCheck.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.meanAnchor.nitro.plot.rda
+
 ## Composites
+## Splash plot combines defAnchor and anchor20
 ## eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.uniN.anchor20.nitro.plot.Rout.pdf
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
 	$(pipeR)

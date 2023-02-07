@@ -69,9 +69,13 @@ The model center does not always correspond to a physically possible data point.
 \flab{centers}
 \end{figure}
 
-\fref{centers} shows an example, based on simulated data with an interaction between correlated variables. The two approaches correctly show the same information about effects of the focal variable, but the one using the model center as a reference point (the \pkg{varpred} default) is centered with respect to the data, while the one that centers based on input variables alone (the most common default, including \pkg{emmeans} and \pkg{effects}:e tod	 which is very close to the simulated average ($\bar{y}$), \fref{justify_plots}B.
-In the simple model, \fref{justify_plots}A, the input variables are the same as the linear predictor variables, so all the three methods produce identical results.
-In the interaction model, \fref{justify_plots}B, there is an additional linear predictor variable ($x_2x_3$). \pkg{emmeans} and \pkg{effects} first average the input variables to compute $\bar{x_2}\bar{x_3}$ while \pkg{varpred} first calculates the corresponding vector of linear predictor values and then averages.
+\fref{centers} shows an example, based on simulated data with an interaction between correlated variables. The two approaches correctly show the same information about effects of the focal variable, but the one using the model center as a reference point (the \pkg{varpred} default) is centered with respect to the data, while the one that centers based on input variables alone (the most common default, including \pkg{emmeans} and \pkg{effects} is offset vertically. This is due to the interaction term not being centered when the input variables are centered; these two approaches give identical results for the simpler model in \fref{splash}.
+
+\subsection{Multi-parameter predictors}
+
+A single input variable can be associated with multiple parameters either by being involved in an interaction, as above, or when a non-linear response (typically spline or polynomial) is specified. In this case, the anchor point can be chosen separately for each of the linear predictor variables corresponding to the non-linear response. Again, our recommended method is to use the model center. The natural alternative is to pick a value of the input variable (either a scientifically meaningful value, or the mean).
+
+\subsection{Direct effects}
 
 \begin{figure}
 \begin{center}
@@ -82,21 +86,6 @@ In the interaction model, \fref{justify_plots}B, there is an additional linear p
 \end{figure}
 
 \fref{uniMulti} shows an example, based on simulated data with an interaction between correlated variables.
-
-\subsection{Multi-parameter predictors}
-
-\subsection{Direct effects}
-
-\begin{figure}
-\begin{center}
-\includegraphics{eco.uniMulti.Rout.pdf}
-\end{center}
-\caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text.}
-\flab{uniMulti}
-\end{figure}
-%%
-\jd{Still working on this. One panel or two?}
-\fref{uniMulti} compares direct and indirect effects using univariate vs.~multivariate models
 
 \section{Generalized linear models}
 
