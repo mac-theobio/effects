@@ -46,10 +46,11 @@ mfit_dep = %_data.rds
 
 ## make different prediction objects ## vp.md
 scriptStep += vp
-vp += defAnchor anchor20 meanAnchor
+vp += defAnchor anchor20 meanAnchor check
 vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
 ## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
+## eco.inter.check.vp.Rout: check.R
 
 ## Model plots plot.md
 scriptStep += plot
