@@ -53,7 +53,7 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 \flab{splash}
 \end{figure}
 
-\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ from the broader \emph{prediction intervals} which give \CIs\ for observations rather than the predicted means, and which are not discussed further here). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the \emph{direct} effect of the focal predictor. In this simple case, effect-style CIs, unlike prediction-style CIs, have a clear visual correspondence with statistical clarity: both CI lines slope in the same direction (both up, or both down) exactly when the P value for the effect of the predictor is below the threshold.
+\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ from the broader \emph{prediction intervals} which give \CIs\ for observations rather than the predicted means, and which are not discussed further here). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the uncertainty due specifically to the effect of the focal predictor. In this simple case, effect-style CIs, unlike prediction-style CIs, have a clear visual correspondence with statistical clarity: both CI lines slope in the same direction (both up, or both down) exactly when the P value for the effect of the predictor is below the threshold.
 
 \subsection{The model center}
 
@@ -74,6 +74,14 @@ The model center does not always correspond to a physically possible data point.
 \subsection{Multi-parameter predictors}
 
 A single input variable can be associated with multiple parameters either by being involved in an interaction, as above, or when a non-linear response (typically spline or polynomial) is specified. In this case, the anchor point can be chosen separately for each of the linear predictor variables corresponding to the non-linear response. Again, our recommended method is to use the model center. The natural alternative is to pick a value of the input variable (either a scientifically meaningful value, or the mean).
+
+\begin{figure}
+\begin{center}
+\includegraphics{eco.quadComp.Rout.pdf}
+\end{center}
+\caption{Outcome plots for a model with a non-linear response to the focal variable. The left plot is anchored at the model center, which does not correspond to a possible value for the focal variable. The right-hand plot is anchored at the mean value of the input variable (nitrogen). }
+\flab{quadComp}
+\end{figure}
 
 \subsection{Direct effects}
 

@@ -49,6 +49,7 @@ scriptStep += vp
 vp += defAnchor anchor20 meanAnchor
 vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
+## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
 
 ## Model plots plot.md
 scriptStep += plot
@@ -62,19 +63,27 @@ plot_dep += %.vp.rda
 ## eco.quadN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.quadN.anchor20.nitro.plot.Rout: nitro.R
 
-## Anchor check
-eco.anchorCheck.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.meanAnchor.nitro.plot.rda
-
+######################################################################
 ## Composites
+
 ## Splash plot combines defAnchor and anchor20
 ## eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.uniN.anchor20.nitro.plot.Rout.pdf
 eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
+	$(pipeR)
+
+## Anchor check: does meanAnchor produce the same splash as defAnchor
+## … in simple case
+eco.splashCheck.Rout: splashCheck.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 
 ## Univariate/multi-variate
 ## eco.uniMulti.Rout: uniMulti.R eco_data.R
 uniMulti: eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.multi.defAnchor.nitro.plot.Rout.pdf 
 eco.uniMulti.Rout: uniMulti.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
+	$(pipeR)
+
+## Compare quad plots with mean vs. default anchor
+eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 
 ######################################################################
