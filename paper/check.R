@@ -14,15 +14,14 @@ bb <- coefficients(mod)
 print(matrix(mm, nrow=1) %*% bb)
 mean(dat$mass)
 
-veff <- varpred(mod, c("nitro", "phos", "pot")
+veff <- varpred(mod, c("nitro")
 	, x.var="nitro"
-	, at=list(nitro=dat$nitro, phos=dat$phos, pot=dat$pot)
 	, returnall=TRUE
 )
 mean(veff$pred$fit)
-colMeans(veff$raw$model.matrix)
-colMeans(model.matrix(mod))
 plot(veff)
+veff <- varpred(mod, "nitro", bias.adjust="observed")
+mean(veff$pred$fit)
 quit()
 
 vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE, steps=200))
