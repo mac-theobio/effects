@@ -60,6 +60,8 @@ plot_dep += %.vp.rda
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.multiPK.defAnchor.centers.plot.Rout: centers.R
 ## eco.inter.defAnchor.centers.plot.Rout: centers.R
+## eco.inter.defAnchor.nitro.plot.Rout: centers.R
+## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
 
 ## eco.quadN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.quadN.anchor20.nitro.plot.Rout: nitro.R
