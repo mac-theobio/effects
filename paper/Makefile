@@ -12,6 +12,16 @@ Sources += $(wildcard *.R *.bib *.bst *.Rmd)
 
 ######################################################################
 
+varpred.quick:
+	cd ../varpred && make quickinstall
+
+varpred.install:
+	cd ../varpred && make install
+
+vv.Rout: vv.R
+
+######################################################################
+
 ## New paper version
 
 ## draft.paper.pdf: paper.tex draft.head.tex
