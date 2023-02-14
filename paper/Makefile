@@ -61,6 +61,7 @@ vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
 ## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
 ## eco.inter.check.vp.Rout: check.R
+## eco.quadN.check.vp.Rout: check.R
 
 ## Model plots plot.md
 scriptStep += plot

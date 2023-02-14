@@ -53,7 +53,7 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 \flab{splash}
 \end{figure}
 
-\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ from the broader \emph{prediction intervals} which give \CIs\ for observations rather than the predicted means, and which are not discussed further here). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the uncertainty due specifically to the effect of the focal predictor. In this simple case, effect-style CIs, unlike prediction-style CIs, have a clear visual correspondence with statistical clarity: both CI lines slope in the same direction (both up, or both down) exactly when the P value for the effect of the predictor is below the threshold.
+\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ from the broader \emph{prediction intervals} which give \CIs\ for observations rather than the predicted means, and which are not discussed further here). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the uncertainty due specifically to the effect of the focal predictor. In this simple case, effect-style CIs, unlike prediction-style CIs, have a clear visual correspondence with statistical clarity: both CI lines slope in the same direction (both up, or both down) exactly when the P value for the effect of the predictor is below the threshold \BC{What would be the threshold in this case? The model center?}.
 
 \subsection{Direct and indirect effects}
 
@@ -61,13 +61,13 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 \begin{center}
 \includegraphics{eco.uniMulti.Rout.pdf}
 %%
-\caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text.}
+\caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text). \BC{We have already compared effect- and prediction-styled plots in \fref{splash}. Here, we could do one panel showing direct and indirect effects only.}}
 %%
 \flab{uniMulti}
 \end{center}
 \end{figure}
 %%
-\jd{Still working on this. One panel or two?}
+\jd{Still working on this. One panel or two?} \BC{See above.}
 
 \fref{uniMulti} shows an example.
 
@@ -75,17 +75,17 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 
 To make an outcome plot, we vary the value of the focal predictor, but we need to choose values for other predictors -- the reference point for the plot. Our default is to do this using the \emph{model center}. We define the model center as the average value of all of the “linear predictor variables” which go into the model matrix. This is not, in general, the same as averaging over the “input variables” which are measured and provided as data (see Glossary box). 
 
-The model center does not always correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome (in a generalized linear model, this is true on the link scale where the model operates, not the original scale of the outcome variable). For this reason, using the model center tends to make outcome plots match the data better than other approaches, including that of taking the mean of input variables only.
+The model center does not always correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome (in a generalized linear model, this is true on the link scale where the model operates, not the original scale of the outcome variable). For this reason, using the model center tends to make outcome plots match the data better than other approaches, including the most common approach of taking the mean of input variables only.
 
 \begin{figure}
 \begin{center}
 \includegraphics{eco.multiPK.defAnchor.centers.plot.Rout.pdf}
 \end{center}
-\caption{Outcome plots for a model with a non-focal interaction. Black lines show an effect plot (mean estimate and CIs) made using the model center (average of linear predictor variables) as a reference point. Blue lines show the same approach made by centering based on input variables; due to the interaction this model does not go through the center point.}
+\caption{Outcome plots for a model with a non-focal interaction. Black lines show an effect plot (mean estimate and CIs) made using the model center (average of linear predictor variables) as a reference point. Blue lines show the same approach made by centering based on input variables; due to the interaction the central prediction line does not go through the center point.}
 \flab{centers}
 \end{figure}
 
-\fref{centers} shows an example, based on simulated data with an interaction between correlated variables. The two approaches correctly show the same information about effects of the focal variable, but the one using the model center as a reference point (the \pkg{varpred} default) is centered with respect to the data, while the one that centers based on input variables alone (the most common default, including \pkg{emmeans} and \pkg{effects} is offset vertically. This is due to the interaction term not being centered when the input variables are centered; these two approaches give identical results for the simpler model in \fref{splash}.
+\fref{centers} shows an example, based on simulated data with an interaction between correlated variables. The two approaches correctly show the same information about effects of the focal variable, but the one using the model center as a reference point (the \pkg{varpred} default) is centered with respect to the data, while the one that centers based on input variables alone (the most common default, including \pkg{emmeans} and \pkg{effects}) is offset vertically. This is due to the interaction term not being centered when the input variables are centered; these two approaches give identical results for the simpler model in \fref{splash}.
 
 \subsection{Multi-parameter predictors}
 
@@ -99,7 +99,7 @@ A single input variable can be associated with multiple parameters either by bei
 \flab{quadComp}
 \end{figure}
 
-An example is shown in \fref{quadComp}. We fit a univariate, \emph{quadratic} response to nitrogen for the biomass. Both panels show the same model, and have the same response curves and prediction CIs. The panel on the left shows the default effect CIs, anchored at the model center. This does not correspond to any real value of nitrogen, because the mean of the quadratic values is taken separately, and is not the value that would correspond in that column to the mean of the original values. FOOTNOTE about Jensen, or what? The panel on the right calculates effect CIs starting from the point that would correspond to an actual nitrogen value (in this case, the mean across the sampled values). The x-axis also reflects actual possible values of nitrogen; this is why the effect uncertainty goes to zero (the anchor point is visible) in the right panel but not the left panel. This is also why the response curves do not pass through the model-center point. 
+An example is shown in \fref{quadComp}. We fit a univariate, \emph{quadratic} response to nitrogen for the biomass. Both panels show the same model, and have the same response curves and prediction CIs. The panel on the left shows the default effect CIs, anchored at the model center. This does not correspond to any real value of nitrogen, because the mean of the quadratic values is taken separately, and is not the value that would correspond in that column to the mean of the original values. FOOTNOTE about Jensen, or what? \BC{Not at this point. Jensen has to do with the curvature of the link function. Here, we could simply say the model center does not correspond to a single input value but rather multiple predictor variables??} The panel on the right calculates effect CIs starting from the point that would correspond to an actual nitrogen value (in this case, the mean across the sampled values). The x-axis also reflects actual possible values of nitrogen; this is why the effect uncertainty goes to zero (the anchor point is visible) in the right panel but not the left panel. This is also why the response curves do not pass through the model-center point. 
 \section{Generalized linear models}
 
 \section{Discussion}
