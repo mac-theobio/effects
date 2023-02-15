@@ -13,10 +13,10 @@ Sources += $(wildcard *.R *.bib *.bst *.Rmd)
 ######################################################################
 
 varpred.quick:
-	cd ../varpred && make quickinstall
+	cd ../varpred && make pull && make quickinstall
 
 varpred.install:
-	cd ../varpred && make install
+	cd ../varpred && make pull && make install
 
 vv.Rout: vv.R
 
