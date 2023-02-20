@@ -62,23 +62,27 @@ We discuss the idea of a model “center” and show how it simplifies thinking 
 \flab{splash}
 \end{figure}
 
-\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ from the broader \emph{prediction intervals} which give \CIs\ for observations rather than the predicted means, and which are not discussed further here). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the uncertainty due specifically to the effect of the focal predictor. In this simple case, effect-style CIs, unlike prediction-style CIs, have a clear visual correspondence with statistical clarity: both CI lines slope in the same direction (both up, or both down) exactly when the P value for the effect of the predictor is below the threshold \BC{What would be the threshold in this case? The model center?}.
+\fref{splash} shows effect- and prediction-style confidence intervals for a hypothetical data set. Prediction-style confidence intervals do not depend on an anchor choice, and correspond to \CIs\ for the predicted mean value of Biomass for the given value of Nitrogen (note that these differ from the broader \emph{prediction intervals} which give \CIs\ for observations rather than the predicted means, and which are not discussed further here). Effect-style confidence intervals show the range of slopes corresponding to the model's \CIs\ for the uncertainty due specifically to the effect of the focal predictor. In this simple case, effect-style CIs, unlike prediction-style CIs, have a clear visual correspondence with statistical clarity: both CI lines slope in the same direction (both up, or both down) exactly when the P value for the effect of the predictor is below the threshold for statistical clarity.
 
 \subsection{Direct and indirect effects}
+
+In a model with more than one predictor, we may be interested in an estimate of the \emph{direct} effects of one predictor (after controlling for others). If predictors are correlated, the direct effect of a predictor may not reflect the visible relationship between the predictor and the outcome variable.
 
 \begin{figure}
 \begin{center}
 \includegraphics{eco.uniMulti.Rout.pdf}
 %%
-\caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text). \BC{We have already compared effect- and prediction-styled plots in \fref{splash}. Here, we could do one panel showing direct and indirect effects only.}}
+\caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text).}
+\jd{How about now (see text also)?}
 %%
 \flab{uniMulti}
 \end{center}
 \end{figure}
 %%
-\jd{Still working on this. One panel or two?} \BC{See above.}
 
-\fref{uniMulti} shows an example.
+\fref{uniMulti} shows an example. The predicted \emph{overall} relationship between nitrogen and biomass is shown in the left panel. This reflects not only direct and indirect effects of nitrogen on biomass, but also any correlations that may be driven by other causes. We may be interested in an effect-style plot here, if we think nitrogen is the main driver of observed effects and we want to estimate total (direct plus indirect) effects. Or we may be interested in a prediction-style plot of the expected value of biomass for a given \emph{observed} value of nitrogen.
+
+The predicted \emph{direct} relationship between nitrogen and biomass is shown in the right panel. This does not track the visible relationship in this case, but instead reflects the modeled \emph{direct} effect of nitrogen. The meaning of such a plot will depend on which variables we choose to control for. Multivariate plots are not expected to be useful for prediction-style plots, so here we show only effect-style intervals.
 
 \subsection{Reference points}
 

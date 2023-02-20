@@ -28,7 +28,7 @@ vv.Rout: vv.R
 
 Ignore += *.paper.tex *.pdf
 
-paperfiles = mscommands.tex begindoc.tex title.tex pabs.tex paper.tex msbib.tex enddoc.tex
+paperfiles = mscommands.tex begindoc.tex title.tex paper.tex msbib.tex enddoc.tex
 Sources += *.head.tex $(paperfiles)
 
 ## draft.paper.tex: 
