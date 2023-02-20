@@ -1,3 +1,13 @@
+% Please keep the abstract below 300 words
+\section*{Abstract}
+
+\jd{I haven't looked at the Abstract for a long time; will get back to it. Moving it now to the main document file.}
+
+In generalized linear (mixed) models that involve complex multiplicative interactions, multi-parameter variables, additional non-focal predictors or a non-linear link function, outcome plots (prediction and effect plots) can aid in understanding difficult-to-interpret coefficient estimates. Outcome plots depend on the choices we make about the non-focal predictors.
+The most common approach is to generate estimates (central estimates, predictions and effects) at a reference point, usually the mean of non-focal predictor. We call this mean-based approach and it estimates effect of an average case in the population. In the presence of additional non-focal predictors, non-linear link functions, random effect terms, etc., mean-based approach generates estimates that are biased and may not be consistent with the observed quantities. An alternative is the observed-value-based approach which estimates the average effect in the population. Moreover, effect-styled confidence intervals provides an alternative and a more clear way to describe uncertainty associated with the focal predictor. In addition to theoretical and methodical comparison, using simulation, we illustrate the two approaches and show that they can produce substantially different results and that observed-value-based approach can not only produce estimates consistent with the observed values, but also appropriate for bias correction. We also present an alternative way, effect-styled confidence intervals, to describe uncertainties associated with the central estimates.
+
+\BC{LET US DISCUSS: What do we want to focus on? common way of generating the plots (input variables) vs model center, prediction- vs effect-style or bias correction, or everything?}
+\jd{Certainly the first two. Do you think bias should be a separate paper?}
 
 \section{Introduction}
 
@@ -27,8 +37,7 @@ To make an outcome plot, we use a \emph{focal} predictor on the x-axis and value
 In a \emph{generalized} linear model, there is usually a non-linear link function, which complicates the picture of additivity.
 Additional challenges arise when dealing with “mixed” models, which incorporate random effects.
 
-We endeavor here to make a conceptual distinction between two functions of 
-outcome plots: prediction and effects. 
+We endeavor here to make a conceptual distinction between two functions of outcome plots: prediction and effects. 
 The primary difference lies in how we describe the uncertainties around the central estimate. 
 If our goal is to \emph{predict} what we learn about the outcome variable by measuring the focal predictor, then we may want to capture a variety of sources of uncertainty, including that due to the intercept, focal and non-focal predictors, and random effects.
 Conversely, if we wish to focus on the \emph{effect} of a focal predictor only, we might want to isolate uncertainty due to coefficients associated with that predictor.
