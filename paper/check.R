@@ -5,11 +5,8 @@ library(emmeans)
 library(shellpipes)
 loadEnvironments()
 
+vpred <- varpred(mod, "nitro")
+print(vpred)
 
-anchor <- mean(dat$nitro)
-
-vpred <- varpred(mod, "nitro", isolate=FALSE, steps=200, isolate.value=anchor)
-plot(vpred)
-veff <- varpred(mod, "nitro", steps=200, isolate.value=anchor)
-plot(veff)
-
+names(mod)
+names(mod$model)

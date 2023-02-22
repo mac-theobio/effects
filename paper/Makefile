@@ -43,16 +43,26 @@ autopipeR = defined
 
 Sources += $(wildcard *.md)
 
-## Fake data about nutrients and biomass
-eco_data.Rout: eco_data.R
+## eco.params.Rout: eco.R
+## high.params.Rout: high.R
+%.params.Rout: %.R
+	$(pipeR)
+
+## Fake data about nutrients and biomass ## data.md
+%.data.Rout: data.R %.params.rda
+	$(pipeR)
+## eco.data.Rout: data.R
+## high.data.Rout: data.R
 
 ## Fit different models ## mfit.md
 scriptStep += mfit
 mfit += uniN quadN inter multi multiPK
-mfit_dep = %_data.rds
+mfit_dep = %.data.rds
 ## eco.uniN.mfit.Rout: uniN.R
-## eco.multi.mfit.Rout: multi.R
+## high.multi.mfit.Rout: multi.R
 ## eco.inter.mfit.Rout: inter.R
+## eco.quadN.mfit.Rout: quadN.R
+## high.quadN.mfit.Rout: quadN.R
 
 ## make different prediction objects ## vp.md
 scriptStep += vp
@@ -60,8 +70,16 @@ vp += defAnchor anchor20 meanAnchor check
 vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
 ## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
-## eco.inter.check.vp.Rout: check.R
+
+# Temporary checks
 ## eco.quadN.check.vp.Rout: check.R
+
+## eco.uniN.predict.Rout: predict.R eco.quadN.mfit.rda
+## eco.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
+## high.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
+
+%.predict.Rout: predict.R %.mfit.rda
+	$(pipeR)
 
 ## Model plots plot.md
 scriptStep += plot
