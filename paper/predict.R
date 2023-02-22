@@ -8,7 +8,7 @@ loadEnvironments()
 
 objects()
 
-vpred <- as.data.frame(varpred(mod, "nitro"))
+vpred <- as.data.frame(varpred(mod, "nitro", steps=200))
 ## summary(vpred)
 
 dat <- na.omit(dat)
