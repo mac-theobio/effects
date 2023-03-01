@@ -118,6 +118,9 @@ eco.uniMulti.Rout: uniMulti.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnc
 eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 
+## Simple example. JD's pipeline too advance?
+simple_example.Rout: simple_example.R
+
 ######################################################################
 
 ### Makestuff

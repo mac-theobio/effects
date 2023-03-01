@@ -4,7 +4,7 @@ dat <- rdsRead()
 
 summary(dat)
 
-mod <- lm(mass~poly(nitro, 2), data=dat)
+mod <- lm(mass~poly(nitro, 2, raw=FALSE), data=dat)
 
 summary(mod)
 
