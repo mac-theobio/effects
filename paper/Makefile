@@ -22,6 +22,10 @@ vv.Rout: vv.R
 
 ######################################################################
 
+## focal_check.pdf: focal_check.rmd
+
+######################################################################
+
 ## New paper version
 
 ## draft.paper.pdf: paper.tex draft.head.tex
