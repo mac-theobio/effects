@@ -1,0 +1,121 @@
+---
+title: "Focal interaction for multi-parameter input variables"
+author: Bicko, Jonathan & Ben
+date: "2023 Mar 08 (Wed)"
+compact-title: false
+output: pdf_document
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+library(shellpipes)
+startGraphics(height=4)
+
+library(dplyr)
+library(ggplot2); theme_set(theme_bw(base_size=16))
+
+## Binning function
+binfun <- function(mod, focal, bins=50, groups=NULL, ...) {
+	if (!is.null(groups)) {
+		bins_all <- c(groups, "bin")
+	} else {
+		bins_all <- "bin"
+	}
+	if (!inherits(mod, "data.frame")) {
+		mf <- model.frame(mod)
+	} else {
+		mf <- mod
+	}
+	check_df <- (mf
+		%>% arrange_at(focal)
+		%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
+		%>% group_by_at(bins_all)
+		%>% summarise_all(mean)
+		%>% mutate(model="binned")
+	)
+	return(check_df)
+}
+
+
+
+df <- rdsRead()
+```
+
+The aim is to use a simple example to show what `varpred` does (there is more to that though in the package code) in the case of multi-parameter focal interaction.
+
+Consider a model with the focal multi-parameter:
+
+\[
+mass = \beta_0 + \beta_1{nitro} + \beta_2{nitro}^2 + \beta_3{phos} + \epsilon
+\]
+
+```{r model}
+mod <- lm(mass ~ poly(nitro, 2) + phos, df)
+summary(mod)
+```
+
+Picking _nitro_ as the focal predictor, the non-focal predictor (_phos_) is set at its model center reference value. For the _focal_ predictor, we simply choose representative values from the input variable. Thus the central prediction is:
+
+\[
+\hat{mass} =\hat{\beta_0} + \hat{\beta_1}{nitro} + \hat{\beta_2}{nitro}^2 + \hat{\beta_3}{\bar{phos}}
+\]
+
+Let us try to do this the base R way:
+
+```{r baseR}
+focal <- df$nitro
+
+beta <- coef(mod)
+mod_mat <- model.matrix(mod)
+
+non_focal_mean <- mean(mod_mat[, "phos"])
+
+## Set non-focal model center reference value
+mod_mat[, "phos"] <- non_focal_mean
+head(mod_mat)
+
+## Generate central predictions
+base_pred <- as.vector(mod_mat %*% beta)
+```
+
+This averages to the observed average biomass:
+
+```{r compare_baseR}
+base <- c(observed=mean(df$mass), base=mean(base_pred))
+print(base)
+```
+
+But the curve (which averages to the observed) does not pass through this point (black dot)
+
+```{r base_plot}
+df$base_pred <- base_pred
+base_plot <- (ggplot(df, aes(x=nitro, y=base_pred))
+	+ geom_line()
+	+ geom_point(aes(y=mass), colour="grey")
+	+ geom_hline(yintercept=base[["observed"]], lty=2, colour="blue")
+	+ geom_hline(yintercept=base[["base"]], lty=3, colour="red")
+	+ geom_point(data=data.frame(mass=base[["observed"]], nitro=mean(focal))
+		, aes(x=nitro, y=mass)
+		, size=4
+		, colour="black"
+	)
+)
+print(base_plot)
+```
+
+Let us add binned observations (dark red dots)
+
+```{r binned}
+binned_df <-  binfun(df, "nitro", bins=8)
+base_plot <- (base_plot
+	+ geom_point(data=binned_df, aes(x=nitro, y=mass), size=2, colour="darkred")
+)
+print(base_plot)
+```
+
+**Summary**
+
+- The reference point for the non-focal predictor is chosen at the model center
+- All the predictor variables corresponding to the multi-parameter focal variable are evaluated using the chosen focal values
+- The average of the predictions is identical to the average of the observed biomass but the curve does not pass through the point (assuming the center of the multi-parameter focal variable is the mean of nitro -- in real sense we don't know the this.)
+- These are based on simple base R implementation but agrees with what varpred does.
+- **What are we missing in dealing with the multi-parameter focal variables?**
