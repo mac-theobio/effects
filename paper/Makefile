@@ -46,6 +46,11 @@ autopipeR = defined
 
 ######################################################################
 
+## Rename variables and see how the machinery works
+## eco.weird.Rout: weird.R
+%.weird.Rout: weird.R %.data.rds
+	$(pipeR)
+
 Sources += $(wildcard *.md)
 
 ## eco.params.Rout: eco.R
@@ -92,7 +97,7 @@ plot += nitro centers
 plot_dep += %.vp.rda
 
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.multiPK.defAnchor.centers.plot.Rout: centers.R
+## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
 ## eco.inter.defAnchor.centers.plot.Rout: centers.R
 ## eco.inter.defAnchor.nitro.plot.Rout: centers.R
 ## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
