@@ -278,6 +278,7 @@ Ignore += simple_pred_spec_plot1.pdf simple_pred_spec_plot2.pdf
 
 ######################################################################
 
+## OBSOLETE!!! 
 ## Package installation and checks
 Ignore += vareffects_1*.*
 
