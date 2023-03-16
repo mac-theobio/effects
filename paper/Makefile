@@ -124,7 +124,7 @@ uniMulti: eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.multi.defAnchor.nitro.plot.
 eco.uniMulti.Rout: uniMulti.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
 	$(pipeR)
 
-## Compare quad plots with mean vs. default anchor
+## Compare quad plots with mean vs. default anchor (read and arrange only)
 eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 

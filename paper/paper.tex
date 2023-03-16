@@ -18,11 +18,11 @@ Plots of predicted values of an outcome against predictors (often called effect 
 \begin{description}
 \item [Input variables] Observed (scientific) variables underlying an inference or exploration. Input variables for our simulated ecological data set are N, P and K, plus the biomass used as a response variable.
 
-\item [Focal predictors] The input variable on the x-axis of an outcome plot.
+\item [Focal predictor] The input variable on the x-axis of an outcome plot.
 
-\item [Linear predictor variables] The variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable contributes to one or more linear predictor variables. N, P and K in our ecological data set are all linear predictor variables, but combinations like P:K or N$\mbox{}^2$ when they appear in the model.
+\item [Linear predictor variables] The variables which are combined to make the linear predictor (corresponding to the columns in the model matrix). Each input variable contributes to one or more linear predictor variables. N, P and K in our ecological data set are all linear predictor variables; so are combinations like P:K or N$\mbox{}^2$ when they appear in the model.
 
-\item[Multi-parameter variables (MPVs)] Input variables which correspond to more than one linear predictor variable -- for example, variables with more than two categories (religion in our first example), or variables with spline or polynomial response. 
+\item[Multi-parameter variables (MPVs)] Input variables which correspond to more than one linear predictor variable -- for example, variables with more than two categories, or variables with spline or polynomial response. 
 
 \item [Model center] The point corresponding to the mean of the linear predictor variables. In an ordinary linear model, the central estimate at this point will be the mean of the response variable. 
 
@@ -112,7 +112,7 @@ A single input variable can be associated with multiple parameters either by bei
 \flab{quadComp}
 \end{figure}
 
-An example is shown in \fref{quadComp}. We fit a univariate, \emph{quadratic} response to nitrogen for the biomass. Both panels show the same model, and have the same response curves and prediction CIs. The panel on the left shows the default effect CIs, anchored at the model center. This does not correspond to any real value of nitrogen, because the mean of the quadratic values is taken separately, and is not the value that would correspond in that column to the mean of the original values. FOOTNOTE about Jensen, or what? \BC{Not at this point. Jensen has to do with the curvature of the link function.} \jd{Jensen is also how you show that the column means can never correspond to a real value of the parameter: the mean of the squares always exceeds the square of the mean.} \BC{Here, we could simply say the model center does not correspond to a single input value but rather multiple predictor variables??} The panel on the right calculates effect CIs starting from the point that would correspond to an actual nitrogen value (in this case, the mean across the sampled values). The x-axis also reflects actual possible values of nitrogen; this is why the effect uncertainty goes to zero (the anchor point is visible) in the right panel but not the left panel. This is also why the response curves do not pass through the model-center point. 
+An example is shown in \fref{quadComp}. We fit a univariate, \emph{quadratic} response to nitrogen for the biomass. Both panels show the same model, and have the same response curves and prediction CIs. The panel on the left shows the default effect CIs, anchored at the model center. The model center does not correspond to any real value of nitrogen, because we average separately over the two different linear predictor variables (specifically, the mean of the squares is always greater than the square of the means). Thus, no anchor point where the effect-style CIs come together is seen on the plot. This is also why no model-center point is seen on the plot. The panel on the right is anchored at a point that does correspond to a real nitrogen value (in particular, the mean across the sampled values), and we see the effect-style CIs coming together at this point.
 
 In neither case is the picture as clear to interpret as the simplest case (\fref{splash}). We argue though that the picture on the left is a good way to show the shape of the model fit, while focusing on the uncertainty due to the parameter values due to the focal variable alone.
 
