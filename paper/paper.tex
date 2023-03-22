@@ -108,13 +108,17 @@ A single input variable can be associated with multiple parameters either by bei
 \begin{center}
 \includegraphics{eco.quadComp.Rout.pdf}
 \end{center}
-\caption{Outcome plots for a model with a non-linear response to the focal variable. The left plot is anchored at the model center, which does not correspond to a possible value for the focal variable. The right-hand plot is anchored at the mean value of the input variable (nitrogen). }
+\caption{Outcome plots for a model with a non-linear response to the focal variable. The left plot is anchored at the model center, which does not correspond to a possible value for the focal input variable (nitrogen). The right-hand plot is anchored at the mean value of the input variable (nitrogen). }
 \flab{quadComp}
 \end{figure}
 
-An example is shown in \fref{quadComp}. We fit a univariate, \emph{quadratic} response to nitrogen for the biomass. Both panels show the same model, and have the same response curves and prediction CIs. The panel on the left shows the default effect CIs, anchored at the model center. The model center does not correspond to any real value of nitrogen, because we average separately over the two different linear predictor variables (specifically, the mean of the squares is always greater than the square of the means). Thus, no anchor point where the effect-style CIs come together is seen on the plot. This is also why no model-center point is seen on the plot. The panel on the right is anchored at a point that does correspond to a real nitrogen value (in particular, the mean across the sampled values), and we see the effect-style CIs coming together at this point.
+An example is shown in \fref{quadComp}. We fit a univariate, \emph{quadratic} response to nitrogen for the biomass. Both panels show the same model, and have the same response curves and prediction CIs. The panel on the left shows the default effect CIs, anchored at the model center.
+Because we average separately over the two different linear predictor variables, 
+the model center does not correspond to a real value of nitrogen and is therefore not seen on the plot. 
+Thus, no anchor point where the effect-style CIs come together is visible. 
+The panel on the right is anchored at a real nitrogen value (in particular, the mean across the sampled values), and we see the effect-style CIs coming together at this point.
 
-In neither case is the picture as clear to interpret as the simplest case (\fref{splash}). We argue though that the picture on the left is a good way to show the shape of the model fit, while focusing on the uncertainty due to the parameter values due to the focal variable alone.
+In neither case is the picture as clear to interpret as the simplest case (\fref{splash}). We argue though that the picture on the left is a good way to show the shape of the model fit, while focusing on the uncertainty due to the parameter values due to the focal variable alone. The physically interpretable anchor on the right, even though chosen to correspond to the mean value of nitrogen, is fair from the model center and generates effect-style CIs that are at some points wider than the prediction-style CIs.
 
 \section{Generalized linear models}
 

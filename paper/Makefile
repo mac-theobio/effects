@@ -22,7 +22,6 @@ vv.Rout: vv.R
 
 ######################################################################
 
-
 ## New paper version
 
 ## draft.paper.pdf: paper.tex draft.head.tex
