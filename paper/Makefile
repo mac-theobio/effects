@@ -65,7 +65,7 @@ Sources += $(wildcard *.md)
 
 ## Fit different models ## mfit.md
 scriptStep += mfit
-mfit += uniN quadN inter multi multiPK
+mfit += uniN quadN inter multi multiPK monster
 mfit_dep = %.data.rds
 ## eco.uniN.mfit.Rout: uniN.R
 ## high.multi.mfit.Rout: multi.R
