@@ -41,6 +41,15 @@ autopipeR = defined
 
 ######################################################################
 
+## focal_check.pdf: focal_check.rmd
+
+######################################################################
+
+## Rename variables and see how the machinery works
+## eco.weird.Rout: weird.R
+%.weird.Rout: weird.R %.data.rds
+	$(pipeR)
+
 Sources += $(wildcard *.md)
 
 ## eco.params.Rout: eco.R
@@ -56,7 +65,7 @@ Sources += $(wildcard *.md)
 
 ## Fit different models ## mfit.md
 scriptStep += mfit
-mfit += uniN quadN inter multi multiPK
+mfit += uniN quadN inter multi multiPK monster
 mfit_dep = %.data.rds
 ## eco.uniN.mfit.Rout: uniN.R
 ## high.multi.mfit.Rout: multi.R
@@ -87,7 +96,7 @@ plot += nitro centers
 plot_dep += %.vp.rda
 
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.multiPK.defAnchor.centers.plot.Rout: centers.R
+## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
 ## eco.inter.defAnchor.centers.plot.Rout: centers.R
 ## eco.inter.defAnchor.nitro.plot.Rout: centers.R
 ## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
@@ -114,7 +123,7 @@ uniMulti: eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.multi.defAnchor.nitro.plot.
 eco.uniMulti.Rout: uniMulti.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
 	$(pipeR)
 
-## Compare quad plots with mean vs. default anchor
+## Compare quad plots with mean vs. default anchor (read and arrange only)
 eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 
