@@ -235,7 +235,6 @@ short_lab_report.pdf: binom_correlated_preds.rda variable_predictions_objs.rda \
 	short_lab_report.rmd
 	$(knitpdf)
 
-
 ######################################################################
 
 cp2comp_exam:
