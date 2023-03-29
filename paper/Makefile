@@ -3,6 +3,8 @@
 current: target
 -include target.mk
 
+all: draft.paper.pdf
+
 vim_session:
 	bash -cl "vmt paper.tex body.tex"
 
@@ -80,8 +82,8 @@ vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
 ## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
 
-# Temporary checks
-## eco.quadN.check.vp.Rout: check.R
+# Temporary checks; Giving up for now!
+## eco.monster.check.vp.Rout: check.R
 
 ## eco.uniN.predict.Rout: predict.R eco.quadN.mfit.rda
 ## eco.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
