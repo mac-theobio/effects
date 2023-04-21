@@ -24,6 +24,10 @@ vv.Rout: vv.R
 
 ######################################################################
 
+## New notes 2023 Apr 19 (Wed)
+
+Sources += notes.md
+
 ## New paper version
 
 ## draft.paper.pdf: paper.tex draft.head.tex
