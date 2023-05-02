@@ -23,7 +23,7 @@ beta_nnm <- -0.623
 
 # Extra params for binomial outcome
 binSize <- 20
-beta_r <- 3
-beta_mr <- 0.004
+beta_r <- 2
+beta_mr <- 0.006
 
 saveEnvironment()

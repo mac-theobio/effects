@@ -87,7 +87,7 @@ mfit_dep = %.data.rds
 
 ## fit glm models glmfit.md
 scriptStep += glmfit
-glmfit += uniglmN
+glmfit += uniglmN multiglm interglm
 glmfit_dep = %.data.rds
 ## eco.uniglmN.glmfit.Rout: uniglmN.R
 
@@ -101,12 +101,14 @@ vp_dep += %.mfit.rda
 ## eco.monster.check.vp.Rout: check.R
 
 ## make glm prediction objects ## gvp.md
-## TODO: move defRef and defAnchor to def!, if they can both be the same
+## TODO: move defRef and defAnchor to def, if they can both be the same!
 scriptStep += gvp
 gvp += defRef obsRef realObsRef
 gvp_dep += %.glmfit.rda
 ## eco.uniglmN.defRef.gvp.Rout: defRef.R
-## eco.uniglmN.obsRef.gvp.Rout: obsRef.R
+## eco.multiglm.defRef.gvp.Rout: obsRef.R
+
+## FIXME realObsRef does not work (rows problem)
 ## eco.uniglmN.realObsRef.gvp.Rout: realObsRef.R
 
 ## Some sort of check (compare base predict to varpred)
@@ -134,6 +136,18 @@ glmPlot += rnitro
 glmPlot_dep += %.gvp.rda
 ## eco.uniglmN.defRef.rnitro.glmPlot.Rout: rnitro.R
 ## eco.uniglmN.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## eco.multiglm.defRef.rnitro.glmPlot.Rout: rnitro.R
+## eco.multiglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## FIXME: The difference between obsRef and defRef is always small;
+## hard to find a good example where bias-correct is correcting the bias
+## eco.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
+## eco.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## FIXME: WTAH? There is no way that setting a consistent reference point should make this non-monotonic
+
+## FIXME: Why do defRef and obsRef look different in univariate case?
+eco.refComp.Rout: eco.uniglmN.defRef.gvp.rda eco.uniglmN.obsRef.gvp.rda
+eco.refComp.Rout: refComp.R
+	$(pipeR)
 
 ######################################################################
 ## Composites
