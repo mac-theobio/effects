@@ -66,8 +66,14 @@ Sources += $(wildcard *.md)
 ## Fake data about nutrients and biomass ## data.md
 %.data.Rout: data.R %.params.rda
 	$(pipeR)
-## eco.data.Rout: data.R
+## eco.data.Rout: data.R eco.R
 ## high.data.Rout: data.R
+
+## Plot only
+scriptStep += scatter
+scatter += robust
+scatter_dep = %.data.rds
+## eco.robust.scatter.Rout: robust.R
 
 ## Fit different models ## mfit.md
 scriptStep += mfit
@@ -79,20 +85,33 @@ mfit_dep = %.data.rds
 ## eco.quadN.mfit.Rout: quadN.R
 ## high.quadN.mfit.Rout: quadN.R
 
+## fit glm models glmfit.md
+scriptStep += glmfit
+glmfit += uniglmN
+glmfit_dep = %.data.rds
+## eco.uniglmN.glmfit.Rout: uniglmN.R
+
 ## make different prediction objects ## vp.md
 scriptStep += vp
 vp += defAnchor anchor20 meanAnchor check
 vp_dep += %.mfit.rda
 ## eco.inter.defAnchor.vp.Rout: defAnchor.R
 ## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
-
 # Temporary checks; Giving up for now!
 ## eco.monster.check.vp.Rout: check.R
 
-## eco.uniN.predict.Rout: predict.R eco.quadN.mfit.rda
+## make glm prediction objects ## gvp.md
+## TODO: move defRef and defAnchor to def!, if they can both be the same
+scriptStep += gvp
+gvp += defRef obsRef realObsRef
+gvp_dep += %.glmfit.rda
+## eco.uniglmN.defRef.gvp.Rout: defRef.R
+## eco.uniglmN.obsRef.gvp.Rout: obsRef.R
+## eco.uniglmN.realObsRef.gvp.Rout: realObsRef.R
+
+## Some sort of check (compare base predict to varpred)
 ## eco.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
 ## high.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
-
 %.predict.Rout: predict.R %.mfit.rda
 	$(pipeR)
 
@@ -102,13 +121,19 @@ plot += nitro centers
 plot_dep += %.vp.rda
 
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
-## eco.inter.defAnchor.centers.plot.Rout: centers.R
-## eco.inter.defAnchor.nitro.plot.Rout: centers.R
-## eco.multiPK.defAnchor.nitro.plot.Rout: centers.R
-
 ## eco.quadN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.quadN.anchor20.nitro.plot.Rout: nitro.R
+## eco.inter.defAnchor.nitro.plot.Rout: nitro.R
+## eco.inter.defAnchor.centers.plot.Rout: centers.R
+
+## TODO: When do we need a different track for glm at all?
+## Can we save some info about the outcome variable?
+## glm plots glmPlot.md
+scriptStep += glmPlot
+glmPlot += rnitro
+glmPlot_dep += %.gvp.rda
+## eco.uniglmN.defRef.rnitro.glmPlot.Rout: rnitro.R
+## eco.uniglmN.obsRef.rnitro.glmPlot.Rout: rnitro.R
 
 ######################################################################
 ## Composites

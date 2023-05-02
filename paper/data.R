@@ -23,6 +23,12 @@ dat <- (data.frame(nitro = rlnorm(N, meanlog=log(nitro_mean), sdlog=nitro_spread
 			+ (pot-pot_mean)*beta_km
 			+ (pot-pot_mean)*(phos-phos_mean)*beta_pkm
 		, mass = rlnorm(N, meanlog=log(mass_pred), sdlog=mass_spread)
+		, robust = rbinom(N
+			, size=binSize
+			, prob=plogis(beta_r + beta_mr*(mass_pred-mass_mean))
+		)
+		, numTest=binSize
+		, robustProp = robust/binSize
 	)
 )
 
