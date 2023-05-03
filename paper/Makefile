@@ -104,18 +104,10 @@ vp_dep += %.mfit.rda
 ## make glm prediction objects ## gvp.md
 ## TODO: move defRef and defAnchor to def, if they can both be the same!
 scriptStep += gvp
-gvp += defRef obsRef realObsRef
+gvp += defRef obsRef
 gvp_dep += %.glmfit.rda
 ## eco.uniglmN.defRef.gvp.Rout: defRef.R
 ## eco.multiglm.obsRef.gvp.Rout: obsRef.R
-
-### FIXME: For testing. REMOVE
-scriptStep += gvp
-gvp += defRef obsRef realObsRef
-gvp_dep += %.glmfit.rda
-
-## FIXME realObsRef does not work (rows problem)
-## eco.uniglmN.realObsRef.gvp.Rout: realObsRef.R
 
 ### FIXME: For testing. REMOVE
 scriptStep += test
