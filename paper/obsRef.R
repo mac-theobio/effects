@@ -16,7 +16,7 @@ veff <- as.data.frame(varpred(mod, "nitro", steps=steps
 
 vpred <- as.data.frame(varpred(mod, "nitro", steps=steps
 	, bias.adjust="observed"
-	## , isolate=FALSE
+	, isolate=FALSE
 ))
 
 iveff <- as.data.frame(varpred(mod, "nitro", steps=steps

@@ -8,9 +8,10 @@ loadEnvironments()
 ## summary(mod)
 ## summary(dat)
 
-vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE, steps=200))
-veff <- as.data.frame(varpred(mod, "nitro", steps=200))
-iveff <- as.data.frame(varpred(mod, "nitro", steps=200, input_vars=TRUE))
+steps <- 200
+vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE, steps=steps))
+veff <- as.data.frame(varpred(mod, "nitro", steps=steps))
+iveff <- as.data.frame(varpred(mod, "nitro", steps=steps, input_vars=TRUE))
 
 saveEnvironment()
 

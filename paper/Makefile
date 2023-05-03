@@ -107,10 +107,21 @@ scriptStep += gvp
 gvp += defRef obsRef realObsRef
 gvp_dep += %.glmfit.rda
 ## eco.uniglmN.defRef.gvp.Rout: defRef.R
-## eco.multiglm.defRef.gvp.Rout: obsRef.R
+## eco.multiglm.obsRef.gvp.Rout: obsRef.R
+
+### FIXME: For testing. REMOVE
+scriptStep += gvp
+gvp += defRef obsRef realObsRef
+gvp_dep += %.glmfit.rda
 
 ## FIXME realObsRef does not work (rows problem)
 ## eco.uniglmN.realObsRef.gvp.Rout: realObsRef.R
+
+### FIXME: For testing. REMOVE
+scriptStep += test
+test += defRef obsRef realObsRefTest
+test_dep += %.glmfit.rda
+## eco.uniglmN.realObsRefTest.test.Rout: realObsRefTest.R
 
 ## Some sort of check (compare base predict to varpred)
 ## eco.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
