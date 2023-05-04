@@ -8,7 +8,7 @@ loadEnvironments()
 ## summary(mod)
 ## summary(dat)
 
-steps <- nrow(dat)
+steps <- 200
 
 veff <- as.data.frame(varpred(mod, "nitro", steps=steps
 	, bias.adjust="observed"
