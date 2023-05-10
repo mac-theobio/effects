@@ -2,6 +2,8 @@ library(shellpipes)
 library(dplyr)
 library(ggplot2)
 
+rpcall("observed_approach.Rout observed_approach.pipestar observed_approach.R eco.interglm.glmfit.rda")
+
 theme_set(theme_bw())
 
 loadEnvironments()
@@ -57,8 +59,7 @@ head(pred_df)
 mean(pred_df$fit)
 mean(dat[[outcome_var]])
 
-
-## Bined data
+## Binned data
 bin_df <- (dat
 	%>% arrange_at(focal_var)
 	%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
@@ -66,6 +67,12 @@ bin_df <- (dat
 	%>% summarise_all(mean)
 )
 
+if (FALSE) {
+    my_vars <- c("nitro", "pot", "phos")
+    pairs(dat[, my_vars], gap = 0)
+    dev.new()
+    pairs(mm[,my_vars], gap = 0)
+}
 
 p <- (ggplot(pred_df, aes(x=nitro, y=fit))
 	+ geom_line()
