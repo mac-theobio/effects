@@ -176,7 +176,6 @@ eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanA
 ## FIXME: DELETE later
 observed_approach.Rout: observed_approach.R eco.interglm.glmfit.rda
 
-
 ######################################################################
 
 

@@ -1,9 +1,17 @@
 library(shellpipes)
 library(dplyr)
+library(ggplot2)
+
+theme_set(theme_bw())
 
 loadEnvironments()
 
+startGraphics()
+
 summary(mod)
+
+##
+
 
 ## get RHS of formula
 
@@ -11,6 +19,7 @@ form <- formula(mod)[c(1,3)]
 
 focal_var <- "nitro"
 outcome_var <- "robustProp"
+bins <- 10
 
 ## Setting focal values
 probs <- seq(0, 1, length.out = 25)
@@ -47,4 +56,22 @@ pred_df <- (mf
 head(pred_df)
 mean(pred_df$fit)
 mean(dat[[outcome_var]])
+
+
+## Bined data
+bin_df <- (dat
+	%>% arrange_at(focal_var)
+	%>% mutate(bin=ceiling(row_number()*bins/nrow(.)))
+	%>% group_by(bin)
+	%>% summarise_all(mean)
+)
+
+
+p <- (ggplot(pred_df, aes(x=nitro, y=fit))
+	+ geom_line()
+	+ geom_point(aes(x=mean(nitro), y=mean(fit)), size=3, colour="red")
+	+ geom_point(data=bin_df, aes(x=nitro, y=robustProp), colour="grey")
+	+ geom_point(data=dat, aes(x=mean(nitro), y=mean(robustProp)), size=3, colour="black")
+)
+print(p)
 
