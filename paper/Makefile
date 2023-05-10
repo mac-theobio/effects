@@ -178,6 +178,12 @@ eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanA
 
 ######################################################################
 
+## Observed value approach (interactions on focal predictors)
+## FIXME: DELETE later
+observed_approach.Rout: observed_approach.R eco.interglm.glmfit.rda
+
+
+######################################################################
 
 
 ## Focal interaction check 
