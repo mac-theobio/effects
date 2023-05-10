@@ -109,12 +109,6 @@ gvp_dep += %.glmfit.rda
 ## eco.uniglmN.defRef.gvp.Rout: defRef.R
 ## eco.multiglm.obsRef.gvp.Rout: obsRef.R
 
-### FIXME: For testing. REMOVE
-scriptStep += test
-test += defRef obsRef realObsRefTest
-test_dep += %.glmfit.rda
-## eco.uniglmN.realObsRefTest.test.Rout: realObsRefTest.R
-
 ## Some sort of check (compare base predict to varpred)
 ## eco.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
 ## high.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
@@ -148,7 +142,7 @@ glmPlot_dep += %.gvp.rda
 ## eco.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
 ## FIXME: WTAH? There is no way that setting a consistent reference point should make this non-monotonic
 
-## FIXME: Why do defRef and obsRef look different in univariate case?
+## 2023 May 04 (Thu) Debugged reference-point inconsistency in uni
 eco.refComp.Rout: eco.uniglmN.defRef.gvp.rda eco.uniglmN.obsRef.gvp.rda
 eco.refComp.Rout: refComp.R
 	$(pipeR)
