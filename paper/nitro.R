@@ -15,6 +15,8 @@ points <- (ggplot(dat)
 	+ geom_point(aes(mean(nitro), mean(mass)), size=4, color="grey")
 )
 
+print(summary(dat))
+
 plain <- (points
 	+ geom_line(data=vpred, aes(y=fit))
 )

@@ -18,12 +18,13 @@ beta_nm <- 0.9
 beta_km <- 0.2
 beta_nk <- 0
 beta_pk <- 0.4
-beta_pkm <- 0.1
+beta_pkm <- 2
 beta_nnm <- -0.625
+beta_nnm <- 0
 
 # Extra params for binomial outcome
-binSize <- 20
-beta_r <- 3
+binSize <- 100
+beta_r <- 4
 beta_mr <- 0.004
 
 saveEnvironment()

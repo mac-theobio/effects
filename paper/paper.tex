@@ -73,8 +73,7 @@ In a model with more than one predictor, we may be interested in an estimate of 
 \includegraphics{eco.uniMulti.Rout.pdf}
 %%
 \caption{Outcome plots with effect- (dotted straight lines) and prediction-style (dashed curved lines). The panel on the left shows the results of a univariate model fit; the panel on the right shows a multivariate fit (and effect-style lines only, see text).}
-\jd{How about now (see text also)?}
-\BC{I think a Fig. simular to Fig 6 in plos.pdf in the manuscript folder could be clearer.}
+\jd{Need to play with parameters or something; slopes should differ sharply.}
 %%
 \flab{uniMulti}
 \end{center}
@@ -89,7 +88,7 @@ The predicted \emph{direct} relationship between nitrogen and biomass is shown i
 
 To make an outcome plot, we vary the value of the focal predictor, but we need to choose values for other predictors -- the reference point for the plot. Our default is to do this using the \emph{model center}. We define the model center as the average value of all of the “linear predictor variables” which go into the model matrix. This is not, in general, the same as averaging over the “input variables” which are measured and provided as data (see Glossary box). 
 
-The model center does not always correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome (in a generalized linear model, this is true on the link scale where the model operates, not the original scale of the outcome variable). For this reason, using the model center tends to make outcome plots match the data better than other approaches, including the most common approach of taking the mean of input variables only.
+The model center does not always correspond to a physically possible data point. For example, the mean of an interaction term across the data is generally not the same as the value of the same term evaluated when each of its components is at its mean. The predicted outcome at the model center, however, is always the same as the mean predicted outcome (in a generalized linear model, this is true on the link scale where the model operates, not the original scale of the outcome variable). In an ordinary (but not a generalized) model, this mean predicted outcome is also the same as the mean observed outcome. For this reason, using the model center tends to make outcome plots match the data better than other approaches, including the most common approach of taking the mean of input variables only.
 
 \begin{figure}
 \begin{center}
@@ -119,7 +118,7 @@ the model center does not correspond to a real value of nitrogen and is therefor
 Thus, no anchor point where the effect-style CIs come together is visible. 
 The panel on the right is anchored at a real nitrogen value (in particular, the mean across the sampled values), and we see the effect-style CIs coming together at this point.
 
-In neither case is the picture as clear to interpret as the simplest case (\fref{splash}). We argue though that the picture on the left is a good way to show the shape of the model fit, while focusing on the uncertainty due to the parameter values due to the focal variable alone. The physically interpretable anchor on the right, even though chosen to correspond to the mean value of nitrogen, is fair from the model center and generates effect-style CIs that are at some points wider than the prediction-style CIs.
+In neither case is the picture as clear to interpret as the simplest case (\fref{splash}). We argue though that the picture on the left is a good way to show the shape of the model fit, while focusing on the uncertainty due to the parameter values due to the focal variable alone. The physically interpretable anchor on the right, even though chosen to correspond to the mean value of nitrogen, is far from the model center in other dimensions, and generates effect-style CIs that are at some points wider than the prediction-style CIs.
 
 \section{Generalized linear models}
 
