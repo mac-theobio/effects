@@ -24,26 +24,33 @@ outcome_var <- "robustProp"
 bins <- 10
 
 ## Setting focal values
-probs <- seq(0, 1, length.out = 25)
+probs <- seq(0, 1, length.out = 50)
 focal_vals <- quantile(dat[[focal_var]], probs, names=FALSE)
 print(focal_vals)
 focal_df <- data.frame(focal_vals)
 colnames(focal_df) <- focal_var
 
 ## Non-focal predictors
-non_focal_df <- dat[, colnames(dat)[!colnames(dat) %in% c(focal_var, outcome_var)]]
+non_focal_df <- dat[, all.vars(form)[!all.vars(form) %in% focal_var]]
 head(non_focal_df)
 
 ## For every focal value, assign a non-focal value
 nM <- NROW(non_focal_df)
-focal_df <- focal_df[rep(1:NROW(focal_df), each=nM),,drop=FALSE]
+#focal_df <- focal_df[rep(1:NROW(focal_df), each=nM),,drop=FALSE]
 
 ## Generate new model frame
-mf <- cbind.data.frame(focal_df, non_focal_df)
+mf <- expand.grid(as.list(c(focal_df, non_focal_df)))
+#mf <- cbind.data.frame(focal_df, non_focal_df)
 head(mf)
 
 ## Generate model matrix
 mm <- model.matrix(form, mf)
+
+typical <- mean
+col_mean <- apply(mm, 2, typical)
+center_mean <- colMeans(mm)
+mm <- sweep(mm, 2, col_mean, FUN="/")
+mm <- sweep(mm, 2, center_mean, FUN="*")
 
 ## Generate predictions
 beta <- coef(mod)
@@ -67,12 +74,6 @@ bin_df <- (dat
 	%>% summarise_all(mean)
 )
 
-if (FALSE) {
-    my_vars <- c("nitro", "pot", "phos")
-    pairs(dat[, my_vars], gap = 0)
-    dev.new()
-    pairs(mm[,my_vars], gap = 0)
-}
 
 p <- (ggplot(pred_df, aes(x=nitro, y=fit))
 	+ geom_line()
