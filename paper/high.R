@@ -1,6 +1,6 @@
 library(shellpipes)
 
-N <- 25 
+N <- 25
 seed <- 31
 pot_mean <- 8
 pot_spread <- 0.4

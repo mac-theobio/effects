@@ -174,6 +174,10 @@ eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanA
 
 ######################################################################
 
+## CHECK: 2023 May 23 (Tue) - DELETE
+check_data.Rout: check_data.R
+check_defRef.Rout: check_defRef.R high.multiglm.glmfit.rda
+
 ## Observed value approach (interactions on focal predictors)
 ## FIXME: DELETE later
 observed_approach.Rout: observed_approach.R eco.interglm.glmfit.rda
