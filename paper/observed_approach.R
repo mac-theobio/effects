@@ -2,6 +2,8 @@ library(shellpipes)
 library(dplyr)
 library(ggplot2)
 
+nq <- 40
+
 rpcall("observed_approach.Rout observed_approach.pipestar observed_approach.R eco.interglm.glmfit.rda")
 
 theme_set(theme_bw())
@@ -12,9 +14,6 @@ startGraphics()
 
 summary(mod)
 
-##
-
-
 ## get RHS of formula
 
 form <- formula(mod)[c(1,3)]
@@ -24,13 +23,18 @@ outcome_var <- "robustProp"
 bins <- 10
 
 ## Setting focal values
+<<<<<<< HEAD
 probs <- seq(0, 1, length.out = 50)
+=======
+probs <- seq(0, 1, length.out = nq)
+>>>>>>> 73752e5b7cbd7cd66a46ac4d6013f925bdd8209e
 focal_vals <- quantile(dat[[focal_var]], probs, names=FALSE)
 print(focal_vals)
 focal_df <- data.frame(focal_vals)
 colnames(focal_df) <- focal_var
 
 ## Non-focal predictors
+<<<<<<< HEAD
 non_focal_df <- dat[, all.vars(form)[!all.vars(form) %in% focal_var]]
 head(non_focal_df)
 
@@ -42,6 +46,22 @@ nM <- NROW(non_focal_df)
 mf <- expand.grid(as.list(c(focal_df, non_focal_df)))
 #mf <- cbind.data.frame(focal_df, non_focal_df)
 head(mf)
+=======
+non_focal_df <- dat[, colnames(dat)[!colnames(dat) %in% c(focal_var, outcome_var)]]
+summary(non_focal_df)
+dim(non_focal_df)
+
+## For every focal value, assign a non-focal value
+nM <- NROW(non_focal_df)
+focal_df <- focal_df[rep(1:NROW(focal_df), each=nM),,drop=FALSE]
+summary(focal_df)
+dim(focal_df)
+
+## Generate new model frame
+mf <- cbind.data.frame(focal_df, non_focal_df)
+summary(mf)
+dim(mf)
+>>>>>>> 73752e5b7cbd7cd66a46ac4d6013f925bdd8209e
 
 ## Generate model matrix
 mm <- model.matrix(form, mf)

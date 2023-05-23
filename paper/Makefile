@@ -123,6 +123,8 @@ plot_dep += %.vp.rda
 ## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.quadN.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.quadN.anchor20.nitro.plot.Rout: nitro.R
+## high.uniN.defAnchor.nitro.plot.Rout: nitro.R
+## high.inter.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.inter.defAnchor.nitro.plot.Rout: nitro.R
 ## eco.inter.defAnchor.centers.plot.Rout: centers.R
 
@@ -132,10 +134,10 @@ plot_dep += %.vp.rda
 scriptStep += glmPlot
 glmPlot += rnitro
 glmPlot_dep += %.gvp.rda
-## eco.uniglmN.defRef.rnitro.glmPlot.Rout: rnitro.R
-## eco.uniglmN.obsRef.rnitro.glmPlot.Rout: rnitro.R
-## eco.multiglm.defRef.rnitro.glmPlot.Rout: rnitro.R
-## eco.multiglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## high.uniglmN.defRef.rnitro.glmPlot.Rout: rnitro.R
+## high.uniglmN.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## high.multiglm.defRef.rnitro.glmPlot.Rout: rnitro.R high.R
+## high.multiglm.obsRef.rnitro.glmPlot.Rout: rnitro.R high.R
 ## FIXME: The difference between obsRef and defRef is always small;
 ## hard to find a good example where bias-correct is correcting the bias
 ## eco.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
@@ -171,6 +173,11 @@ eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanA
 	$(pipeR)
 
 ######################################################################
+
+## CHECK: 2023 May 23 (Tue) - DELETE
+check_data.Rout: check_data.R
+check_defRef.Rout: check_defRef.R check_data.rda 
+check_obsRef.Rout: check_obsRef.R check_data.rda 
 
 ## Observed value approach (interactions on focal predictors)
 ## FIXME: DELETE later

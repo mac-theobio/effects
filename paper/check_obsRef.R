@@ -7,15 +7,15 @@ startGraphics()
 
 loadEnvironments()
 
-points <- (ggplot(dat)
-	+ aes(nitro, mass)
+vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE, bias.adjust="observed"))
+veff <- as.data.frame(varpred(mod, "nitro", bias.adjust="observed"))
+
+points <- (ggplot(binned_df)
+	+ aes(nitro, status)
 	+ geom_point()
 	+ xlab("Nitrogen")
-	+ ylab("Biomass")
-	+ geom_point(aes(mean(nitro), mean(mass)), size=4, color="grey")
+	+ ylab("Status")
 )
-
-print(summary(dat))
 
 plain <- (points
 	+ geom_line(data=vpred, aes(y=fit))

@@ -1,3 +1,4 @@
+
 library(varpred)
 library(dplyr)
 library(ggplot2); theme_set(theme_bw(base_size=16))
@@ -7,15 +8,15 @@ startGraphics()
 
 loadEnvironments()
 
-points <- (ggplot(dat)
-	+ aes(nitro, mass)
+vpred <- as.data.frame(varpred(mod, "nitro", isolate=FALSE))
+veff <- as.data.frame(varpred(mod, "nitro"))
+
+points <- (ggplot(binned_df)
+	+ aes(nitro, status)
 	+ geom_point()
 	+ xlab("Nitrogen")
-	+ ylab("Biomass")
-	+ geom_point(aes(mean(nitro), mean(mass)), size=4, color="grey")
+	+ ylab("Status")
 )
-
-print(summary(dat))
 
 plain <- (points
 	+ geom_line(data=vpred, aes(y=fit))
