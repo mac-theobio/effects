@@ -5,6 +5,8 @@ set.seed(991)
 
 N <- 1e4
 
+draws <- 1
+
 beta_0 <- 2
 
 nitro_beta <- 0.5
@@ -34,7 +36,6 @@ binfun <- function(mod, focal, bins=50) {
 	return(check_df)
 }
 
-
 ## Simulate data
 dat <- (data.frame(nitro=rlnorm(N,meanlog=log(nitro_mean), sdlog=nitro_sd))
 	%>% mutate(nitro=pmin(nitro, nitro_max)
@@ -42,7 +43,8 @@ dat <- (data.frame(nitro=rlnorm(N,meanlog=log(nitro_mean), sdlog=nitro_sd))
 		, phos=rnorm(N, mean=1, sd=phos_sd)
 		, pot = rnorm(N)
 		, eta=beta_0 + nitro_beta*nitro + phos_beta*phos + pot_beta*pot
-		, status=rbinom(N, 1, plogis(eta))
+		, status=rbinom(N, draws, plogis(eta))/draws
+		, wt=draws
 	)
 )
 
@@ -51,6 +53,6 @@ binned_df <- binfun(dat, "nitro")
 head(binned_df)
 
 ## Fit model
-mod <- glm(status ~ nitro + phos + pot, dat, family="binomial")
+mod <- glm(status/wt ~ nitro + phos + pot, dat, family="binomial", weights=wt)
 
 saveVars(dat, mod, binned_df)

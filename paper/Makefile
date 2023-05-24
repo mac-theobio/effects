@@ -142,7 +142,6 @@ glmPlot_dep += %.gvp.rda
 ## hard to find a good example where bias-correct is correcting the bias
 ## eco.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
 ## eco.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
-## FIXME: WTAH? There is no way that setting a consistent reference point should make this non-monotonic
 
 ## 2023 May 04 (Thu) Debugged reference-point inconsistency in uni
 eco.refComp.Rout: eco.uniglmN.defRef.gvp.rda eco.uniglmN.obsRef.gvp.rda
@@ -174,14 +173,27 @@ eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanA
 
 ######################################################################
 
-## CHECK: 2023 May 23 (Tue) - DELETE
+## Bicko debugging stuff
+
+## CHECK: 2023 May 23 (Tue)
 check_data.Rout: check_data.R
 check_defRef.Rout: check_defRef.R check_data.rda 
 check_obsRef.Rout: check_obsRef.R check_data.rda 
 
+obsComp.pdf: check_defRef.Rout.pdf check_obsRef.Rout.pdf
+	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
+
 ## Observed value approach (interactions on focal predictors)
-## FIXME: DELETE later
 observed_approach.Rout: observed_approach.R eco.interglm.glmfit.rda
+
+## alternative pipeline
+
+check_%.glmfit.Rout: altcheck.R check_%.rda
+	$(pipeR)
+
+check_data.glmfit.Rout: altcheck.R
+check_data.defRef.rnitro.glmPlot.Rout.pdf:
+check_data.obsRef.rnitro.glmPlot.Rout.pdf:
 
 ######################################################################
 
