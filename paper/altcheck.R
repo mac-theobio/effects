@@ -6,7 +6,12 @@ loadEnvironments()
 
 summary(dat)
 
-dat <- (dat)
+dat <- (dat
+	%>% mutate(NULL
+		, robustProp = status/wt
+		, numTest = wt
+	)
+)
 
 saveEnvironment()
 

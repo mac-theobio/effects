@@ -5,7 +5,10 @@ set.seed(991)
 
 N <- 1e4
 
+draws <- 20
 draws <- 1
+
+N <- floor(N/draws)
 
 beta_0 <- 2
 
@@ -35,6 +38,7 @@ binfun <- function(mod, focal, bins=50) {
 	)
 	return(check_df)
 }
+
 
 ## Simulate data
 dat <- (data.frame(nitro=rlnorm(N,meanlog=log(nitro_mean), sdlog=nitro_sd))

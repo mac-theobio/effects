@@ -180,9 +180,6 @@ check_data.Rout: check_data.R
 check_defRef.Rout: check_defRef.R check_data.rda 
 check_obsRef.Rout: check_obsRef.R check_data.rda 
 
-obsComp.pdf: check_defRef.Rout.pdf check_obsRef.Rout.pdf
-	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
-
 ## Observed value approach (interactions on focal predictors)
 observed_approach.Rout: observed_approach.R eco.interglm.glmfit.rda
 
@@ -194,6 +191,16 @@ check_%.glmfit.Rout: altcheck.R check_%.rda
 check_data.glmfit.Rout: altcheck.R
 check_data.defRef.rnitro.glmPlot.Rout.pdf:
 check_data.obsRef.rnitro.glmPlot.Rout.pdf:
+
+obsComp.pdf: check_defRef.Rout.pdf check_obsRef.Rout.pdf
+	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
+
+## check_data.rnComp.pdf: altcheck.R check_data.R
+%.rnComp.pdf: %.defRef.rnitro.glmPlot.Rout.pdf %.obsRef.rnitro.glmPlot.Rout.pdf
+	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
+
+## high.multiglm.rnComp.pdf: high.R
+
 
 ######################################################################
 

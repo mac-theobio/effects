@@ -16,7 +16,7 @@ safelog <- function (x, scale=1){
 dat <- (data.frame(nitro = rlnorm(N, meanlog=log(nitro_mean), sdlog=nitro_spread))
 	%>% mutate(NULL
 		, phos_pred = phos_mean+(nitro-nitro_mean)*beta_np
-		, phos = rlnorm(N, meanlog=log(phos_pred), sdlog=phos_spread)
+		, phos = rlnorm(N, meanlog=safelog(phos_pred), sdlog=phos_spread)
 		, pot_pred = pot_mean
 			+ (nitro-nitro_mean)*beta_nk
 			+ (phos-phos_mean)*beta_pk
@@ -36,7 +36,6 @@ dat <- (data.frame(nitro = rlnorm(N, meanlog=log(nitro_mean), sdlog=nitro_spread
 		, robustProp = robust/binSize
 	)
 )
-
 
 summary(dat)
 
