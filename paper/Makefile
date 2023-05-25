@@ -1,5 +1,6 @@
 ## vareffects follow-on paper
 ## effects/paper
+## Everything is BROKEN because we bifurcated .data.; new target names should fix
 
 current: target
 -include target.mk
@@ -54,7 +55,7 @@ autopipeR = defined
 
 ## Rename variables and see how the machinery works
 ## eco.weird.Rout: weird.R
-%.weird.Rout: weird.R %.data.rds
+%.weird.Rout: weird.R %.fake.rds
 	$(pipeR)
 
 Sources += $(wildcard *.md)
@@ -65,21 +66,29 @@ Sources += $(wildcard *.md)
 	$(pipeR)
 
 ## Fake data about nutrients and biomass ## data.md
+## deprecate .data. for .fake. 2023 May 25 (Thu)
 %.data.Rout: data.R %.params.rda
 	$(pipeR)
 ## eco.data.Rout: data.R eco.R
 ## high.data.Rout: data.R
 
+## Two fake data branches ## fake.md ## IN Progress on bus May 25 (Thu)
+scriptStep += fake
+fake += bc jd
+fake_dep = %.params.rda
+## eco.jd.fake.Rout: jd.R
+## eco.bc.fake.Rout: bc.R
+
 ## Plot only
 scriptStep += scatter
 scatter += robust
-scatter_dep = %.data.rds
+scatter_dep = %.fake.rds
 ## eco.robust.scatter.Rout: robust.R
 
 ## Fit different models ## mfit.md
 scriptStep += mfit
 mfit += uniN quadN inter multi multiPK monster
-mfit_dep = %.data.rds
+mfit_dep = %.fake.rds
 ## eco.uniN.mfit.Rout: uniN.R
 ## high.multi.mfit.Rout: multi.R
 ## eco.inter.mfit.Rout: inter.R
@@ -89,7 +98,7 @@ mfit_dep = %.data.rds
 ## fit glm models glmfit.md
 scriptStep += glmfit
 glmfit += uniglmN multiglm interglm
-glmfit_dep = %.data.rds
+glmfit_dep = %.fake.rds
 ## eco.uniglmN.glmfit.Rout: uniglmN.R
 
 ## make different prediction objects ## vp.md
@@ -201,12 +210,10 @@ obsComp.pdf: check_defRef.Rout.pdf check_obsRef.Rout.pdf
 
 ## high.multiglm.rnComp.pdf: high.R
 
-
 ######################################################################
 
-
 ## Focal interaction check 
-focal_check.pdf: focal_check.rmd eco.data.rds
+focal_check.pdf: focal_check.rmd eco.fake.rds
 	$(knitpdf)
 simple_example.Rout: simple_example.R
 

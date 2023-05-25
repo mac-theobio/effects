@@ -1,3 +1,11 @@
+
+2023 May 24 (Wed)
+
+R Journal. https://journal.r-project.org/
+
+----------------------------------------------------------------------
+
+
 Build some glm examples, based on code in ../manuscript and newer examples in ../varpred, which is documented at https://cygubicko.github.io/varpred/index.html
 
 Think about relationship between bias adjustment and reference point. Try to harmonize between paper and package.

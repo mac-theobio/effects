@@ -39,7 +39,6 @@ binfun <- function(mod, focal, bins=50) {
 	return(check_df)
 }
 
-
 ## Simulate data
 dat <- (data.frame(nitro=rlnorm(N,meanlog=log(nitro_mean), sdlog=nitro_sd))
 	%>% mutate(nitro=pmin(nitro, nitro_max)
@@ -57,6 +56,6 @@ binned_df <- binfun(dat, "nitro")
 head(binned_df)
 
 ## Fit model
-mod <- glm(status/wt ~ nitro + phos + pot, dat, family="binomial", weights=wt)
+mod <- glm(status ~ nitro + phos + pot, dat, family="binomial", weights=wt)
 
 saveVars(dat, mod, binned_df)
