@@ -69,58 +69,58 @@ Sources += $(wildcard *.md)
 ## deprecate .data. for .fake. 2023 May 25 (Thu)
 %.data.Rout: data.R %.params.rda
 	$(pipeR)
-## eco.data.Rout: data.R eco.R
+## eco.jd.data.Rout: data.R eco.R
 ## high.data.Rout: data.R
 
 ## Two fake data branches ## fake.md ## IN Progress on bus May 25 (Thu)
 scriptStep += fake
 fake += bc jd
-fake_dep = %.params.rda
+fake_dep = %.params.rda smoothfuns.rda
 ## eco.jd.fake.Rout: jd.R
-## eco.bc.fake.Rout: bc.R
+## straight.bc.fake.Rout: bc.R straight.R
 
 ## Plot only
 scriptStep += scatter
 scatter += robust
 scatter_dep = %.fake.rds
-## eco.robust.scatter.Rout: robust.R
+## eco.jd.robust.scatter.Rout: robust.R
 
 ## Fit different models ## mfit.md
 scriptStep += mfit
 mfit += uniN quadN inter multi multiPK monster
 mfit_dep = %.fake.rds
-## eco.uniN.mfit.Rout: uniN.R
+## eco.jd.uniN.mfit.Rout: uniN.R
 ## high.multi.mfit.Rout: multi.R
-## eco.inter.mfit.Rout: inter.R
-## eco.quadN.mfit.Rout: quadN.R
+## eco.jd.inter.mfit.Rout: inter.R
+## eco.jd.quadN.mfit.Rout: quadN.R
 ## high.quadN.mfit.Rout: quadN.R
 
 ## fit glm models glmfit.md
 scriptStep += glmfit
 glmfit += uniglmN multiglm interglm
 glmfit_dep = %.fake.rds
-## eco.uniglmN.glmfit.Rout: uniglmN.R
+## eco.jd.uniglmN.glmfit.Rout: uniglmN.R
 
 ## make different prediction objects ## vp.md
 scriptStep += vp
 vp += defAnchor anchor20 meanAnchor check
 vp_dep += %.mfit.rda
-## eco.inter.defAnchor.vp.Rout: defAnchor.R
-## eco.inter.meanAnchor.vp.Rout: meanAnchor.R
+## eco.jd.inter.defAnchor.vp.Rout: defAnchor.R
+## eco.jd.inter.meanAnchor.vp.Rout: meanAnchor.R
 # Temporary checks; Giving up for now!
-## eco.monster.check.vp.Rout: check.R
+## eco.jd.monster.check.vp.Rout: check.R
 
 ## make glm prediction objects ## gvp.md
 ## TODO: move defRef and defAnchor to def, if they can both be the same!
 scriptStep += gvp
 gvp += defRef obsRef
 gvp_dep += %.glmfit.rda
-## eco.uniglmN.defRef.gvp.Rout: defRef.R
-## eco.multiglm.obsRef.gvp.Rout: obsRef.R
+## eco.jd.uniglmN.defRef.gvp.Rout: defRef.R
+## eco.jd.multiglm.obsRef.gvp.Rout: obsRef.R
 
 ## Some sort of check (compare base predict to varpred)
-## eco.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
-## high.quadN.predict.Rout: predict.R eco.quadN.mfit.rda
+## eco.jd.quadN.predict.Rout: predict.R eco.jd.quadN.mfit.rda
+## high.quadN.predict.Rout: predict.R eco.jd.quadN.mfit.rda
 %.predict.Rout: predict.R %.mfit.rda
 	$(pipeR)
 
@@ -129,13 +129,13 @@ scriptStep += plot
 plot += nitro centers
 plot_dep += %.vp.rda
 
-## eco.uniN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.quadN.defAnchor.nitro.plot.Rout: nitro.R
-## eco.quadN.anchor20.nitro.plot.Rout: nitro.R
+## eco.jd.uniN.defAnchor.nitro.plot.Rout: nitro.R
+## eco.jd.quadN.defAnchor.nitro.plot.Rout: nitro.R
+## eco.jd.quadN.anchor20.nitro.plot.Rout: nitro.R
 ## high.uniN.defAnchor.nitro.plot.Rout: nitro.R
 ## high.inter.defAnchor.nitro.plot.Rout: nitro.R
-## eco.inter.defAnchor.nitro.plot.Rout: nitro.R
-## eco.inter.defAnchor.centers.plot.Rout: centers.R
+## eco.jd.inter.defAnchor.nitro.plot.Rout: nitro.R
+## eco.jd.inter.defAnchor.centers.plot.Rout: centers.R
 
 ## TODO: When do we need a different track for glm at all?
 ## Can we save some info about the outcome variable?
@@ -149,8 +149,8 @@ glmPlot_dep += %.gvp.rda
 ## high.multiglm.obsRef.rnitro.glmPlot.Rout: rnitro.R high.R
 ## FIXME: The difference between obsRef and defRef is always small;
 ## hard to find a good example where bias-correct is correcting the bias
-## eco.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
-## eco.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## eco.jd.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
+## eco.jd.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
 
 ## 2023 May 04 (Thu) Debugged reference-point inconsistency in uni
 eco.refComp.Rout: eco.uniglmN.defRef.gvp.rda eco.uniglmN.obsRef.gvp.rda
@@ -161,23 +161,23 @@ eco.refComp.Rout: refComp.R
 ## Composites
 
 ## Splash plot combines defAnchor and anchor20
-## eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.uniN.anchor20.nitro.plot.Rout.pdf
-eco.splash.Rout: splash.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.anchor20.nitro.plot.rda
+## eco.jd.uniN.defAnchor.nitro.plot.Rout.pdf eco.jd.uniN.anchor20.nitro.plot.Rout.pdf
+eco.jd.splash.Rout: splash.R eco.jd.uniN.defAnchor.nitro.plot.rda eco.jd.uniN.anchor20.nitro.plot.rda
 	$(pipeR)
 
 ## Anchor check: does meanAnchor produce the same splash as defAnchor
 ## … in simple case
-eco.splashCheck.Rout: splashCheck.R eco.uniN.defAnchor.nitro.plot.rda eco.uniN.meanAnchor.nitro.plot.rda
+eco.jd.splashCheck.Rout: splashCheck.R eco.jd.uniN.defAnchor.nitro.plot.rda eco.jd.uniN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 
 ## Univariate/multi-variate
-## eco.uniMulti.Rout: uniMulti.R eco_data.R
-uniMulti: eco.uniN.defAnchor.nitro.plot.Rout.pdf eco.multi.defAnchor.nitro.plot.Rout.pdf 
-eco.uniMulti.Rout: uniMulti.R eco.uniN.defAnchor.nitro.plot.rda eco.multi.defAnchor.nitro.plot.rda 
+## eco.jd.uniMulti.Rout: uniMulti.R eco_data.R
+uniMulti: eco.jd.uniN.defAnchor.nitro.plot.Rout.pdf eco.jd.multi.defAnchor.nitro.plot.Rout.pdf 
+eco.jd.uniMulti.Rout: uniMulti.R eco.jd.uniN.defAnchor.nitro.plot.rda eco.jd.multi.defAnchor.nitro.plot.rda 
 	$(pipeR)
 
 ## Compare quad plots with mean vs. default anchor (read and arrange only)
-eco.quadComp.Rout: quadComp.R eco.quadN.defAnchor.nitro.plot.rda eco.quadN.meanAnchor.nitro.plot.rda
+eco.jd.quadComp.Rout: quadComp.R eco.jd.quadN.defAnchor.nitro.plot.rda eco.jd.quadN.meanAnchor.nitro.plot.rda
 	$(pipeR)
 
 ######################################################################

@@ -7,11 +7,6 @@ loadEnvironments()
 
 set.seed(seed)
 
-## Take the log of values that are large compared to scale; smoothly return a finite value for negative numbers
-safelog <- function (x, scale=1){
-	return(log(scale*log(1+exp(x/scale))))
-}
-
 ## meanlog = log(0) works as desired in rlnorm!
 dat <- (data.frame(nitro = rlnorm(N, meanlog=log(nitro_mean), sdlog=nitro_spread))
 	%>% mutate(NULL
