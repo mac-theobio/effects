@@ -1,6 +1,5 @@
 ## vareffects follow-on paper
 ## effects/paper
-## Everything is BROKEN because we bifurcated .data.; new target names should fix
 
 current: target
 -include target.mk
