@@ -7,7 +7,7 @@ current: target
 all: draft.paper.pdf
 
 vim_session:
-	bash -cl "vmt paper.tex body.tex"
+	bash -cl "vmt paper.tex"
 
 ######################################################################
 
