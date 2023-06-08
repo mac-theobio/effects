@@ -32,6 +32,7 @@ dat <- (data.frame(nitro = rlnorm(N, meanlog=log(nitro_mean), sdlog=nitro_spread
 	)
 )
 
+print(dat)
 summary(dat)
 
 rdsSave(dat)

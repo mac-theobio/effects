@@ -52,6 +52,8 @@ autopipeR = defined
 
 ######################################################################
 
+smoothfuns.Rout: smoothfuns.R
+
 ## Rename variables and see how the machinery works
 ## eco.weird.Rout: weird.R
 %.weird.Rout: weird.R %.fake.rds
@@ -77,6 +79,7 @@ fake += bc jd
 fake_dep = %.params.rda smoothfuns.rda
 ## eco.jd.fake.Rout: jd.R
 ## straight.bc.fake.Rout: bc.R straight.R
+## straight.jd.fake.Rout: jd.R straight.R
 
 ## Plot only
 scriptStep += scatter
@@ -151,9 +154,14 @@ glmPlot_dep += %.gvp.rda
 ## eco.jd.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
 ## eco.jd.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
 
+## straight.jd.interglm.doNitro.pdf: rnitro.R
+%.doNitro.pdf: %.defRef.rnitro.glmPlot.Rout.pdf %.obsRef.rnitro.glmPlot.Rout.pdf
+	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
+
 ## 2023 May 04 (Thu) Debugged reference-point inconsistency in uni
-eco.refComp.Rout: eco.uniglmN.defRef.gvp.rda eco.uniglmN.obsRef.gvp.rda
-eco.refComp.Rout: refComp.R
+## eco.jd.refComp.Rout: refComp.R
+## this compares two objects that are apparently the same.
+%.refComp.Rout: refComp.R %.uniglmN.defRef.gvp.rda %.uniglmN.obsRef.gvp.rda
 	$(pipeR)
 
 ######################################################################
