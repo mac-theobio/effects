@@ -61,25 +61,19 @@ smoothfuns.Rout: smoothfuns.R
 
 Sources += $(wildcard *.md)
 
-## eco.params.Rout: eco.R
+## Parameter sets params.md
+## straight.params.Rout: straight.R
 ## high.params.Rout: high.R
 %.params.Rout: %.R
 	$(pipeR)
 
-## Fake data about nutrients and biomass ## data.md
-## deprecate .data. for .fake. 2023 May 25 (Thu)
-%.data.Rout: data.R %.params.rda
-	$(pipeR)
-## eco.jd.data.Rout: data.R eco.R
-## high.data.Rout: data.R
-
-## Two fake data branches ## fake.md ## IN Progress on bus May 25 (Thu)
+## Two methods for faking data (combine these once things work)
 scriptStep += fake
 fake += bc jd
 fake_dep = %.params.rda smoothfuns.rda
 ## eco.jd.fake.Rout: jd.R
 ## straight.bc.fake.Rout: bc.R straight.R
-## straight.jd.fake.Rout: jd.R straight.R
+## high.jd.fake.Rout: jd.R high.R
 
 ## Plot only
 scriptStep += scatter
@@ -151,10 +145,11 @@ glmPlot_dep += %.gvp.rda
 ## high.multiglm.obsRef.rnitro.glmPlot.Rout: rnitro.R high.R
 ## FIXME: The difference between obsRef and defRef is always small;
 ## hard to find a good example where bias-correct is correcting the bias
-## eco.jd.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
-## eco.jd.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
+## high.jd.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
+## high.jd.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
 
-## straight.jd.interglm.doNitro.pdf: rnitro.R
+## high.jd.interglm.doNitro.pdf: rnitro.R high.R
+## straight.bc.interglm.doNitro.pdf: rnitro.R
 %.doNitro.pdf: %.defRef.rnitro.glmPlot.Rout.pdf %.obsRef.rnitro.glmPlot.Rout.pdf
 	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
 
