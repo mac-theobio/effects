@@ -9,7 +9,7 @@ The most common approach is to generate estimates (central estimates, prediction
 
 \section{Introduction}
 
-Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots, generalized here as “outcome plots”) are often a useful way to summarize the results of a statistical model. These can be used to illustrate the shape of model response and associated uncertainties, and may be easier to interpret than tables of coefficient estimates \citep{brambor_understanding_2006, berry_improving_2012, leeper2017interpreting}. 
+Plots of predicted values of an outcome against predictors (often called effect plots or prediction plots, generalized here as “outcome plots”) are often a useful way to summarize the results of a statistical model. These can be used to illustrate the shape of model response and associated uncertainties, and may be easier to interpret than tables of coefficient estimates \citep{searle_population_1980, brambor_understanding_2006, schielzeth2010simple, berry_improving_2012, leeper2017interpreting}. 
 
 \begin{gloss}
 \subsection*{Glossary}
@@ -37,7 +37,7 @@ Additional challenges arise when dealing with “mixed” models, which incorpor
 
 We endeavor here to make a conceptual distinction between two functions of outcome plots: prediction and effects. 
 The primary difference lies in how we describe the uncertainties around the central estimate. 
-If our goal is to \emph{predict} what we learn about the outcome variable by measuring the focal predictor, then we may want to capture a variety of sources of uncertainty, including that due to the intercept, focal and non-focal predictors, and random effects.
+If our goal is to \emph{predict} what we learn about the outcome variable by measuring the focal predictor, then we may want to capture a variety of sources of uncertainty, including that due to the intercept, focal and non-focal predictors, and random effects. This is a common approach and is implemented as a default in many software packages for outcome plots \citep{fox2009effect, leeper2017package, lenth2018package,marginaleffects2023package}. 
 Conversely, if we wish to focus on the \emph{effect} of a focal predictor only, we might want to isolate uncertainty due to coefficients associated with that predictor.
 If we follow this convention, we expect effects plots to generally have narrower confidence intervals (CIs) than prediction plots, since less uncertainty is taken into account.
 
@@ -46,7 +46,7 @@ In general, if we want to predict based on a focal parameter, we are likely to p
 If we want to know the effects of a predictor, we may want to control for covariates with a multivariate model, in order to estimate “direct” effects; leave covariates out, in order to estimate “total” effects (direct plus indirect); or take an intermediate strategy.
 These address different versions of the question: if we change the focal parameter (possibly allowing it also to affect other covariates), what is the expected effect on the outcome variable (see, e.g., \citep{shi_evidence_2017}).
 
-We discuss the idea of a model “center” and show how it simplifies thinking about outcome plot choices, particularly in the case of ordinary linear models. We also discuss biases that arise from non-linear link functions in generalized linear models, and how such biases can be addressed.
+We discuss the idea of a model “center” and show how it simplifies thinking about outcome plot choices, particularly in the case of ordinary linear models. We also discuss biases that arise from non-linear link functions in generalized linear models \citep{duursma_bias_2003,duursma2003bias,hanmer2013behind}, and how such biases can be addressed. The proposed approach and R software package will complement the existing ones, \citep{fox2009effect, leeper2017package, lenth2018package,marginaleffects2023package}, by providing a straightforward way to generate effects plots (in our sense), and correct for bias in generalized linear models.
 
 %% \clearpage
 
