@@ -1,4 +1,6 @@
 
+makestuff/pandoc.mk
+
 ## Project
 
 Refactor paper and fitting into two different directories
