@@ -145,10 +145,10 @@ glmPlot_dep += %.gvp.rda
 ## high.multiglm.obsRef.rnitro.glmPlot.Rout: rnitro.R high.R
 ## FIXME: The difference between obsRef and defRef is always small;
 ## hard to find a good example where bias-correct is correcting the bias
-## high.jd.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R
+## high.jd.interglm.defRef.rnitro.glmPlot.Rout: rnitro.R high.R
 ## high.jd.interglm.obsRef.rnitro.glmPlot.Rout: rnitro.R
 
-## high.jd.interglm.doNitro.pdf: rnitro.R high.R
+## high.jd.multiglm.doNitro.pdf: rnitro.R high.R
 ## straight.bc.interglm.doNitro.pdf: rnitro.R
 %.doNitro.pdf: %.defRef.rnitro.glmPlot.Rout.pdf %.obsRef.rnitro.glmPlot.Rout.pdf
 	pdfjam -o $@ $(word 1, $^) 3 $(word 2, $^) 3 
@@ -160,6 +160,15 @@ glmPlot_dep += %.gvp.rda
 	$(pipeR)
 
 ######################################################################
+
+## Investigate weirdness in _analysis_ of JD pipeline
+
+## high.explore.Rout: explore.R high.R
+high.explore.Rout: high.jd.fake.rds explore.R
+	$(pipeR)
+
+######################################################################
+
 ## Composites
 
 ## Splash plot combines defAnchor and anchor20
