@@ -5,5 +5,5 @@ Uses N as focal variable and makes vpred, veff, and optionally iveff (input vari
 
 defAnchor.R uses default anchor
 anchor20.R an example of picking an anchor
-meanAnchor picks the mean value of the focal variable; this should be the _same_ as defAnchor for a simple focal variable
+meanAnchor picks the mean value of the focal variable; this should be the _same_ as defAnchor for a simple focal variable, but different for a multi-parameter focal variable
 

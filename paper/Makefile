@@ -99,10 +99,11 @@ glmfit_dep = %.fake.rds
 
 ## make different prediction objects ## vp.md
 scriptStep += vp
-vp += defAnchor anchor20 meanAnchor check
+vp += defAnchor anchor20 meanAnchor check obsRef
 vp_dep += %.mfit.rda
 ## eco.jd.inter.defAnchor.vp.Rout: defAnchor.R
 ## eco.jd.inter.meanAnchor.vp.Rout: meanAnchor.R
+## eco.jd.inter.obsRef.vp.Rout: obsRef.R
 # Temporary checks; Giving up for now!
 ## eco.jd.monster.check.vp.Rout: check.R
 
@@ -130,8 +131,9 @@ plot_dep += %.vp.rda
 ## eco.jd.quadN.anchor20.nitro.plot.Rout: nitro.R
 ## high.uniN.defAnchor.nitro.plot.Rout: nitro.R
 ## high.inter.defAnchor.nitro.plot.Rout: nitro.R
-## eco.jd.inter.defAnchor.nitro.plot.Rout: nitro.R
-## eco.jd.inter.defAnchor.centers.plot.Rout: centers.R
+## eco.jd.uniN.defAnchor.nitro.plot.Rout: nitro.R
+## eco.jd.uniN.obsRef.nitro.plot.Rout: nitro.R
+## eco.jd.uniN.defAnchor.centers.plot.Rout: centers.R
 
 ## TODO: When do we need a different track for glm at all?
 ## Can we save some info about the outcome variable?
